@@ -8,7 +8,10 @@
 -export([has_fuse/2]).
 
 -export_type([pof/0]).
+-export_type([pof_binary/0]).
 -export_type([flash/0]).
+
+-type pof_binary() :: binary().
 
 -type pof() :: #{
     cfm => flash(),
@@ -35,7 +38,7 @@ read(File) ->
 %% decode
 %%====================================================================
 
--spec decode(binary()) -> {ok, pof()}.
+-spec decode(pof_binary()) -> {ok, pof()}.
 
 decode(<<"POF", 0, 0, 0, 1, 0, Count:32/little-unsigned, Data/binary>>) ->
     decode_parts(Count, Data, #{}).

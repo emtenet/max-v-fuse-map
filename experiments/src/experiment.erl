@@ -8,7 +8,6 @@
 -export([fuses/1]).
 -export([pof/1]).
 -export([rcf/1]).
--export([source/1]).
 
 -export_type([compile/0]).
 -export_type([fuses/0]).
@@ -24,9 +23,7 @@
 
 -type device() :: device:device().
 
--type result() ::
-    {cached, file:filename_all()} |
-    {compiled, binary(), binary()}.
+-type result() :: {device(), pof:pof_binary(), rcf:rcf_binary()}.
 
 -type fuses() :: [fuse:fuse()].
 -type setting() :: setting:setting().
@@ -39,9 +36,9 @@
 -spec compile(compile()) -> {ok, result()} | error;
              ([compile()]) -> {ok, [result()]} | error.
 
-compile(Compile) when is_map(Compile) ->
+compile(Compile = #{device := Device}) ->
     Source = experiment_compile:pre(Compile),
-    submit_single(Source);
+    submit_single(Device, Source);
 compile([]) ->
     {ok, []};
 compile(Compiles) when is_list(Compiles) ->
@@ -154,10 +151,7 @@ fuses(Result) ->
 
 -spec pof(result()) -> {ok, pof_file:pof()}.
 
-pof({cached, Dir}) ->
-    {ok, POF} = experiment_cache:read_pof(Dir),
-    pof_file:decode(POF);
-pof({compiled, POF, _}) ->
+pof({_, POF, _}) ->
     pof_file:decode(POF).
 
 %%====================================================================
@@ -166,47 +160,35 @@ pof({compiled, POF, _}) ->
 
 -spec rcf(result()) -> {ok, rcf_file:rcf()}.
 
-rcf({cached, Dir}) ->
-    {ok, RCF} = experiment_cache:read_rcf(Dir),
-    rcf_file:decode(RCF);
-rcf({compiled, _, RCF}) ->
+rcf({_, _, RCF}) ->
     rcf_file:decode(RCF).
-
-%%====================================================================
-%% source
-%%====================================================================
-
--spec source(result()) -> {ok, binary()}.
-
-source({cached, Dir}) ->
-    experiment_cache:read_source(Dir).
 
 %%====================================================================
 %% single
 %%====================================================================
 
-submit_single(Source) ->
+submit_single(Device, Source) ->
     case experiment_server:submit(Source) of
         {ok, Cached} ->
             {ok, Cached};
 
         {pickup, JobRef} ->
-            pickup_single(JobRef);
+            pickup_single(Device, JobRef);
 
         busy ->
-            submit_single(Source)
+            submit_single(Device, Source)
     end.
 
 %%--------------------------------------------------------------------
 
-pickup_single(JobRef) ->
+pickup_single(Device, JobRef) ->
     case experiment_server:pickup_sleep([JobRef]) of
         {ok, Replies} ->
             #{JobRef := Result} = Replies,
-            experiment_compile:post(Result);
+            experiment_compile:post(Device, Result);
 
         false ->
-            pickup_single(JobRef)
+            pickup_single(Device, JobRef)
     end.
 
 %%====================================================================
@@ -221,6 +203,7 @@ pickup_single(JobRef) ->
     count :: non_neg_integer(),
     answers :: #{index() => term()},
     answer_index :: index(),
+    devices :: #{index() => device()},
     results :: #{index() => experiment_compile:result()},
     pickups :: #{job_ref() => index()},
     source :: source() | undefined,
@@ -245,6 +228,7 @@ batch(Compiles) ->
         count = length(Compiles),
         answers = #{},
         answer_index = 0,
+        devices = #{},
         results = #{},
         pickups = #{},
         source = undefined,
@@ -269,13 +253,15 @@ batch(State, Batch = #batch{answer_index = Index})
     batch(State, Batch#batch{answer_index = Index + 1});
 batch(State, Batch = #batch{answer_index = Index})
         when is_map_key(Index, Batch#batch.results) ->
+    {Device, Devices} = maps:take(Index, Batch#batch.devices),
     {Result, Results} = maps:take(Index, Batch#batch.results),
-    case experiment_compile:post(Result) of
+    case experiment_compile:post(Device, Result) of
         {ok, Answer} ->
             Answers = Batch#batch.answers,
             batch(State, Batch#batch{
                 answers = Answers#{Index => Answer},
                 answer_index = Index + 1,
+                devices = Devices,
                 results = Results
             });
 
@@ -284,10 +270,14 @@ batch(State, Batch = #batch{answer_index = Index})
     end;
 batch(normal, Batch = #batch{compiles = [Compile | Compiles]})
         when Batch#batch.source =:= undefined ->
+    Index = Batch#batch.source_index + 1,
+    Devices = Batch#batch.devices,
+    #{device := Device} = Compile,
     Source = experiment_compile:pre(Compile),
     batch(normal, Batch#batch{
+        devices = Devices#{Index => Device},
         source = Source,
-        source_index = Batch#batch.source_index + 1,
+        source_index = Index,
         compiles = Compiles
     });
 batch(normal, Batch = #batch{source = Source}) when Source =/= undefined ->

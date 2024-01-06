@@ -2,7 +2,7 @@
 
 -export([pre/1]).
 -export([connect/0]).
--export([post/1]).
+-export([post/2]).
 
 -export_type([files/0]).
 -export_type([job_ref/0]).
@@ -10,6 +10,7 @@
 -export_type([source/0]).
 
 -type compile() :: experiment:compile().
+-type device() :: device:device().
 
 -type files() :: #{
     pof := binary(),
@@ -24,7 +25,7 @@
     title := experiment:title(),
     device := binary(),
     settings := binary(),
-    vhdl := binary()
+    verilog := binary()
 }.
 
 %%====================================================================
@@ -72,19 +73,19 @@ connect() ->
 %% post
 %%====================================================================
 
--spec post(result()) -> {ok, experiment:result()} | error.
+-spec post(device(), result()) -> {ok, experiment:result()} | error.
 
-post({ok, #{pof := POF, rcf := RCF}}) ->
-    {ok, {compiled, POF, RCF}};
-post({error, {quartus_map, Exit, Out}}) ->
+post(Device, {ok, #{pof := POF, rcf := RCF}}) ->
+    {ok, {Device, POF, RCF}};
+post(_, {error, {quartus_map, Exit, Out}}) ->
     post_out("MAP", Exit, Out);
-post({error, {quartus_fit, Exit, Out}}) ->
+post(_, {error, {quartus_fit, Exit, Out}}) ->
     post_out("FIT", Exit, Out);
-post({error, {quartus_asm, Exit, Out}}) ->
+post(_, {error, {quartus_asm, Exit, Out}}) ->
     post_out("ASM", Exit, Out);
-post({error, {quartus_cdb, Exit, Out}}) ->
+post(_, {error, {quartus_cdb, Exit, Out}}) ->
     post_out("CDB", Exit, Out);
-post({error, Error}) ->
+post(_, {error, Error}) ->
     io:format("QUARTUS: ~p~n", [Error]),
     error.
 

@@ -4,6 +4,9 @@
 -export([decode/1]).
 
 -export_type([rcf/0]).
+-export_type([rcf_binary/0]).
+
+-type rcf_binary() :: binary().
 
 -type rcf() :: #{
     device => binary(),
@@ -52,7 +55,7 @@ read(File) ->
 %% decode
 %%====================================================================
 
--spec decode(binary()) -> {ok, rcf()}.
+-spec decode(rcf_binary()) -> {ok, rcf()}.
 
 decode(Data) when is_binary(Data) ->
     Lines = binary:split(Data, <<"\r\n">>, [global]),

@@ -104,6 +104,7 @@ start_link() ->
 %%--------------------------------------------------------------------
 
 init(undefined) ->
+    experiment_cache:init(),
     State = #state{
         submits = #{},
         results = #{},
