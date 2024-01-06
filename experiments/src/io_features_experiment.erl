@@ -37,11 +37,11 @@ density(Density) ->
 %%--------------------------------------------------------------------
 
 block(Density, Device, {IOB, _}) ->
-    Pins = lists:sort([
-        {IOC, Pin}
+    Pins = lists:sort(fun source:sort_by_ioc/2, [
+        Pin
         ||
-        {Pin, IOC} <- Device:iocs(),
-        ioc:iob(IOC) =:= IOB
+        Pin <- Device:iocs(),
+        ioc:iob(source:ioc(Pin)) =:= IOB
     ]),
     Last = lists:last(Pins),
     pins(Density, Device, Pins, Last).

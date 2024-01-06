@@ -11,6 +11,7 @@
 
 -export([ioc/1]).
 -export([pin/1]).
+-export([sort_by_ioc/2]).
 
 %%====================================================================
 %% in_out
@@ -526,13 +527,20 @@ out_constant(Device, {Pin, IOC}, Bit) ->
 %% helpers
 %%====================================================================
 
-pin(Pin) when is_atom(Pin) -> Pin;
-pin({{ioc, _, _, _}, Pin}) -> Pin;
-pin({Pin, {ioc, _, _, _}}) -> Pin.
+pin(Pin) when is_atom(Pin) ->
+    Pin;
+pin({Pin, {ioc, _, _, _}}) when is_atom(Pin) ->
+    Pin.
 
 %%--------------------------------------------------------------------
 
-ioc(IOC = {ioc, _, _, _}) -> IOC;
-ioc({IOC = {ioc, _, _, _}, _}) -> IOC;
-ioc({_, IOC = {ioc, _, _, _}}) -> IOC.
+ioc(IOC = {ioc, _, _, _}) ->
+    IOC;
+ioc({_, IOC = {ioc, _, _, _}}) ->
+    IOC.
+
+%%--------------------------------------------------------------------
+
+sort_by_ioc({_, L = {ioc, _, _, _}}, {_, R = {ioc, _, _, _}}) ->
+    L =< R.
 
