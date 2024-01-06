@@ -4,6 +4,7 @@
 -export([build_with_location/2]).
 -export([build_with_map/2]).
 -export([is_empty/1]).
+-export([fuse_count/1]).
 -export([find_fuse/2]).
 -export([all_ones/1]).
 -export([all_zeros/1]).
@@ -190,6 +191,15 @@ is_empty({matrix, _, []}) ->
     true;
 is_empty({matrix, _, [_ | _]}) ->
     false.
+
+%%====================================================================
+%% fuse_count
+%%====================================================================
+
+-spec fuse_count(matrix()) -> boolean().
+
+fuse_count({matrix, _, Fuses}) ->
+    length(Fuses).
 
 %%====================================================================
 %% find_fuse
