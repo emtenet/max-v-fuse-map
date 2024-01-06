@@ -404,7 +404,7 @@
     %?IOC_SIDE( 1, 1, fast_out);
     %?IOC_SIDE( 2, 0, {output3, mux1});
     %?IOC_SIDE( 2, 1, output_invert);
-    %?IOC_SIDE( 2, 2, enable_invert);
+    ?IOC_SIDE( 2, 2, input); %enable_invert);
     %?IOC_SIDE( 2, 3, {enable3, mux1});
     %?IOC_SIDE( 3, 0, {output3, mux0});
     %?IOC_SIDE( 3, 1, {output3, mux2});
@@ -483,9 +483,9 @@
     %?IOC_HEAD( 9, 3, 3, {output3, mux1});
     %?IOC_HEAD( 9, 4, 3, output_invert);
     %?IOC_HEAD( 9, 5, 2, {enable3, mux1});
-    %?IOC_HEAD( 9, 6, 2, enable_invert);
+    ?IOC_HEAD( 9, 6, 2, input); %enable_invert);
     %?IOC_HEAD( 9, 7, 3, {enable3, mux1});
-    %?IOC_HEAD( 9, 8, 3, enable_invert);
+    ?IOC_HEAD( 9, 8, 3, input); %enable_invert);
     %?IOC_HEAD(10, 2, 2, fast_out);
     %?IOC_HEAD(10, 4, 3, fast_out);
     %?IOC_HEAD(12, 2, 0, fast_out);
@@ -495,9 +495,9 @@
     %?IOC_HEAD(13, 3, 1, {output3, mux1});
     %?IOC_HEAD(13, 4, 1, output_invert);
     %?IOC_HEAD(13, 5, 0, {enable3, mux1});
-    %?IOC_HEAD(13, 6, 0, enable_invert);
+    ?IOC_HEAD(13, 6, 0, input); %enable_invert);
     %?IOC_HEAD(13, 7, 1, {enable3, mux1});
-    %?IOC_HEAD(13, 8, 1, enable_invert);
+    ?IOC_HEAD(13, 8, 1, input); %enable_invert);
     %?IOC_HEAD(15, 0, 1, output);
     %?IOC_HEAD(15, 1, 0, {output3, mux0});
     %?IOC_HEAD(15, 2, 0, {output3, mux2});
@@ -534,9 +534,9 @@
 
 -define(IOC_STRIPS(),
     %?IOC_STRIP(0, 2, open_drain);
-    %?IOC_STRIP(1, 2, bus_hold);
+    ?IOC_STRIP(1, 2, bus_hold);
     %?IOC_STRIP(2, 2, enable);
-    %?IOC_STRIP(3, 2, weak_pull_up);
+    ?IOC_STRIP(3, 2, weak_pull_up);
     %?IOC_STRIP(4, 2, current_strength_0);
     %?IOC_STRIP(5, 2, current_strength_1);
 ).
@@ -2992,91 +2992,91 @@ from_lc(X, Y, N, Name, _With) ->
 
 %%--------------------------------------------------------------------
 
-%from_ioc_strip(X, Y, N, R, C, With = #with{density = max_v_240z}) ->
-%    from_max_v_240z_strip(X, Y, N, R, C, With);
-%from_ioc_strip(X, Y, N, R, C, With = #with{density = max_v_570z}) ->
-%    from_max_v_570z_strip(X, Y, N, R, C, With);
-%from_ioc_strip(X, Y, N, R, C, With = #with{density = max_v_1270z}) ->
-%    from_max_v_1270z_strip(X, Y, N, R, C, With);
-%from_ioc_strip(X, Y, N, R, C, With = #with{density = max_v_2210z}) ->
-%    from_max_v_2210z_strip(X, Y, N, R, C, With).
+from_ioc_strip(X, Y, N, R, C, With = #with{density = max_v_240z}) ->
+    from_max_v_240z_strip(X, Y, N, R, C, With);
+from_ioc_strip(X, Y, N, R, C, With = #with{density = max_v_570z}) ->
+    from_max_v_570z_strip(X, Y, N, R, C, With);
+from_ioc_strip(X, Y, N, R, C, With = #with{density = max_v_1270z}) ->
+    from_max_v_1270z_strip(X, Y, N, R, C, With);
+from_ioc_strip(X, Y, N, R, C, With = #with{density = max_v_2210z}) ->
+    from_max_v_2210z_strip(X, Y, N, R, C, With).
 
 %%--------------------------------------------------------------------
 
-%-define(STRIP(X, Y, N, Side, Index),
-%    from_max_v_240z_strip(X, Y, N, R, C, With) ->
-%        from_side_strip(Side, Index, R, C, With)
-%).
-%
-%?MAX_V_240Z_STRIPS()
-%from_max_v_240z_strip(X, Y, N, R, C, _With) ->
-%    {error, {strip, X, Y, N, R, C}}.
-%
-%-undef(STRIP).
+-define(STRIP(X, Y, N, Side, Index),
+    from_max_v_240z_strip(X, Y, N, R, C, With) ->
+        from_side_strip(Side, Index, R, C, With)
+).
+
+?MAX_V_240Z_STRIPS()
+from_max_v_240z_strip(X, Y, N, R, C, _With) ->
+    {error, {strip, X, Y, N, R, C}}.
+
+-undef(STRIP).
 
 %%--------------------------------------------------------------------
 
-%-define(STRIP(X, Y, N, Side, Index),
-%    from_max_v_570z_strip(X, Y, N, R, C, With) ->
-%        from_side_strip(Side, Index, R, C, With)
-%).
-%
-%?MAX_V_570Z_STRIPS()
-%from_max_v_570z_strip(X, Y, N, R, C, _With) ->
-%    {error, {strip, X, Y, N, R, C}}.
-%
-%-undef(STRIP).
+-define(STRIP(X, Y, N, Side, Index),
+    from_max_v_570z_strip(X, Y, N, R, C, With) ->
+        from_side_strip(Side, Index, R, C, With)
+).
+
+?MAX_V_570Z_STRIPS()
+from_max_v_570z_strip(X, Y, N, R, C, _With) ->
+    {error, {strip, X, Y, N, R, C}}.
+
+-undef(STRIP).
 
 %%--------------------------------------------------------------------
 
-%-define(STRIP(X, Y, N, Side, Index),
-%    from_max_v_1270z_strip(X, Y, N, R, C, With) ->
-%        from_side_strip(Side, Index, R, C, With)
-%).
-%
-%?MAX_V_1270Z_STRIPS()
-%from_max_v_1270z_strip(X, Y, N, R, C, _With) ->
-%    {error, {strip, X, Y, N, R, C}}.
-%
-%-undef(STRIP).
+-define(STRIP(X, Y, N, Side, Index),
+    from_max_v_1270z_strip(X, Y, N, R, C, With) ->
+        from_side_strip(Side, Index, R, C, With)
+).
+
+?MAX_V_1270Z_STRIPS()
+from_max_v_1270z_strip(X, Y, N, R, C, _With) ->
+    {error, {strip, X, Y, N, R, C}}.
+
+-undef(STRIP).
 
 %%--------------------------------------------------------------------
 
-%-define(STRIP(X, Y, N, Side, Index),
-%    from_max_v_2210z_strip(X, Y, N, R, C, With) ->
-%        from_side_strip(Side, Index, R, C, With)
-%).
-%
-%?MAX_V_2210Z_STRIPS()
-%from_max_v_2210z_strip(X, Y, N, R, C, _With) ->
-%    {error, {strip, X, Y, N, R, C}}.
-%
-%-undef(STRIP).
+-define(STRIP(X, Y, N, Side, Index),
+    from_max_v_2210z_strip(X, Y, N, R, C, With) ->
+        from_side_strip(Side, Index, R, C, With)
+).
+
+?MAX_V_2210Z_STRIPS()
+from_max_v_2210z_strip(X, Y, N, R, C, _With) ->
+    {error, {strip, X, Y, N, R, C}}.
+
+-undef(STRIP).
 
 %%--------------------------------------------------------------------
 
-%from_side_strip(left, Index, R, C, With = #with{left_strip = Base}) ->
-%    from_base_strip(Base, Index, R, C, With);
-%from_side_strip(top, Index, R, C, With = #with{top_strip = Base}) ->
-%    from_base_strip(Base, Index, R, C, With);
-%from_side_strip(right, Index, R, C, With = #with{right_strip = Base})
-%        when With#with.density =:= max_v_1270z orelse
-%             With#with.density =:= max_v_2210z ->
-%    from_base_strip7(Base, Index, 5 - R, C, With);
-%from_side_strip(right, Index, R, C, With = #with{right_strip = Base}) ->
-%    from_base_strip(Base, Index, 5 - R, C, With);
-%from_side_strip(bottom, Index, R, C, With = #with{bottom_strip = Base}) ->
-%    from_base_strip(Base, Index, 5 - R, C, With).
+from_side_strip(left, Index, R, C, With = #with{left_strip = Base}) ->
+    from_base_strip(Base, Index, R, C, With);
+from_side_strip(top, Index, R, C, With = #with{top_strip = Base}) ->
+    from_base_strip(Base, Index, R, C, With);
+from_side_strip(right, Index, R, C, With = #with{right_strip = Base})
+        when With#with.density =:= max_v_1270z orelse
+             With#with.density =:= max_v_2210z ->
+    from_base_strip7(Base, Index, 5 - R, C, With);
+from_side_strip(right, Index, R, C, With = #with{right_strip = Base}) ->
+    from_base_strip(Base, Index, 5 - R, C, With);
+from_side_strip(bottom, Index, R, C, With = #with{bottom_strip = Base}) ->
+    from_base_strip(Base, Index, 5 - R, C, With).
 
 %%--------------------------------------------------------------------
 
-%from_base_strip(Base, Index, R, C, #with{strip_width = Width}) ->
-%    {ok, ((Base + (Index * 6) + R) * Width) + C}.
+from_base_strip(Base, Index, R, C, #with{strip_width = Width}) ->
+    {ok, ((Base + (Index * 6) + R) * Width) + C}.
 
 %%--------------------------------------------------------------------
 
-%from_base_strip7(Base, Index, R, C, #with{strip_width = Width}) ->
-%    {ok, ((Base + (Index * 7) + R) * Width) + C}.
+from_base_strip7(Base, Index, R, C, #with{strip_width = Width}) ->
+    {ok, ((Base + (Index * 7) + R) * Width) + C}.
 
 %%--------------------------------------------------------------------
 
@@ -3090,31 +3090,31 @@ from_lc(X, Y, N, Name, _With) ->
 
 %%--------------------------------------------------------------------
 
-%from_side(X, Sector, Y, N, I, With) when N < 5 ->
-%    from_line(X, Sector, Y, (N * 4) + I, With);
-%from_side(X, Sector, Y, N, I, With) ->
-%    from_line(X, Sector, Y, 9 + (N * 4) - I, With).
+from_side(X, Sector, Y, N, I, With) when N < 5 ->
+    from_line(X, Sector, Y, (N * 4) + I, With);
+from_side(X, Sector, Y, N, I, With) ->
+    from_line(X, Sector, Y, 9 + (N * 4) - I, With).
 
 %%--------------------------------------------------------------------
 
-%from_head(X, Sector, Offset, With) ->
-%    from_sector_skip(
-%        X,
-%        Sector,
-%        Offset,
-%        With
-%    ).
+from_head(X, Sector, Offset, With) ->
+    from_sector_skip(
+        X,
+        Sector,
+        Offset,
+        With
+    ).
 
 %%--------------------------------------------------------------------
 
-%from_tail(X, Sector, Offset, With, Lines) ->
-%    End = ?HEAD_WIDTH + (Lines * ?LINE_WIDTH) + 10,
-%    from_sector_skip(
-%        X,
-%        Sector,
-%        End - Offset,
-%        With
-%    ).
+from_tail(X, Sector, Offset, With, Lines) ->
+    End = ?HEAD_WIDTH + (Lines * ?LINE_WIDTH) + 10,
+    from_sector_skip(
+        X,
+        Sector,
+        End - Offset,
+        With
+    ).
 
 %%--------------------------------------------------------------------
 
@@ -3125,22 +3125,22 @@ from_lc(X, Y, N, Name, _With) ->
 
 %%--------------------------------------------------------------------
 
-%from_line(X, Sector, Y, Offset, With = #with{top_y = TopY}) ->
-%    Line = TopY - Y - 1,
-%    from_sector_skip(
-%        X,
-%        Sector,
-%        ?HEAD_WIDTH + (Line * ?LINE_WIDTH) + Offset,
-%        With
-%    ).
+from_line(X, Sector, Y, Offset, With = #with{top_y = TopY}) ->
+    Line = TopY - Y - 1,
+    from_sector_skip(
+        X,
+        Sector,
+        ?HEAD_WIDTH + (Line * ?LINE_WIDTH) + Offset,
+        With
+    ).
 
 %%--------------------------------------------------------------------
 
-%from_sector_skip(X, Sector, Offset, With = #with{})
-%        when Offset >= With#with.skip  ->
-%    from_sector_reverse(X, Sector, Offset + 1, With);
-%from_sector_skip(X, Sector, Offset, With) ->
-%    from_sector_reverse(X, Sector, Offset, With).
+from_sector_skip(X, Sector, Offset, With = #with{})
+        when Offset >= With#with.skip  ->
+    from_sector_reverse(X, Sector, Offset + 1, With);
+from_sector_skip(X, Sector, Offset, With) ->
+    from_sector_reverse(X, Sector, Offset, With).
 
 %%--------------------------------------------------------------------
 
@@ -3149,63 +3149,63 @@ from_lc(X, Y, N, Name, _With) ->
 
 %%--------------------------------------------------------------------
 
-%from_sector_reverse(X, Sector, Offset, With = #with{right_x = X}) ->
-%    from_sector_pad(X, ?SIDE_SECTORS - 1 - Sector, Offset, With);
-%from_sector_reverse(X, Sector, Offset, With) ->
-%    from_sector_pad(X, Sector, Offset, With).
+from_sector_reverse(X, Sector, Offset, With = #with{right_x = X}) ->
+    from_sector_pad(X, ?SIDE_SECTORS - 1 - Sector, Offset, With);
+from_sector_reverse(X, Sector, Offset, With) ->
+    from_sector_pad(X, Sector, Offset, With).
 
 %%--------------------------------------------------------------------
 
-%from_sector_pad(X, Sector, Offset, With = #with{}) ->
-%    Line = 1 + (Offset div (With#with.strip_width - 3)),
-%    from_sector(X, Sector, Offset + (Line * 3), With).
+from_sector_pad(X, Sector, Offset, With = #with{}) ->
+    Line = 1 + (Offset div (With#with.strip_width - 3)),
+    from_sector(X, Sector, Offset + (Line * 3), With).
 
 %%--------------------------------------------------------------------
 
-%from_sector(X, Sector, Offset, With) when X < With#with.left_x ->
-%    {error, {sector, X, Sector, Offset}};
-%from_sector(X, Sector, Offset, With) when X =:= With#with.left_x ->
-%    {ok,
-%        With#with.left_base +
-%        (Sector * With#with.short_sector) +
-%        Offset
-%    };
-%from_sector(X, Sector, Offset, With = #with{})
-%        when X < With#with.grow_x orelse
-%             (X =:= With#with.grow_x andalso Sector < ?SHORT_SECTORS) ->
-%    Column = X - 1 - With#with.left_x,
-%    {ok,
-%        With#with.short_base +
-%        (Column * ?COLUMN_SECTORS * With#with.short_sector) +
-%        (Sector * With#with.short_sector) +
-%        Offset
-%    };
-%from_sector(X, Sector, Offset, With = #with{})
-%        when X =:= With#with.grow_x ->
-%    {ok,
-%        With#with.grow_base +
-%        (?SHORT_SECTORS * With#with.short_sector) +
-%        ((Sector - ?SHORT_SECTORS) * With#with.long_sector) +
-%        Offset
-%    };
-%from_sector(X, Sector, Offset, With = #with{})
-%        when X < With#with.right_x ->
-%    Column = X - 1 - With#with.grow_x,
-%    {ok,
-%        With#with.long_base +
-%        (Column * ?COLUMN_SECTORS * With#with.long_sector) +
-%        (Sector * With#with.long_sector) +
-%        Offset
-%    };
-%from_sector(X, Sector, Offset, With = #with{})
-%        when X =:= With#with.right_x ->
-%    {ok,
-%        With#with.right_base +
-%        (Sector * With#with.long_sector) +
-%        Offset
-%    };
-%from_sector(X, Sector, Offset, _With) ->
-%    {error, {sector, X, Sector, Offset}}.
+from_sector(X, Sector, Offset, With) when X < With#with.left_x ->
+    {error, {sector, X, Sector, Offset}};
+from_sector(X, Sector, Offset, With) when X =:= With#with.left_x ->
+    {ok,
+        With#with.left_base +
+        (Sector * With#with.short_sector) +
+        Offset
+    };
+from_sector(X, Sector, Offset, With = #with{})
+        when X < With#with.grow_x orelse
+             (X =:= With#with.grow_x andalso Sector < ?SHORT_SECTORS) ->
+    Column = X - 1 - With#with.left_x,
+    {ok,
+        With#with.short_base +
+        (Column * ?COLUMN_SECTORS * With#with.short_sector) +
+        (Sector * With#with.short_sector) +
+        Offset
+    };
+from_sector(X, Sector, Offset, With = #with{})
+        when X =:= With#with.grow_x ->
+    {ok,
+        With#with.grow_base +
+        (?SHORT_SECTORS * With#with.short_sector) +
+        ((Sector - ?SHORT_SECTORS) * With#with.long_sector) +
+        Offset
+    };
+from_sector(X, Sector, Offset, With = #with{})
+        when X < With#with.right_x ->
+    Column = X - 1 - With#with.grow_x,
+    {ok,
+        With#with.long_base +
+        (Column * ?COLUMN_SECTORS * With#with.long_sector) +
+        (Sector * With#with.long_sector) +
+        Offset
+    };
+from_sector(X, Sector, Offset, With = #with{})
+        when X =:= With#with.right_x ->
+    {ok,
+        With#with.right_base +
+        (Sector * With#with.long_sector) +
+        Offset
+    };
+from_sector(X, Sector, Offset, _With) ->
+    {error, {sector, X, Sector, Offset}}.
 
 %%====================================================================
 %% to_location
@@ -3972,10 +3972,10 @@ to_skip(X, Cell, Sector, #with{skip = Skip}) ->
 
 %%--------------------------------------------------------------------
 
-%to_ioc(X, Y, N, {Name, Value}) ->
-%    {ok, {{ioc, X, Y, N}, Name, Value}};
-%to_ioc(X, Y, N, Name) ->
-%    {ok, {{ioc, X, Y, N}, Name}}.
+to_ioc(X, Y, N, {Name, Value}) ->
+    {ok, {{ioc, X, Y, N}, Name, Value}};
+to_ioc(X, Y, N, Name) ->
+    {ok, {{ioc, X, Y, N}, Name}}.
 
 %%--------------------------------------------------------------------
 
