@@ -56,7 +56,7 @@ line(Fuse, Stop, Database, Line) ->
 
 %%--------------------------------------------------------------------
 
-fuse(Fuse, {Density, Fuses}) when is_list(Fuses) ->
+fuse(Fuse, {_Density, Fuses}) when is_list(Fuses) ->
     case lists:member(Fuse, Fuses) of
         true ->
             %case fuse_map:to_name(Fuse, Density) of
