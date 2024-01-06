@@ -497,7 +497,7 @@ open_drain(Device, Title, In, Out) ->
             "  input wire i,\n"
             "  output wire o\n"
             ");\n"
-            "  opndrn pad (.in(i), .out(p));\n"
+            "  opndrn pad (.in(i), .out(o));\n"
             "endmodule\n"
         >>
     }.
