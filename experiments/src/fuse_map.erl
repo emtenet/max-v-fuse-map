@@ -1,5 +1,7 @@
 -module(fuse_map).
 
+-export([run/0]).
+
 -export([from_name/2]).
 -export([to_location/2]).
 -export([to_name/2]).
@@ -2344,6 +2346,43 @@
     ?STRIP(1, 3, 1, bottom, 64);
     ?STRIP(1, 3, 2, bottom, 65);
 ).
+
+%%====================================================================
+%% run
+%%====================================================================
+
+run() ->
+    lists:foreach(fun run/1, density:list()),
+    ok.
+
+%%--------------------------------------------------------------------
+
+run(Density) ->
+    io:format(" => ~s~n", [Density]),
+    Count = density:fuse_count(Density),
+    run(0, Count, Density).
+
+%%--------------------------------------------------------------------
+
+run(Count, Count, _) ->
+    ok;
+run(Fuse, Count, Density) ->
+    case to_name(Fuse, Density) of
+        {ok, Name} ->
+            case from_name(Name, Density) of
+                {ok, Fuse} ->
+                    run(Fuse + 1, Count, Density);
+
+                {ok, Different} ->
+                    throw({Density, Fuse, to, Name, from, Different});
+
+                {error, Error} ->
+                    throw({Density, Fuse, to, Name, error, Error})
+            end;
+
+        {error, _Location} ->
+            run(Fuse + 1, Count, Density)
+    end.
 
 %%====================================================================
 %% from_name
