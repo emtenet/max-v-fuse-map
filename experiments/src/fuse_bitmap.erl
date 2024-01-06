@@ -31,8 +31,8 @@ print_map(Density) ->
 
 print_minimal(Density) ->
     FuseCount = density:fuse_count(Density),
-    {ok, Database} = minimal_experiment:fuses(Density),
-    lines(0, FuseCount, {Density, Database}).
+    Fuses = density:minimal_fuses(Density),
+    lines(0, FuseCount, {Density, Fuses}).
 
 %%--------------------------------------------------------------------
 
@@ -56,24 +56,36 @@ line(Fuse, Stop, Database, Line) ->
 
 %%--------------------------------------------------------------------
 
-fuse(Fuse, {_Density, Fuses}) when is_list(Fuses) ->
-    case lists:member(Fuse, Fuses) of
+fuse(Fuse, {Density, Fuses}) when is_list(Fuses) ->
+    case pof_file:is_stripe(Fuse, Density) of
         true ->
-            %case fuse_map:to_name(Fuse, Density) of
-            %    {ok, _} -> $M;
-            %    {error, _} -> $?
-            %end;
-            $M;
+            $|;
 
-        false -> $.
+        false ->
+            case lists:member(Fuse, Fuses) of
+                true ->
+                    %case fuse_map:to_name(Fuse, Density) of
+                    %    {ok, _} -> $M;
+                    %    {error, _} -> $?
+                    %end;
+                    $M;
+
+                false -> $.
+            end
     end;
 fuse(Fuse, Density) when is_atom(Density) ->
-    case fuse_map:to_name(Fuse, Density) of
-        {ok, Name} ->
-            fuse(Name);
+    case pof_file:is_stripe(Fuse, Density) of
+        true ->
+            $|;
 
-        {error, _} ->
-            $.
+        false ->
+            case fuse_map:to_name(Fuse, Density) of
+                {ok, Name} ->
+                    fuse(Name);
+
+                {error, _} ->
+                    $.
+            end
     end;
 fuse(Fuse, Database) ->
     case fuse_database:name(Fuse, Database) of

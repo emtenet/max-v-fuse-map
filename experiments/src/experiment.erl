@@ -141,9 +141,10 @@ flush(Compiles) when is_list(Compiles) ->
 
 -spec fuses(result()) -> {ok, fuses()}.
 
-fuses(Result) ->
-    {ok, POF} = pof(Result),
-    {ok, pof_file:fuses(POF)}.
+fuses({Device, POFBinary, _}) ->
+    {ok, POF} = pof_file:decode(POFBinary),
+    Density = device:density(Device),
+    {ok, pof_file:fuses(Density, POF)}.
 
 %%====================================================================
 %% pof
@@ -151,8 +152,8 @@ fuses(Result) ->
 
 -spec pof(result()) -> {ok, pof_file:pof()}.
 
-pof({_, POF, _}) ->
-    pof_file:decode(POF).
+pof({_, POFBinary, _}) ->
+    pof_file:decode(POFBinary).
 
 %%====================================================================
 %% rcf
@@ -160,8 +161,8 @@ pof({_, POF, _}) ->
 
 -spec rcf(result()) -> {ok, rcf_file:rcf()}.
 
-rcf({_, _, RCF}) ->
-    rcf_file:decode(RCF).
+rcf({_, _, RCFBinary}) ->
+    rcf_file:decode(RCFBinary).
 
 %%====================================================================
 %% single

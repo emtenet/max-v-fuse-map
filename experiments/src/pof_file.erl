@@ -3,14 +3,15 @@
 -export([read/1]).
 -export([decode/1]).
 -export([fuse_count/1]).
--export([fuses/1]).
--export([unknown_fuses/2]).
+-export([fuses/2]).
 -export([has_fuse/2]).
+-export([is_stripe/2]).
 
 -export_type([pof/0]).
 -export_type([pof_binary/0]).
 -export_type([flash/0]).
 
+-type density() :: density:density().
 -type pof_binary() :: binary().
 
 -type pof() :: #{
@@ -112,86 +113,77 @@ fuses_test() ->
     % See: doc/fuse-vs-bit.md
     CFM = <<16#fe, 16#ff, 16#ff, 16#ff, 16#fd, 16#3f, 16#9f, 16#e7>>,
     POF = #{cfm => #{data => CFM}},
-    Fuses = [0, 33, 46, 47, 53, 54, 59, 60],
-    ?assertEqual(Fuses, fuses(POF)),
+    Fuses = [33, 46, 47, 53, 54, 59, 60],
+    ?assertEqual(Fuses, fuses(max_v_2210z, POF)),
     [
         ?assertEqual(lists:member(Fuse, Fuses), has_fuse(Fuse, POF))
         ||
-        Fuse <- lists:seq(0, bit_size(CFM) - 1)
+        % start from 1, since bit 0 is a strip bit
+        % that _always_ exists, yet not returned by fuses/2
+        Fuse <- lists:seq(1, bit_size(CFM) - 1)
     ],
-    Unknowns = [
-        {36, 0},
-        {38, 1},
-        {44, 0},
-        {46, 1},
-        {52, 0},
-        {54, 1},
-        {60, 0},
-        {62, 1}
-    ],
-    UnknownFuses = [38, 60, 62],
-    ?assertEqual(UnknownFuses, unknown_fuses(POF, Unknowns)),
     ok.
 
 -endif.
 
 %%--------------------------------------------------------------------
 
--spec fuses(pof()) -> [fuse:fuse()].
+-spec fuses(density(), pof()) -> [fuse:fuse()].
 
-fuses(#{cfm := #{data := Bytes}}) ->
-    fuses_bytes(0, Bytes, []).
+fuses(max_v_240z, #{cfm := #{data := Bytes}}) ->
+    fuses_small_bytes(0, Bytes, []);
+fuses(max_v_570z, #{cfm := #{data := Bytes}}) ->
+    fuses_small_bytes(0, Bytes, []);
+fuses(max_v_1270z, #{cfm := #{data := Bytes}}) ->
+    fuses_large_bytes(0, Bytes, []);
+fuses(max_v_2210z, #{cfm := #{data := Bytes}}) ->
+    fuses_large_bytes(0, Bytes, []).
 
 %%--------------------------------------------------------------------
 
-fuses_bytes(_, <<>>, Fuses) ->
+fuses_small_bytes(_, <<>>, Fuses) ->
     lists:reverse(Fuses);
-fuses_bytes(Fuse, <<255, Bytes/binary>>, Fuses) ->
-    fuses_bytes(Fuse + 8, Bytes, Fuses);
-fuses_bytes(Fuse, <<Byte, Bytes/binary>>, Fuses) ->
-    fuses_bytes(Fuse + 8, Bytes, fuses_byte(8, Fuse, Byte, Fuses)).
+fuses_small_bytes(Fuse, <<255, Bytes/binary>>, Fuses) ->
+    fuses_small_bytes(Fuse + 8, Bytes, Fuses);
+fuses_small_bytes(Fuse, <<Byte, Bytes/binary>>, Fuses) ->
+    fuses_small_bytes(Fuse + 8, Bytes, fuses_small_byte(8, Fuse, Byte, Fuses)).
 
 %%--------------------------------------------------------------------
 
-fuses_byte(0, _, _, Fuses) ->
+fuses_small_byte(0, _, _, Fuses) ->
     Fuses;
-fuses_byte(N, Fuse, Byte, Fuses) when Byte band 1 =:= 0 ->
-    fuses_byte(N - 1, Fuse + 1, Byte bsr 1, [Fuse | Fuses]);
-fuses_byte(N, Fuse, Byte, Fuses) ->
-    fuses_byte(N - 1, Fuse + 1, Byte bsr 1, Fuses).
-
-%%====================================================================
-%% unknown_fuses
-%%====================================================================
-
--spec unknown_fuses(pof(), [{fuse:fuse(), 0 | 1}]) -> [fuse:fuse()].
-
-unknown_fuses(#{cfm := #{data := Bytes}}, Unknown) ->
-    unknown_bytes(0, Bytes, Unknown, []).
+fuses_small_byte(N, Fuse, Byte, Fuses)
+        when Fuse rem 64 =:= 0 orelse Fuse rem 64 =:= 33 ->
+    % stripe but is _always_ 0
+    0 = Byte band 1,
+    fuses_small_byte(N - 1, Fuse + 1, Byte bsr 1, Fuses);
+fuses_small_byte(N, Fuse, Byte, Fuses) when Byte band 1 =:= 0 ->
+    fuses_small_byte(N - 1, Fuse + 1, Byte bsr 1, [Fuse | Fuses]);
+fuses_small_byte(N, Fuse, Byte, Fuses) ->
+    fuses_small_byte(N - 1, Fuse + 1, Byte bsr 1, Fuses).
 
 %%--------------------------------------------------------------------
 
-unknown_bytes(_, <<>>, _, Fuses) ->
+fuses_large_bytes(_, <<>>, Fuses) ->
     lists:reverse(Fuses);
-unknown_bytes(_, _, [], Fuses) ->
-    lists:reverse(Fuses);
-unknown_bytes(Fuse, <<Byte, Bytes/binary>>, Unknown, Fuses) ->
-    unknown_byte(8, Fuse, Byte, Bytes, Unknown, Fuses).
+fuses_large_bytes(Fuse, <<255, Bytes/binary>>, Fuses) ->
+    fuses_large_bytes(Fuse + 8, Bytes, Fuses);
+fuses_large_bytes(Fuse, <<Byte, Bytes/binary>>, Fuses) ->
+    fuses_large_bytes(Fuse + 8, Bytes, fuses_large_byte(8, Fuse, Byte, Fuses)).
 
 %%--------------------------------------------------------------------
 
-unknown_byte(0, Fuse, _, Bytes, Unknown, Fuses) ->
-    unknown_bytes(Fuse, Bytes, Unknown, Fuses);
-unknown_byte(N, Fuse, Byte, Bytes, [{Fuse, Bit} | Unknown], Fuses) ->
-    case Byte band 1 of
-        Bit ->
-            unknown_byte(N - 1, Fuse + 1, Byte bsr 1, Bytes, Unknown, [Fuse | Fuses]);
-
-        _ ->
-            unknown_byte(N - 1, Fuse + 1, Byte bsr 1, Bytes, Unknown, Fuses)
-    end;
-unknown_byte(N, Fuse, Byte, Bytes, Unknown, Fuses) ->
-    unknown_byte(N - 1, Fuse + 1, Byte bsr 1, Bytes, Unknown, Fuses).
+fuses_large_byte(0, _, _, Fuses) ->
+    Fuses;
+fuses_large_byte(N, Fuse, Byte, Fuses)
+        when Fuse rem 128 =:= 0 orelse Fuse rem 128 =:= 65 ->
+    % stripe but is _always_ 0
+    0 = Byte band 1,
+    fuses_large_byte(N - 1, Fuse + 1, Byte bsr 1, Fuses);
+fuses_large_byte(N, Fuse, Byte, Fuses) when Byte band 1 =:= 0 ->
+    fuses_large_byte(N - 1, Fuse + 1, Byte bsr 1, [Fuse | Fuses]);
+fuses_large_byte(N, Fuse, Byte, Fuses) ->
+    fuses_large_byte(N - 1, Fuse + 1, Byte bsr 1, Fuses).
 
 %%====================================================================
 %% has_fuse
@@ -209,4 +201,37 @@ has_fuse(Fuse, #{cfm := #{data := Bytes}}) ->
         _ ->
             false
     end.
+
+%%====================================================================
+%% is_stripe
+%%====================================================================
+
+-spec is_stripe(fuse:fuse(), density()) -> boolean().
+
+is_stripe(Fuse, max_v_240z) ->
+    is_stripe_small(Fuse);
+is_stripe(Fuse, max_v_570z) ->
+    is_stripe_small(Fuse);
+is_stripe(Fuse, max_v_1270z) ->
+    is_stripe_large(Fuse);
+is_stripe(Fuse, max_v_2210z) ->
+    is_stripe_large(Fuse).
+
+%%--------------------------------------------------------------------
+
+is_stripe_small(Fuse) when Fuse rem 64 =:= 0 ->
+    true;
+is_stripe_small(Fuse) when Fuse rem 64 =:= 33 ->
+    true;
+is_stripe_small(_) ->
+    false.
+
+%%--------------------------------------------------------------------
+
+is_stripe_large(Fuse) when Fuse rem 128 =:= 0 ->
+    true;
+is_stripe_large(Fuse) when Fuse rem 128 =:= 65 ->
+    true;
+is_stripe_large(_) ->
+    false.
 
