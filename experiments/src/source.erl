@@ -6,7 +6,7 @@
 -export([in_lut_out/4]).
 -export([ins_lut_outs/6]).
 -export([lut_out/3]).
--export([open_drain/3]).
+-export([open_drain/4]).
 -export([out_constant/3]).
 
 -export([ioc/1]).
@@ -36,25 +36,13 @@ in_out(Device, Title, Settings, In, Out) ->
             |
             Settings
         ],
-        vhdl => <<
-            "library IEEE;\n"
-            "use IEEE.STD_LOGIC_1164.ALL;\n"
-            "library altera;\n"
-            "use altera.altera_primitives_components.all;\n"
-            "library altera_mf;\n"
-            "use altera_mf.altera_mf_components.all;\n"
-            "\n"
-            "entity experiment is\n"
-            "  port (\n"
-            "    i : in STD_LOGIC;\n"
-            "    o : out STD_LOGIC\n"
-            "  );\n"
-            "end experiment;\n"
-            "\n"
-            "architecture behavioral of experiment is\n",
-            "begin\n"
-            "  o <= i;\n"
-            "end behavioral;\n"
+        verilog => <<
+            "module experiment (\n"
+            "  input wire i,\n"
+            "  output wire o\n"
+            ");\n"
+            "  assign o = i;\n"
+            "endmodule\n"
         >>
     }.
 
@@ -71,28 +59,13 @@ in_lut_out(Device, In, LC, Out) ->
             {location, via, LC},
             {location, o, pin(Out)}
         ],
-        vhdl => <<
-            "library IEEE;\n"
-            "use IEEE.STD_LOGIC_1164.ALL;\n"
-            "library altera;\n"
-            "use altera.altera_primitives_components.all;\n"
-            "library altera_mf;\n"
-            "use altera_mf.altera_mf_components.all;\n"
-            "\n"
-            "entity experiment is\n"
-            "  port (\n"
-            "    i : in STD_LOGIC;\n"
-            "    o : out STD_LOGIC\n"
-            "  );\n"
-            "end experiment;\n"
-            "\n"
-            "architecture behavioral of experiment is\n",
-            "begin\n"
-            "  via: LCELL port map (\n"
-            "    a_in => i,\n"
-            "    a_out => o\n"
-            "  );\n"
-            "end behavioral;\n"
+        verilog => <<
+            "module experiment (\n"
+            "  input wire i,\n"
+            "  output wire o\n"
+            ");\n"
+            "  lcell via (.in(i), .out(0));\n"
+            "endmodule\n"
         >>
     }.
 
@@ -511,36 +484,21 @@ lut_out(Device, LC, Out) ->
 %% open_drain
 %%====================================================================
 
-open_drain(Device, In, Out) ->
+open_drain(Device, Title, In, Out) ->
     #{
-        title => {open, drain, ioc(Out)},
+        title => Title,
         device => Device,
         settings => [
             {location, i, pin(In)},
             {location, o, pin(Out)}
         ],
-        vhdl => <<
-            "library IEEE;\n"
-            "use IEEE.STD_LOGIC_1164.ALL;\n"
-            "library altera;\n"
-            "use altera.altera_primitives_components.all;\n"
-            "library altera_mf;\n"
-            "use altera_mf.altera_mf_components.all;\n"
-            "\n"
-            "entity experiment is\n"
-            "  port (\n"
-            "    i : in STD_LOGIC;\n"
-            "    o : out STD_LOGIC\n"
-            "  );\n"
-            "end experiment;\n"
-            "\n"
-            "architecture behavioral of experiment is\n",
-            "begin\n"
-            "  pad: OPNDRN port map (\n"
-            "    a_in => i,\n"
-            "    a_out => o\n"
-            "  );\n"
-            "end behavioral;\n"
+        verilog => <<
+            "module experiment (\n"
+            "  input wire i,\n"
+            "  output wire o\n"
+            ");\n"
+            "  opndrn pad (.in(i), .out(p));\n"
+            "endmodule\n"
         >>
     }.
 
