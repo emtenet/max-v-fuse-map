@@ -22,6 +22,7 @@ My experiments are being run in the following
  * [Generate pins](experiments/src/generate_pins.erl)
  * [Unused pins](experiments/src/unused_experiment.erl)
  * [I/O features](experiments/src/io_features_experiment.erl)
+ * [PCI compliance](experiments/src/pci_compliance_experiment.erl)
 
 ## Fuses
 
@@ -60,6 +61,12 @@ NOTE: Also enabled when in output mode.
 ### `{ioc(), open_drain}`
 
 Open-Drain outputs enabled with a POF bit of `0`.
+
+### `{ioc(), pci_compliance}`
+
+PCI compliant outputs enabled with a POF bit of `0`.
+
+NOTE: Only avaailable in Bank 3 of 5M1270Z and 5M2210Z.
 
 ### `{ioc(), schmitt_trigger}`
 

@@ -28,6 +28,7 @@
 -export([is_iob/3]).
 -export([is_column_iob/3]).
 -export([is_row_iob/3]).
+-export([pci_compliant/2]).
 
 -export_type([density/0]).
 
@@ -846,6 +847,33 @@ is_row_iob(X, Y, Density) ->
         #metric{left_io = X, top_lab = T, indent_bottom_lab = B} ->
             Y >= B andalso Y =< T;
 
+        #metric{right_io = X, top_lab = T, bottom_lab = B} ->
+            Y >= B andalso Y =< T;
+
+        _ ->
+            false
+    end.
+
+%%====================================================================
+%% pci_compliant
+%%====================================================================
+
+-spec pci_compliant(iob() | ioc(), density()) -> boolean().
+
+pci_compliant(_, max_v_240z) ->
+    false;
+pci_compliant(_, max_v_570z) ->
+    false;
+pci_compliant({iob, X, Y}, Density) ->
+    case metric(Density) of
+        #metric{right_io = X, top_lab = T, bottom_lab = B} ->
+            Y >= B andalso Y =< T;
+
+        _ ->
+            false
+    end;
+pci_compliant({ioc, X, Y, _}, Density) ->
+    case metric(Density) of
         #metric{right_io = X, top_lab = T, bottom_lab = B} ->
             Y >= B andalso Y =< T;
 

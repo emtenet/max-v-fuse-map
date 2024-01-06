@@ -535,12 +535,13 @@
 ).
 
 -define(IOC_STRIPS(),
-    ?IOC_STRIP(0, 2, open_drain);
-    ?IOC_STRIP(1, 2, bus_hold);
-    ?IOC_STRIP(2, 2, slow_slew_rate);
-    ?IOC_STRIP(3, 2, weak_pull_up);
-    ?IOC_STRIP(4, 2, current_strength_0);
-    ?IOC_STRIP(5, 2, current_strength_1);
+    ?IOC_STRIP(0, 2, pci_compliance);
+    ?IOC_STRIP(1, 2, open_drain);
+    ?IOC_STRIP(2, 2, bus_hold);
+    ?IOC_STRIP(3, 2, slow_slew_rate);
+    ?IOC_STRIP(4, 2, weak_pull_up);
+    ?IOC_STRIP(5, 2, current_strength_0);
+    ?IOC_STRIP(6, 2, current_strength_1);
 ).
 
 -define(LAB_CELLS(),
@@ -3095,17 +3096,17 @@ from_max_v_2210z_strip(X, Y, N, R, C, _With) ->
 %%--------------------------------------------------------------------
 
 from_side_strip(left, Index, R, C, With = #with{left_strip = Base}) ->
-    from_base_strip(Base, Index, R, C, With);
+    from_base_strip(Base, Index, R - 1, C, With);
 from_side_strip(top, Index, R, C, With = #with{top_strip = Base}) ->
-    from_base_strip(Base, Index, R, C, With);
+    from_base_strip(Base, Index, R - 1, C, With);
 from_side_strip(right, Index, R, C, With = #with{right_strip = Base})
         when With#with.density =:= max_v_1270z orelse
              With#with.density =:= max_v_2210z ->
-    from_base_strip7(Base, Index, 5 - R, C, With);
+    from_base_strip7(Base, Index, 6 - R, C, With);
 from_side_strip(right, Index, R, C, With = #with{right_strip = Base}) ->
-    from_base_strip(Base, Index, 5 - R, C, With);
+    from_base_strip(Base, Index, 6 - R, C, With);
 from_side_strip(bottom, Index, R, C, With = #with{bottom_strip = Base}) ->
-    from_base_strip(Base, Index, 5 - R, C, With).
+    from_base_strip(Base, Index, 6 - R, C, With).
 
 %%--------------------------------------------------------------------
 
@@ -3406,22 +3407,22 @@ to_strip(Row, Col, With = #with{}) when Row < With#with.left_strip ->
     {Row, Col, strip};
 to_strip(Row0, Col, With = #with{}) when Row0 < With#with.top_strip ->
     Row = Row0 - With#with.left_strip,
-    {left, Row div 6, strip, Row rem 6, Col};
+    {left, Row div 6, strip, 1 + (Row rem 6), Col};
 to_strip(Row0, Col, With = #with{}) when Row0 < With#with.right_strip ->
     Row = Row0 - With#with.top_strip,
-    {top, Row div 6, strip, Row rem 6, Col};
+    {top, Row div 6, strip, 1 + (Row rem 6), Col};
 to_strip(Row0, Col, With = #with{})
         when Row0 < With#with.bottom_strip andalso
              (With#with.density =:= max_v_1270z orelse
               With#with.density =:= max_v_2210z) ->
     Row = Row0 - With#with.right_strip,
-    {right, Row div 7, strip, 5 - (Row rem 7), Col};
+    {right, Row div 7, strip, 6 - (Row rem 7), Col};
 to_strip(Row0, Col, With = #with{}) when Row0 < With#with.bottom_strip ->
     Row = Row0 - With#with.right_strip,
-    {right, Row div 6, strip, 5 - (Row rem 6), Col};
+    {right, Row div 6, strip, 6 - (Row rem 6), Col};
 to_strip(Row0, Col, With = #with{}) when Row0 < With#with.end_strip ->
     Row = Row0 - With#with.bottom_strip,
-    {bottom, Row div 6, strip, 5 - (Row rem 6), Col};
+    {bottom, Row div 6, strip, 6 - (Row rem 6), Col};
 to_strip(Row, Col, _With) ->
     {Row, Col, strip}.
 
