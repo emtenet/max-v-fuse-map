@@ -24,6 +24,7 @@
     {current_strength, signal(), current_strength()} |
     {global_clock, signal(), boolean()} |
     {io_standard, signal(), io_standard()} |
+    {pci_compliance, signal(), boolean()} |
     {slow_slew_rate, signal(), boolean()} |
     {weak_pull_up, signal(), boolean()} |
     {input_delay, signal(), boolean()} |
@@ -120,6 +121,8 @@ setting({global_clock, Signal, Value}) ->
     instance(<<"GLOBAL_SIGNAL">>, Signal, global_clock(Value));
 setting({io_standard, Signal, Value}) ->
     instance(<<"IO_STANDARD">>, Signal, io_standard(Value));
+setting({pci_compliance, Signal, Value}) ->
+    instance(<<"PCI_IO">>, Signal, boolean(Value));
 setting({slow_slew_rate, Signal, Value}) ->
     instance(<<"SLOW_SLEW_RATE">>, Signal, boolean(Value));
 setting({weak_pull_up, Signal, Value}) ->
