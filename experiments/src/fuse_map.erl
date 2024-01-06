@@ -397,7 +397,7 @@
 
 -define(IOC_ZEROS(),
     %?IOC_ZERO( 0, output);
-    %?IOC_ZERO( 1, schmitt_trigger);
+    ?IOC_ZERO( 1, schmitt_trigger);
 ).
 
 -define(IOC_SIDES(),
@@ -425,28 +425,28 @@
 ).
 
 -define(IOC_LEFTS(),
-    %?IOC_LEFT(1, 9, 3, 6, input_delay);
-    %?IOC_LEFT(2, 1, 0, 0, input_delay);
-    %?IOC_LEFT(2, 1, 1, 1, input_delay);
-    %?IOC_LEFT(2, 1, 2, 2, input_delay);
+    ?IOC_LEFT(1, 9, 3, 6, input_delay);
+    ?IOC_LEFT(2, 1, 0, 0, input_delay);
+    ?IOC_LEFT(2, 1, 1, 1, input_delay);
+    ?IOC_LEFT(2, 1, 2, 2, input_delay);
 ).
 
 -define(IOC_LEFT_LINES(),
-    %?IOC_LEFT_LINE( 4, 21, 3, input_delay);
-    %?IOC_LEFT_LINE( 4, 22, 4, input_delay);
-    %?IOC_LEFT_LINE( 4, 23, 5, input_delay);
+    ?IOC_LEFT_LINE( 4, 21, 3, input_delay);
+    ?IOC_LEFT_LINE( 4, 22, 4, input_delay);
+    ?IOC_LEFT_LINE( 4, 23, 5, input_delay);
 ).
 
 -define(IOC_RIGHTS(),
-    %?IOC_RIGHT(3, 9, 2, 5, input_delay);
-    %?IOC_RIGHT(4, 1, 1, 0, input_delay);
-    %?IOC_RIGHT(4, 1, 2, 1, input_delay);
-    %?IOC_RIGHT(4, 1, 3, 2, input_delay);
+    ?IOC_RIGHT(3, 9, 2, 5, input_delay);
+    ?IOC_RIGHT(4, 1, 1, 0, input_delay);
+    ?IOC_RIGHT(4, 1, 2, 1, input_delay);
+    ?IOC_RIGHT(4, 1, 3, 2, input_delay);
 ).
 
 -define(IOC_RIGHT_LINES(),
-    %?IOC_RIGHT_LINE( 2, 20, 3, input_delay);
-    %?IOC_RIGHT_LINE( 2, 21, 4, input_delay);
+    ?IOC_RIGHT_LINE( 2, 20, 3, input_delay);
+    ?IOC_RIGHT_LINE( 2, 21, 4, input_delay);
 ).
 
 -define(IOC_HEADS(),
@@ -459,7 +459,7 @@
     %?IOC_HEAD( 6, 6, 2, {enable4, mux3});
     %?IOC_HEAD( 6, 7, 3, {enable4, mux2});
     %?IOC_HEAD( 6, 8, 3, {enable4, mux3});
-    %?IOC_HEAD( 7, 0, 3, schmitt_trigger);
+    ?IOC_HEAD( 7, 0, 3, schmitt_trigger);
     %?IOC_HEAD( 7, 1, 2, {output4, mux0});
     %?IOC_HEAD( 7, 2, 2, {output4, mux1});
     %?IOC_HEAD( 7, 3, 3, {output4, mux0});
@@ -477,7 +477,7 @@
     %?IOC_HEAD( 8, 6, 2, {enable3, mux2});
     %?IOC_HEAD( 8, 7, 3, {enable3, mux0});
     %?IOC_HEAD( 8, 8, 3, {enable3, mux2});
-    %?IOC_HEAD( 9, 0, 2, schmitt_trigger);
+    ?IOC_HEAD( 9, 0, 2, schmitt_trigger);
     %?IOC_HEAD( 9, 1, 2, {output3, mux1});
     %?IOC_HEAD( 9, 2, 2, output_invert);
     %?IOC_HEAD( 9, 3, 3, {output3, mux1});
@@ -507,7 +507,7 @@
     %?IOC_HEAD(15, 6, 0, {enable3, mux2});
     %?IOC_HEAD(15, 7, 1, {enable3, mux0});
     %?IOC_HEAD(15, 8, 1, {enable3, mux2});
-    %?IOC_HEAD(16, 0, 1, schmitt_trigger);
+    ?IOC_HEAD(16, 0, 1, schmitt_trigger);
     %?IOC_HEAD(16, 1, 0, {output4, mux0});
     %?IOC_HEAD(16, 2, 0, {output4, mux1});
     %?IOC_HEAD(16, 3, 1, {output4, mux0});
@@ -524,21 +524,21 @@
     %?IOC_HEAD(17, 6, 0, {enable4, mux3});
     %?IOC_HEAD(17, 7, 1, {enable4, mux2});
     %?IOC_HEAD(17, 8, 1, {enable4, mux3});
-    %?IOC_HEAD(19, 2, 0, input_delay);
-    %?IOC_HEAD(19, 4, 1, input_delay);
-    %?IOC_HEAD(19, 6, 2, input_delay);
-    %?IOC_HEAD(19, 8, 3, input_delay);
+    ?IOC_HEAD(19, 2, 0, input_delay);
+    ?IOC_HEAD(19, 4, 1, input_delay);
+    ?IOC_HEAD(19, 6, 2, input_delay);
+    ?IOC_HEAD(19, 8, 3, input_delay);
     %?IOC_HEAD(24, 0, 0, output);
-    %?IOC_HEAD(25, 0, 0, schmitt_trigger);
+    ?IOC_HEAD(25, 0, 0, schmitt_trigger);
 ).
 
 -define(IOC_STRIPS(),
-    %?IOC_STRIP(0, 2, open_drain);
+    ?IOC_STRIP(0, 2, open_drain);
     ?IOC_STRIP(1, 2, bus_hold);
-    %?IOC_STRIP(2, 2, enable);
+    ?IOC_STRIP(2, 2, slow_slew_rate);
     ?IOC_STRIP(3, 2, weak_pull_up);
-    %?IOC_STRIP(4, 2, current_strength_0);
-    %?IOC_STRIP(5, 2, current_strength_1);
+    ?IOC_STRIP(4, 2, current_strength_0);
+    ?IOC_STRIP(5, 2, current_strength_1);
 ).
 
 -define(LAB_CELLS(),
@@ -3080,13 +3080,13 @@ from_base_strip7(Base, Index, R, C, #with{strip_width = Width}) ->
 
 %%--------------------------------------------------------------------
 
-%from_zero(X, Y, 0, I, With) -> from_line(X, 0, Y, 0 + I, With);
-%from_zero(X, Y, 1, I, With) -> from_line(X, 0, Y, 7 + I, With);
-%from_zero(X, Y, 2, I, With) -> from_line(X, 0, Y, 13 + I, With);
-%from_zero(X, Y, 3, I, With) -> from_line(X, 0, Y, 20 + I, With);
-%from_zero(X, Y, 4, I, With) -> from_line(X, 0, Y, 27 + I, With);
-%from_zero(X, Y, 5, I, With) -> from_line(X, 0, Y, 33 + I, With);
-%from_zero(X, Y, 6, I, With) -> from_line(X, 0, Y, 40 + I, With).
+from_zero(X, Y, 0, I, With) -> from_line(X, 0, Y, 0 + I, With);
+from_zero(X, Y, 1, I, With) -> from_line(X, 0, Y, 7 + I, With);
+from_zero(X, Y, 2, I, With) -> from_line(X, 0, Y, 13 + I, With);
+from_zero(X, Y, 3, I, With) -> from_line(X, 0, Y, 20 + I, With);
+from_zero(X, Y, 4, I, With) -> from_line(X, 0, Y, 27 + I, With);
+from_zero(X, Y, 5, I, With) -> from_line(X, 0, Y, 33 + I, With);
+from_zero(X, Y, 6, I, With) -> from_line(X, 0, Y, 40 + I, With).
 
 %%--------------------------------------------------------------------
 
