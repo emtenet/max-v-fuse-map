@@ -3,6 +3,7 @@
 -export([encode/1]).
 -export([io_standards/0]).
 -export([io_standard_output/1]).
+-export([unused_pins/0]).
 
 -export_type([setting/0]).
 
@@ -23,6 +24,7 @@
     {current_strength, signal(), current_strength()} |
     {global_clock, signal(), boolean()} |
     {io_standard, signal(), io_standard()} |
+    {slow_slew_rate, signal(), boolean()} |
     {weak_pull_up, signal(), boolean()} |
     {input_delay, signal(), boolean()} |
     {input_delay, signal(), signal(), boolean()} |
@@ -34,6 +36,14 @@
 -type signal() :: atom() | binary().
 
 -type current_strength() ::
+    current_2ma |
+    current_3ma |
+    current_4ma |
+    current_6ma |
+    current_7ma |
+    current_8ma |
+    current_14ma |
+    current_16ma |
     minimum |
     maximum.
 
@@ -110,6 +120,8 @@ setting({global_clock, Signal, Value}) ->
     instance(<<"GLOBAL_SIGNAL">>, Signal, global_clock(Value));
 setting({io_standard, Signal, Value}) ->
     instance(<<"IO_STANDARD">>, Signal, io_standard(Value));
+setting({slow_slew_rate, Signal, Value}) ->
+    instance(<<"SLOW_SLEW_RATE">>, Signal, boolean(Value));
 setting({weak_pull_up, Signal, Value}) ->
     instance(<<"WEAK_PULL_UP_RESISTOR">>, Signal, boolean(Value));
 setting({input_delay, From, To, Delay}) ->
@@ -171,7 +183,8 @@ location(Signal0, Value) ->
 %%====================================================================
 
 io_standards() ->
-    [v1_5,
+    [v1_2,
+     v1_5,
      v1_8,
      v2_5,
      v2_5_schmitt_trigger,
@@ -202,10 +215,16 @@ integer(Value) ->
 
 %%--------------------------------------------------------------------
 
-current_strength(minimum) ->
-    <<"\"Minimum current\"">>;
-current_strength(maximum) ->
-    <<"\"Maximum current\"">>.
+current_strength(current_2ma) -> <<"\"2mA\"">>;
+current_strength(current_3ma) -> <<"\"3mA\"">>;
+current_strength(current_4ma) -> <<"\"4mA\"">>;
+current_strength(current_6ma) -> <<"\"6mA\"">>;
+current_strength(current_7ma) -> <<"\"7mA\"">>;
+current_strength(current_8ma) -> <<"\"8mA\"">>;
+current_strength(current_14ma) -> <<"\"14mA\"">>;
+current_strength(current_16ma) -> <<"\"16mA\"">>;
+current_strength(minimum) -> <<"\"Minimum current\"">>;
+current_strength(maximum) -> <<"\"Maximum current\"">>.
 
 %%--------------------------------------------------------------------
 
@@ -223,6 +242,8 @@ global_clock(false) ->
 
 %%--------------------------------------------------------------------
 
+io_standard(v1_2) ->
+    <<"\"1.2 V\"">>;
 io_standard(v1_5) ->
     <<"\"1.5 V\"">>;
 io_standard(v1_8) ->
@@ -260,8 +281,18 @@ quote(Value) ->
             Value;
 
         _ ->
-            <<"\n", Value/binary, "\"">>
+            <<"\"", Value/binary, "\"">>
     end.
+
+%%--------------------------------------------------------------------
+
+unused_pins() ->
+    [input_tri_stated,
+     input_tri_stated_with_bus_hold,
+     input_tri_stated_with_weak_pull_up,
+     output_driving_unspecified,
+     output_driving_ground
+    ].
 
 %%--------------------------------------------------------------------
 
