@@ -2,6 +2,16 @@
 
 -export([run/0]).
 
+% This experiment uses the `unused_pins` setting to change all 
+% unused pins:
+%
+%  * input / output
+%  * bus holl - on / off
+%  * weak pull up - on / off
+%
+% Three sets fuses can then be identified but not which fuse
+% is connected to which IOC.
+
 %%====================================================================
 %% run
 %%====================================================================
