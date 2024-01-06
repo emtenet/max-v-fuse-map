@@ -1,7 +1,6 @@
 -module(matrix).
 
--export([build/1]).
--export([build/2]).
+%-export([build/1]).
 -export([build_with_location/2]).
 -export([build_with_map/2]).
 -export([is_empty/1]).
@@ -50,23 +49,12 @@
 -spec build([experiment()]) -> matrix().
 
 build(Experiments) ->
-    build_with(fun name_is_undefined/1, Experiments).
+    build_with(fun name_is_fuse/1, Experiments).
 
 %%--------------------------------------------------------------------
 
-name_is_undefined(_) ->
-    undefined.
-
-%%====================================================================
-%% build
-%%====================================================================
-
--spec build(density() | device(), [experiment()]) -> matrix().
-
-build(DensityOrDevice, Experiments) ->
-    Database = fuse_database:read(DensityOrDevice),
-    With = fun (Fuse) -> fuse_database:name(Fuse, Database) end,
-    build_with(With, Experiments).
+name_is_fuse(Fuse) ->
+    Fuse.
 
 %%====================================================================
 %% build_with_location

@@ -59,13 +59,19 @@ run(Density) ->
         experiment(Device, <<"40000000">>, 30),
         experiment(Device, <<"80000000">>, 31)
     ]),
-    Matrix = matrix:build(Experiments),
+    Matrix = matrix:build_with_map(Device, Experiments),
     matrix:print(Matrix),
     % the user code bits are stored invered so look for a
     % single zero (0) bit
     Fuses = matrix:single_zeros(Matrix),
     32 = length(Fuses),
-    fuse_database:update(Density, Fuses).
+    lists:foreach(fun (Fuse) -> check_fuse(Fuse, Density) end, Fuses),
+    ok.
+
+%%--------------------------------------------------------------------
+
+check_fuse({Fuse, UserCode}, Density) ->
+    {ok, UserCode} = fuse_map:to_name(Fuse, Density).
 
 %%--------------------------------------------------------------------
 

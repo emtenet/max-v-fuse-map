@@ -1,6 +1,5 @@
 -module(fuse_bitmap).
 
--export([print_database/1]).
 -export([print_map/1]).
 -export([print_minimal/1]).
 
@@ -9,15 +8,6 @@
 %%====================================================================
 %% print
 %%====================================================================
-
--spec print_database(density()) -> ok.
-
-print_database(Density) ->
-    FuseCount = density:fuse_count(Density),
-    Database = fuse_database:read(Density),
-    lines(0, FuseCount, Database).
-
-%%--------------------------------------------------------------------
 
 -spec print_map(density()) -> ok.
 
@@ -64,11 +54,10 @@ fuse(Fuse, {Density, Fuses}) when is_list(Fuses) ->
         false ->
             case lists:member(Fuse, Fuses) of
                 true ->
-                    %case fuse_map:to_name(Fuse, Density) of
-                    %    {ok, _} -> $M;
-                    %    {error, _} -> $?
-                    %end;
-                    $M;
+                    case fuse_map:to_name(Fuse, Density) of
+                        {ok, _} -> $M;
+                        {error, _} -> $?
+                    end;
 
                 false -> $.
             end
@@ -86,14 +75,6 @@ fuse(Fuse, Density) when is_atom(Density) ->
                 {error, _} ->
                     $.
             end
-    end;
-fuse(Fuse, Database) ->
-    case fuse_database:name(Fuse, Database) of
-        Name when is_integer(Name) ->
-            $.;
-
-        Name ->
-            fuse(Name)
     end.
 
 %%--------------------------------------------------------------------
