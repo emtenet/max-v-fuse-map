@@ -1,6 +1,7 @@
 -module(max_v_40z_m64).
 
 -export([iocs/0]).
+-export([iocs/1]).
 -export([pins/0]).
 -export([top_iocs/1]).
 -export([top_pins/1]).
@@ -11,6 +12,7 @@
 -export([bottom_iocs/1]).
 -export([bottom_pins/1]).
 
+-type iob() :: iob:iob().
 -type ioc() :: ioc:ioc().
 -type pin() :: pin:pin().
 -type x() :: max_v:x().
@@ -50,6 +52,62 @@ iocs() ->
      {h7,{ioc,6,0,2}},
      {h8,{ioc,7,0,1}}
     ].
+
+-spec iocs(iob()) -> [{pin(), ioc()}].
+
+iocs({iob,1,4}) ->
+    [{a1,{ioc,1,4,1}},
+     {b1,{ioc,1,4,2}},
+     {c2,{ioc,1,4,3}}];
+iocs({iob,1,3}) ->
+    [{d2,{ioc,1,3,1}}];
+iocs({iob,1,2}) ->
+    [{e2,{ioc,1,2,0}},
+     {f1,{ioc,1,2,3}}];
+iocs({iob,1,1}) ->
+    [{f3,{ioc,1,1,2}}];
+iocs({iob,2,5}) ->
+    [{a2,{ioc,2,5,0}},
+     {b2,{ioc,2,5,2}}];
+iocs({iob,3,5}) ->
+    [{a4,{ioc,3,5,0}},
+     {a3,{ioc,3,5,2}}];
+iocs({iob,4,5}) ->
+    [];
+iocs({iob,5,5}) ->
+    [{a6,{ioc,5,5,0}},
+     {c5,{ioc,5,5,1}}];
+iocs({iob,6,5}) ->
+    [{c6,{ioc,6,5,2}}];
+iocs({iob,7,5}) ->
+    [];
+iocs({iob,8,4}) ->
+    [{a8,{ioc,8,4,2}},
+     {b8,{ioc,8,4,3}}];
+iocs({iob,8,3}) ->
+    [{c8,{ioc,8,3,0}},
+     {b7,{ioc,8,3,1}}];
+iocs({iob,8,2}) ->
+    [{d8,{ioc,8,2,0}}];
+iocs({iob,8,1}) ->
+    [{f8,{ioc,8,1,3}}];
+iocs({iob,7,0}) ->
+    [{h8,{ioc,7,0,1}},
+     {g8,{ioc,7,0,2}}];
+iocs({iob,6,0}) ->
+    [{g7,{ioc,6,0,1}},
+     {h7,{ioc,6,0,2}},
+     {f6,{ioc,6,0,3}}];
+iocs({iob,5,0}) ->
+    [{f5,{ioc,5,0,1}}];
+iocs({iob,4,0}) ->
+    [];
+iocs({iob,3,0}) ->
+    [{h6,{ioc,3,0,1}},
+     {h5,{ioc,3,0,3}}];
+iocs({iob,2,0}) ->
+    [{h4,{ioc,2,0,1}},
+     {h3,{ioc,2,0,3}}].
 
 -spec pins() -> [pin()].
 

@@ -135,6 +135,7 @@ device_file({Device, BSDLPins}) ->
         "-module(">>, atom_to_binary(Device), <<").\n"
         "\n"
         "-export([iocs/0]).\n"
+        "-export([iocs/1]).\n"
         "-export([pins/0]).\n"
         "-export([top_iocs/1]).\n"
         "-export([top_pins/1]).\n"
@@ -145,6 +146,7 @@ device_file({Device, BSDLPins}) ->
         "-export([bottom_iocs/1]).\n"
         "-export([bottom_pins/1]).\n"
         "\n"
+        "-type iob() :: iob:iob().\n"
         "-type ioc() :: ioc:ioc().\n"
         "-type pin() :: pin:pin().\n"
         "-type x() :: max_v:x().\n"
@@ -154,6 +156,10 @@ device_file({Device, BSDLPins}) ->
         "\n"
         "iocs() ->\n">>,
         device_iocs(Pins, []), <<
+        "\n"
+        "-spec iocs(iob()) -> [{pin(), ioc()}].\n"
+        "\n">>,
+        device_iobs(Density, Pins), <<
         "\n"
         "-spec pins() -> [pin()].\n"
         "\n"
@@ -180,6 +186,33 @@ device_file({Device, BSDLPins}) ->
     Name = lists:flatten(io_lib:format("~s.erl", [Device])),
     File = filename:join("src", Name),
     ok = file:write_file(File, Data).
+
+%%--------------------------------------------------------------------
+
+device_iobs(Density, Pins) ->
+    IOBs = density:iobs(Density),
+    device_iobs_clauses(IOBs, Pins, []).
+
+%%--------------------------------------------------------------------
+
+device_iobs_clauses([{IOB, _}], Pins, Clauses) ->
+    Clause = device_iobs_clause(IOB, Pins, <<".\n">>),
+    lists:reverse(Clauses, [Clause]);
+device_iobs_clauses([{IOB, _} | IOBs], Pins, Clauses) ->
+    Clause = device_iobs_clause(IOB, Pins, <<";\n">>),
+    device_iobs_clauses(IOBs, Pins, [Clause | Clauses]).
+
+%%--------------------------------------------------------------------
+
+device_iobs_clause(IOB = {iob, XX, YY}, Pins0, End) ->
+    Pins = sort_by_ioc(lists:filter(fun ({_, {ioc, X, Y, _}}) ->
+        X =:= XX andalso Y =:= YY
+    end, Pins0)),
+    [
+        io_lib:format("iocs(~p) ->~n", [IOB]),
+        side_iocs_lines(Pins),
+        End
+    ].
 
 %%--------------------------------------------------------------------
 

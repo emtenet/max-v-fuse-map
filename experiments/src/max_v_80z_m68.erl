@@ -1,6 +1,7 @@
 -module(max_v_80z_m68).
 
 -export([iocs/0]).
+-export([iocs/1]).
 -export([pins/0]).
 -export([top_iocs/1]).
 -export([top_pins/1]).
@@ -11,6 +12,7 @@
 -export([bottom_iocs/1]).
 -export([bottom_pins/1]).
 
+-type iob() :: iob:iob().
 -type ioc() :: ioc:ioc().
 -type pin() :: pin:pin().
 -type x() :: max_v:x().
@@ -72,6 +74,83 @@ iocs() ->
      {j8,{ioc,7,0,2}},
      {j9,{ioc,7,0,1}}
     ].
+
+-spec iocs(iob()) -> [{pin(), ioc()}].
+
+iocs({iob,1,4}) ->
+    [{a1,{ioc,1,4,1}},
+     {b1,{ioc,1,4,2}},
+     {c1,{ioc,1,4,3}}];
+iocs({iob,1,3}) ->
+    [{c2,{ioc,1,3,0}},
+     {d1,{ioc,1,3,1}},
+     {d2,{ioc,1,3,2}},
+     {e2,{ioc,1,3,3}}];
+iocs({iob,1,2}) ->
+    [{e1,{ioc,1,2,0}}];
+iocs({iob,1,1}) ->
+    [{f2,{ioc,1,1,1}},
+     {f3,{ioc,1,1,2}},
+     {g2,{ioc,1,1,3}}];
+iocs({iob,2,5}) ->
+    [{a3,{ioc,2,5,0}},
+     {b2,{ioc,2,5,1}},
+     {a2,{ioc,2,5,2}}];
+iocs({iob,3,5}) ->
+    [{a5,{ioc,3,5,0}},
+     {b4,{ioc,3,5,1}},
+     {a4,{ioc,3,5,2}},
+     {b3,{ioc,3,5,3}}];
+iocs({iob,4,5}) ->
+    [{b6,{ioc,4,5,0}},
+     {b5,{ioc,4,5,2}}];
+iocs({iob,5,5}) ->
+    [{a7,{ioc,5,5,0}},
+     {a6,{ioc,5,5,1}},
+     {b7,{ioc,5,5,2}}];
+iocs({iob,6,5}) ->
+    [{a8,{ioc,6,5,2}},
+     {b8,{ioc,6,5,3}}];
+iocs({iob,7,5}) ->
+    [];
+iocs({iob,8,4}) ->
+    [{a9,{ioc,8,4,1}},
+     {b9,{ioc,8,4,2}},
+     {c8,{ioc,8,4,3}},
+     {d8,{ioc,8,4,4}}];
+iocs({iob,8,3}) ->
+    [{c9,{ioc,8,3,0}},
+     {d9,{ioc,8,3,1}},
+     {e8,{ioc,8,3,4}}];
+iocs({iob,8,2}) ->
+    [{e9,{ioc,8,2,0}},
+     {f9,{ioc,8,2,3}}];
+iocs({iob,8,1}) ->
+    [{f8,{ioc,8,1,1}},
+     {g8,{ioc,8,1,2}},
+     {g9,{ioc,8,1,3}},
+     {h9,{ioc,8,1,4}}];
+iocs({iob,7,0}) ->
+    [{j9,{ioc,7,0,1}},
+     {j8,{ioc,7,0,2}}];
+iocs({iob,6,0}) ->
+    [{h8,{ioc,6,0,0}},
+     {j7,{ioc,6,0,1}},
+     {h7,{ioc,6,0,2}},
+     {j6,{ioc,6,0,3}}];
+iocs({iob,5,0}) ->
+    [{h6,{ioc,5,0,0}},
+     {g6,{ioc,5,0,1}}];
+iocs({iob,4,0}) ->
+    [];
+iocs({iob,3,0}) ->
+    [{h5,{ioc,3,0,2}},
+     {j4,{ioc,3,0,3}}];
+iocs({iob,2,0}) ->
+    [{h4,{ioc,2,0,0}},
+     {j3,{ioc,2,0,1}},
+     {h3,{ioc,2,0,2}},
+     {j2,{ioc,2,0,3}}].
 
 -spec pins() -> [pin()].
 

@@ -1,6 +1,7 @@
 -module(max_v_570z_t100).
 
 -export([iocs/0]).
+-export([iocs/1]).
 -export([pins/0]).
 -export([top_iocs/1]).
 -export([top_pins/1]).
@@ -11,6 +12,7 @@
 -export([bottom_iocs/1]).
 -export([bottom_pins/1]).
 
+-type iob() :: iob:iob().
 -type ioc() :: ioc:ioc().
 -type pin() :: pin:pin().
 -type x() :: max_v:x().
@@ -94,6 +96,122 @@ iocs() ->
      {pin99,{ioc,4,8,2}},
      {pin100,{ioc,3,8,0}}
     ].
+
+-spec iocs(iob()) -> [{pin(), ioc()}].
+
+iocs({iob,0,4}) ->
+    [{pin19,{ioc,0,4,5}}];
+iocs({iob,0,5}) ->
+    [{pin12,{ioc,0,5,0}},
+     {pin14,{ioc,0,5,1}},
+     {pin15,{ioc,0,5,2}},
+     {pin16,{ioc,0,5,3}},
+     {pin17,{ioc,0,5,4}},
+     {pin18,{ioc,0,5,5}}];
+iocs({iob,0,6}) ->
+    [];
+iocs({iob,0,7}) ->
+    [{pin4,{ioc,0,7,0}},
+     {pin5,{ioc,0,7,2}},
+     {pin6,{ioc,0,7,3}},
+     {pin7,{ioc,0,7,4}}];
+iocs({iob,1,8}) ->
+    [{pin2,{ioc,1,8,0}},
+     {pin3,{ioc,1,8,2}}];
+iocs({iob,2,8}) ->
+    [];
+iocs({iob,3,8}) ->
+    [{pin100,{ioc,3,8,0}},
+     {pin1,{ioc,3,8,3}}];
+iocs({iob,4,8}) ->
+    [{pin98,{ioc,4,8,1}},
+     {pin99,{ioc,4,8,2}}];
+iocs({iob,5,8}) ->
+    [{pin96,{ioc,5,8,1}},
+     {pin97,{ioc,5,8,2}}];
+iocs({iob,6,8}) ->
+    [{pin91,{ioc,6,8,2}},
+     {pin92,{ioc,6,8,3}}];
+iocs({iob,7,8}) ->
+    [{pin87,{ioc,7,8,0}},
+     {pin89,{ioc,7,8,1}}];
+iocs({iob,8,8}) ->
+    [{pin83,{ioc,8,8,0}},
+     {pin84,{ioc,8,8,1}},
+     {pin85,{ioc,8,8,2}},
+     {pin86,{ioc,8,8,3}}];
+iocs({iob,9,8}) ->
+    [{pin82,{ioc,9,8,0}}];
+iocs({iob,10,8}) ->
+    [{pin81,{ioc,10,8,3}}];
+iocs({iob,11,8}) ->
+    [];
+iocs({iob,12,8}) ->
+    [{pin76,{ioc,12,8,1}},
+     {pin77,{ioc,12,8,2}},
+     {pin78,{ioc,12,8,3}}];
+iocs({iob,13,7}) ->
+    [{pin75,{ioc,13,7,1}},
+     {pin74,{ioc,13,7,3}},
+     {pin73,{ioc,13,7,5}}];
+iocs({iob,13,6}) ->
+    [{pin72,{ioc,13,6,1}},
+     {pin71,{ioc,13,6,2}},
+     {pin70,{ioc,13,6,5}}];
+iocs({iob,13,5}) ->
+    [{pin69,{ioc,13,5,0}}];
+iocs({iob,13,4}) ->
+    [{pin68,{ioc,13,4,0}},
+     {pin67,{ioc,13,4,1}},
+     {pin66,{ioc,13,4,2}},
+     {pin64,{ioc,13,4,3}},
+     {pin62,{ioc,13,4,4}}];
+iocs({iob,13,3}) ->
+    [{pin61,{ioc,13,3,1}}];
+iocs({iob,13,2}) ->
+    [{pin58,{ioc,13,2,0}},
+     {pin57,{ioc,13,2,1}},
+     {pin56,{ioc,13,2,2}},
+     {pin55,{ioc,13,2,4}}];
+iocs({iob,13,1}) ->
+    [{pin54,{ioc,13,1,1}},
+     {pin53,{ioc,13,1,3}},
+     {pin52,{ioc,13,1,4}}];
+iocs({iob,12,0}) ->
+    [{pin51,{ioc,12,0,2}}];
+iocs({iob,11,0}) ->
+    [{pin50,{ioc,11,0,2}}];
+iocs({iob,10,0}) ->
+    [{pin49,{ioc,10,0,0}},
+     {pin48,{ioc,10,0,1}},
+     {pin47,{ioc,10,0,2}}];
+iocs({iob,8,3}) ->
+    [{pin44,{ioc,8,3,2}},
+     {pin43,{ioc,8,3,3}}];
+iocs({iob,7,3}) ->
+    [{pin42,{ioc,7,3,0}},
+     {pin41,{ioc,7,3,1}},
+     {pin40,{ioc,7,3,2}},
+     {pin38,{ioc,7,3,3}}];
+iocs({iob,6,3}) ->
+    [{pin36,{ioc,6,3,0}},
+     {pin35,{ioc,6,3,1}},
+     {pin34,{ioc,6,3,2}},
+     {pin33,{ioc,6,3,3}}];
+iocs({iob,5,3}) ->
+    [];
+iocs({iob,4,3}) ->
+    [{pin30,{ioc,4,3,1}},
+     {pin29,{ioc,4,3,2}},
+     {pin28,{ioc,4,3,3}}];
+iocs({iob,3,3}) ->
+    [{pin27,{ioc,3,3,1}},
+     {pin26,{ioc,3,3,2}}];
+iocs({iob,2,3}) ->
+    [];
+iocs({iob,1,3}) ->
+    [{pin21,{ioc,1,3,1}},
+     {pin20,{ioc,1,3,3}}].
 
 -spec pins() -> [pin()].
 

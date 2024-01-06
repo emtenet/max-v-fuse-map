@@ -31,18 +31,13 @@ run() ->
 density(Density) ->
     io:format(" => ~s~n", [Density]),
     Device = density:largest_device(Density),
-    IOBs = lists:sort(device:iobs(Device)),
+    IOBs = device:iobs(Device),
     lists:foreach(fun (IOB) -> block(Density, Device, IOB) end, IOBs).
 
 %%--------------------------------------------------------------------
 
 block(Density, Device, {IOB, _}) ->
-    Pins = lists:sort(fun source:sort_by_ioc/2, [
-        Pin
-        ||
-        Pin <- Device:iocs(),
-        ioc:iob(source:ioc(Pin)) =:= IOB
-    ]),
+    Pins = device:iocs(Device, IOB),
     Last = lists:last(Pins),
     pins(Density, Device, Pins, Last).
 

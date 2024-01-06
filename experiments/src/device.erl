@@ -7,6 +7,9 @@
 -export([package/1]).
 -export([gclk_pins/1]).
 -export([iobs/1]).
+-export([iocs/1]).
+-export([iocs/2]).
+-export([pins/1]).
 -export([labs/1]).
 -export([metric/1]).
 -export([top_io/1]).
@@ -50,6 +53,7 @@
     max_v_2210z_f324.
 
 -type iob() :: iob:iob().
+-type ioc() :: iob:ioc().
 -type lab() :: lab:lab().
 -type package() :: package:package().
 -type pin() :: pin:pin().
@@ -195,6 +199,96 @@ gclk_pins(Device) ->
 
 iobs(Device) ->
     density:iobs(density(Device)).
+
+%%====================================================================
+%% iocs
+%%====================================================================
+
+-spec iocs(device()) -> [{pin(), ioc()}].
+
+iocs(max_v_40z_e64) -> max_v_40z_e64:iocs();
+iocs(max_v_40z_m64) -> max_v_40z_m64:iocs();
+iocs(max_v_80z_e64) -> max_v_80z_e64:iocs();
+iocs(max_v_80z_m64) -> max_v_80z_m64:iocs();
+iocs(max_v_80z_m68) -> max_v_80z_m68:iocs();
+iocs(max_v_80z_t100) -> max_v_80z_t100:iocs();
+iocs(max_v_160z_e64) -> max_v_160z_e64:iocs();
+iocs(max_v_160z_m68) -> max_v_160z_m68:iocs();
+iocs(max_v_160z_m100) -> max_v_160z_m100:iocs();
+iocs(max_v_160z_t100) -> max_v_160z_t100:iocs();
+iocs(max_v_240z_m68) -> max_v_240z_m68:iocs();
+iocs(max_v_240z_m100) -> max_v_240z_m100:iocs();
+iocs(max_v_240z_t100) -> max_v_240z_t100:iocs();
+iocs(max_v_240z_t144) -> max_v_240z_t144:iocs();
+iocs(max_v_570z_m100) -> max_v_570z_m100:iocs();
+iocs(max_v_570z_t100) -> max_v_570z_t100:iocs();
+iocs(max_v_570z_t144) -> max_v_570z_t144:iocs();
+iocs(max_v_570z_f256) -> max_v_570z_f256:iocs();
+iocs(max_v_1270z_t144) -> max_v_1270z_t144:iocs();
+iocs(max_v_1270z_f256) -> max_v_1270z_f256:iocs();
+iocs(max_v_1270z_f324) -> max_v_1270z_f324:iocs();
+iocs(max_v_2210z_f256) -> max_v_2210z_f256:iocs();
+iocs(max_v_2210z_f324) -> max_v_2210z_f324:iocs().
+
+%%====================================================================
+%% iocs
+%%====================================================================
+
+-spec iocs(device(), iob()) -> [{pin(), ioc()}].
+
+iocs(max_v_40z_e64, IOB) -> max_v_40z_e64:iocs(IOB);
+iocs(max_v_40z_m64, IOB) -> max_v_40z_m64:iocs(IOB);
+iocs(max_v_80z_e64, IOB) -> max_v_80z_e64:iocs(IOB);
+iocs(max_v_80z_m64, IOB) -> max_v_80z_m64:iocs(IOB);
+iocs(max_v_80z_m68, IOB) -> max_v_80z_m68:iocs(IOB);
+iocs(max_v_80z_t100, IOB) -> max_v_80z_t100:iocs(IOB);
+iocs(max_v_160z_e64, IOB) -> max_v_160z_e64:iocs(IOB);
+iocs(max_v_160z_m68, IOB) -> max_v_160z_m68:iocs(IOB);
+iocs(max_v_160z_m100, IOB) -> max_v_160z_m100:iocs(IOB);
+iocs(max_v_160z_t100, IOB) -> max_v_160z_t100:iocs(IOB);
+iocs(max_v_240z_m68, IOB) -> max_v_240z_m68:iocs(IOB);
+iocs(max_v_240z_m100, IOB) -> max_v_240z_m100:iocs(IOB);
+iocs(max_v_240z_t100, IOB) -> max_v_240z_t100:iocs(IOB);
+iocs(max_v_240z_t144, IOB) -> max_v_240z_t144:iocs(IOB);
+iocs(max_v_570z_m100, IOB) -> max_v_570z_m100:iocs(IOB);
+iocs(max_v_570z_t100, IOB) -> max_v_570z_t100:iocs(IOB);
+iocs(max_v_570z_t144, IOB) -> max_v_570z_t144:iocs(IOB);
+iocs(max_v_570z_f256, IOB) -> max_v_570z_f256:iocs(IOB);
+iocs(max_v_1270z_t144, IOB) -> max_v_1270z_t144:iocs(IOB);
+iocs(max_v_1270z_f256, IOB) -> max_v_1270z_f256:iocs(IOB);
+iocs(max_v_1270z_f324, IOB) -> max_v_1270z_f324:iocs(IOB);
+iocs(max_v_2210z_f256, IOB) -> max_v_2210z_f256:iocs(IOB);
+iocs(max_v_2210z_f324, IOB) -> max_v_2210z_f324:iocs(IOB).
+
+%%====================================================================
+%% pins
+%%====================================================================
+
+-spec pins(device()) -> [pin()].
+
+pins(max_v_40z_e64) -> max_v_40z_e64:pins();
+pins(max_v_40z_m64) -> max_v_40z_m64:pins();
+pins(max_v_80z_e64) -> max_v_80z_e64:pins();
+pins(max_v_80z_m64) -> max_v_80z_m64:pins();
+pins(max_v_80z_m68) -> max_v_80z_m68:pins();
+pins(max_v_80z_t100) -> max_v_80z_t100:pins();
+pins(max_v_160z_e64) -> max_v_160z_e64:pins();
+pins(max_v_160z_m68) -> max_v_160z_m68:pins();
+pins(max_v_160z_m100) -> max_v_160z_m100:pins();
+pins(max_v_160z_t100) -> max_v_160z_t100:pins();
+pins(max_v_240z_m68) -> max_v_240z_m68:pins();
+pins(max_v_240z_m100) -> max_v_240z_m100:pins();
+pins(max_v_240z_t100) -> max_v_240z_t100:pins();
+pins(max_v_240z_t144) -> max_v_240z_t144:pins();
+pins(max_v_570z_m100) -> max_v_570z_m100:pins();
+pins(max_v_570z_t100) -> max_v_570z_t100:pins();
+pins(max_v_570z_t144) -> max_v_570z_t144:pins();
+pins(max_v_570z_f256) -> max_v_570z_f256:pins();
+pins(max_v_1270z_t144) -> max_v_1270z_t144:pins();
+pins(max_v_1270z_f256) -> max_v_1270z_f256:pins();
+pins(max_v_1270z_f324) -> max_v_1270z_f324:pins();
+pins(max_v_2210z_f256) -> max_v_2210z_f256:pins();
+pins(max_v_2210z_f324) -> max_v_2210z_f324:pins().
 
 %%====================================================================
 %% labs
