@@ -19,7 +19,7 @@ density(Density) ->
     io:format(" => ~s~n", [Density]),
     Device = density:largest_device(Density),
     {ok, Experiments} = experiment:compile_to_fuses([
-        source:out_constant(Device, Pin, 0)
+        source:in_out(Device, constant, 0, Pin)
         ||
         Pin <- pins(Device)
     ]),

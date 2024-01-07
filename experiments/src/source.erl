@@ -1,38 +1,140 @@
 -module(source).
 
--export([in_out/3]).
+-export([in_oe_out/5]).
+-export([in_oe_out/6]).
 -export([in_out/4]).
 -export([in_out/5]).
 -export([in_lut_out/4]).
 -export([ins_lut_outs/6]).
 -export([lut_out/3]).
 -export([open_drain/4]).
--export([out_constant/3]).
 
 -export([ioc/1]).
 -export([pin/1]).
 
 %%====================================================================
-%% in_out
+%% in_oe_out
 %%====================================================================
 
-in_out(Device, In, Out) ->
-    in_out(Device, [], In, Out).
+in_oe_out(Device, Title, I, OE, O) ->
+    in_oe_out(Device, Title, [], I, OE, O).
 
 %%--------------------------------------------------------------------
 
-in_out(Device, Settings, In, Out) ->
-    in_out(Device, {ioc(In), to, ioc(Out)}, Settings, In, Out).
-
-%%--------------------------------------------------------------------
-
-in_out(Device, Title, Settings, In, Out) ->
+in_oe_out(Device, Title, Settings, I, OE, O)
+        when is_integer(I) andalso
+             is_integer(OE) ->
     #{
         title => Title,
         device => Device,
         settings => [
-            {location, i, pin(In)},
-            {location, o, pin(Out)}
+            {location, o, pin(O)}
+            |
+            Settings
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  output wire o\n"
+            ");\n"
+            "  alt_outbuf_tri tri (.i(", ($0 + I), "), .oe(", ($0 + OE), "), .o(o));\n"
+            "endmodule\n"
+        >>
+    };
+in_oe_out(Device, Title, Settings, I, OE, O)
+        when is_integer(I) ->
+    #{
+        title => Title,
+        device => Device,
+        settings => [
+            {location, o, pin(O)},
+            {location, oe, pin(OE)}
+            |
+            Settings
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire oe,\n"
+            "  output wire o\n"
+            ");\n"
+            "  alt_outbuf_tri tri (.i(", ($0 + I), "), .oe(oe), .o(o));\n"
+            "endmodule\n"
+        >>
+    };
+in_oe_out(Device, Title, Settings, I, OE, O)
+        when is_integer(OE) ->
+    #{
+        title => Title,
+        device => Device,
+        settings => [
+            {location, i, pin(I)},
+            {location, o, pin(O)}
+            |
+            Settings
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire i,\n"
+            "  output wire o\n"
+            ");\n"
+            "  alt_outbuf_tri tri (.i(i), .oe(", ($0 + OE), "), .o(o));\n"
+            "endmodule\n"
+        >>
+    };
+in_oe_out(Device, Title, Settings, I, OE, O) ->
+    #{
+        title => Title,
+        device => Device,
+        settings => [
+            {location, i, pin(I)},
+            {location, oe, pin(OE)},
+            {location, o, pin(O)}
+            |
+            Settings
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire i,\n"
+            "  input wire oe,\n"
+            "  output wire o\n"
+            ");\n"
+            "  alt_outbuf_tri tri (.i(i), .oe(oe), .o(o));\n"
+            "endmodule\n"
+        >>
+    }.
+
+%%====================================================================
+%% in_out
+%%====================================================================
+
+in_out(Device, Title, I, O) ->
+    in_out(Device, Title, [], I, O).
+
+%%--------------------------------------------------------------------
+
+in_out(Device, Title, Settings, I, O) when is_integer(I) ->
+    #{
+        title => Title,
+        device => Device,
+        settings => [
+            {location, o, pin(O)}
+            |
+            Settings
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  output wire o\n"
+            ");\n"
+            "  assign o = ", ($0 + I), ";\n"
+            "endmodule\n"
+        >>
+    };
+in_out(Device, Title, Settings, I, O) ->
+    #{
+        title => Title,
+        device => Device,
+        settings => [
+            {location, i, pin(I)},
+            {location, o, pin(O)}
             |
             Settings
         ],
@@ -498,26 +600,6 @@ open_drain(Device, Title, In, Out) ->
             "  output wire o\n"
             ");\n"
             "  opndrn pad (.in(i), .out(o));\n"
-            "endmodule\n"
-        >>
-    }.
-
-%%====================================================================
-%% out_constant
-%%====================================================================
-
-out_constant(Device, Pin, Bit) ->
-    #{
-        title => {output, ioc(Pin), as, Bit},
-        device => Device,
-        settings => [
-            {location, q, pin(Pin)}
-        ],
-        verilog => <<
-            "module experiment (\n"
-            "  output wire q\n"
-            ");\n"
-            "  assign q = ", ($0 + Bit), ";\n"
             "endmodule\n"
         >>
     }.
