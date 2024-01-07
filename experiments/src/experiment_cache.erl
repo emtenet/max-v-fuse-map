@@ -8,6 +8,7 @@
 
 -export([iterate/0]).
 -export([iterate/1]).
+-export([iterate_read/1]).
 
 -export_type([slot/0]).
 -export_type([iterator/0]).
@@ -21,6 +22,7 @@
      [file:filename_all()]
     }.
 
+-type base64() :: binary().
 -type device() :: device:device().
 -type files() :: experiment_compile:files().
 -type source() :: experiment_compile:source().
@@ -107,7 +109,7 @@ flush(Source) ->
 %%====================================================================
 
 -spec iterate()
-    -> {experiment:result(), iterator()} | false.
+    -> {base64(), experiment:result(), iterator()} | false.
 
 iterate() ->
     {ok, Outers} = file:list_dir("cache"),
@@ -116,7 +118,7 @@ iterate() ->
 %%--------------------------------------------------------------------
 
 -spec iterate(iterator())
-    -> {experiment:result(), iterator()} | false.
+    -> {base64(), experiment:result(), iterator()} | false.
 
 iterate({cache, Inners, Outer, Outers}) ->
     iterate(Inners, Outer, Outers).
@@ -137,10 +139,27 @@ iterate([Inner | Inners], Outer, Outers) ->
     File = list_to_binary(filename:join(["cache", Outer, Inner])),
     case file:read_file(File) of
         {ok, Zipped} ->
-            {gunzip(Zipped), Next};
+            {base64(Outer, Inner), gunzip(Zipped), Next};
 
         {error, enoent} ->
             iterate(Inners, Outer, Outers)
+    end.
+
+%%====================================================================
+%% iterate_read
+%%====================================================================
+
+-spec iterate_read(base64()) -> {ok, experiment:result()} | false.
+
+iterate_read(Key) ->
+    <<Head:2/binary, Tail/binary>> = Key,
+    File = filename:join(["cache", Head, <<Tail/binary, ".gz">>]),
+    case file:read_file(File) of
+        {ok, Zipped} ->
+            {ok, gunzip(Zipped)};
+
+        {error, enoent} ->
+            false
     end.
 
 %%====================================================================
@@ -163,6 +182,12 @@ cache_file(Signature) ->
     Base64 = base64url:encode(Hash),
     <<Head:2/binary, Tail/binary>> = Base64,
     filename:join(["cache", Head, <<Tail/binary, ".gz">>]).
+
+%%--------------------------------------------------------------------
+
+base64([A, B], Tail) ->
+    <<Base64:43/binary, ".gz">> = list_to_binary([A, B | Tail]),
+    Base64.
 
 %%--------------------------------------------------------------------
 
