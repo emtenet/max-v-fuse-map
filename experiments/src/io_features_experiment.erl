@@ -8,9 +8,9 @@
 %  * weak pull-up
 %  * schmitt trigger
 %  * input delay
-%  * slow slew rate
+%  * fast slew rate
 %  * open drain
-%  * variable current strength
+%  * low current strength
 %
 % So far there are too many fuses that could represent the I/O mode
 % of input or output...
@@ -81,14 +81,14 @@ pin(_Density, Device, Pin, Other) ->
     Matrix = matrix:build_with_map(Device, Experiments),
     %matrix:print(Matrix),
     %
+    % in/out:     i i i i i o o o o
     fuse(Matrix, [1,0,1,1,1,1,1,1,1], IOC, bus_hold),
     fuse(Matrix, [1,1,0,1,1,1,1,1,1], IOC, weak_pull_up),
     fuse(Matrix, [1,1,1,0,1,0,0,0,0], IOC, schmitt_trigger),
     fuse(Matrix, [0,0,0,0,1,1,1,1,1], IOC, input_delay),
-    fuse(Matrix, [0,0,0,0,0,0,1,0,0], IOC, slow_slew_rate),
+    fuse(Matrix, [0,0,0,0,0,0,1,0,0], IOC, fast_slew_rate),
     fuse(Matrix, [1,1,1,1,1,1,1,0,1], IOC, open_drain),
-    fuse(Matrix, [1,1,1,1,1,1,1,1,0], IOC, current_strength_0,
-                                           current_strength_1),
+    fuse(Matrix, [1,1,1,1,1,1,1,1,0], IOC, low_current_0, low_current_1),
     ok.
 
 %%--------------------------------------------------------------------

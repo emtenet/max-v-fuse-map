@@ -56,18 +56,23 @@ The feature is enabled when the POF bit is `0`.
 
 Warning: only enable __one__ at a time.
 
-### `{ioc(), current_strength_0}` and `{ioc(), current_strength_1}`
+### `{ioc(), low_current_0}` and `{ioc(), low_current_1}`
 
-Current strength of IOC outputs can be minimum or maximum.
+Drive strength of IOC outputs can be minimum or maximum current.
 
- * Minimum enabled when *both* fuses have POF bit of `0`.
- * Maximum enabled when *both* fuses have POF bit of `1`.
+Default drive strength is maximum current.
+
+A low current strength is enabled with a POF bit of `0`.
+
+NOTE: Both fuses are always the same as each other.
+
+### `{ioc(), fast_slew_rate}`
+
+Slew Rate of IOC outputs is fast with a POF bit of `0`.
 
 ### `{ioc(), input_delay}`
 
-Input delay on IOC inputs enabled with a POF bit of `1`.
-
-NOTE: Also enabled when in output mode.
+Input delay on IOC inputs enabled with a POF bit of `0`.
 
 ### `{ioc(), open_drain}`
 
@@ -84,8 +89,4 @@ NOTE: Only avaailable in Bank 3 of 5M1270Z and 5M2210Z.
 Schmitt Trigger on IOC inputs enabled with a POF bit of `0`.
 
 NOTE: Also enabled when in output mode.
-
-### `{ioc(), slow_slew_rate}`
-
-Slew Rate of IOC outputs can be slowed with a POF bit of `1`.
 

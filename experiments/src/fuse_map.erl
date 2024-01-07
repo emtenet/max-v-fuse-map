@@ -538,10 +538,10 @@
     ?IOC_STRIP(0, 2, pci_compliance);
     ?IOC_STRIP(1, 2, open_drain);
     ?IOC_STRIP(2, 2, bus_hold);
-    ?IOC_STRIP(3, 2, slow_slew_rate);
+    ?IOC_STRIP(3, 2, fast_slew_rate);
     ?IOC_STRIP(4, 2, weak_pull_up);
-    ?IOC_STRIP(5, 2, current_strength_0);
-    ?IOC_STRIP(6, 2, current_strength_1);
+    ?IOC_STRIP(5, 2, low_current_0);
+    ?IOC_STRIP(6, 2, low_current_1);
 ).
 
 -define(LAB_CELLS(),
