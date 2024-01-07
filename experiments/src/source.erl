@@ -36,7 +36,7 @@ in_oe_out(Device, Title, Settings, I, OE, O)
             "module experiment (\n"
             "  output wire o\n"
             ");\n"
-            "  alt_outbuf_tri tri (.i(", ($0 + I), "), .oe(", ($0 + OE), "), .o(o));\n"
+            "  alt_outbuf_tri pad (.i(", ($0 + I), "), .oe(", ($0 + OE), "), .o(o));\n"
             "endmodule\n"
         >>
     };
@@ -56,7 +56,7 @@ in_oe_out(Device, Title, Settings, I, OE, O)
             "  input wire oe,\n"
             "  output wire o\n"
             ");\n"
-            "  alt_outbuf_tri tri (.i(", ($0 + I), "), .oe(oe), .o(o));\n"
+            "  alt_outbuf_tri pad (.i(", ($0 + I), "), .oe(oe), .o(o));\n"
             "endmodule\n"
         >>
     };
@@ -76,7 +76,7 @@ in_oe_out(Device, Title, Settings, I, OE, O)
             "  input wire i,\n"
             "  output wire o\n"
             ");\n"
-            "  alt_outbuf_tri tri (.i(i), .oe(", ($0 + OE), "), .o(o));\n"
+            "  alt_outbuf_tri pad (.i(i), .oe(", ($0 + OE), "), .o(o));\n"
             "endmodule\n"
         >>
     };
@@ -97,7 +97,7 @@ in_oe_out(Device, Title, Settings, I, OE, O) ->
             "  input wire oe,\n"
             "  output wire o\n"
             ");\n"
-            "  alt_outbuf_tri tri (.i(i), .oe(oe), .o(o));\n"
+            "  alt_outbuf_tri pad (.i(i), .oe(oe), .o(o));\n"
             "endmodule\n"
         >>
     }.
