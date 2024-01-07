@@ -40,6 +40,26 @@ in_oe_out(Device, Title, Settings, I, OE, O)
             "endmodule\n"
         >>
     };
+in_oe_out(Device, Title, Settings, I, {inv, OE}, O)
+        when is_integer(I) ->
+    #{
+        title => Title,
+        device => Device,
+        settings => [
+            {location, o, pin(O)},
+            {location, oe, pin(OE)}
+            |
+            Settings
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire oe,\n"
+            "  output wire o\n"
+            ");\n"
+            "  alt_outbuf_tri pad (.i(", ($0 + I), "), .oe(! oe), .o(o));\n"
+            "endmodule\n"
+        >>
+    };
 in_oe_out(Device, Title, Settings, I, OE, O)
         when is_integer(I) ->
     #{
@@ -60,6 +80,26 @@ in_oe_out(Device, Title, Settings, I, OE, O)
             "endmodule\n"
         >>
     };
+in_oe_out(Device, Title, Settings, {inv, I}, OE, O)
+        when is_integer(OE) ->
+    #{
+        title => Title,
+        device => Device,
+        settings => [
+            {location, i, pin(I)},
+            {location, o, pin(O)}
+            |
+            Settings
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire i,\n"
+            "  output wire o\n"
+            ");\n"
+            "  alt_outbuf_tri pad (.i(! i), .oe(", ($0 + OE), "), .o(o));\n"
+            "endmodule\n"
+        >>
+    };
 in_oe_out(Device, Title, Settings, I, OE, O)
         when is_integer(OE) ->
     #{
@@ -77,6 +117,69 @@ in_oe_out(Device, Title, Settings, I, OE, O)
             "  output wire o\n"
             ");\n"
             "  alt_outbuf_tri pad (.i(i), .oe(", ($0 + OE), "), .o(o));\n"
+            "endmodule\n"
+        >>
+    };
+in_oe_out(Device, Title, Settings, {inv, I}, {inv, OE}, O) ->
+    #{
+        title => Title,
+        device => Device,
+        settings => [
+            {location, i, pin(I)},
+            {location, oe, pin(OE)},
+            {location, o, pin(O)}
+            |
+            Settings
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire i,\n"
+            "  input wire oe,\n"
+            "  output wire o\n"
+            ");\n"
+            "  alt_outbuf_tri pad (.i(! i), .oe(! oe), .o(o));\n"
+            "endmodule\n"
+        >>
+    };
+in_oe_out(Device, Title, Settings, {inv, I}, OE, O) ->
+    #{
+        title => Title,
+        device => Device,
+        settings => [
+            {location, i, pin(I)},
+            {location, oe, pin(OE)},
+            {location, o, pin(O)}
+            |
+            Settings
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire i,\n"
+            "  input wire oe,\n"
+            "  output wire o\n"
+            ");\n"
+            "  alt_outbuf_tri pad (.i(! i), .oe(oe), .o(o));\n"
+            "endmodule\n"
+        >>
+    };
+in_oe_out(Device, Title, Settings, I, {inv, OE}, O) ->
+    #{
+        title => Title,
+        device => Device,
+        settings => [
+            {location, i, pin(I)},
+            {location, oe, pin(OE)},
+            {location, o, pin(O)}
+            |
+            Settings
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire i,\n"
+            "  input wire oe,\n"
+            "  output wire o\n"
+            ");\n"
+            "  alt_outbuf_tri pad (.i(i), .oe(! oe), .o(o));\n"
             "endmodule\n"
         >>
     };
@@ -125,6 +228,25 @@ in_out(Device, Title, Settings, I, O) when is_integer(I) ->
             "  output wire o\n"
             ");\n"
             "  assign o = ", ($0 + I), ";\n"
+            "endmodule\n"
+        >>
+    };
+in_out(Device, Title, Settings, {inv, I}, O) ->
+    #{
+        title => Title,
+        device => Device,
+        settings => [
+            {location, i, pin(I)},
+            {location, o, pin(O)}
+            |
+            Settings
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire i,\n"
+            "  output wire o\n"
+            ");\n"
+            "  assign o = ! i;\n"
             "endmodule\n"
         >>
     };

@@ -23,6 +23,7 @@ My experiments are being run in the following
  * [Unused pins](experiments/src/unused_experiment.erl)
  * [I/O features](experiments/src/io_features_experiment.erl)
  * [PCI compliance](experiments/src/pci_compliance_experiment.erl)
+ * [I/O modes](experiments/src/io_modes_experiment.erl)
 
 ## Fuses
 
@@ -33,9 +34,19 @@ There are 32 bits of user oode numbered LSB (0) to MSB (31).
 The user code bits are stored in the POF file inverted,
 so a user code bit of `1` is stored as a `0`.
 
-### `{ioc(), input}`
+### `{ioc(), input_off}`
 
-The IOC is an input when the POF but is `0`.
+The IOC input is turned off when the POF but is `0`.
+
+This could also be called *output only*.
+
+### `{ioc(), output_invert}`
+
+The IOC output is inverted when the POF but is `0`.
+
+### `{ioc(), enable_invert}`
+
+The IOC is an output when the POF but is `0`.
 
 ### `{ioc(), bus_hold}` and `{ioc(), weak_pull_up}`
 

@@ -398,15 +398,15 @@
 ).
 
 -define(IOC_ZEROS(),
-    %?IOC_ZERO( 0, output);
+    ?IOC_ZERO( 0, input_off);
     ?IOC_ZERO( 1, schmitt_trigger);
 ).
 
 -define(IOC_SIDES(),
     %?IOC_SIDE( 1, 1, fast_out);
     %?IOC_SIDE( 2, 0, {output3, mux1});
-    %?IOC_SIDE( 2, 1, output_invert);
-    ?IOC_SIDE( 2, 2, input); %enable_invert);
+    ?IOC_SIDE( 2, 1, output_invert);
+    ?IOC_SIDE( 2, 2, enable_invert);
     %?IOC_SIDE( 2, 3, {enable3, mux1});
     %?IOC_SIDE( 3, 0, {output3, mux0});
     %?IOC_SIDE( 3, 1, {output3, mux2});
@@ -452,7 +452,7 @@
 ).
 
 -define(IOC_HEADS(),
-    %?IOC_HEAD( 6, 0, 3, output);
+    ?IOC_HEAD( 6, 0, 3, input_off);
     %?IOC_HEAD( 6, 1, 2, {output4, mux2});
     %?IOC_HEAD( 6, 2, 2, {output4, mux3});
     %?IOC_HEAD( 6, 3, 3, {output4, mux2});
@@ -470,7 +470,7 @@
     %?IOC_HEAD( 7, 6, 2, {enable4, mux1});
     %?IOC_HEAD( 7, 7, 3, {enable4, mux0});
     %?IOC_HEAD( 7, 8, 3, {enable4, mux1});
-    %?IOC_HEAD( 8, 0, 2, output);
+    ?IOC_HEAD( 8, 0, 2, input_off);
     %?IOC_HEAD( 8, 1, 2, {output3, mux0});
     %?IOC_HEAD( 8, 2, 2, {output3, mux2});
     %?IOC_HEAD( 8, 3, 3, {output3, mux0});
@@ -481,26 +481,26 @@
     %?IOC_HEAD( 8, 8, 3, {enable3, mux2});
     ?IOC_HEAD( 9, 0, 2, schmitt_trigger);
     %?IOC_HEAD( 9, 1, 2, {output3, mux1});
-    %?IOC_HEAD( 9, 2, 2, output_invert);
+    ?IOC_HEAD( 9, 2, 2, output_invert);
     %?IOC_HEAD( 9, 3, 3, {output3, mux1});
-    %?IOC_HEAD( 9, 4, 3, output_invert);
+    ?IOC_HEAD( 9, 4, 3, output_invert);
     %?IOC_HEAD( 9, 5, 2, {enable3, mux1});
-    ?IOC_HEAD( 9, 6, 2, input); %enable_invert);
+    ?IOC_HEAD( 9, 6, 2, enable_invert);
     %?IOC_HEAD( 9, 7, 3, {enable3, mux1});
-    ?IOC_HEAD( 9, 8, 3, input); %enable_invert);
+    ?IOC_HEAD( 9, 8, 3, enable_invert);
     %?IOC_HEAD(10, 2, 2, fast_out);
     %?IOC_HEAD(10, 4, 3, fast_out);
     %?IOC_HEAD(12, 2, 0, fast_out);
     %?IOC_HEAD(12, 4, 1, fast_out);
     %?IOC_HEAD(13, 1, 0, {output3, mux1});
-    %?IOC_HEAD(13, 2, 0, output_invert);
+    ?IOC_HEAD(13, 2, 0, output_invert);
     %?IOC_HEAD(13, 3, 1, {output3, mux1});
-    %?IOC_HEAD(13, 4, 1, output_invert);
+    ?IOC_HEAD(13, 4, 1, output_invert);
     %?IOC_HEAD(13, 5, 0, {enable3, mux1});
-    ?IOC_HEAD(13, 6, 0, input); %enable_invert);
+    ?IOC_HEAD(13, 6, 0, enable_invert);
     %?IOC_HEAD(13, 7, 1, {enable3, mux1});
-    ?IOC_HEAD(13, 8, 1, input); %enable_invert);
-    %?IOC_HEAD(15, 0, 1, output);
+    ?IOC_HEAD(13, 8, 1, enable_invert);
+    ?IOC_HEAD(15, 0, 1, input_off);
     %?IOC_HEAD(15, 1, 0, {output3, mux0});
     %?IOC_HEAD(15, 2, 0, {output3, mux2});
     %?IOC_HEAD(15, 3, 1, {output3, mux0});
@@ -530,7 +530,7 @@
     ?IOC_HEAD(19, 4, 1, input_delay);
     ?IOC_HEAD(19, 6, 2, input_delay);
     ?IOC_HEAD(19, 8, 3, input_delay);
-    %?IOC_HEAD(24, 0, 0, output);
+    ?IOC_HEAD(24, 0, 0, input_off);
     ?IOC_HEAD(25, 0, 0, schmitt_trigger);
 ).
 
