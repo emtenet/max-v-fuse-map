@@ -24,11 +24,24 @@
 -export([right_rows/1]).
 -export([global_block/1]).
 -export([block_type/3]).
+-export([is_lab/2]).
 -export([is_lab/3]).
+-export([is_iob/2]).
 -export([is_iob/3]).
+-export([is_column_iob/2]).
 -export([is_column_iob/3]).
+-export([is_row_iob/2]).
 -export([is_row_iob/3]).
--export([pci_compliant/2]).
+-export([is_left_iob/2]).
+-export([is_left_iob/3]).
+-export([is_top_iob/2]).
+-export([is_top_iob/3]).
+-export([is_right_iob/2]).
+-export([is_right_iob/3]).
+-export([is_bottom_iob/2]).
+-export([is_bottom_iob/3]).
+-export([is_pci_iob/2]).
+-export([is_pci_iob/3]).
 
 -export_type([density/0]).
 
@@ -764,6 +777,13 @@ block(_, _, _) ->
 %% is_lab
 %%====================================================================
 
+-spec is_lab(lab(), density()) -> boolean().
+
+is_lab({lab, X, Y}, Density) ->
+    is_lab(X, Y, Density).
+
+%%--------------------------------------------------------------------
+
 -spec is_lab(max_ii:x(), max_ii:y(), density()) -> boolean().
 
 is_lab(X, Y, Density) ->
@@ -792,6 +812,13 @@ is_lab(X, Y, Density) ->
 %% is_iob
 %%====================================================================
 
+-spec is_iob(iob(), density()) -> boolean().
+
+is_iob({iob, X, Y}, Density) ->
+    is_iob(X, Y, Density).
+
+%%--------------------------------------------------------------------
+
 -spec is_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
 
 is_iob(X, Y, Density) ->
@@ -819,6 +846,13 @@ is_iob(X, Y, Density) ->
 %% is_column_iob
 %%====================================================================
 
+-spec is_column_iob(iob(), density()) -> boolean().
+
+is_column_iob({iob, X, Y}, Density) ->
+    is_column_iob(X, Y, Density).
+
+%%--------------------------------------------------------------------
+
 -spec is_column_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
 
 is_column_iob(X, Y, Density) ->
@@ -840,6 +874,13 @@ is_column_iob(X, Y, Density) ->
 %% is_row_iob
 %%====================================================================
 
+-spec is_row_iob(iob(), density()) -> boolean().
+
+is_row_iob({iob, X, Y}, Density) ->
+    is_row_iob(X, Y, Density).
+
+%%--------------------------------------------------------------------
+
 -spec is_row_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
 
 is_row_iob(X, Y, Density) ->
@@ -855,24 +896,114 @@ is_row_iob(X, Y, Density) ->
     end.
 
 %%====================================================================
-%% pci_compliant
+%% is_left_iob
 %%====================================================================
 
--spec pci_compliant(iob() | ioc(), density()) -> boolean().
+-spec is_left_iob(iob(), density()) -> boolean().
 
-pci_compliant(_, max_v_240z) ->
-    false;
-pci_compliant(_, max_v_570z) ->
-    false;
-pci_compliant({iob, X, Y}, Density) ->
+is_left_iob({iob, X, Y}, Density) ->
+    is_left_iob(X, Y, Density).
+
+%%--------------------------------------------------------------------
+
+-spec is_left_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
+
+is_left_iob(X, Y, Density) ->
+    case metric(Density) of
+        #metric{left_io = X, top_lab = T, indent_bottom_lab = B} ->
+            Y >= B andalso Y =< T;
+
+        _ ->
+            false
+    end.
+
+%%====================================================================
+%% is_top_iob
+%%====================================================================
+
+-spec is_top_iob(iob(), density()) -> boolean().
+
+is_top_iob({iob, X, Y}, Density) ->
+    is_top_iob(X, Y, Density).
+
+%%--------------------------------------------------------------------
+
+-spec is_top_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
+
+is_top_iob(X, Y, Density) ->
+    case metric(Density) of
+        #metric{top_io = Y, left_lab = L, right_lab = R} ->
+            X >= L andalso X =< R;
+
+        _ ->
+            false
+    end.
+
+%%====================================================================
+%% is_right_iob
+%%====================================================================
+
+-spec is_right_iob(iob(), density()) -> boolean().
+
+is_right_iob({iob, X, Y}, Density) ->
+    is_right_iob(X, Y, Density).
+
+%%--------------------------------------------------------------------
+
+-spec is_right_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
+
+is_right_iob(X, Y, Density) ->
     case metric(Density) of
         #metric{right_io = X, top_lab = T, bottom_lab = B} ->
             Y >= B andalso Y =< T;
 
         _ ->
             false
-    end;
-pci_compliant({ioc, X, Y, _}, Density) ->
+    end.
+
+%%====================================================================
+%% is_bottom_iob
+%%====================================================================
+
+-spec is_bottom_iob(iob(), density()) -> boolean().
+
+is_bottom_iob({iob, X, Y}, Density) ->
+    is_bottom_iob(X, Y, Density).
+
+%%--------------------------------------------------------------------
+
+-spec is_bottom_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
+
+is_bottom_iob(X, Y, Density) ->
+    case metric(Density) of
+        #metric{bottom_io = Y, indent_left_lab = L, right_lab = R} ->
+            X >= L andalso X =< R;
+
+        #metric{indent_bottom_io = Y, left_lab = L, indent_right_lab = R} ->
+            X >= L andalso X =< R;
+
+        _ ->
+            false
+    end.
+
+%%====================================================================
+%% is_pci_iob
+%%====================================================================
+
+-spec is_pci_iob(iob(), density()) -> boolean().
+
+is_pci_iob({iob, X, Y}, Density) ->
+    is_pci_iob(X, Y, Density).
+
+%%--------------------------------------------------------------------
+
+-spec is_pci_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
+
+is_pci_iob(_, _, max_v_240z) ->
+    false;
+is_pci_iob(_, _, max_v_570z) ->
+    false;
+is_pci_iob(X, Y, Density) ->
     case metric(Density) of
         #metric{right_io = X, top_lab = T, bottom_lab = B} ->
             Y >= B andalso Y =< T;

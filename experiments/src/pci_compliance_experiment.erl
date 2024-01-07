@@ -27,7 +27,7 @@ density(Density) ->
 %%--------------------------------------------------------------------
 
 block(Density, Device, {IOB, _}) ->
-    case density:pci_compliant(IOB, Density) of
+    case density:is_pci_iob(IOB, Density) of
         true ->
             Pins = device:iocs(Device, IOB),
             Last = lists:last(Pins),

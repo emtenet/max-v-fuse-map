@@ -204,7 +204,7 @@ iobs(Device) ->
 %% iocs
 %%====================================================================
 
--spec iocs(device()) -> [{pin(), ioc()}].
+-spec iocs(device()) -> [{ioc(), pin()}].
 
 iocs(max_v_40z_e64) -> max_v_40z_e64:iocs();
 iocs(max_v_40z_m64) -> max_v_40z_m64:iocs();
@@ -234,7 +234,7 @@ iocs(max_v_2210z_f324) -> max_v_2210z_f324:iocs().
 %% iocs
 %%====================================================================
 
--spec iocs(device(), iob()) -> [{pin(), ioc()}].
+-spec iocs(device(), iob()) -> [{ioc(), pin()}].
 
 iocs(max_v_40z_e64, IOB) -> max_v_40z_e64:iocs(IOB);
 iocs(max_v_40z_m64, IOB) -> max_v_40z_m64:iocs(IOB);

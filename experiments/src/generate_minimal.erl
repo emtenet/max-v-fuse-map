@@ -23,7 +23,7 @@ density(Density) ->
         ||
         Pin <- pins(Device)
     ]),
-    Matrix = matrix:build(Experiments),
+    Matrix = matrix:build_with_location(Density, Experiments),
     %matrix:print(Matrix),
     Zeros = [ Fuse || {Fuse, _} <- matrix:single_zeros(Matrix) ],
     Ones = [ Fuse || {Fuse, _} <- matrix:single_ones(Matrix) ],
@@ -46,8 +46,8 @@ pins(Device) ->
 
 %%--------------------------------------------------------------------
 
-pin([Pin = {_, IOC} | Pins], IOB) ->
-    case ioc:in_iob(IOC, IOB) of
+pin([Pin | Pins], IOB) ->
+    case ioc:in_iob(source:ioc(Pin), IOB) of
         true ->
             Pin;
 

@@ -152,12 +152,12 @@ device_file({Device, BSDLPins}) ->
         "-type x() :: max_v:x().\n"
         "-type y() :: max_v:y().\n"
         "\n"
-        "-spec iocs() -> [{pin(), ioc()}].\n"
+        "-spec iocs() -> [{ioc(), pin()}].\n"
         "\n"
         "iocs() ->\n">>,
         device_iocs(Pins, []), <<
         "\n"
-        "-spec iocs(iob()) -> [{pin(), ioc()}].\n"
+        "-spec iocs(iob()) -> [{ioc(), pin()}].\n"
         "\n">>,
         device_iobs(Density, Pins), <<
         "\n"
@@ -205,9 +205,9 @@ device_iobs_clauses([{IOB, _} | IOBs], Pins, Clauses) ->
 %%--------------------------------------------------------------------
 
 device_iobs_clause(IOB = {iob, XX, YY}, Pins0, End) ->
-    Pins = sort_by_ioc(lists:filter(fun ({_, {ioc, X, Y, _}}) ->
+    Pins = lists:filter(fun ({{ioc, X, Y, _}, _}) ->
         X =:= XX andalso Y =:= YY
-    end, Pins0)),
+    end, Pins0),
     [
         io_lib:format("iocs(~p) ->~n", [IOB]),
         side_iocs_lines(Pins),
@@ -226,8 +226,8 @@ device_iocs([Pin | Pins], Lines) ->
 
 %%--------------------------------------------------------------------
 
-device_ioc(Head, {Enum, IOC}, Tail) ->
-    [Head, io_lib:format("{~s,~w}", [Enum, IOC]), Tail].
+device_ioc(Head, {IOC, Enum}, Tail) ->
+    [Head, io_lib:format("{~w,~s}", [IOC, Enum]), Tail].
 
 %%--------------------------------------------------------------------
 
@@ -241,7 +241,7 @@ device_pins([Pin | Pins], Lines) ->
 
 %%--------------------------------------------------------------------
 
-device_pin(Head, {Enum, _}, Tail) ->
+device_pin(Head, {_, Enum}, Tail) ->
     [Head, io_lib:format("~s", [Enum]), Tail].
 
 %%--------------------------------------------------------------------
@@ -257,42 +257,37 @@ device_rows(#metric{bottom_lab = Bottom, top_lab = Top}) ->
 %%--------------------------------------------------------------------
 
 device_top(Pins, #metric{top_io = Top}, At) ->
-    lists:filter(fun ({_, {ioc, X, Y, _}}) ->
+    lists:filter(fun ({{ioc, X, Y, _}, _}) ->
         X =:= At andalso Y =:= Top
     end, Pins).
 
 %%--------------------------------------------------------------------
 
 device_left(Pins, #metric{left_io = Left, indent_left_io = Indent}, At) ->
-    lists:filter(fun ({_, {ioc, X, Y, _}}) ->
+    lists:filter(fun ({{ioc, X, Y, _}, _}) ->
         (X =:= Left orelse X =:= Indent) andalso Y =:= At
     end, Pins).
 
 %%--------------------------------------------------------------------
 
 device_right(Pins, #metric{right_io = Right}, At) ->
-    lists:filter(fun ({_, {ioc, X, Y, _}}) ->
+    lists:filter(fun ({{ioc, X, Y, _}, _}) ->
         X =:= Right andalso Y =:= At
     end, Pins).
 
 %%--------------------------------------------------------------------
 
 device_bottom(Pins, #metric{bottom_io = Bottom, indent_bottom_io = Indent}, At) ->
-    lists:filter(fun ({_, {ioc, X, Y, _}}) ->
+    lists:filter(fun ({{ioc, X, Y, _}, _}) ->
         X =:= At andalso (Y =:= Bottom orelse Y =:= Indent)
     end, Pins).
-
-%%--------------------------------------------------------------------
-
-sort_by_ioc(Pins) ->
-    lists:sort(fun ({_, A}, {_, B}) -> A =< B end, Pins).
 
 %%--------------------------------------------------------------------
 
 side_iocs(Pins, Metric, Name, Type, Range, Filter) ->
     {Min, Max} = Range(Metric),
     [<<
-        "-spec ", Name/binary, "_iocs(", Type/binary, ") -> [{pin(), ioc()}].\n"
+        "-spec ", Name/binary, "_iocs(", Type/binary, ") -> [{ioc(), pin()}].\n"
         "\n">>,
         side_iocs_clauses(Pins, Metric, Name, Min, Max, Filter, []), <<
         "\n"
@@ -310,7 +305,7 @@ side_iocs_clauses(Pins, Metric, Name, At, Max, Filter, Clauses) ->
 %%--------------------------------------------------------------------
 
 side_iocs_clause(Pins0, Metric, Name, At, Filter, End) ->
-    Pins = sort_by_ioc(Filter(Pins0, Metric, At)),
+    Pins = Filter(Pins0, Metric, At),
     Value = integer_to_binary(At),
     [
         <<Name/binary, "_iocs(", Value/binary, ") ->\n">>,
@@ -390,14 +385,18 @@ pins(Device, BSDLPins) ->
         {_, Enum, Name} <- BSDLPins
     ],
     {ok, Experiments} = experiment:compile_to_rcf(Sources),
-    lists:map(fun pin/1, Experiments).
+    Pins = lists:map(fun pin/1, Experiments),
+    Sorted = pins_sorted(device:density(Device), Pins),
+    Count = length(Pins),
+    Count = length(Sorted),
+    Sorted.
 
 %%--------------------------------------------------------------------
 
 pin({Enum, RCF}) ->
     Pin = binary_to_atom(Enum),
     IOC = pin_ioc(RCF),
-    {Pin, IOC}.
+    {IOC, Pin}.
 
 %%--------------------------------------------------------------------
 
@@ -424,4 +423,37 @@ pin_source(Device, Enum, Name) ->
             "endmodule\n"
         >>
     }.
+
+%%--------------------------------------------------------------------
+
+pins_sorted(Density, Pins) ->
+    IOBs = lists:reverse(density:iobs(Density)),
+    pins_sorted(IOBs, Density, Pins, []).
+
+%%--------------------------------------------------------------------
+
+pins_sorted([], _, _, Sorted) ->
+    Sorted;
+pins_sorted([{{iob, XX, YY}, _} | IOBs], Density, Pins, Sorted) ->
+    Block = lists:sort(lists:filter(fun ({{ioc, X, Y, _}, _}) ->
+        X =:= XX andalso Y =:= YY
+    end, Pins)),
+    case is_reverse_iob(XX, YY, Density) of
+        true ->
+            pins_sorted(IOBs, Density, Pins, lists:reverse(Block, Sorted));
+
+        false ->
+            pins_sorted(IOBs, Density, Pins, Block ++ Sorted)
+    end.
+
+%%--------------------------------------------------------------------
+
+is_reverse_iob(X, Y, Density) ->
+    case density:is_right_iob(X, Y, Density) of
+        true ->
+            true;
+
+        false ->
+            density:is_bottom_iob(X, Y, Density)
+    end.
 
