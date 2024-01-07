@@ -1,8 +1,7 @@
 -module(matrix).
 
-%-export([build/1]).
--export([build_with_location/2]).
--export([build_with_map/2]).
+-export([build/1]).
+-export([build/2]).
 -export([is_empty/1]).
 -export([fuse_count/1]).
 -export([find_fuse/2]).
@@ -58,23 +57,12 @@ name_is_fuse(Fuse) ->
     Fuse.
 
 %%====================================================================
-%% build_with_location
+%% build
 %%====================================================================
 
--spec build_with_location(density() | device(), [experiment()]) -> matrix().
+-spec build(density() | device(), [experiment()]) -> matrix().
 
-build_with_location(DensityOrDevice, Experiments) ->
-    Density = density:or_device(DensityOrDevice),
-    With = fun (Fuse) -> fuse_map:to_location(Fuse, Density) end,
-    build_with(With, Experiments).
-
-%%====================================================================
-%% build_with_map
-%%====================================================================
-
--spec build_with_map(density() | device(), [experiment()]) -> matrix().
-
-build_with_map(DensityOrDevice, Experiments) ->
+build(DensityOrDevice, Experiments) ->
     Density = density:or_device(DensityOrDevice),
     With = fun (Fuse) -> fuse_map_to_name(Fuse, Density) end,
     build_with(With, Experiments).
@@ -452,7 +440,7 @@ print_rows([{Fuse, Fuses, Name} | Rows]) ->
     io:format("~6b |", [Fuse]),
     print_fuses(Fuses),
     case Name of
-        _ when is_integer(Name) ->
+        Fuse ->
             io:format("~n", []);
 
         _ ->

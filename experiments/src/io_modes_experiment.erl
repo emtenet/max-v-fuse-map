@@ -68,7 +68,7 @@ pin(_Density, Device, O, I, OE) ->
     ]),
     %io:format("~p~n", [[{Title, RCF} || {Title, _, RCF} <- Experiments]]),
     %throw(stop),
-    Matrix0 = matrix:build_with_map(Device, Experiments),
+    Matrix0 = matrix:build(Device, Experiments),
     Matrix = matrix:remove_fuses(Matrix0, fun
         ({{ioc, _, _, _}, input_delay}) -> true;
         ({{ioc, _, _, _}, schmitt_trigger}) -> true;

@@ -78,7 +78,7 @@ pin(_Density, Device, Pin, Other) ->
             {current_strength, o, minimum}
         ], Other, Pin)
     ]),
-    Matrix = matrix:build_with_map(Device, Experiments),
+    Matrix = matrix:build(Device, Experiments),
     %matrix:print(Matrix),
     %
     % in/out:     i i i i i o o o o

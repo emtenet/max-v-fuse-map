@@ -32,7 +32,7 @@ density(Density) ->
         ||
         Unused <- setting:unused_pins()
     ]),
-    Matrix = matrix:build_with_map(Device, Experiments),
+    Matrix = matrix:build(Device, Experiments),
     %matrix:print(Matrix),
     %
     Inputs = matrix:pattern_is(Matrix, [0,0,0,1,1]),

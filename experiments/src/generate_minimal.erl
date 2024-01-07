@@ -23,7 +23,7 @@ density(Density) ->
         ||
         Pin <- pins(Device)
     ]),
-    Matrix = matrix:build_with_location(Density, Experiments),
+    Matrix = matrix:build(Density, Experiments),
     %matrix:print(Matrix),
     Zeros = [ Fuse || {Fuse, _} <- matrix:single_zeros(Matrix) ],
     Ones = [ Fuse || {Fuse, _} <- matrix:single_ones(Matrix) ],

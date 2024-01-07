@@ -59,7 +59,7 @@ run(Density) ->
         experiment(Device, <<"40000000">>, 30),
         experiment(Device, <<"80000000">>, 31)
     ]),
-    Matrix = matrix:build_with_map(Device, Experiments),
+    Matrix = matrix:build(Device, Experiments),
     matrix:print(Matrix),
     % the user code bits are stored invered so look for a
     % single zero (0) bit

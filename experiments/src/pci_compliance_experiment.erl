@@ -60,7 +60,7 @@ pin(_Density, Device, Pin, Other) ->
         ], Other, Pin),
         source:in_out(Device, output, [], Other, Pin)
     ]),
-    Matrix = matrix:build_with_map(Device, Experiments),
+    Matrix = matrix:build(Device, Experiments),
     %matrix:print(Matrix),
     %
     fuse(Matrix, [1,0,0,1], IOC, pci_compliance),
