@@ -25,8 +25,9 @@ My experiments are being run in the following
  * [PCI compliance](experiments/src/pci_compliance_experiment.erl)
  * [I/O modes](experiments/src/io_modes_experiment.erl)
  * [LUT](experiments/src/lut_experiment.erl)
+ * [Generate fast out](experiments/src/generate_fast_out.erl)
 
-## GLobal Fuses
+## Global Fuses
 
 ### `{user_code, bit()}`
 

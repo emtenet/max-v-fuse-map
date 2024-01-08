@@ -4,7 +4,7 @@
 -export([in_oe_out/6]).
 -export([in_out/4]).
 -export([in_out/5]).
--export([in_lut_out/4]).
+-export([in_lut_out/5]).
 -export([ins_lut_outs/6]).
 -export([lut_out/3]).
 -export([open_drain/4]).
@@ -274,21 +274,37 @@ in_out(Device, Title, Settings, I, O) ->
 %% in_lut_out
 %%====================================================================
 
-in_lut_out(Device, In, LC, Out) ->
+in_lut_out(Device, Title, I, LC, O) when is_integer(I) ->
     #{
-        title => {ioc(In), via, LC, to, ioc(Out)},
+        title => Title,
         device => Device,
         settings => [
-            {location, i, pin(In)},
             {location, via, LC},
-            {location, o, pin(Out)}
+            {location, o, pin(O)}
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  output wire o\n"
+            ");\n"
+            "  lcell via (.in(", ($0 + I), "), .out(o));\n"
+            "endmodule\n"
+        >>
+    };
+in_lut_out(Device, Title, I, LC, O) ->
+    #{
+        title => Title,
+        device => Device,
+        settings => [
+            {location, i, pin(I)},
+            {location, via, LC},
+            {location, o, pin(O)}
         ],
         verilog => <<
             "module experiment (\n"
             "  input wire i,\n"
             "  output wire o\n"
             ");\n"
-            "  lcell via (.in(i), .out(0));\n"
+            "  lcell via (.in(i), .out(o));\n"
             "endmodule\n"
         >>
     }.
