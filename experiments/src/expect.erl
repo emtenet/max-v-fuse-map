@@ -2,6 +2,7 @@
 
 -export([control/4]).
 -export([fuse/3]).
+-export([fuse/4]).
 
 %%====================================================================
 %% control
@@ -34,18 +35,47 @@ control({_, _, #{signals := Signals}}, Signal, Control, Port) ->
 %%====================================================================
 
 fuse(Matrix, Pattern, Fuse) ->
-    Fuses = matrix:pattern_is(Matrix, Pattern),
-    case Fuses of
-        [{_, Fuse}] ->
+    case lists:usort(Pattern) of
+        [_] ->
             ok;
 
         _ ->
-            case lists:keyfind(Fuse, 2, Fuses) of
-                {_, _} ->
+            Fuses = matrix:pattern_is(Matrix, Pattern),
+            case Fuses of
+                [{_, Fuse}] ->
                     ok;
 
-                false ->
-                    io:format("Expecting:~n  ~w~n", [Fuse]),
+                _ ->
+                    case lists:keyfind(Fuse, 2, Fuses) of
+                        {_, _} ->
+                            ok;
+
+                        false ->
+                            io:format("Expecting:~n  ~w~n", [Fuse]),
+                            io:format("Candidates:~n  ~p~n", [Fuses]),
+                            throw(stop)
+                    end
+            end
+    end.
+
+%%--------------------------------------------------------------------
+
+fuse(Matrix, Pattern, Fuse1, Fuse2) ->
+    case lists:usort(Pattern) of
+        [_] ->
+            ok;
+
+        _ ->
+            Fuses = matrix:pattern_is(Matrix, Pattern),
+            case Fuses of
+                [{_, Fuse1}, {_, Fuse2}] ->
+                    ok;
+
+                [{_, Fuse2}, {_, Fuse1}] ->
+                    ok;
+
+                _ ->
+                    io:format("Expecting:~n  ~w~n  ~w~n", [Fuse1, Fuse2]),
                     io:format("Candidates:~n  ~p~n", [Fuses]),
                     throw(stop)
             end
