@@ -165,7 +165,7 @@ control_routing_dest(#{lc := LC, port := Port, route := Route}, Routing) ->
             [{LC, Port, {global, N}} | Routing];
 
         [{lab_control_mux, _, _, 0, N}, From | _] ->
-            [{LC, Port, {local, N, From}} | Routing];
+            [{LC, Port, {control, N, From}} | Routing];
 
         [From | _] when Port =:= s_data ->
             [{LC, Port, From} | Routing];

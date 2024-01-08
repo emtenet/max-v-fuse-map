@@ -1,4 +1,3 @@
-
 # Altera MAX V Fuse Map (by experiment)
 
 This is a puzzle.
@@ -27,6 +26,7 @@ My experiments are being run in the following
  * [LUT](experiments/src/lut_experiment.erl)
  * [Generate fast out](experiments/src/generate_fast_out.erl)
  * [LAB clk1](experiments/src/lab_clk1_experiment.erl)
+ * [LAB s-load](experiments/src/lab_s_load_experiment.erl)
 
 ## Global Fuses
 
@@ -111,6 +111,14 @@ Each LAB's clk1 & clk2 can be inverted.
 
 Invert is selected when the bit is `0`
 
+## `{lab(), s_load, control}`
+
+The LAB's s-load line is selected from one of the control lines.
+
+## `{lab(), s_load, invert}`
+
+The LAB's s-load line is inverted.
+
 ## LC Fuses
 
 ### `{lc(), lut, a#b#c#d#}`
@@ -121,4 +129,8 @@ The fuse for LUT term `a AND (NOT b) AND c AND d`
 is named `{lc(), lut, a1b0c1d1}`.
 
 The stored bit is the result of the lookup.
+
+## `{lc(), s_load}`
+
+The LC's s-load line is enabled.
 
