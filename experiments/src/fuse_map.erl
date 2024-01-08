@@ -630,8 +630,8 @@
     %?LAB_CELL(4, 3, 2, {{interconnect,12}, from3, mux0});
     %?LAB_CELL(4, 3, 3, {{interconnect,12}, direct_link});
     %?LAB_CELL(4, 4, 0, {{interconnect,12}, from4, gclk});
-    %?LAB_CELL(4, 4, 2, {clk2, global0});
-    %?LAB_CELL(4, 4, 3, {clk2, global1});
+    ?LAB_CELL(4, 4, 2, {clk2, global0});
+    ?LAB_CELL(4, 4, 3, {clk2, global1});
     %?LAB_CELL(4, 5, 0, {{interconnect,18}, from3, mux0});
     %?LAB_CELL(4, 5, 1, {{interconnect,18}, direct_link});
     %?LAB_CELL(4, 5, 2, {{interconnect,19}, from3, mux0});
@@ -649,8 +649,8 @@
     %?LAB_CELL(4, 8, 2, {{interconnect,25}, from3, mux0});
     %?LAB_CELL(4, 8, 3, {{interconnect,25}, direct_link});
     %?LAB_CELL(4, 9, 0, {{interconnect,25}, from4, gclk});
-    %?LAB_CELL(4, 9, 2, {clk2, global2});
-    %?LAB_CELL(4, 9, 3, {clk2, global3});
+    ?LAB_CELL(4, 9, 2, {clk2, global2});
+    ?LAB_CELL(4, 9, 3, {clk2, global3});
     %?LAB_CELL(5, 0, 0, {{interconnect, 5}, from3, mux1});
     %?LAB_CELL(5, 0, 1, {{interconnect, 5}, from3, mux2});
     %?LAB_CELL(5, 0, 2, {{interconnect, 6}, from3, mux1});
@@ -828,18 +828,18 @@
     %?LAB_LINE(14, 25, {{control, 5}, from3, mux2});
     %?LAB_LINE(15, 20, {clk1, control});
     ?LAB_LINE(15, 21, {clk1, invert});
-    %?LAB_LINE(15, 22, {clk2_a_load, control_3_not_2});
+    ?LAB_LINE(15, 22, {clk2, control_3_not_2}); % clk2_a_load
     %?LAB_LINE(15, 24, {s_clr, control_5_not_4});
     %?LAB_LINE(15, 25, {clr2, global});
-    %?LAB_LINE(16, 20, {clk1, control_0_not_1});
+    ?LAB_LINE(16, 20, {clk1, control_0_not_1});
     %?LAB_LINE(16, 21, {ena1, invert});
     %?LAB_LINE(16, 22, {ena1, control_3_not_2});
-    %?LAB_LINE(16, 23, {clk2, control});
+    ?LAB_LINE(16, 23, {clk2, control});
     %?LAB_LINE(16, 24, {ena1, off});
     %?LAB_LINE(17, 20, {ena2_s_load, control_0_not_1});
     %?LAB_LINE(19, 20, {ena2, off});
     ?LAB_LINE(19, 21, {s_load, control});
-    %?LAB_LINE(19, 22, {clk2, invert});
+    ?LAB_LINE(19, 22, {clk2, invert});
     %?LAB_LINE(19, 25, {a_load, invert});
     %?LAB_LINE(20, 20, {s_load, unknown});
     ?LAB_LINE(20, 21, {clr1, global});
@@ -907,7 +907,7 @@
     ?LC_CELL(18, 2, {lut, a0b0c1d0});
     ?LC_CELL(18, 3, {lut, a0b1c1d0});
     %?LC_CELL(19, 1, {lut_out, right});
-    %?LC_CELL(19, 2, clk);
+    ?LC_CELL(19, 2, clk2);
     %?LC_CELL(20, 1, {lut_out, left});
     %?LC_CELL(20, 3, clr);
     ?LC_CELL(21, 0, s_load);

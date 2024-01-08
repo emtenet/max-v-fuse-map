@@ -28,6 +28,7 @@ My experiments are being run in the following
  * [LAB clk1](experiments/src/lab_clk1_experiment.erl)
  * [LAB s-load](experiments/src/lab_s_load_experiment.erl)
  * [LAB clr1](experiments/src/lab_clr1_experiment.erl)
+ * [LAB clk2](experiments/src/lab_clk2_experiment.erl)
 
 ## Global Fuses
 
@@ -98,13 +99,30 @@ NOTE: Also enabled when in output mode.
 
 ## LAB Fuses
 
-### `{lab(), clk#, global#}`
+### `{lab(), clk#, global#}` and `{lab(), clk2, control}`
 
-Each LAB can select a clk1 & clk2
-from amongst the four global signals (0..3) (and others).
+Each LAB's clk# can be selected fron the four global signals (0..3)
+or a control line.
 
-The four global signals are selected with a one-shot fuse per selection,
-the selection is active with a bit of `0`.
+These fuses form a one-shot mux with the active selection with a bit of `0`.
+
+## `{lab(), clk1, control_0_not_1}`
+
+When the LAB's clk1 line is selected from a control line.
+
+The specific control line selected is:
+
+ * a `0` bit selects 0,
+ * a `1` bit selects 1.
+
+## `{lab(), clk2, control_3_not_2}`
+
+When the LAB's clk2 line is selected from a control line.
+
+The specific control line selected is:
+
+ * a `0` bit selects 3,
+ * a `1` bit selects 2.
 
 ### `{lab(), clk#, invert}`
 
@@ -124,7 +142,7 @@ Alternatively the line is selected from a control line.
 
 When the LAB's clr1 line is selected from a global line.
 
-The specific global line is selected with these one-shot fuses.
+These fuses form a one-shot mux with the active selection with a bit of `0`.
 
 ## `{lab(), clr1, control_5_not_4}`
 
@@ -148,6 +166,12 @@ The LAB's s-load line is selected from one of the control lines.
 The LAB's s-load line is inverted.
 
 ## LC Fuses
+
+### `{lc(), clk2}`
+
+Each LC can select between two LAB wide clocsk, clk1 & clk2.
+
+This fuse selects clk2.
 
 ### `{lc(), lut, a#b#c#d#}`
 
