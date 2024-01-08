@@ -26,6 +26,7 @@ My experiments are being run in the following
  * [I/O modes](experiments/src/io_modes_experiment.erl)
  * [LUT](experiments/src/lut_experiment.erl)
  * [Generate fast out](experiments/src/generate_fast_out.erl)
+ * [LAB clk1](experiments/src/lab_clk1_experiment.erl)
 
 ## Global Fuses
 
@@ -93,6 +94,22 @@ NOTE: Only avaailable in Bank 3 of 5M1270Z and 5M2210Z.
 Schmitt Trigger on IOC inputs enabled with a POF bit of `0`.
 
 NOTE: Also enabled when in output mode.
+
+## LAB Fuses
+
+### `{lab(), clk#, global#}`
+
+Each LAB can select a clk1 & clk2
+from amongst the four global signals (0..3) (and others).
+
+The four global signals are selected with a one-shot fuse per selection,
+the selection is active with a bit of `0`.
+
+### `{lab(), clk#, invert}`
+
+Each LAB's clk1 & clk2 can be inverted.
+
+Invert is selected when the bit is `0`
 
 ## LC Fuses
 

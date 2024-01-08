@@ -593,8 +593,8 @@
     %?LAB_CELL(3, 3, 1, {{interconnect,11}, from4, mux3});
     %?LAB_CELL(3, 3, 2, {{interconnect,12}, from4, mux2});
     %?LAB_CELL(3, 3, 3, {{interconnect,12}, from4, mux3});
-    %?LAB_CELL(3, 4, 2, {clk1, global0});
-    %?LAB_CELL(3, 4, 3, {clk1, global1});
+    ?LAB_CELL(3, 4, 2, {clk1, global0});
+    ?LAB_CELL(3, 4, 3, {clk1, global1});
     %?LAB_CELL(3, 5, 0, {{interconnect,18}, from4, mux2});
     %?LAB_CELL(3, 5, 1, {{interconnect,18}, from4, mux3});
     %?LAB_CELL(3, 5, 2, {{interconnect,19}, from4, mux2});
@@ -611,8 +611,8 @@
     %?LAB_CELL(3, 8, 1, {{interconnect,24}, from4, mux3});
     %?LAB_CELL(3, 8, 2, {{interconnect,25}, from4, mux2});
     %?LAB_CELL(3, 8, 3, {{interconnect,25}, from4, mux3});
-    %?LAB_CELL(3, 9, 2, {clk1, global2});
-    %?LAB_CELL(3, 9, 3, {clk1, global3});
+    ?LAB_CELL(3, 9, 2, {clk1, global2});
+    ?LAB_CELL(3, 9, 3, {clk1, global3});
     %?LAB_CELL(4, 0, 0, {{interconnect, 5}, from3, mux0});
     %?LAB_CELL(4, 0, 1, {{interconnect, 5}, direct_link});
     %?LAB_CELL(4, 0, 2, {{interconnect, 6}, from3, mux0});
@@ -827,7 +827,7 @@
     %?LAB_LINE(14, 24, {{control, 4}, from3, mux2});
     %?LAB_LINE(14, 25, {{control, 5}, from3, mux2});
     %?LAB_LINE(15, 20, {clk1, control});
-    %?LAB_LINE(15, 21, {clk1, invert});
+    ?LAB_LINE(15, 21, {clk1, invert});
     %?LAB_LINE(15, 22, {clk2_a_load, control_3_not_2});
     %?LAB_LINE(15, 24, {s_clr, control_5_not_4});
     %?LAB_LINE(15, 25, {clr2, global});
@@ -4019,12 +4019,12 @@ to_ioc(X, Y, N, Name) ->
 
 %%--------------------------------------------------------------------
 
-%to_lab(X, Y, {Name, Key, Value}) ->
-%    {ok, {{lab, X, Y}, Name, Key, Value}};
-%to_lab(X, Y, {Name, Value}) ->
-%    {ok, {{lab, X, Y}, Name, Value}};
-%to_lab(X, Y, Name) ->
-%    {ok, {{lab, X, Y}, Name}}.
+to_lab(X, Y, {Name, Key, Value}) ->
+    {ok, {{lab, X, Y}, Name, Key, Value}};
+to_lab(X, Y, {Name, Value}) ->
+    {ok, {{lab, X, Y}, Name, Value}};
+to_lab(X, Y, Name) ->
+    {ok, {{lab, X, Y}, Name}}.
 
 %%--------------------------------------------------------------------
 
