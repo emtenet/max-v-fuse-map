@@ -27,6 +27,7 @@ My experiments are being run in the following
  * [Generate fast out](experiments/src/generate_fast_out.erl)
  * [LAB clk1](experiments/src/lab_clk1_experiment.erl)
  * [LAB s-load](experiments/src/lab_s_load_experiment.erl)
+ * [LAB clr1](experiments/src/lab_clr1_experiment.erl)
 
 ## Global Fuses
 
@@ -107,9 +108,36 @@ the selection is active with a bit of `0`.
 
 ### `{lab(), clk#, invert}`
 
-Each LAB's clk1 & clk2 can be inverted.
+The LAB's clk# line is inverted.
 
-Invert is selected when the bit is `0`
+## `{lab(), clr1, off}`
+
+Turns of the LAB's clr1 line.
+
+## `{lab(), clr1, global}`
+
+The LAB's clr1 line is selected from one of the global lines (also when off).
+
+Alternatively the line is selected from a control line.
+
+## `{lab(), clr1, global#}`
+
+When the LAB's clr1 line is selected from a global line.
+
+The specific global line is selected with these one-shot fuses.
+
+## `{lab(), clr1, control_5_not_4}`
+
+When the LAB's clr1 line is selected from a control line.
+
+The specific control line selected is:
+
+ * a `0` bit selects 5,
+ * a `1` bit selects 4.
+
+## `{lab(), clr1, invert}`
+
+The LAB's clr1 line is inverted.
 
 ## `{lab(), s_load, control}`
 

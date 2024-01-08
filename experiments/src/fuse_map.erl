@@ -667,8 +667,8 @@
     %?LAB_CELL(5, 3, 1, {{interconnect,11}, from3, mux2});
     %?LAB_CELL(5, 3, 2, {{interconnect,12}, from3, mux1});
     %?LAB_CELL(5, 3, 3, {{interconnect,12}, from3, mux2});
-    %?LAB_CELL(5, 4, 2, {clr, global0});
-    %?LAB_CELL(5, 4, 3, {clr, global1});
+    ?LAB_CELL(5, 4, 2, {clr1, global0});
+    ?LAB_CELL(5, 4, 3, {clr1, global1});
     %?LAB_CELL(5, 5, 0, {{interconnect,18}, from3, mux1});
     %?LAB_CELL(5, 5, 1, {{interconnect,18}, from3, mux2});
     %?LAB_CELL(5, 5, 2, {{interconnect,19}, from3, mux1});
@@ -685,8 +685,8 @@
     %?LAB_CELL(5, 8, 1, {{interconnect,24}, from3, mux2});
     %?LAB_CELL(5, 8, 2, {{interconnect,25}, from3, mux1});
     %?LAB_CELL(5, 8, 3, {{interconnect,25}, from3, mux2});
-    %?LAB_CELL(5, 9, 2, {clr, global2});
-    %?LAB_CELL(5, 9, 3, {clr, global3});
+    ?LAB_CELL(5, 9, 2, {clr1, global2});
+    ?LAB_CELL(5, 9, 3, {clr1, global3});
     %?LAB_CELL(22, 0, 2, {{interconnect, 0}, from3, mux1});
     %?LAB_CELL(22, 0, 3, {{interconnect, 0}, from3, mux2});
     %?LAB_CELL(22, 1, 2, {{interconnect, 1}, from3, mux1});
@@ -771,7 +771,7 @@
 
 -define(LAB_LINES(),
     %?LAB_LINE( 5, 20, {clr2, control_5_not_4});
-    %?LAB_LINE( 5, 25, {clr1, control_5_not_4});
+    ?LAB_LINE( 5, 25, {clr1, control_5_not_4});
     %?LAB_LINE( 6, 20, {{control, 0}, from6, mux0});
     %?LAB_LINE( 6, 21, {{control, 0}, from6, mux1});
     %?LAB_LINE( 6, 22, {{control, 2}, from6, mux0});
@@ -842,13 +842,13 @@
     %?LAB_LINE(19, 22, {clk2, invert});
     %?LAB_LINE(19, 25, {a_load, invert});
     %?LAB_LINE(20, 20, {s_load, unknown});
-    %?LAB_LINE(20, 21, {clr1, global});
+    ?LAB_LINE(20, 21, {clr1, global});
     ?LAB_LINE(20, 24, {s_load, invert}); % ena2_s_load
-    %?LAB_LINE(20, 25, {clr1, off});
+    ?LAB_LINE(20, 25, {clr1, off});
     %?LAB_LINE(21, 20, s_clr);
     %?LAB_LINE(21, 21, {s_clr, invert});
     %?LAB_LINE(21, 22, {a_load, control});
-    %?LAB_LINE(21, 23, {clr1, invert});
+    ?LAB_LINE(21, 23, {clr1, invert});
     %?LAB_LINE(21, 24, {clr2, invert});
     %?LAB_LINE(21, 25, {clr2, off});
 ).
