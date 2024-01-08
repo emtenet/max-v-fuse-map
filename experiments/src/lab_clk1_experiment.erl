@@ -81,45 +81,25 @@ block(Density, Device, LAB, Gclks, Pins) ->
         ({{ioc, _, _, _}, _}) -> true;
         ({{ioc, _, _, _}, _, _}) -> true;
         ({{ioc, _, _, _}, _, _, _}) -> true;
-        %({{c4, _, _}, _, _}) -> true;
-        %({{c4, _, _}, _, _, _}) -> true;
-        %({{r4, _, _}, _, _}) -> true;
-        %({{r4, _, _}, _, _, _}) -> true;
-        %({{lab, _, _}, {control, _}, _, _}) -> true;
-        %({{lab, _, _}, {interconnect, _}, _}) -> true;
-        %({{lab, _, _}, {interconnect, _}, _, _}) -> true;
-        %({{lc, _, _, _}, local_line}) -> true;
         ({_, lut, _}) -> true;
-        %({_, data_b3, _}) -> true;
-        %({_, data_b6, _}) -> true;
-        %({_, data_c3, _}) -> true;
-        %({_, data_c6, _}) -> true;
-        %({_, data_d3, _}) -> true;
-        %({_, data_d6, _}) -> true;
         (_) -> false
     end),
     %
     %matrix:print(Matrix),
     %control_routing(Experiments),
     %
-    expect(Matrix, [0,1,1,1,1,1,1], {LAB, clk1, invert}),
-    expect(Matrix, [0,0,1,1,1,1,1], {LAB, clk1, global0}),
-    expect(Matrix, [1,1,0,1,1,1,1], {LAB, clk1, global1}),
-    expect(Matrix, [1,1,1,0,1,1,1], {LAB, clk1, global2}),
-    expect(Matrix, [1,1,1,1,0,1,1], {LAB, clk1, global3}),
+    expect:fuse(Matrix, [0,1,1,1,1,1,1], {LAB, clk1, invert}),
+    expect:fuse(Matrix, [0,0,1,1,1,1,1], {LAB, clk1, global0}),
+    expect:fuse(Matrix, [1,1,0,1,1,1,1], {LAB, clk1, global1}),
+    expect:fuse(Matrix, [1,1,1,0,1,1,1], {LAB, clk1, global2}),
+    expect:fuse(Matrix, [1,1,1,1,0,1,1], {LAB, clk1, global3}),
     %
     lists:foreach(fun not_s_data/1, Experiments),
     %
     %Control = {LAB, clk1, control},
     %Control0 = {LAB, clk1, control_0_not_1},
-    %expect(Matrix, [1,1,1,1,1,0,0], Control),
-    %expect(Matrix, [1,1,1,1,1,0,1], Control0),
-    ok.
-
-%%--------------------------------------------------------------------
-
-expect(Matrix, Pattern, Fuse) ->
-    [{_, Fuse}] = matrix:pattern_is(Matrix, Pattern),
+    %expect:fuse(Matrix, [1,1,1,1,1,0,0], Control),
+    %expect:fuse(Matrix, [1,1,1,1,1,0,1], Control0),
     ok.
 
 %%--------------------------------------------------------------------

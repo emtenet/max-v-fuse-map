@@ -87,35 +87,14 @@ block(Density, Device, LAB, Gclks, Pins) ->
     %matrix:print(Matrix),
     %lab_clk1_experiment:control_routing(Experiments),
     %
-    expect_fuse(Matrix, [1,1,0,0,0,0,0], {LAB, s_load, control}),
-    %expect_fuse(Matrix, [0,1,0,0,0,0,0], {LAB, s_load, unknown}),
-    expect_fuse(Matrix, [1,1,0,1,1,1,1], {LAB, s_load, invert}), % ena2_s_load
-    expect_fuse(Matrix, [1,0,0,0,0,0,0], {lab:lc(LAB, 0), s_load}),
+    expect:fuse(Matrix, [1,1,0,0,0,0,0], {LAB, s_load, control}),
+    %expect:fuse(Matrix, [0,1,0,0,0,0,0], {LAB, s_load, unknown}),
+    expect:fuse(Matrix, [1,1,0,1,1,1,1], {LAB, s_load, invert}), % ena2_s_load
+    expect:fuse(Matrix, [1,0,0,0,0,0,0], {lab:lc(LAB, 0), s_load}),
     %
     %Control = control_pattern(Experiments),
-    %expect_fuse(Matrix, Control, {LAB, s_load, control_0_not_1}), % ena2_s_load
+    %expect:fuse(Matrix, Control, {LAB, s_load, control_0_not_1}), % ena2_s_load
     ok.
-
-%%--------------------------------------------------------------------
-
-expect_fuse(Matrix, Pattern, Fuse) ->
-    Fuses = matrix:pattern_is(Matrix, Pattern),
-    case Fuses of
-        [{_, Fuse}] ->
-            ok;
-
-        _ ->
-            case lists:keyfind(Fuse, 2, Fuses) of
-                {_, _} ->
-                    ok;
-
-                false ->
-                    io:format("Expecting:~n  ~w~n", [Fuse]),
-                    io:format("Candidates:~n  ~p~n", [Fuses]),
-                    throw(stop)
-            end
-    end.
-
 
 %%--------------------------------------------------------------------
 
