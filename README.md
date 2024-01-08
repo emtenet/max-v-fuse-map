@@ -26,7 +26,7 @@ My experiments are being run in the following
  * [I/O modes](experiments/src/io_modes_experiment.erl)
  * [LUT](experiments/src/lut_experiment.erl)
 
-## Fuses
+## GLobal Fuses
 
 ### `{user_code, bit()}`
 
@@ -34,6 +34,8 @@ There are 32 bits of user oode numbered LSB (0) to MSB (31).
 
 The user code bits are stored in the POF file inverted,
 so a user code bit of `1` is stored as a `0`.
+
+## IOC Fuses
 
 ### `{ioc(), input_off}`
 
@@ -90,6 +92,8 @@ NOTE: Only avaailable in Bank 3 of 5M1270Z and 5M2210Z.
 Schmitt Trigger on IOC inputs enabled with a POF bit of `0`.
 
 NOTE: Also enabled when in output mode.
+
+## LC Fuses
 
 ### `{lc(), lut, a#b#c#d#}`
 
