@@ -24,6 +24,7 @@ My experiments are being run in the following
  * [I/O features](experiments/src/io_features_experiment.erl)
  * [PCI compliance](experiments/src/pci_compliance_experiment.erl)
  * [I/O modes](experiments/src/io_modes_experiment.erl)
+ * [LUT](experiments/src/lut_experiment.erl)
 
 ## Fuses
 
@@ -89,4 +90,13 @@ NOTE: Only avaailable in Bank 3 of 5M1270Z and 5M2210Z.
 Schmitt Trigger on IOC inputs enabled with a POF bit of `0`.
 
 NOTE: Also enabled when in output mode.
+
+### `{lc(), lut, a#b#c#d#}`
+
+Each LC as a 16-entry LUT with a fuse per entry.
+
+The fuse for LUT term `a AND (NOT b) AND c AND d`
+is named `{lc(), lut, a1b0c1d1}`.
+
+The stored bit is the result of the lookup.
 

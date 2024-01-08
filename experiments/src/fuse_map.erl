@@ -890,22 +890,22 @@
     %?LC_CELL(14, 1, {data_b3, mux2});
     %?LC_CELL(14, 2, {data_c3, mux2});
     %?LC_CELL(14, 3, {data_d3, mux2});
-    %?LC_CELL(15, 0, {lut, a1b1c0d1});
-    %?LC_CELL(15, 1, {lut, a1b0c0d1});
-    %?LC_CELL(15, 2, {lut, a1b1c0d0});
-    %?LC_CELL(15, 3, {lut, a1b0c0d0});
-    %?LC_CELL(16, 0, {lut, a0b1c0d1});
-    %?LC_CELL(16, 1, {lut, a0b0c0d1});
-    %?LC_CELL(16, 2, {lut, a0b1c0d0});
-    %?LC_CELL(16, 3, {lut, a0b0c0d0});
-    %?LC_CELL(17, 0, {lut, a1b1c1d1});
-    %?LC_CELL(17, 1, {lut, a1b0c1d1});
-    %?LC_CELL(17, 2, {lut, a1b0c1d0});
-    %?LC_CELL(17, 3, {lut, a1b1c1d0});
-    %?LC_CELL(18, 0, {lut, a0b1c1d1});
-    %?LC_CELL(18, 1, {lut, a0b0c1d1});
-    %?LC_CELL(18, 2, {lut, a0b0c1d0});
-    %?LC_CELL(18, 3, {lut, a0b1c1d0});
+    ?LC_CELL(15, 0, {lut, a1b1c0d1});
+    ?LC_CELL(15, 1, {lut, a1b0c0d1});
+    ?LC_CELL(15, 2, {lut, a1b1c0d0});
+    ?LC_CELL(15, 3, {lut, a1b0c0d0});
+    ?LC_CELL(16, 0, {lut, a0b1c0d1});
+    ?LC_CELL(16, 1, {lut, a0b0c0d1});
+    ?LC_CELL(16, 2, {lut, a0b1c0d0});
+    ?LC_CELL(16, 3, {lut, a0b0c0d0});
+    ?LC_CELL(17, 0, {lut, a1b1c1d1});
+    ?LC_CELL(17, 1, {lut, a1b0c1d1});
+    ?LC_CELL(17, 2, {lut, a1b0c1d0});
+    ?LC_CELL(17, 3, {lut, a1b1c1d0});
+    ?LC_CELL(18, 0, {lut, a0b1c1d1});
+    ?LC_CELL(18, 1, {lut, a0b0c1d1});
+    ?LC_CELL(18, 2, {lut, a0b0c1d0});
+    ?LC_CELL(18, 3, {lut, a0b1c1d0});
     %?LC_CELL(19, 1, {lut_out, right});
     %?LC_CELL(19, 2, clk);
     %?LC_CELL(20, 1, {lut_out, left});
@@ -3158,10 +3158,10 @@ from_tail(X, Sector, Offset, With, Lines) ->
 
 %%--------------------------------------------------------------------
 
-%from_cell(X, Sector, Y, N, I, With) when N < 5 ->
-%    from_line(X, Sector, Y, (N * 4) + I, With);
-%from_cell(X, Sector, Y, N, I, With) ->
-%    from_line(X, Sector, Y, 65 - (N * 4) - I, With).
+from_cell(X, Sector, Y, N, I, With) when N < 5 ->
+    from_line(X, Sector, Y, (N * 4) + I, With);
+from_cell(X, Sector, Y, N, I, With) ->
+    from_line(X, Sector, Y, 65 - (N * 4) - I, With).
 
 %%--------------------------------------------------------------------
 
@@ -4028,10 +4028,10 @@ to_ioc(X, Y, N, Name) ->
 
 %%--------------------------------------------------------------------
 
-%to_lc(X, Y, N, {Name, Value}) ->
-%    {ok, {{lc, X, Y, N}, Name, Value}};
-%to_lc(X, Y, N, Name) ->
-%    {ok, {{lc, X, Y, N}, Name}}.
+to_lc(X, Y, N, {Name, Value}) ->
+    {ok, {{lc, X, Y, N}, Name, Value}};
+to_lc(X, Y, N, Name) ->
+    {ok, {{lc, X, Y, N}, Name}}.
 
 %%--------------------------------------------------------------------
 
