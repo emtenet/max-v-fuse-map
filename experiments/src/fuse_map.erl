@@ -832,10 +832,10 @@
     %?LAB_LINE(15, 24, {s_clr, control_5_not_4});
     ?LAB_LINE(15, 25, {a_clr2, global});
     ?LAB_LINE(16, 20, {clk1, control_0_not_1});
-    %?LAB_LINE(16, 21, {ena1, invert});
-    %?LAB_LINE(16, 22, {ena1, control_3_not_2});
+    ?LAB_LINE(16, 21, {ena1, invert});
+    ?LAB_LINE(16, 22, {ena1, control_3_not_2});
     ?LAB_LINE(16, 23, {clk2, control});
-    %?LAB_LINE(16, 24, {ena1, off});
+    ?LAB_LINE(16, 24, {ena1, off});
     ?LAB_LINE(17, 20, {s_load, control_0_not_1}); % ena2_s_load
     %?LAB_LINE(19, 20, {ena2, off});
     ?LAB_LINE(19, 21, {s_load, control});

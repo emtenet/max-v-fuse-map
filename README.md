@@ -39,6 +39,7 @@ My experiments are being run in the following
  * IOC enable MUX [playground](experiments/src/ioc_output_mux_playground.erl)
    and [theory](experiments/src/ioc_output_mux_theory.erl)
  * [LC output](experiments/src/lc_output_experiment.erl)
+ * [LAB ena1](experiments/src/lab_ena1_experiment.erl)
 
 ## Maps
 
@@ -176,6 +177,21 @@ The specific control line selected is:
 ### `{lab(), clk#, invert}`
 
 The LAB's clk# line is inverted.
+
+### `{lab(), ena1, off}`
+
+This turns off the LAB's enable line. LC's are then continuously enabled.
+
+### `{lab(), ena1, control_3_not_2}`
+
+This selects the LAB's enable (1) line from either:
+
+ * a `0` bit selects control line 3
+ * a `1` bit selects control line 2
+
+### `{lab(), ena1, invert}`
+
+This inverts the LAB's enable (1) line.
 
 ## `{lab(), a_clr, global#}`
 
