@@ -667,8 +667,8 @@
     %?LAB_CELL(5, 3, 1, {{interconnect,11}, from3, mux2});
     %?LAB_CELL(5, 3, 2, {{interconnect,12}, from3, mux1});
     %?LAB_CELL(5, 3, 3, {{interconnect,12}, from3, mux2});
-    ?LAB_CELL(5, 4, 2, {a_clr1, global0});
-    ?LAB_CELL(5, 4, 3, {a_clr1, global1});
+    ?LAB_CELL(5, 4, 2, {a_clr, global0});
+    ?LAB_CELL(5, 4, 3, {a_clr, global1});
     %?LAB_CELL(5, 5, 0, {{interconnect,18}, from3, mux1});
     %?LAB_CELL(5, 5, 1, {{interconnect,18}, from3, mux2});
     %?LAB_CELL(5, 5, 2, {{interconnect,19}, from3, mux1});
@@ -685,8 +685,8 @@
     %?LAB_CELL(5, 8, 1, {{interconnect,24}, from3, mux2});
     %?LAB_CELL(5, 8, 2, {{interconnect,25}, from3, mux1});
     %?LAB_CELL(5, 8, 3, {{interconnect,25}, from3, mux2});
-    ?LAB_CELL(5, 9, 2, {a_clr1, global2});
-    ?LAB_CELL(5, 9, 3, {a_clr1, global3});
+    ?LAB_CELL(5, 9, 2, {a_clr, global2});
+    ?LAB_CELL(5, 9, 3, {a_clr, global3});
     %?LAB_CELL(22, 0, 2, {{interconnect, 0}, from3, mux1});
     %?LAB_CELL(22, 0, 3, {{interconnect, 0}, from3, mux2});
     %?LAB_CELL(22, 1, 2, {{interconnect, 1}, from3, mux1});
@@ -770,7 +770,7 @@
 ).
 
 -define(LAB_LINES(),
-    %?LAB_LINE( 5, 20, {a_clr2, control_5_not_4});
+    ?LAB_LINE( 5, 20, {a_clr2, control_5_not_4});
     ?LAB_LINE( 5, 25, {a_clr1, control_5_not_4});
     %?LAB_LINE( 6, 20, {{control, 0}, from6, mux0});
     %?LAB_LINE( 6, 21, {{control, 0}, from6, mux1});
@@ -830,7 +830,7 @@
     ?LAB_LINE(15, 21, {clk1, invert});
     ?LAB_LINE(15, 22, {clk2, control_3_not_2}); % clk2_a_load
     %?LAB_LINE(15, 24, {s_clr, control_5_not_4});
-    %?LAB_LINE(15, 25, {a_clr2, global});
+    ?LAB_LINE(15, 25, {a_clr2, global});
     ?LAB_LINE(16, 20, {clk1, control_0_not_1});
     %?LAB_LINE(16, 21, {ena1, invert});
     %?LAB_LINE(16, 22, {ena1, control_3_not_2});
@@ -849,8 +849,8 @@
     %?LAB_LINE(21, 21, {s_clr, invert});
     %?LAB_LINE(21, 22, {a_load, control});
     ?LAB_LINE(21, 23, {a_clr1, invert});
-    %?LAB_LINE(21, 24, {a_clr2, invert});
-    %?LAB_LINE(21, 25, {a_clr2, off});
+    ?LAB_LINE(21, 24, {a_clr2, invert});
+    ?LAB_LINE(21, 25, {a_clr2, off});
 ).
 
 -define(LC_CELLS(),
@@ -909,7 +909,7 @@
     %?LC_CELL(19, 1, {lut_out, right});
     ?LC_CELL(19, 2, clk2);
     %?LC_CELL(20, 1, {lut_out, left});
-    %?LC_CELL(20, 3, clr);
+    ?LC_CELL(20, 3, a_clr1);
     ?LC_CELL(21, 0, s_load);
     %?LC_CELL(21, 3, local_line);
 ).

@@ -29,6 +29,7 @@ My experiments are being run in the following
  * [LAB s-load](experiments/src/lab_s_load_experiment.erl)
  * [LAB a-clr1](experiments/src/lab_a_clr1_experiment.erl)
  * [LAB clk2](experiments/src/lab_clk2_experiment.erl)
+ * [LAB a-clr2](experiments/src/lab_a_clr2_experiment.erl)
 
 ## Global Fuses
 
@@ -128,34 +129,35 @@ The specific control line selected is:
 
 The LAB's clk# line is inverted.
 
-## `{lab(), a_clr1, off}`
+## `{lab(), a_clr, global#}`
 
-Turns of the LAB's a-clr1 line.
-
-## `{lab(), a_clr1, global}`
-
-The LAB's a-clr1 line is selected from one of the global lines (also when off).
-
-Alternatively the line is selected from a control line.
-
-## `{lab(), a_clr1, global#}`
-
-When the LAB's a_clr1 line is selected from a global line.
+Only one of the two a-clr# lines can select from a global line.
+This mux is common to those two lines and selected by `{lab(), a_clr#, global}`.
 
 These fuses form a one-shot mux with the active selection with a bit of `0`.
 
-## `{lab(), a_clr1, control_5_not_4}`
+## `{lab(), a_clr#, off}`
 
-When the LAB's a-clr1 line is selected from a control line.
+Turns of the LAB's a-clr# line.
+
+## `{lab(), a_clr#, global}`
+
+The LAB's a-clr# line is selected from one of the global lines (also when off).
+
+Alternatively the line is selected from a control line.
+
+## `{lab(), a_clr#, control_5_not_4}`
+
+When the LAB's a-clr# line is selected from a control line.
 
 The specific control line selected is:
 
  * a `0` bit selects 5,
  * a `1` bit selects 4.
 
-## `{lab(), a_clr1, invert}`
+## `{lab(), a_clr#, invert}`
 
-The LAB's a-clr1 line is inverted.
+The LAB's a-clr# line is inverted.
 
 ## `{lab(), s_load, control}`
 
@@ -184,9 +186,15 @@ It has a bit `1` when the s-load line is a constant `1`.
 
 ### `{lc(), clk2}`
 
-Each LC can select between two LAB wide clocsk, clk1 & clk2.
+Each LC can select between two LAB wide clocks, clk1 & clk2.
 
 This fuse selects clk2.
+
+### `{lc(), a_clr1}`
+
+Each LC can select between two LAB wide a-clrs, a-clr1 & a-clr2.
+
+This fuse selects a-clr1.
 
 ### `{lc(), lut, a#b#c#d#}`
 
