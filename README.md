@@ -38,6 +38,7 @@ My experiments are being run in the following
    and [theory](experiments/src/ioc_output_mux_theory.erl)
  * IOC enable MUX [playground](experiments/src/ioc_output_mux_playground.erl)
    and [theory](experiments/src/ioc_output_mux_theory.erl)
+ * [LC output](experiments/src/lc_output_experiment.erl)
 
 ## Maps
 
@@ -268,6 +269,11 @@ This fuse either:
 
  * enables that output, or
  * selects between the LUT and registers to output.
+
+### `{lc(), lut_out, left | right}`
+
+Each LC can drive the LUT output to the left or right
+via direct-links, fast-outs, r4s & c4s.
 
 ### `{lc(), lut, a#b#c#d#}`
 
