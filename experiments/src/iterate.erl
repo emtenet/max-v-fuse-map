@@ -13,7 +13,7 @@
 labs(Device, PinCount, Pins0, Sources, Experiments) ->
     LABs = device:labs(Device),
     Pins = pins_start(Pins0),
-    labs_loop(LABs, PinCount, Pins, Sources, Experiments, 1).
+    labs_loop(1, LABs, PinCount, Pins, Sources, Experiments).
 
 %%--------------------------------------------------------------------
 
