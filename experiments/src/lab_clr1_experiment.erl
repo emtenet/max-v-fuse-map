@@ -48,27 +48,28 @@ run() ->
 
 density(Density) ->
     Device = density:largest_device(Density),
-    device(Density, Device).
+    device(Device).
 
 %%--------------------------------------------------------------------
 
-device(Density, Device) ->
+device(Device) ->
     Gclks = device:gclk_pins(Device),
-    Pins = lists:subtract(device:pins(Device), Gclks),
-    [
-        block(Density, Device, LAB, Gclks, Pins)
-        ||
-        LAB <- device:labs(Device)
-    ],
-    ok.
+    Pins0 = lists:subtract(device:pins(Device), Gclks),
+    iterate:labs(Device, 3, Pins0,
+        fun (LAB, Pins) ->
+            sources(Device, LAB, Gclks, Pins)
+        end,
+        fun (LAB, _, Experiments) ->
+            experiments(Device, LAB, Experiments)
+        end
+     ).
 
 %%--------------------------------------------------------------------
 
-block(Density, Device, LAB, Gclks, Pins) ->
-    io:format(" ==> ~p ~p~n", [Density, LAB]),
+sources(Device, LAB, Gclks, Pins) ->
     [Gclk0, Gclk1, Gclk2, Gclk3] = Gclks,
-    [Clk, D, Q | _] = Pins,
-    {ok, Experiments} = experiment:compile_to_fuses_and_rcf([
+    {Clk, D, Q} = Pins,
+    [
         source_never(Device, LAB, Clk, D, Q, never),
         source_global(Device, LAB, Clk, D, Q, gclk0_not, Gclk0, <<"!">>),
         source_global(Device, LAB, Clk, D, Q, gclk0, Gclk0, <<>>),
@@ -77,8 +78,13 @@ block(Density, Device, LAB, Gclks, Pins) ->
         source_global(Device, LAB, Clk, D, Q, gclk3, Gclk3, <<>>),
         source_local(Device, LAB, Clk, D, Q, local7, Gclk0, 7),
         source_local(Device, LAB, Clk, D, Q, local8, Gclk0, 8)
-    ]),
-    Matrix0 = matrix:build(Density, Experiments),
+    ].
+
+%%--------------------------------------------------------------------
+
+experiments(Device, LAB, Experiments) ->
+    io:format(" ==> ~p ~p~n", [Device, LAB]),
+    Matrix0 = matrix:build(Device, Experiments),
     Matrix = matrix:remove_fuses(Matrix0, fun
         ({{iob, _, _}, _}) -> true;
         ({{iob, _, _}, _, _}) -> true;

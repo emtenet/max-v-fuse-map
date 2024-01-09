@@ -42,27 +42,28 @@ run() ->
 
 density(Density) ->
     Device = density:largest_device(Density),
-    device(Density, Device).
+    device(Device).
 
 %%--------------------------------------------------------------------
 
-device(Density, Device) ->
+device(Device) ->
     Gclks = device:gclk_pins(Device),
-    Pins = lists:subtract(device:pins(Device), Gclks),
-    [
-        block(Density, Device, LAB, Gclks, Pins)
-        ||
-        LAB <- device:labs(Device)
-    ],
-    ok.
+    Pins0 = lists:subtract(device:pins(Device), Gclks),
+    iterate:labs(Device, 4, Pins0,
+        fun (LAB, Pins) ->
+            sources(Device, LAB, Gclks, Pins)
+        end,
+        fun (LAB, _, Experiments) ->
+            experiments(Device, LAB, Experiments)
+        end
+     ).
 
 %%--------------------------------------------------------------------
 
-block(Density, Device, LAB, Gclks, Pins) ->
-    io:format(" ==> ~p ~p~n", [Density, LAB]),
+sources(Device, LAB, Gclks, Pins) ->
     [SLoad, _, SLoad2, SLoad3] = Gclks,
-    [Clk, SData, D, Q | _] = Pins,
-    {ok, Experiments} = experiment:compile_to_fuses_and_rcf([
+    {Clk, SData, D, Q} = Pins,
+    [
         source_never(Device, LAB, Clk, D, Q, never, SData),
         source_always(Device, LAB, Clk, D, Q, always, SData),
         source_global(Device, LAB, Clk, D, Q, gclk2, SData, SLoad2, <<"!">>),
@@ -70,8 +71,13 @@ block(Density, Device, LAB, Gclks, Pins) ->
         source_global(Device, LAB, Clk, D, Q, gclk3, SData, SLoad3, <<>>),
         source_local(Device, LAB, Clk, D, Q, local7, SData, SLoad, 7),
         source_local(Device, LAB, Clk, D, Q, local8, SData, SLoad, 8)
-    ]),
-    Matrix0 = matrix:build(Density, Experiments),
+    ].
+
+%%--------------------------------------------------------------------
+
+experiments(Device, LAB, Experiments) ->
+    io:format(" ==> ~p ~p~n", [Device, LAB]),
+    Matrix0 = matrix:build(Device, Experiments),
     Matrix = matrix:remove_fuses(Matrix0, fun
         ({{iob, _, _}, _}) -> true;
         ({{iob, _, _}, _, _}) -> true;
@@ -88,41 +94,41 @@ block(Density, Device, LAB, Gclks, Pins) ->
     %lab_clk1_experiment:control_routing(Experiments),
     %
     expect:fuse(Matrix, [1,1,0,0,0,0,0], {LAB, s_load, control}),
-    %expect:fuse(Matrix, [0,1,0,0,0,0,0], {LAB, s_load, unknown}),
+    expect:fuse(Matrix, [0,1,0,0,0,0,0], {LAB, s_load, unknown}),
     expect:fuse(Matrix, [1,1,0,1,1,1,1], {LAB, s_load, invert}), % ena2_s_load
     expect:fuse(Matrix, [1,0,0,0,0,0,0], {lab:lc(LAB, 0), s_load}),
     %
-    %Control = control_pattern(Experiments),
-    %expect:fuse(Matrix, Control, {LAB, s_load, control_0_not_1}), % ena2_s_load
+    Control = control_pattern(Experiments),
+    expect:fuse(Matrix, Control, {LAB, s_load, control_0_not_1}), % ena2_s_load
     ok.
 
 %%--------------------------------------------------------------------
 
-%control_pattern(Experiments) ->
-%    lists:map(fun ({_, _, #{signals := Signals}}) ->
-%        control_pattern_bit(Signals)
-%    end, Experiments).
+control_pattern(Experiments) ->
+    lists:map(fun ({_, _, #{signals := Signals}}) ->
+        control_pattern_bit(Signals)
+    end, Experiments).
 
 %%--------------------------------------------------------------------
 
-%control_pattern_bit(#{ss := #{dests := [#{port := s_load, route := Route}]}}) ->
-%    case  Route of
-%        [{lab_control_mux, _, _, 0, 1} | _] ->
-%            1;
-%
-%        [{lab_control_mux, _, _, 0, 0} | _] ->
-%            0
-%    end;
-%control_pattern_bit(#{sload := #{dests := [#{port := s_load, route := Route}]}}) ->
-%    case  Route of
-%        [{lab_control_mux, _, _, 0, 1} | _] ->
-%            1;
-%
-%        [{lab_control_mux, _, _, 0, 0} | _] ->
-%            0
-%    end;
-%control_pattern_bit(_) ->
-%    1.
+control_pattern_bit(#{ss := #{dests := [#{port := s_load, route := Route}]}}) ->
+    case  Route of
+        [{lab_control_mux, _, _, 0, 1} | _] ->
+            1;
+
+        [{lab_control_mux, _, _, 0, 0} | _] ->
+            0
+    end;
+control_pattern_bit(#{sload := #{dests := [#{port := s_load, route := Route}]}}) ->
+    case  Route of
+        [{lab_control_mux, _, _, 0, 1} | _] ->
+            1;
+
+        [{lab_control_mux, _, _, 0, 0} | _] ->
+            0
+    end;
+control_pattern_bit(_) ->
+    1.
 
 %%--------------------------------------------------------------------
 

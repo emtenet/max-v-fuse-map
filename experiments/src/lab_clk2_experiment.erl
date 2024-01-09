@@ -40,28 +40,29 @@ run() ->
 
 density(Density) ->
     Device = density:largest_device(Density),
-    device(Density, Device).
+    device(Device).
 
 %%--------------------------------------------------------------------
 
-device(Density, Device) ->
+device(Device) ->
     Gclks = device:gclk_pins(Device),
-    Pins = lists:subtract(device:pins(Device), Gclks),
-    [
-        block(Density, Device, LAB, Gclks, Pins)
-        ||
-        LAB <- device:labs(Device)
-    ],
-    ok.
+    Pins0 = lists:subtract(device:pins(Device), Gclks),
+    iterate:labs(Device, 6, Pins0,
+        fun (LAB, Pins) ->
+            sources(Device, LAB, Gclks, Pins)
+        end,
+        fun (LAB, _, Experiments) ->
+            experiments(Device, LAB, Experiments)
+        end
+    ).
 
 %%--------------------------------------------------------------------
 
-block(Density, Device, LAB, Gclks, Pins) ->
-    io:format(" ==> ~p ~p~n", [Density, LAB]),
+sources(Device, LAB, Gclks, Pins) ->
     [Gclk0, Gclk1, Gclk2, Gclk3] = Gclks,
-    [Clk1, D1, Q1, A, B, Q | _] = Pins,
+    {Clk1, D1, Q1, A, B, Q} = Pins,
     Common = {LAB, Clk1, D1, Q1, A, B, Q},
-    {ok, Experiments} = experiment:compile_to_fuses_and_rcf([
+    [
         source_lut(Device, Common, lut),
         source_global(Device, Common, gclk0, Gclk0, <<"!">>),
         source_global(Device, Common, gclk0, Gclk0, <<>>),
@@ -72,8 +73,13 @@ block(Density, Device, LAB, Gclks, Pins) ->
         source_local(Device, Common, even_local8, Gclk0, 8, even),
         source_local(Device, Common, odd_local7, Gclk0, 7, odd),
         source_local(Device, Common, odd_local8, Gclk0, 8, odd)
-    ]),
-    Matrix0 = matrix:build(Density, Experiments),
+    ].
+
+%%--------------------------------------------------------------------
+
+experiments(Device, LAB, Experiments) ->
+    io:format(" ==> ~p ~p~n", [Device, LAB]),
+    Matrix0 = matrix:build(Device, Experiments),
     Matrix = matrix:remove_fuses(Matrix0, fun
         ({{iob, _, _}, _}) -> true;
         ({{iob, _, _}, _, _}) -> true;
@@ -92,31 +98,38 @@ block(Density, Device, LAB, Gclks, Pins) ->
     %
     lists:foreach(fun not_s_data/1, Experiments),
     %
-    {LC0Clk, LC1Clk} = clk_pattern(Experiments),
+    {LC0Clk, LC1Clk} = clk2_pattern(Experiments),
     io:format("LC 0 clk2    = ~w~n", [LC0Clk]),
     io:format("LC 1 clk2    = ~w~n", [LC1Clk]),
-    Control = control_pattern(Experiments),
-    Control1 = control_1_pattern(Experiments),
-    Control2 = control_2_pattern(Experiments),
-    io:format("clk2 control = ~w~n", [Control]),
-    io:format("clk1 is 0/1  = ~w~n", [Control1]),
-    io:format("clk2 is 3/2  = ~w~n", [Control2]),
+    Clk1Control = clk1_control_pattern(Experiments),
+    Clk1Select = clk1_select_pattern(Experiments),
+    Clk2Control = clk2_control_pattern(Experiments),
+    Clk2Select = clk2_select_pattern(Experiments),
+    io:format("clk1 control = ~w~n", [Clk1Control]),
+    io:format("clk1 is 0/1  = ~w~n", [Clk1Select]),
+    io:format("clk2 control = ~w~n", [Clk2Control]),
+    io:format("clk2 is 3/2  = ~w~n", [Clk2Select]),
     %
-    % we need the clk2 control fuse to be on at least once
-    [0, 1] = lists:usort(Control),
-    %
-    expect:fuse(Matrix, LC0Clk, {lab:lc(LAB, 0), clk2}),
-    expect:fuse(Matrix, LC1Clk, {lab:lc(LAB, 1), clk2}),
-    %
-    expect:fuse(Matrix, [1,0,1,1,1,1,1,1,1,1], {LAB, clk2, invert}),
-    expect:fuse(Matrix, [1,0,0,1,1,1,1,1,1,1], {LAB, clk2, global0}),
-    expect:fuse(Matrix, [1,1,1,0,1,1,1,1,1,1], {LAB, clk2, global1}),
-    expect:fuse(Matrix, [1,1,1,1,0,1,1,1,1,1], {LAB, clk2, global2}),
-    expect:fuse(Matrix, [1,1,1,1,1,0,1,1,1,1], {LAB, clk2, global3}),
-    %
-    expect:fuse(Matrix, Control,  {LAB, clk2, control}),
-    expect:fuse(Matrix, Control1, {LAB, clk1, control_0_not_1}),
-    expect:fuse(Matrix, Control2, {LAB, clk2, control_3_not_2}),
+    % we would like the clk2 control fuse to be on at least once
+    case lists:usort(Clk2Control) of
+        [0, 1] ->
+            expect:fuse(Matrix, LC0Clk, {lab:lc(LAB, 0), clk2}),
+            expect:fuse(Matrix, LC1Clk, {lab:lc(LAB, 1), clk2}),
+            %
+            expect:fuse(Matrix, [1,0,1,1,1,1,1,1,1,1], {LAB, clk2, invert}),
+            expect:fuse(Matrix, [1,0,0,1,1,1,1,1,1,1], {LAB, clk2, global0}),
+            expect:fuse(Matrix, [1,1,1,0,1,1,1,1,1,1], {LAB, clk2, global1}),
+            expect:fuse(Matrix, [1,1,1,1,0,1,1,1,1,1], {LAB, clk2, global2}),
+            expect:fuse(Matrix, [1,1,1,1,1,0,1,1,1,1], {LAB, clk2, global3}),
+            %
+            expect:fuse(Matrix, Clk1Control, {LAB, clk1, control}),
+            expect:fuse(Matrix, Clk1Select,  {LAB, clk1, control_0_not_1}),
+            expect:fuse(Matrix, Clk2Control, {LAB, clk2, control}),
+            expect:fuse(Matrix, Clk2Select,  {LAB, clk2, control_3_not_2});
+
+        _ ->
+            ok
+    end,
     ok.
 
 %%--------------------------------------------------------------------
@@ -140,92 +153,92 @@ not_s_data({_, _, #{signals := Signals}}) ->
 
 %%--------------------------------------------------------------------
 
-clk_pattern(Experiments) ->
+clk2_pattern(Experiments) ->
     lists:unzip(lists:map(fun ({_, _, #{signals := Signals}}) ->
-        clk_pattern_signals(Signals)
+        clk2_pattern_signals(Signals)
     end, Experiments)).
 
 %%--------------------------------------------------------------------
 
-clk_pattern_signals(Signals) ->
+clk2_pattern_signals(Signals) ->
     case Signals of
         #{cc   := #{dests := [#{port := clk, lc := A, route := RouteA}]},
           clk  := #{dests := [#{port := clk, lc := _, route := RouteB}]}} ->
-            clk_pattern_routes(A, RouteA, RouteB);
+            clk2_pattern_routes(A, RouteA, RouteB);
 
         #{cc   := #{dests := [#{port := clk, lc := A, route := RouteA}]},
           clk1 := #{dests := [#{port := clk, lc := _, route := RouteB}]}} ->
-            clk_pattern_routes(A, RouteA, RouteB);
+            clk2_pattern_routes(A, RouteA, RouteB);
 
         #{clk  := #{dests := [#{port := clk, lc := A, route := RouteA}]},
           clk1 := #{dests := [#{port := clk, lc := _, route := RouteB}]}} ->
-            clk_pattern_routes(A, RouteA, RouteB);
+            clk2_pattern_routes(A, RouteA, RouteB);
 
         #{clk1 := #{dests := [#{port := clk, lc := A, route := RouteA}]}} ->
             {lc, _, _, 0} = A,
-            clk_pattern_bit(clk_pattern_route(RouteA))
+            clk2_pattern_bit(clk2_pattern_route(RouteA))
     end.
 
 %%--------------------------------------------------------------------
 
-clk_pattern_routes({lc, _, _, 0}, RouteA, RouteB) ->
-    clk_pattern_bit(clk_pattern_route(RouteA), clk_pattern_route(RouteB));
-clk_pattern_routes({lc, _, _, 1}, RouteA, RouteB) ->
-    clk_pattern_bit(clk_pattern_route(RouteB), clk_pattern_route(RouteA)).
+clk2_pattern_routes({lc, _, _, 0}, RouteA, RouteB) ->
+    clk2_pattern_bit(clk2_pattern_route(RouteA), clk2_pattern_route(RouteB));
+clk2_pattern_routes({lc, _, _, 1}, RouteA, RouteB) ->
+    clk2_pattern_bit(clk2_pattern_route(RouteB), clk2_pattern_route(RouteA)).
 
 %%--------------------------------------------------------------------
 
-clk_pattern_route([{lab_control_mux, _, _, 0, 0} | _]) -> clk1;
-clk_pattern_route([{lab_control_mux, _, _, 0, 1} | _]) -> clk1;
-clk_pattern_route([{lab_control_mux, _, _, 0, 2} | _]) -> clk2;
-clk_pattern_route([{lab_control_mux, _, _, 0, 3} | _]) -> clk2;
-clk_pattern_route([{lab_clk, _, _, _, _} | _]) -> global.
+clk2_pattern_route([{lab_control_mux, _, _, 0, 0} | _]) -> clk1;
+clk2_pattern_route([{lab_control_mux, _, _, 0, 1} | _]) -> clk1;
+clk2_pattern_route([{lab_control_mux, _, _, 0, 2} | _]) -> clk2;
+clk2_pattern_route([{lab_control_mux, _, _, 0, 3} | _]) -> clk2;
+clk2_pattern_route([{lab_clk, _, _, _, _} | _]) -> global.
 
 %%--------------------------------------------------------------------
 
-clk_pattern_bit(clk1, _) -> {1, 0};
-clk_pattern_bit(_, clk2) -> {1, 0};
-clk_pattern_bit(clk2, _) -> {0, 1};
-clk_pattern_bit(_, clk1) -> {0, 1}.
+clk2_pattern_bit(clk1, _) -> {1, 0};
+clk2_pattern_bit(_, clk2) -> {1, 0};
+clk2_pattern_bit(clk2, _) -> {0, 1};
+clk2_pattern_bit(_, clk1) -> {0, 1}.
 
 %%--------------------------------------------------------------------
 
-clk_pattern_bit(clk1) -> {1, 0};
-clk_pattern_bit(clk2) -> {0, 1}.
+clk2_pattern_bit(clk1) -> {1, 0};
+clk2_pattern_bit(clk2) -> {0, 1}.
 
 %%--------------------------------------------------------------------
 
-control_pattern(Experiments) ->
+clk1_control_pattern(Experiments) ->
     lists:map(fun ({_, _, #{signals := Signals}}) ->
-        maps:fold(fun control_pattern_bit/3, 1, Signals)
+        maps:fold(fun clk1_control_pattern_bit/3, 1, Signals)
     end, Experiments).
 
 %%--------------------------------------------------------------------
 
-control_pattern_bit(_, #{dests := [#{port := clk, route := Route}]}, Bit) ->
+clk1_control_pattern_bit(_, #{dests := [#{port := clk, route := Route}]}, Bit) ->
     case Route of
-        [{lab_control_mux, _, _, 0, 3} | _] ->
+        [{lab_control_mux, _, _, 0, 0} | _] ->
             0;
 
-        [{lab_control_mux, _, _, 0, 2} | _] ->
+        [{lab_control_mux, _, _, 0, 1} | _] ->
             0;
 
         _ ->
             Bit
     end;
-control_pattern_bit(_, _, Bit) ->
+clk1_control_pattern_bit(_, _, Bit) ->
     Bit.
 
 %%--------------------------------------------------------------------
 
-control_1_pattern(Experiments) ->
+clk1_select_pattern(Experiments) ->
     lists:map(fun ({_, _, #{signals := Signals}}) ->
-        maps:fold(fun control_1_pattern_bit/3, 1, Signals)
+        maps:fold(fun clk1_select_pattern_bit/3, 1, Signals)
     end, Experiments).
 
 %%--------------------------------------------------------------------
 
-control_1_pattern_bit(_, #{dests := [#{port := clk, route := Route}]}, Bit) ->
+clk1_select_pattern_bit(_, #{dests := [#{port := clk, route := Route}]}, Bit) ->
     case Route of
         [{lab_control_mux, _, _, 0, 0} | _] ->
             0;
@@ -236,19 +249,42 @@ control_1_pattern_bit(_, #{dests := [#{port := clk, route := Route}]}, Bit) ->
         _ ->
             Bit
     end;
-control_1_pattern_bit(_, _, Bit) ->
+clk1_select_pattern_bit(_, _, Bit) ->
     Bit.
 
 %%--------------------------------------------------------------------
 
-control_2_pattern(Experiments) ->
+clk2_control_pattern(Experiments) ->
     lists:map(fun ({_, _, #{signals := Signals}}) ->
-        maps:fold(fun control_2_pattern_bit/3, 1, Signals)
+        maps:fold(fun clk2_control_pattern_bit/3, 1, Signals)
     end, Experiments).
 
 %%--------------------------------------------------------------------
 
-control_2_pattern_bit(_, #{dests := [#{port := clk, route := Route}]}, Bit) ->
+clk2_control_pattern_bit(_, #{dests := [#{port := clk, route := Route}]}, Bit) ->
+    case Route of
+        [{lab_control_mux, _, _, 0, 3} | _] ->
+            0;
+
+        [{lab_control_mux, _, _, 0, 2} | _] ->
+            0;
+
+        _ ->
+            Bit
+    end;
+clk2_control_pattern_bit(_, _, Bit) ->
+    Bit.
+
+%%--------------------------------------------------------------------
+
+clk2_select_pattern(Experiments) ->
+    lists:map(fun ({_, _, #{signals := Signals}}) ->
+        maps:fold(fun clk2_select_pattern_bit/3, 1, Signals)
+    end, Experiments).
+
+%%--------------------------------------------------------------------
+
+clk2_select_pattern_bit(_, #{dests := [#{port := clk, route := Route}]}, Bit) ->
     case Route of
         [{lab_control_mux, _, _, 0, 3} | _] ->
             0;
@@ -259,7 +295,7 @@ control_2_pattern_bit(_, #{dests := [#{port := clk, route := Route}]}, Bit) ->
         _ ->
             Bit
     end;
-control_2_pattern_bit(_, _, Bit) ->
+clk2_select_pattern_bit(_, _, Bit) ->
     Bit.
 
 %%--------------------------------------------------------------------

@@ -99,7 +99,7 @@ NOTE: Also enabled when in output mode.
 
 ## LAB Fuses
 
-### `{lab(), clk#, global#}` and `{lab(), clk2, control}`
+### `{lab(), clk#, global#}` and `{lab(), clk#, control}`
 
 Each LAB's clk# can be selected fron the four global signals (0..3)
 or a control line.
@@ -161,9 +161,24 @@ The LAB's clr1 line is inverted.
 
 The LAB's s-load line is selected from one of the control lines.
 
+## `{lab(), s_load, control_0_not_1}`
+
+When the LAB's s-load line is selected from a control line.
+
+The specific control line selected is:
+
+ * a `0` bit selects 0,
+ * a `1` bit selects 1.
+
 ## `{lab(), s_load, invert}`
 
 The LAB's s-load line is inverted.
+
+## `{lab(), s_load, unknown}`
+
+This fuse seems to be relate to a LAB's s-load line.
+
+It has a bit `1` when the s-load line is a constant `1`.
 
 ## LC Fuses
 
