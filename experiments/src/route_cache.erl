@@ -28,6 +28,9 @@
 -export([fold_cached/4]).
 -export([fold_cached/5]).
 
+-export([matrix/2]).
+-export([matrix/3]).
+
 -type density() :: density:density().
 
 -type cache() :: {route_cache, density(), keys(), blocks()}.
@@ -537,6 +540,125 @@ limit(List, #{limit := Limit}) ->
     end;
 limit(List, _) ->
     List.
+
+%%====================================================================
+%% matrix
+%%====================================================================
+
+-spec matrix(block(), cache()) -> ok | false.
+
+matrix(Block, {route_cache, Density, Keys, Blocks}) ->
+    case Blocks of
+        #{Block := Indexes} ->
+            matrix_indexes(Density, Block, {fold_indexes, Indexes, Keys});
+
+        _ ->
+            false
+    end.
+
+%%--------------------------------------------------------------------
+
+-spec matrix(block(), index(), cache()) -> ok | false.
+
+matrix(Block, Index, {route_cache, Density, Keys, Blocks}) ->
+    case Blocks of
+        #{Block := #{Index := Froms}} ->
+            matrix_froms(Density, Block, Index, {fold_froms, Froms, Keys});
+
+        _ ->
+            false
+    end.
+
+%%--------------------------------------------------------------------
+
+matrix_indexes(Density, Block, Indexes) ->
+    io:format(" ==> ~w ~w~n", [Density, Block]),
+    Minimal = density:minimal_fuses(Density),
+    Experiments0 = route_cache:fold_indexes(
+        fun (Index, Froms, Acc0) ->
+            route_cache:fold_froms(
+                fun (From, Cached, Acc) ->
+                    matrix_from({Index, From}, Cached, Acc)
+                end,
+                Acc0,
+                Froms
+            )
+        end,
+        [],
+        Indexes
+    ),
+    Experiments = [{minimal, Minimal} | Experiments0],
+    Matrix0 = matrix:build(Density, Experiments),
+    Matrix = matrix:remove_fuses(Matrix0, fun
+        ({{iob, _, _}, _, _}) -> true;
+        ({{ioc, _, _, _}, _}) -> true;
+        ({{lab, _, _}, _, _}) -> true;
+        ({{lc, _, _, _}, _}) -> true;
+        ({{lc, _, _, _}, _, _}) -> true;
+        (_) -> false
+    end),
+    matrix:print(Matrix),
+    ok.
+
+%%--------------------------------------------------------------------
+
+matrix_froms(Density, Block, Index, Froms) ->
+    io:format(" ==> ~w ~w ~w~n", [Density, Block, Index]),
+    Minimal = density:minimal_fuses(Density),
+    Experiments0 = route_cache:fold_froms(
+        fun (From, Cached, Acc) ->
+            matrix_from(From, Cached, Acc)
+        end,
+        [],
+        Froms
+    ),
+    Experiments = [{minimal, Minimal} | Experiments0],
+    Matrix0 = matrix:build(Density, Experiments),
+    Matrix = matrix:remove_fuses(Matrix0, fun
+        ({{iob, _, _}, _, _}) -> true;
+        ({{ioc, _, _, _}, _}) -> true;
+        ({{lab, _, _}, _, _}) -> true;
+        ({{lc, _, _, _}, _}) -> true;
+        ({{lc, _, _, _}, _, _}) -> true;
+        (_) -> false
+    end),
+    matrix:print(Matrix),
+    ok.
+
+%%--------------------------------------------------------------------
+
+matrix_from(From, Cached, Experiments) ->
+    case matrix_reduce(Cached) of
+        {ok, Fuses} ->
+            Experiment = {From, Fuses},
+            [Experiment | Experiments];
+
+        false ->
+            Experiments
+    end.
+
+%%--------------------------------------------------------------------
+
+matrix_reduce(Cached) ->
+    route_cache:fold_cached(
+        fun matrix_reduce_zero/2,
+        zero,
+        fun matrix_reduce_rest/2,
+        Cached,
+        #{limit => 50}
+    ).
+
+%%--------------------------------------------------------------------
+
+matrix_reduce_zero(Experiment, zero) ->
+    {ok, Fuses} = experiment:fuses(Experiment),
+    Fuses.
+
+%%--------------------------------------------------------------------
+
+matrix_reduce_rest(Experiment, Fuses0) ->
+    {ok, Fuses} = experiment:fuses(Experiment),
+    fuses:intersect(Fuses0, Fuses).
 
 %%====================================================================
 %% utility
