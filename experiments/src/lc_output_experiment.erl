@@ -145,6 +145,11 @@ fast_outs(Matrix, [A, B, C]) ->
         fast_out(Matrix, A, [0, 1, 1]),
         fast_out(Matrix, B, [1, 0, 1]),
         fast_out(Matrix, C, [1, 1, 0])
+    ];
+fast_outs(Matrix, [A, B]) ->
+    [
+        fast_out(Matrix, A, [0, 1]),
+        fast_out(Matrix, B, [1, 0])
     ].
 
 %%--------------------------------------------------------------------
@@ -159,7 +164,9 @@ fast_out(Matrix, {_, _, LC}, SubPattern) ->
 lut_outs(Matrix, [_, _, _, _], Left, Right) ->
     lut_outs(Matrix, [0, 0, 0, 0], [1, 1, 1, 1], Left, Right);
 lut_outs(Matrix, [_, _, _], Left, Right) ->
-    lut_outs(Matrix, [0, 0, 0], [1, 1, 1], Left, Right).
+    lut_outs(Matrix, [0, 0, 0], [1, 1, 1], Left, Right);
+lut_outs(Matrix, [_, _], Left, Right) ->
+    lut_outs(Matrix, [0, 0], [1, 1], Left, Right).
 
 %%--------------------------------------------------------------------
 
