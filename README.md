@@ -27,7 +27,7 @@ My experiments are being run in the following
  * [Generate fast out](experiments/src/generate_fast_out.erl)
  * [LAB clk1](experiments/src/lab_clk1_experiment.erl)
  * [LAB s-load](experiments/src/lab_s_load_experiment.erl)
- * [LAB clr1](experiments/src/lab_clr1_experiment.erl)
+ * [LAB a-clr1](experiments/src/lab_a_clr1_experiment.erl)
  * [LAB clk2](experiments/src/lab_clk2_experiment.erl)
 
 ## Global Fuses
@@ -128,34 +128,34 @@ The specific control line selected is:
 
 The LAB's clk# line is inverted.
 
-## `{lab(), clr1, off}`
+## `{lab(), a_clr1, off}`
 
-Turns of the LAB's clr1 line.
+Turns of the LAB's a-clr1 line.
 
-## `{lab(), clr1, global}`
+## `{lab(), a_clr1, global}`
 
-The LAB's clr1 line is selected from one of the global lines (also when off).
+The LAB's a-clr1 line is selected from one of the global lines (also when off).
 
 Alternatively the line is selected from a control line.
 
-## `{lab(), clr1, global#}`
+## `{lab(), a_clr1, global#}`
 
-When the LAB's clr1 line is selected from a global line.
+When the LAB's a_clr1 line is selected from a global line.
 
 These fuses form a one-shot mux with the active selection with a bit of `0`.
 
-## `{lab(), clr1, control_5_not_4}`
+## `{lab(), a_clr1, control_5_not_4}`
 
-When the LAB's clr1 line is selected from a control line.
+When the LAB's a-clr1 line is selected from a control line.
 
 The specific control line selected is:
 
  * a `0` bit selects 5,
  * a `1` bit selects 4.
 
-## `{lab(), clr1, invert}`
+## `{lab(), a_clr1, invert}`
 
-The LAB's clr1 line is inverted.
+The LAB's a-clr1 line is inverted.
 
 ## `{lab(), s_load, control}`
 

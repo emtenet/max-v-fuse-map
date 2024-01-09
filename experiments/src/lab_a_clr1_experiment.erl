@@ -1,8 +1,8 @@
--module(lab_clr1_experiment).
+-module(lab_a_clr1_experiment).
 
 -export([run/0]).
 
-% This experiment was designed to look at how the LAB's clr1
+% This experiment was designed to look at how the LAB's a-clr1
 % source was selected between the four (4) global networks
 % or the two (2) LAB control lines.
 %
@@ -10,30 +10,30 @@
 % the clock through LC's 7 and 8. LC 7 can only be selected into
 % even control lines, and LC 8 into odd control lines.
 %
-% The clr1 line is turned off for the whole LAB with fuse:
+% The a-clr1 line is turned off for the whole LAB with fuse:
 %
-%  * {{lab, X, Y}, clr1, off}
+%  * {{lab, X, Y}, a_clr1, off}
 %
 % The following fuse is for sourceing from global lines (or off):
 %
-%  * {{lab, X, Y}, clr1, global}
+%  * {{lab, X, Y}, a_clr1, global}
 %
 % And then the particular global is selected with:
 %
-%  * {{lab, X, Y}, clr1, global0}
-%  * {{lab, X, Y}, clr1, global1}
-%  * {{lab, X, Y}, clr1, global2}
-%  * {{lab, X, Y}, clr1, global3}
+%  * {{lab, X, Y}, a_clr1, global0}
+%  * {{lab, X, Y}, a_clr1, global1}
+%  * {{lab, X, Y}, a_clr1, global2}
+%  * {{lab, X, Y}, a_clr1, global3}
 %
 % Otherwise a selection between control 4 or control 5 is made with:
 %
-%  * {{lab, X, Y}, clr1, control_5_not_4}
+%  * {{lab, X, Y}, a_clr1, control_5_not_4}
 %
 % The clr1 line can be inverted with:
 %
-%  * {{lab, X, Y}, clr1, invert}
+%  * {{lab, X, Y}, a_clr1, invert}
 %
-% NOTE: Not sure why the clr1 lines is always inverted when not selecting
+% NOTE: Not sure why the a-clr1 lines is always inverted when not selecting
 % from a global clock network?
 
 %%====================================================================
@@ -102,18 +102,18 @@ experiments(Device, LAB, Experiments) ->
     %matrix:print(Matrix),
     %display:control_routing(Experiments),
     %
-    expect:fuse(Matrix, [0,1,1,1,1,1,1,1], {LAB, clr1, off}),
-    expect:fuse(Matrix, [1,0,1,1,1,1,0,0], {LAB, clr1, invert}),
-    expect:fuse(Matrix, [1,0,0,1,1,1,1,1], {LAB, clr1, global0}),
-    expect:fuse(Matrix, [1,1,1,0,1,1,1,1], {LAB, clr1, global1}),
-    expect:fuse(Matrix, [1,1,1,1,0,1,1,1], {LAB, clr1, global2}),
-    expect:fuse(Matrix, [1,1,1,1,1,0,1,1], {LAB, clr1, global3}),
-    expect:fuse(Matrix, [0,0,0,0,0,0,1,1], {LAB, clr1, global}),
+    expect:fuse(Matrix, [0,1,1,1,1,1,1,1], {LAB, a_clr1, off}),
+    expect:fuse(Matrix, [1,0,1,1,1,1,0,0], {LAB, a_clr1, invert}),
+    expect:fuse(Matrix, [1,0,0,1,1,1,1,1], {LAB, a_clr1, global0}),
+    expect:fuse(Matrix, [1,1,1,0,1,1,1,1], {LAB, a_clr1, global1}),
+    expect:fuse(Matrix, [1,1,1,1,0,1,1,1], {LAB, a_clr1, global2}),
+    expect:fuse(Matrix, [1,1,1,1,1,0,1,1], {LAB, a_clr1, global3}),
+    expect:fuse(Matrix, [0,0,0,0,0,0,1,1], {LAB, a_clr1, global}),
     %
     [_, _, _, _, _, _, Local7, Local8] = Experiments,
     expect:control(Local7, cc, 4, a_clr),
     expect:control(Local8, cc, 5, a_clr),
-    expect:fuse(Matrix, [1,1,1,1,1,1,1,0], {LAB, clr1, control_5_not_4}),
+    expect:fuse(Matrix, [1,1,1,1,1,1,1,0], {LAB, a_clr1, control_5_not_4}),
     ok.
 
 %%--------------------------------------------------------------------
