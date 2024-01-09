@@ -33,6 +33,7 @@ My experiments are being run in the following
  * [local line](experiments/src/local_line_experiment.erl)
  * Data MUX [playground](experiments/src/data_mux_playground.erl)
    and [theory](experiments/src/data_mux_theory.erl)
+ * [LAB interconnect limit](experiments/src/lab_interconnect_limit_experiment.erl)
 
 ## Maps
 
