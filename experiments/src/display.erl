@@ -1,6 +1,6 @@
 -module(display).
 
--export([control_routing/0]).
+-export([control_routing/1]).
 
 %%====================================================================
 %% control_routing
