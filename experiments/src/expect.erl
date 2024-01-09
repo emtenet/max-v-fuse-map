@@ -51,6 +51,7 @@ fuse(Matrix, Pattern, Fuse) ->
                             ok;
 
                         false ->
+                            io:format("Pattern:~n  ~w~n", [Pattern]),
                             io:format("Expecting:~n  ~w~n", [Fuse]),
                             io:format("Candidates:~n  ~p~n", [Fuses]),
                             throw(stop)
@@ -75,6 +76,7 @@ fuse(Matrix, Pattern, Fuse1, Fuse2) ->
                     ok;
 
                 _ ->
+                    io:format("Pattern:~n  ~w~n", [Pattern]),
                     io:format("Expecting:~n  ~w~n  ~w~n", [Fuse1, Fuse2]),
                     io:format("Candidates:~n  ~p~n", [Fuses]),
                     throw(stop)
