@@ -30,6 +30,7 @@ My experiments are being run in the following
  * [LAB a-clr1](experiments/src/lab_a_clr1_experiment.erl)
  * [LAB clk2](experiments/src/lab_clk2_experiment.erl)
  * [LAB a-clr2](experiments/src/lab_a_clr2_experiment.erl)
+ * [local line](experiments/src/local_line_experiment.erl)
 
 ## Global Fuses
 
@@ -195,6 +196,16 @@ This fuse selects clk2.
 Each LC can select between two LAB wide a-clrs, a-clr1 & a-clr2.
 
 This fuse selects a-clr1.
+
+### `{lc(), local_line}`
+
+Each LC can drive the LUT or register output to the local interconnect
+via it's __local line__.
+
+This fuse either:
+
+ * enables that output, or
+ * selects between the LUT and registers to output.
 
 ### `{lc(), lut, a#b#c#d#}`
 

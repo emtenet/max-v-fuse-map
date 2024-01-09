@@ -911,7 +911,7 @@
     %?LC_CELL(20, 1, {lut_out, left});
     ?LC_CELL(20, 3, a_clr1);
     ?LC_CELL(21, 0, s_load);
-    %?LC_CELL(21, 3, local_line);
+    ?LC_CELL(21, 3, local_line);
 ).
 
 -define(C4_SIDE_HEADS(),
