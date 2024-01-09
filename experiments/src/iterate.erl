@@ -1,6 +1,7 @@
 -module(iterate).
 
 -export([labs/5]).
+-export([labs/6]).
 
 -export([pins_start/1]).
 -export([pins_select/2]).
@@ -12,18 +13,26 @@
 labs(Device, PinCount, Pins0, Sources, Experiments) ->
     LABs = device:labs(Device),
     Pins = pins_start(Pins0),
-    labs_loop(LABs, PinCount, Pins, Sources, Experiments).
+    labs_loop(LABs, PinCount, Pins, Sources, Experiments, 1).
 
 %%--------------------------------------------------------------------
 
-labs_loop([], _, _, _, _) ->
+labs(Device, PinCount, Pins0, Sources, Experiments, {batch, Batch}) ->
+    LABs = device:labs(Device),
+    Pins = pins_start(Pins0),
+    labs_loop(Batch, LABs, PinCount, Pins, Sources, Experiments).
+
+%%--------------------------------------------------------------------
+
+labs_loop(_, [], _, _, _, _) ->
     ok;
-labs_loop(LABs0, PinCount, Pins0, Sources, Experiments) ->
-    {LABs, Pins, Sets} = labs_sources(4, LABs0, PinCount, Pins0, Sources, []),
+labs_loop(Batch, LABs0, PinCount, Pins0, Sources, Experiments) ->
+    {LABs, Pins, Sets} =
+        labs_sources(Batch, LABs0, PinCount, Pins0, Sources, []),
     Ss = lists:flatten([S || {_, _, S} <- Sets]),
     {ok, Es} = experiment:compile_to_fuses_and_rcf(Ss),
     labs_experiments(Sets, Es, Experiments),
-    labs_loop(LABs, PinCount, Pins, Sources, Experiments).
+    labs_loop(Batch, LABs, PinCount, Pins, Sources, Experiments).
 
 %%--------------------------------------------------------------------
 
