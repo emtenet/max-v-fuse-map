@@ -1,11 +1,11 @@
--module(data_mux_theory).
+-module(lc_data_mux_theory).
 
 -export([run/0]).
 
 % This is a theory of how inputs are muxed into the four LUT data
 % inputs: data_a, data_b, data_c & data_d.
 %
-% The theory is based on the data produced by `data_mux_playground`.
+% The theory is based on the data produced by `lc_data_mux_playground`.
 %
 % ASIDE: Muxes seen so far in the MAX II architecture seem to be all
 %   one-hot (or one-cold) selecting multiplexers (rather than
@@ -280,7 +280,7 @@ theory(LC = {lc, X, Y, _}, data_d, Model) ->
 %%--------------------------------------------------------------------
 
 theory(X, Y, Port, Mux6, Mux3) ->
-    case data_mux_map:to_interconnect(Port, Mux6, Mux3) of
+    case lc_data_mux_map:to_interconnect(Port, Mux6, Mux3) of
         {local_line, N} ->
             {local_line, X, Y, 0, N};
 

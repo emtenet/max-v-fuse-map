@@ -1,4 +1,4 @@
--module(data_mux_map).
+-module(lc_data_mux_map).
 
 -export([to_interconnect/3]).
 -export([from_interconnect/2]).

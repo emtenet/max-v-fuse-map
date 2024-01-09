@@ -1,4 +1,4 @@
--module(data_mux_playground).
+-module(lc_data_mux_playground).
 
 -export([run/0]).
 

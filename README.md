@@ -32,10 +32,12 @@ My experiments are being run in the following
  * [LAB a-clr2](experiments/src/lab_a_clr2_experiment.erl)
  * [local line](experiments/src/local_line_experiment.erl)
  * [LAB interconnect limit](experiments/src/lab_interconnect_limit_experiment.erl)
- * Data MUX [playground](experiments/src/data_mux_playground.erl)
-   and [theory](experiments/src/data_mux_theory.erl)
- * Output MUX [playground](experiments/src/output_mux_playground.erl)
-   and [theory](experiments/src/output_mux_theory.erl)
+ * LC data MUX [playground](experiments/src/lc_data_mux_playground.erl)
+   and [theory](experiments/src/lc_data_mux_theory.erl)
+ * IOC output MUX [playground](experiments/src/ioc_output_mux_playground.erl)
+   and [theory](experiments/src/ioc_output_mux_theory.erl)
+ * IOC enable MUX [playground](experiments/src/ioc_output_mux_playground.erl)
+   and [theory](experiments/src/ioc_output_mux_theory.erl)
 
 ## Maps
 
@@ -44,8 +46,9 @@ A mapping to and from fuse numbers, locations & names is encoded in
 
 The following mux mappings are encoded:
 
- * [data mux](experiments/src/data_mux_map.erl)
- * [output mux](experiments/src/output_mux_map.erl)
+ * [LC data MUX](experiments/src/lc_data_mux_map.erl)
+ * [IOC output MUX](experiments/src/ioc_output_mux_map.erl)
+ * [IOC enable MUX](experiments/src/ioc_enable_mux_map.erl)
 
 ## Global Fuses
 
@@ -89,6 +92,12 @@ instead of via the output muxes.
 ### `{ioc(), output_invert}`
 
 The IOC output is inverted when the POF but is `0`.
+
+### `{ioc(), enable3, mux#}`, `{ioc(), enable4, mux#}` and `{ioc(), enable6, mux#}`
+
+The IOC output enables are selected from local interconnects.
+
+See `{ioc(), output#, mux#}` for details.
 
 ### `{ioc(), enable_invert}`
 

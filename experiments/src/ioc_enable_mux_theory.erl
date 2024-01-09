@@ -1,27 +1,16 @@
--module(output_mux_theory).
+-module(ioc_enable_mux_theory).
 
 -export([run/0]).
 
 % This is a theory of how IOB local interconnects are muxed into the
-% IOC outputs.
+% IOC output enables.
 %
-% The theory is based on the data produced by `output_mux_playground`.
+% The theory is based on the data produced by `ioc_enable_mux_playground`.
 %
-% ASIDE: Muxes seen so far in the MAX V architecture seem to be all
-%   one-hot (or one-cold) selecting multiplexers (rather than
-%   binary encoded).
+% The output enable MUX is equivilent to the output MUX with the same
+% number of mux coordinates and shareing the same `ioc_output_mux_map`.
 %
-% Each IOC output has a two dimentional mux.
-%
-% Side IOCs have the two coordinates as:
-%  * a 6-to-1 mux `output6`, and
-%  * a 3-to-1 mux `output3`.
-% Combined the form either a 18-to-1 mux.
-%
-% Top/bottom IOCs have the two coordinates as:
-%  * a 4-to-1 mux `output4`, and
-%  * a 3-to-1 mux `output3`.
-% Combined the form either a 12-to-1 mux.
+% See `ioc_output_mux_theory` for a description.
 %
 %  Checking
 % ==========
@@ -93,43 +82,40 @@ contradiction(Density, Fuse) ->
 %%====================================================================
 
 fuses(Density, Fuses) ->
-    lists:foldl(fun (Fuse, IOCs) -> fuse(Density, Fuse, IOCs) end, #{}, Fuses).
+    lists:foldl(fun (Fuse, LCs) -> fuse(Density, Fuse, LCs) end, #{}, Fuses).
 
 %%--------------------------------------------------------------------
 
-fuse(Density, Fuse, IOCs) ->
+fuse(Density, Fuse, LCs) ->
     case fuse_map:to_name(Fuse, Density) of
-        {ok, {IOC, Key = fast_out}} ->
-            fuse_mux(IOC, Key, on, IOCs);
+        {ok, {IOC = {ioc, _, _, _}, Key = enable6, Value}} ->
+            fuse_mux(IOC, Key, Value, LCs);
 
-        {ok, {IOC, Key = output3, Value}} ->
-            fuse_mux(IOC, Key, Value, IOCs);
+        {ok, {IOC = {ioc, _, _, _}, Key = enable4, Value}} ->
+            fuse_mux(IOC, Key, Value, LCs);
 
-        {ok, {IOC, Key = output4, Value}} ->
-            fuse_mux(IOC, Key, Value, IOCs);
-
-        {ok, {IOC, Key = output6, Value}} ->
-            fuse_mux(IOC, Key, Value, IOCs);
+        {ok, {IOC = {ioc, _, _, _}, Key = enable3, Value}} ->
+            fuse_mux(IOC, Key, Value, LCs);
 
         _ ->
-            IOCs
+            LCs
     end.
 
 %%--------------------------------------------------------------------
 
-fuse_mux(IOC, Key, Value, IOCs) ->
-    case IOCs of
-        #{IOC := #{Key := Existing}} when Existing =:= Value ->
-            IOCs;
+fuse_mux(LC, Key, Value, LCs) ->
+    case LCs of
+        #{LC := #{Key := Existing}} when Existing =:= Value ->
+            LCs;
 
-        #{IOC := #{Key := Existing}} ->
-            throw({IOC, Key, Value, existing, Existing});
+        #{LC := #{Key := Existing}} ->
+            throw({LC, Key, Value, existing, Existing});
 
-        #{IOC := Muxes} ->
-            IOCs#{IOC => Muxes#{Key => Value}};
+        #{LC := Muxes} ->
+            LCs#{LC => Muxes#{Key => Value}};
 
         _ ->
-            IOCs#{IOC => #{Key => Value}}
+            LCs#{LC => #{Key => Value}}
     end.
 
 %%====================================================================
@@ -146,7 +132,7 @@ signal(#{dests := Dests}, Model) ->
 
 %%--------------------------------------------------------------------
 
-signal_dest(#{ioc := IOC, port := data_in, route := Route0}, Model) ->
+signal_dest(#{ioc := IOC, port := oe, route := Route0}, Model) ->
     Route = signal_route(Route0),
     case theory(IOC, Model) of
         Theory when Theory =:= Route ->
@@ -160,28 +146,20 @@ signal_dest(_, _) ->
 
 %%--------------------------------------------------------------------
 
-signal_route([Bypass = {io_bypass_out, _, _, _, _} | _]) ->
-    Bypass;
-signal_route([{io_data_out, _, _, _, _}, Interconnect | _]) ->
+signal_route([{io_oe, _, _, _, _}, Interconnect | _]) ->
     Interconnect.
 
 %%====================================================================
 %% theory
 %%====================================================================
 
-theory(IOC = {ioc, X, Y, N}, Model) ->
+theory(IOC = {ioc, X, Y, _}, Model) ->
     case Model of
-        #{IOC := #{output4 := Mux4, output3 := Mux3, fast_out := on}} ->
-            theory_col(X, Y, N, Mux4, Mux3);
+        #{IOC := #{enable4 := Mux4, enable3 := Mux3}} ->
+            theory_col(X, Y, Mux4, Mux3);
 
-        #{IOC := #{output4 := Mux4, output3 := Mux3}} ->
-            theory_col(X, Y, x, Mux4, Mux3);
-
-        #{IOC := #{output6 := Mux6, output3 := Mux3}} ->
+        #{IOC := #{enable6 := Mux6, enable3 := Mux3}} ->
             theory_row(X, Y, Mux6, Mux3);
-
-        #{IOC := #{fast_out := on}} ->
-            {io_bypass_out, X, Y, N, 0};
 
         #{IOC := Muxes} ->
             Muxes;
@@ -192,18 +170,13 @@ theory(IOC = {ioc, X, Y, N}, Model) ->
 
 %%--------------------------------------------------------------------
 
-theory_col(X, Y, FastOut, Mux4, Mux3) ->
-    case output_mux_map:to_col_interconnect(Mux4, Mux3) of
-        {interconnect, N} when FastOut =:= x ->
-            {local_interconnect, X, Y, 0, N};
-
-        fast_out when FastOut =/= x ->
-            {io_bypass_out, X, Y, FastOut, 0}
-    end.
+theory_col(X, Y, Mux4, Mux3) ->
+    {interconnect, N} = ioc_output_mux_map:to_col_interconnect(Mux4, Mux3),
+    {local_interconnect, X, Y, 0, N}.
 
 %%--------------------------------------------------------------------
 
 theory_row(X, Y, Mux6, Mux3) ->
-    {interconnect, N} = output_mux_map:to_row_interconnect(Mux6, Mux3),
+    {interconnect, N} = ioc_output_mux_map:to_row_interconnect(Mux6, Mux3),
     {local_interconnect, X, Y, 0, N}.
 

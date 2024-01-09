@@ -1,4 +1,4 @@
--module(output_mux_map).
+-module(ioc_output_mux_map).
 
 -export([to_col_interconnect/2]).
 -export([from_col_interconnect/1]).
