@@ -31,9 +31,11 @@ My experiments are being run in the following
  * [LAB clk2](experiments/src/lab_clk2_experiment.erl)
  * [LAB a-clr2](experiments/src/lab_a_clr2_experiment.erl)
  * [local line](experiments/src/local_line_experiment.erl)
+ * [LAB interconnect limit](experiments/src/lab_interconnect_limit_experiment.erl)
  * Data MUX [playground](experiments/src/data_mux_playground.erl)
    and [theory](experiments/src/data_mux_theory.erl)
- * [LAB interconnect limit](experiments/src/lab_interconnect_limit_experiment.erl)
+ * Output MUX [playground](experiments/src/output_mux_playground.erl)
+   and [theory](experiments/src/output_mux_theory.erl)
 
 ## Maps
 
@@ -43,6 +45,7 @@ A mapping to and from fuse numbers, locations & names is encoded in
 The following mux mappings are encoded:
 
  * [data mux](experiments/src/data_mux_map.erl)
+ * [output mux](experiments/src/output_mux_map.erl)
 
 ## Global Fuses
 
@@ -60,6 +63,28 @@ so a user code bit of `1` is stored as a `0`.
 The IOC input is turned off when the POF but is `0`.
 
 This could also be called *output only*.
+
+### `{ioc(), output3, mux#}`, `{ioc(), output4, mux#}` and `{ioc(), output6, mux#}`
+
+The IOC outputs are selected from local interconnects
+via two dimentional muxes.
+Side IOCs have one of size 3, and the other of size 6.
+Top/bottom IOCS have one of size 3, and the other of size 4.
+
+These muxes are one-cold.
+
+For example the fuses
+`{ioc(), output6, mux2}` and `{ioc(), output3, mux1}`
+select local interconnect 7.
+
+For example the fuses
+`{ioc(), output4, mux3}` and `{ioc(), output3, mux2}`
+select local line 9.
+
+### `{ioc(), fast_out}`
+
+Selects output value from fast-out link of neighbouring LAB
+instead of via the output muxes.
 
 ### `{ioc(), output_invert}`
 

@@ -92,15 +92,14 @@ run() ->
 
 experiments(false) ->
     ok;
-experiments({_, Experiment = {Device, _, _}, Iterator}) ->
+experiments({Key, Experiment = {Device, _, _}, Iterator}) ->
     Density = device:density(Device),
     case experiment(Density, Experiment) of
         ok ->
             experiments(experiment_cache:iterate(Iterator));
 
         {error, Error, Fuses, Signals} ->
-            {cached, Dir} = Experiment,
-            contradiction(Density, Dir, Fuses, Signals, Error)
+            contradiction(Density, Key, Fuses, Signals, Error)
     end.
 
 %%--------------------------------------------------------------------
@@ -119,8 +118,8 @@ experiment(Density, Experiment) ->
 
 %%--------------------------------------------------------------------
 
-contradiction(Density, Dir, Fuses0, Signals, Error) ->
-    io:format("~n => ~s~n", [Dir]),
+contradiction(Density, Key, Fuses0, Signals, Error) ->
+    io:format("~n => ~s~n", [Key]),
     io:format("~nDENSITY: ~s~n", [Density]),
     io:format("~nFUSES:~n", []),
     Fuses = fuses:subtract(Fuses0, density:minimal_fuses(Density)),
@@ -133,13 +132,6 @@ contradiction(Density, Dir, Fuses0, Signals, Error) ->
 
 contradiction(Density, Fuse) ->
     io:format("  ~w~n", [fuse_map:to_location(Fuse, Density)]).
-    %case fuse_map:to_name(Fuse, Density) of
-    %    {ok, Name} ->
-    %        io:format("  ~w~n", [Name]);
-
-    %    {error, Error} ->
-    %        io:format("  ~w~n", [Error])
-    %end.
 
 %%====================================================================
 %% fuses
@@ -150,52 +142,34 @@ fuses(Density, Fuses) ->
 
 %%--------------------------------------------------------------------
 
--define(FUSE(Sector, Index, Key, Value),
-        {X, Y, N, Index, cell, Sector} ->
-            fuse_mux({lc, X, Y, N}, Key, Value, LCs)
-).
+fuse(Density, Fuse, IOCs) ->
+    case fuse_map:to_name(Fuse, Density) of
+        {ok, {IOC, Key = data_a3, Value}} ->
+            fuse_mux(IOC, Key, Value, IOCs);
 
-fuse(Density, Fuse, LCs) ->
-    case fuse_map:to_location(Fuse, Density) of
-        ?FUSE( 6, 0, data_a6, mux0);
-        ?FUSE( 6, 1, data_a6, mux1);
-        ?FUSE( 6, 2, data_c6, mux0);
-        ?FUSE( 6, 3, data_c6, mux1);
-        ?FUSE( 7, 0, data_a6, mux2);
-        ?FUSE( 7, 1, data_a6, mux3);
-        ?FUSE( 7, 2, data_c6, mux2);
-        ?FUSE( 7, 3, data_c6, mux3);
-        ?FUSE( 8, 0, data_b6, mux0);
-        ?FUSE( 8, 1, data_b6, mux1);
-        ?FUSE( 8, 2, data_c6, mux4);
-        ?FUSE( 8, 3, data_c6, mux5);
-        ?FUSE( 9, 0, data_b6, mux2);
-        ?FUSE( 9, 1, data_b6, mux3);
-        ?FUSE( 9, 2, data_d6, mux0);
-        ?FUSE( 9, 3, data_d6, mux1);
-        ?FUSE(10, 0, data_b6, mux4);
-        ?FUSE(10, 1, data_b6, mux5);
-        ?FUSE(10, 2, data_d6, mux2);
-        ?FUSE(10, 3, data_d6, mux3);
-        ?FUSE(11, 0, data_a6, mux4);
-        ?FUSE(11, 1, data_a6, mux5);
-        ?FUSE(11, 2, data_d6, mux4);
-        ?FUSE(11, 3, data_d6, mux5);
-        ?FUSE(12, 0, data_a3, mux0);
-        ?FUSE(12, 1, data_b3, mux0);
-        ?FUSE(12, 2, data_c3, mux0);
-        ?FUSE(12, 3, data_d3, mux0);
-        ?FUSE(13, 0, data_a3, mux1);
-        ?FUSE(13, 1, data_b3, mux1);
-        ?FUSE(13, 2, data_c3, mux1);
-        ?FUSE(13, 3, data_d3, mux1);
-        ?FUSE(14, 0, data_a3, mux2);
-        ?FUSE(14, 1, data_b3, mux2);
-        ?FUSE(14, 2, data_c3, mux2);
-        ?FUSE(14, 3, data_d3, mux2);
+        {ok, {IOC, Key = data_a6, Value}} ->
+            fuse_mux(IOC, Key, Value, IOCs);
+
+        {ok, {IOC, Key = data_b3, Value}} ->
+            fuse_mux(IOC, Key, Value, IOCs);
+
+        {ok, {IOC, Key = data_b6, Value}} ->
+            fuse_mux(IOC, Key, Value, IOCs);
+
+        {ok, {IOC, Key = data_c3, Value}} ->
+            fuse_mux(IOC, Key, Value, IOCs);
+
+        {ok, {IOC, Key = data_c6, Value}} ->
+            fuse_mux(IOC, Key, Value, IOCs);
+
+        {ok, {IOC, Key = data_d3, Value}} ->
+            fuse_mux(IOC, Key, Value, IOCs);
+
+        {ok, {IOC, Key = data_d6, Value}} ->
+            fuse_mux(IOC, Key, Value, IOCs);
 
         _ ->
-            LCs
+            IOCs
     end.
 
 %%--------------------------------------------------------------------
