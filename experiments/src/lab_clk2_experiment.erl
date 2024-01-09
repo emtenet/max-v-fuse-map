@@ -94,7 +94,7 @@ experiments(Device, LAB, Experiments) ->
     end),
     %
     %matrix:print(Matrix),
-    %lab_clk1_experiment:control_routing(Experiments),
+    %display:control_routing(Experiments),
     %
     lists:foreach(fun not_s_data/1, Experiments),
     %

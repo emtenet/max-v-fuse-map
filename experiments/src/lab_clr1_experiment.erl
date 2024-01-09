@@ -100,7 +100,7 @@ experiments(Device, LAB, Experiments) ->
     end),
     %
     %matrix:print(Matrix),
-    %lab_clk1_experiment:control_routing(Experiments),
+    %display:control_routing(Experiments),
     %
     expect:fuse(Matrix, [0,1,1,1,1,1,1,1], {LAB, clr1, off}),
     expect:fuse(Matrix, [1,0,1,1,1,1,0,0], {LAB, clr1, invert}),
