@@ -1,6 +1,7 @@
 -module(display).
 
 -export([control_routing/1]).
+-export([port_routing/2]).
 
 %%====================================================================
 %% control_routing
@@ -42,5 +43,50 @@ control_routing_dest(#{lc := LC, port := Port, route := Route}, Routing) ->
             Routing
     end;
 control_routing_dest(_, Routing) ->
+    Routing.
+
+%%====================================================================
+%% port_routing
+%%====================================================================
+
+port_routing(Port, Experiments) ->
+    lists:foreach(fun (Experiment) ->
+        port_routing_experiment(Port, Experiment)
+    end, Experiments).
+
+%%--------------------------------------------------------------------
+
+port_routing_experiment(Port, {Name, _, #{signals := Signals}}) ->
+    io:format(" --> ~p~n", [Name]),
+    Routing = maps:fold(fun (K, V, Acc) ->
+        port_routing_signal(Port, K, V, Acc)
+    end, [], Signals),
+    [
+        io:format("  ~12w ~6w <- ~p~n", [LC, Port, Route])
+        ||
+        {LC, Route} <- lists:sort(Routing)
+    ].
+
+%%--------------------------------------------------------------------
+
+port_routing_signal(Port, _, #{dests := Dests}, Routing) ->
+    lists:foldl(fun (V, Acc) ->
+        port_routing_dest(Port, V, Acc)
+    end, Routing, Dests).
+
+%%--------------------------------------------------------------------
+
+port_routing_dest(Port, #{lc := LC, port := Port, route := Route}, Routing) ->
+    case Route of
+        [{lab_clk, _, _, 0, N} | _] ->
+            [{LC, {global, N}} | Routing];
+
+        [{lab_control_mux, _, _, 0, N}, From | _] ->
+            [{LC, {control, N, From}} | Routing];
+
+        [From | _] ->
+            [{LC, From} | Routing]
+    end;
+port_routing_dest(_, _, Routing) ->
     Routing.
 
