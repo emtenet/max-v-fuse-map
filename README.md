@@ -31,6 +31,7 @@ My experiments are being run in the following
  * [LAB clk2](experiments/src/lab_clk2_experiment.erl)
  * [LAB a-clr2](experiments/src/lab_a_clr2_experiment.erl)
  * [local line](experiments/src/local_line_experiment.erl)
+ * Data MUX [playground](experiments/src/data_mux_playground.erl)
 
 ## Global Fuses
 
@@ -196,6 +197,22 @@ This fuse selects clk2.
 Each LC can select between two LAB wide a-clrs, a-clr1 & a-clr2.
 
 This fuse selects a-clr1.
+
+### `{lc(), data_#3, mux#}` and `{lc(), data_#6, mux#}`
+
+The LUT inputs `data_a`, `data_b`, `data_c` & `data_d` are
+selected from local interconnects via two dimentional muxes,
+one of size 3, and the other of size 6.
+
+These muxes are one-hot.
+
+For example the fuses
+`{lc(), data_a3, mux1}` and `{lc(), data_a6, mux0}`
+select local interconnect 3.
+
+For example the fuses
+`{lc(), data_c3, mux2}` and `{lc(), data_c6, mux5}`
+select local line 7.
 
 ### `{lc(), local_line}`
 
