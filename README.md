@@ -32,6 +32,16 @@ My experiments are being run in the following
  * [LAB a-clr2](experiments/src/lab_a_clr2_experiment.erl)
  * [local line](experiments/src/local_line_experiment.erl)
  * Data MUX [playground](experiments/src/data_mux_playground.erl)
+   and [theory](experiments/src/data_mux_theory.erl)
+
+## Maps
+
+A mapping to and from fuse numbers, locations & names is encoded in
+[fuse map](experiments/src/fuse_map.erl).
+
+The following mux mappings are encoded:
+
+ * [data mux](experiments/src/data_mux_map.erl)
 
 ## Global Fuses
 
