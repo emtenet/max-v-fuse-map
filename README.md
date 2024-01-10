@@ -41,6 +41,7 @@ My experiments are being run in the following
  * [LC output](experiments/src/lc_output_experiment.erl)
  * [LAB ena1](experiments/src/lab_ena1_experiment.erl)
  * [LAB ena2](experiments/src/lab_ena2_experiment.erl)
+ * [LAB ena2 vs s-load](experiments/src/lab_ena2_s_load_experiment.erl)
 
 ## Maps
 
