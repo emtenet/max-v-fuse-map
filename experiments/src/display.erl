@@ -28,7 +28,7 @@ control_routing_signal(_, #{dests := Dests}, Routing) ->
 
 %%--------------------------------------------------------------------
 
-control_routing_dest(#{lc := LC, port := Port, route := Route}, Routing) ->
+control_routing_dest(D = #{lc := LC, port := Port, route := Route}, Routing) ->
     case Route of
         [{lab_clk, _, _, 0, N} | _] ->
             [{LC, Port, {global, N}} | Routing];
@@ -37,10 +37,12 @@ control_routing_dest(#{lc := LC, port := Port, route := Route}, Routing) ->
             [{LC, Port, {control, N, From}} | Routing];
 
         [From | _] when Port =:= s_data ->
+            #{route_port := data_c} = D,
             [{LC, Port, From} | Routing];
 
-        _ ->
-            Routing
+        [From | _] ->
+            #{route_port := Data} = D,
+            [{LC, Data, From} | Routing]
     end;
 control_routing_dest(_, Routing) ->
     Routing.
