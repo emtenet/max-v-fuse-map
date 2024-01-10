@@ -836,14 +836,14 @@
     ?LAB_LINE(16, 22, {ena1, control_3_not_2});
     ?LAB_LINE(16, 23, {clk2, control});
     ?LAB_LINE(16, 24, {ena1, off});
-    ?LAB_LINE(17, 20, {s_load, control_0_not_1}); % ena2_s_load
-    %?LAB_LINE(19, 20, {ena2, off});
+    ?LAB_LINE(17, 20, {ena2_s_load, control_0_not_1});
+    ?LAB_LINE(19, 20, {ena2, off});
     ?LAB_LINE(19, 21, {s_load, control});
     ?LAB_LINE(19, 22, {clk2, invert});
     %?LAB_LINE(19, 25, {a_load, invert});
     ?LAB_LINE(20, 20, {s_load, unknown});
     ?LAB_LINE(20, 21, {a_clr1, global});
-    ?LAB_LINE(20, 24, {s_load, invert}); % ena2_s_load
+    ?LAB_LINE(20, 24, {ena2_s_load, invert});
     ?LAB_LINE(20, 25, {a_clr1, off});
     %?LAB_LINE(21, 20, s_clr);
     %?LAB_LINE(21, 21, {s_clr, invert});

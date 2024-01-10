@@ -20,15 +20,17 @@
 %
 % The s-load line is selected between {control, 0} and {control, 1}:
 %
-%  * {{lab, X, Y}, s_load, control_0_not_1}
+%  * {{lab, X, Y}, ena2_s_load, control_0_not_1}
 %
 % The s-load line can be inverted with:
 %
-%  * {{lab, X, Y}, s_load, invert}
+%  * {{lab, X, Y}, ena2_s_load, invert}
 %
 % The LC s-load is enabled with:
 %
 %  * {{lc, X, Y, N}, s_load}
+%
+% NOTE: Some of the fuses are shared with the ena2 line.
 
 %%====================================================================
 %% run
@@ -95,11 +97,11 @@ experiments(Device, LAB, Experiments) ->
     %
     expect:fuse(Matrix, [1,1,0,0,0,0,0], {LAB, s_load, control}),
     expect:fuse(Matrix, [0,1,0,0,0,0,0], {LAB, s_load, unknown}),
-    expect:fuse(Matrix, [1,1,0,1,1,1,1], {LAB, s_load, invert}), % ena2_s_load
+    expect:fuse(Matrix, [1,1,0,1,1,1,1], {LAB, ena2_s_load, invert}),
     expect:fuse(Matrix, [1,0,0,0,0,0,0], {lab:lc(LAB, 0), s_load}),
     %
     Control = control_pattern(Experiments),
-    expect:fuse(Matrix, Control, {LAB, s_load, control_0_not_1}), % ena2_s_load
+    expect:fuse(Matrix, Control, {LAB, ena2_s_load, control_0_not_1}),
     ok.
 
 %%--------------------------------------------------------------------

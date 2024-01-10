@@ -40,6 +40,7 @@ My experiments are being run in the following
    and [theory](experiments/src/ioc_output_mux_theory.erl)
  * [LC output](experiments/src/lc_output_experiment.erl)
  * [LAB ena1](experiments/src/lab_ena1_experiment.erl)
+ * [LAB ena2](experiments/src/lab_ena2_experiment.erl)
 
 ## Maps
 
@@ -180,18 +181,39 @@ The LAB's clk# line is inverted.
 
 ### `{lab(), ena1, off}`
 
-This turns off the LAB's enable line. LC's are then continuously enabled.
+This turns off the LAB's ena1 line. LC's are then continuously enabled.
 
 ### `{lab(), ena1, control_3_not_2}`
 
-This selects the LAB's enable (1) line from either:
+This selects the LAB's ena1 line from either:
 
  * a `0` bit selects control line 3
  * a `1` bit selects control line 2
 
 ### `{lab(), ena1, invert}`
 
-This inverts the LAB's enable (1) line.
+This inverts the LAB's ena1 line.
+
+### `{lab(), ena2, off}`
+
+This turns off the LAB's ena2 line. LC's are then continuously enabled.
+
+## `{lab(), ena2_s_load, control_0_not_1}`
+
+The LAB's ena2 & s-load lines share a common control source.
+
+When the LAB's ena2 / s-load line is selected from a control line.
+
+The specific control line selected is:
+
+ * a `0` bit selects 0,
+ * a `1` bit selects 1.
+
+## `{lab(), ena2_s_load, invert}`
+
+The LAB's ena2 & s-load lines share a common inversion.
+
+The LAB's ena2 / s-load line is inverted.
 
 ## `{lab(), a_clr, global#}`
 
@@ -226,19 +248,6 @@ The LAB's a-clr# line is inverted.
 ## `{lab(), s_load, control}`
 
 The LAB's s-load line is selected from one of the control lines.
-
-## `{lab(), s_load, control_0_not_1}`
-
-When the LAB's s-load line is selected from a control line.
-
-The specific control line selected is:
-
- * a `0` bit selects 0,
- * a `1` bit selects 1.
-
-## `{lab(), s_load, invert}`
-
-The LAB's s-load line is inverted.
 
 ## `{lab(), s_load, unknown}`
 
