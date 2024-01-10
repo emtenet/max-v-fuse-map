@@ -45,6 +45,7 @@ My experiments are being run in the following
  * [LAB a-load](experiments/src/lab_a_load_experiment.erl)
  * [LAB s-clr](experiments/src/lab_s_clr_experiment.erl)
  * [LAB s-load always](experiments/src/lab_s_load_always_experiment.erl)
+ * [LC a-load](experiments/src/lc_a_load_experiment.erl)
 
 ## Maps
 
@@ -299,6 +300,8 @@ This fuse selects clk2.
 Each LC can select between two LAB wide a-clrs, a-clr1 & a-clr2.
 
 This fuse selects a-clr1.
+
+It _also_ elects out of the LAB's a-load line.
 
 ### `{lc(), data_#3, mux#}` and `{lc(), data_#6, mux#}`
 
