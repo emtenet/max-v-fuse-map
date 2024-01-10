@@ -6,6 +6,8 @@
 -export([mux6s/0]).
 -export([mux3s/0]).
 
+-export([print/0]).
+
 -export_type([mux6/0]).
 -export_type([mux3/0]).
 
@@ -23,75 +25,75 @@
     ?MAPPING(data_a, mux0, mux0, interconnect, 0);
     ?MAPPING(data_a, mux0, mux1, interconnect, 3);
     ?MAPPING(data_a, mux0, mux2, interconnect, 8);
-    ?MAPPING(data_a, mux1, mux0, interconnect, 9);
-    ?MAPPING(data_a, mux1, mux1, interconnect, 11);
-    ?MAPPING(data_a, mux1, mux2, interconnect, 14);
-    ?MAPPING(data_a, mux2, mux0, interconnect, 18);
-    ?MAPPING(data_a, mux2, mux1, interconnect, 22);
-    ?MAPPING(data_a, mux2, mux2, interconnect, 25);
-    ?MAPPING(data_a, mux3, mux0, local_line, 4);
-    ?MAPPING(data_a, mux3, mux1, local_line, 5);
-    ?MAPPING(data_a, mux3, mux2, local_line, 6);
-    ?MAPPING(data_a, mux4, mux0, interconnect, 1);
-    ?MAPPING(data_a, mux4, mux1, interconnect, 6);
-    ?MAPPING(data_a, mux4, mux2, interconnect, 15);
-    ?MAPPING(data_a, mux5, mux0, interconnect, 19);
-    ?MAPPING(data_a, mux5, mux1, local_line, 3);
-    ?MAPPING(data_a, mux5, mux2, local_line, 8);
-    ?MAPPING(data_b, mux0, mux0, interconnect, 17);
+    ?MAPPING(data_a, mux1, mux0, interconnect, 1);
+    ?MAPPING(data_a, mux1, mux1, interconnect, 6);
+    ?MAPPING(data_a, mux1, mux2, interconnect, 15);
+    ?MAPPING(data_a, mux2, mux0, interconnect, 9);
+    ?MAPPING(data_a, mux2, mux1, interconnect, 11);
+    ?MAPPING(data_a, mux2, mux2, interconnect, 14);
+    ?MAPPING(data_a, mux3, mux0, interconnect, 18);
+    ?MAPPING(data_a, mux3, mux1, interconnect, 22);
+    ?MAPPING(data_a, mux3, mux2, interconnect, 25);
+    ?MAPPING(data_a, mux4, mux0, interconnect, 19);
+    ?MAPPING(data_a, mux4, mux1, local_line, 3);
+    ?MAPPING(data_a, mux4, mux2, local_line, 8);
+    ?MAPPING(data_a, mux5, mux0, local_line, 4);
+    ?MAPPING(data_a, mux5, mux1, local_line, 5);
+    ?MAPPING(data_a, mux5, mux2, local_line, 6);
+    ?MAPPING(data_b, mux0, mux0, interconnect, 2);
     ?MAPPING(data_b, mux0, mux1, interconnect, 7);
-    ?MAPPING(data_b, mux0, mux2, interconnect, 2);
-    ?MAPPING(data_b, mux1, mux0, local_line, 7);
-    ?MAPPING(data_b, mux1, mux1, local_line, 0);
-    ?MAPPING(data_b, mux1, mux2, interconnect, 21);
-    ?MAPPING(data_b, mux2, mux0, interconnect, 10);
-    ?MAPPING(data_b, mux2, mux1, interconnect, 5);
-    ?MAPPING(data_b, mux2, mux2, interconnect, 4);
-    ?MAPPING(data_b, mux3, mux0, interconnect, 16);
-    ?MAPPING(data_b, mux3, mux1, interconnect, 13);
-    ?MAPPING(data_b, mux3, mux2, interconnect, 12);
-    ?MAPPING(data_b, mux4, mux0, interconnect, 24);
-    ?MAPPING(data_b, mux4, mux1, interconnect, 23);
-    ?MAPPING(data_b, mux4, mux2, interconnect, 20);
-    ?MAPPING(data_b, mux5, mux0, local_line, 9);
+    ?MAPPING(data_b, mux0, mux2, interconnect, 17);
+    ?MAPPING(data_b, mux1, mux0, interconnect, 4);
+    ?MAPPING(data_b, mux1, mux1, interconnect, 5);
+    ?MAPPING(data_b, mux1, mux2, interconnect, 10);
+    ?MAPPING(data_b, mux2, mux0, interconnect, 12);
+    ?MAPPING(data_b, mux2, mux1, interconnect, 13);
+    ?MAPPING(data_b, mux2, mux2, interconnect, 16);
+    ?MAPPING(data_b, mux3, mux0, interconnect, 20);
+    ?MAPPING(data_b, mux3, mux1, interconnect, 23);
+    ?MAPPING(data_b, mux3, mux2, interconnect, 24);
+    ?MAPPING(data_b, mux4, mux0, interconnect, 21);
+    ?MAPPING(data_b, mux4, mux1, local_line, 0);
+    ?MAPPING(data_b, mux4, mux2, local_line, 7);
+    ?MAPPING(data_b, mux5, mux0, local_line, 1);
     ?MAPPING(data_b, mux5, mux1, local_line, 2);
-    ?MAPPING(data_b, mux5, mux2, local_line, 1);
+    ?MAPPING(data_b, mux5, mux2, local_line, 9);
     ?MAPPING(data_c, mux0, mux0, interconnect, 0);
     ?MAPPING(data_c, mux0, mux1, interconnect, 3);
     ?MAPPING(data_c, mux0, mux2, interconnect, 8);
-    ?MAPPING(data_c, mux1, mux0, interconnect, 9);
-    ?MAPPING(data_c, mux1, mux1, interconnect, 11);
-    ?MAPPING(data_c, mux1, mux2, interconnect, 14);
-    ?MAPPING(data_c, mux2, mux0, interconnect, 18);
-    ?MAPPING(data_c, mux2, mux1, interconnect, 22);
-    ?MAPPING(data_c, mux2, mux2, interconnect, 25);
-    ?MAPPING(data_c, mux3, mux0, local_line, 4);
-    ?MAPPING(data_c, mux3, mux1, local_line, 5);
-    ?MAPPING(data_c, mux3, mux2, local_line, 6);
-    ?MAPPING(data_c, mux4, mux0, interconnect, 2);
-    ?MAPPING(data_c, mux4, mux1, interconnect, 7);
-    ?MAPPING(data_c, mux4, mux2, interconnect, 17);
-    ?MAPPING(data_c, mux5, mux0, interconnect, 21);
-    ?MAPPING(data_c, mux5, mux1, local_line, 0);
-    ?MAPPING(data_c, mux5, mux2, local_line, 7);
-    ?MAPPING(data_d, mux0, mux0, interconnect, 10);
-    ?MAPPING(data_d, mux0, mux1, interconnect, 5);
-    ?MAPPING(data_d, mux0, mux2, interconnect, 4);
-    ?MAPPING(data_d, mux1, mux0, interconnect, 16);
-    ?MAPPING(data_d, mux1, mux1, interconnect, 13);
-    ?MAPPING(data_d, mux1, mux2, interconnect, 12);
-    ?MAPPING(data_d, mux2, mux0, interconnect, 24);
-    ?MAPPING(data_d, mux2, mux1, interconnect, 23);
-    ?MAPPING(data_d, mux2, mux2, interconnect, 20);
-    ?MAPPING(data_d, mux3, mux0, local_line, 9);
-    ?MAPPING(data_d, mux3, mux1, local_line, 2);
-    ?MAPPING(data_d, mux3, mux2, local_line, 1);
-    ?MAPPING(data_d, mux4, mux0, interconnect, 15);
-    ?MAPPING(data_d, mux4, mux1, interconnect, 6);
-    ?MAPPING(data_d, mux4, mux2, interconnect, 1);
-    ?MAPPING(data_d, mux5, mux0, local_line, 8);
-    ?MAPPING(data_d, mux5, mux1, local_line, 3);
-    ?MAPPING(data_d, mux5, mux2, interconnect, 19)
+    ?MAPPING(data_c, mux1, mux0, interconnect, 2);
+    ?MAPPING(data_c, mux1, mux1, interconnect, 7);
+    ?MAPPING(data_c, mux1, mux2, interconnect, 17);
+    ?MAPPING(data_c, mux2, mux0, interconnect, 9);
+    ?MAPPING(data_c, mux2, mux1, interconnect, 11);
+    ?MAPPING(data_c, mux2, mux2, interconnect, 14);
+    ?MAPPING(data_c, mux3, mux0, interconnect, 18);
+    ?MAPPING(data_c, mux3, mux1, interconnect, 22);
+    ?MAPPING(data_c, mux3, mux2, interconnect, 25);
+    ?MAPPING(data_c, mux4, mux0, interconnect, 21);
+    ?MAPPING(data_c, mux4, mux1, local_line, 0);
+    ?MAPPING(data_c, mux4, mux2, local_line, 7);
+    ?MAPPING(data_c, mux5, mux0, local_line, 4);
+    ?MAPPING(data_c, mux5, mux1, local_line, 5);
+    ?MAPPING(data_c, mux5, mux2, local_line, 6);
+    ?MAPPING(data_d, mux0, mux0, interconnect, 1);
+    ?MAPPING(data_d, mux0, mux1, interconnect, 6);
+    ?MAPPING(data_d, mux0, mux2, interconnect, 15);
+    ?MAPPING(data_d, mux1, mux0, interconnect, 4);
+    ?MAPPING(data_d, mux1, mux1, interconnect, 5);
+    ?MAPPING(data_d, mux1, mux2, interconnect, 10);
+    ?MAPPING(data_d, mux2, mux0, interconnect, 12);
+    ?MAPPING(data_d, mux2, mux1, interconnect, 13);
+    ?MAPPING(data_d, mux2, mux2, interconnect, 16);
+    ?MAPPING(data_d, mux3, mux0, interconnect, 20);
+    ?MAPPING(data_d, mux3, mux1, interconnect, 23);
+    ?MAPPING(data_d, mux3, mux2, interconnect, 24);
+    ?MAPPING(data_d, mux4, mux0, interconnect, 19);
+    ?MAPPING(data_d, mux4, mux1, local_line, 3);
+    ?MAPPING(data_d, mux4, mux2, local_line, 8);
+    ?MAPPING(data_d, mux5, mux0, local_line, 1);
+    ?MAPPING(data_d, mux5, mux1, local_line, 2);
+    ?MAPPING(data_d, mux5, mux2, local_line, 9)
 ).
 
 %%====================================================================
@@ -145,6 +147,29 @@ mux6s() ->
 
 mux3s() ->
     [mux0, mux1, mux2].
+
+%%====================================================================
+%% print
+%%====================================================================
+
+-spec print() -> ok.
+
+print() ->
+    io:format("mux6 | mux3 | ~-18w | ~-18w | ~-18w | ~-18w~n", lc:inputs()),
+    [
+        io:format("~w | ~w | ~-18w | ~-18w | ~-18w | ~-18w~n", [
+            Mux6,
+            Mux3,
+            to_interconnect(data_a, Mux6, Mux3),
+            to_interconnect(data_b, Mux6, Mux3),
+            to_interconnect(data_c, Mux6, Mux3),
+            to_interconnect(data_d, Mux6, Mux3)
+        ])
+        ||
+        Mux6 <- mux6s(),
+        Mux3 <- mux3s()
+    ],
+    ok.
 
 %%====================================================================
 %% tests
