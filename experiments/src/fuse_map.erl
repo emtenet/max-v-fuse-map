@@ -828,7 +828,7 @@
     %?LAB_LINE(14, 25, {{control, 5}, from3, mux2});
     ?LAB_LINE(15, 20, {clk1, control});
     ?LAB_LINE(15, 21, {clk1, invert});
-    ?LAB_LINE(15, 22, {clk2, control_3_not_2}); % clk2_a_load
+    ?LAB_LINE(15, 22, {clk2_a_load, control_3_not_2});
     %?LAB_LINE(15, 24, {s_clr, control_5_not_4});
     ?LAB_LINE(15, 25, {a_clr2, global});
     ?LAB_LINE(16, 20, {clk1, control_0_not_1});
@@ -840,14 +840,14 @@
     ?LAB_LINE(19, 20, {ena2, off});
     ?LAB_LINE(19, 21, {s_load, control});
     ?LAB_LINE(19, 22, {clk2, invert});
-    %?LAB_LINE(19, 25, {a_load, invert});
+    ?LAB_LINE(19, 25, {a_load, invert});
     ?LAB_LINE(20, 20, {s_load, unknown});
     ?LAB_LINE(20, 21, {a_clr1, global});
     ?LAB_LINE(20, 24, {ena2_s_load, invert});
     ?LAB_LINE(20, 25, {a_clr1, off});
     %?LAB_LINE(21, 20, s_clr);
     %?LAB_LINE(21, 21, {s_clr, invert});
-    %?LAB_LINE(21, 22, {a_load, control});
+    ?LAB_LINE(21, 22, {a_load, control});
     ?LAB_LINE(21, 23, {a_clr1, invert});
     ?LAB_LINE(21, 24, {a_clr2, invert});
     ?LAB_LINE(21, 25, {a_clr2, off});

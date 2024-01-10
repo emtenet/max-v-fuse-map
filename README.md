@@ -42,6 +42,7 @@ My experiments are being run in the following
  * [LAB ena1](experiments/src/lab_ena1_experiment.erl)
  * [LAB ena2](experiments/src/lab_ena2_experiment.erl)
  * [LAB ena2 vs s-load](experiments/src/lab_ena2_s_load_experiment.erl)
+ * [LAB a-load](experiments/src/lab_a_load_experiment.erl)
 
 ## Maps
 
@@ -167,9 +168,11 @@ The specific control line selected is:
  * a `0` bit selects 0,
  * a `1` bit selects 1.
 
-## `{lab(), clk2, control_3_not_2}`
+## `{lab(), clk2_a_load, control_3_not_2}`
 
-When the LAB's clk2 line is selected from a control line.
+The LAB's clk2 & a-load lines share a common control source.
+
+When the LAB's clk2 / a-load line is selected from a control line.
 
 The specific control line selected is:
 
@@ -245,6 +248,14 @@ The specific control line selected is:
 ## `{lab(), a_clr#, invert}`
 
 The LAB's a-clr# line is inverted.
+
+## `{lab(), a_load, control}`
+
+The LAB's a-load line is selected from one of the control lines.
+
+## `{lab(), a_load, invert}`
+
+The LAB's a-load line is inverted.
 
 ## `{lab(), s_load, control}`
 

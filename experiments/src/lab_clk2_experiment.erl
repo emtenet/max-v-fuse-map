@@ -20,13 +20,15 @@
 %
 % Then in control is selected above, a further fuse:
 %
-%  * {{lab, X, Y}, clk2, control_0_not_1}
+%  * {{lab, X, Y}, clk2_a_load, control_0_not_1}
 %
 % selects between {control, 0} and {control, 1}.
 %
 % The clock line can be inverted with:
 %
 %  * {{lab, X, Y}, clk2, invert}
+%
+% NOTE: Some of the fuses are shared with the a-load line.
 
 %%====================================================================
 %% run
@@ -125,7 +127,7 @@ experiments(Device, LAB, Experiments) ->
             expect:fuse(Matrix, Clk1Control, {LAB, clk1, control}),
             expect:fuse(Matrix, Clk1Select,  {LAB, clk1, control_0_not_1}),
             expect:fuse(Matrix, Clk2Control, {LAB, clk2, control}),
-            expect:fuse(Matrix, Clk2Select,  {LAB, clk2, control_3_not_2});
+            expect:fuse(Matrix, Clk2Select,  {LAB, clk2_a_load, control_3_not_2});
 
         _ ->
             ok
