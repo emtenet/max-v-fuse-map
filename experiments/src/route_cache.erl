@@ -23,6 +23,7 @@
 -export([experiments/4]).
 
 -export([fold_blocks/4]).
+-export([fold_block/2]).
 -export([fold_indexes/3]).
 -export([fold_froms/3]).
 -export([fold_cached/4]).
@@ -430,6 +431,21 @@ fold_blocks(Type, Fold, Init, Cache) ->
 fold_block(Fold, Block, {route_cache, _, Keys, Blocks}, Acc) ->
     #{Block := Indexes} = Blocks,
     Fold(Block, {fold_indexes, Indexes, Keys}, Acc).
+
+%%====================================================================
+%% fold_block
+%%====================================================================
+
+-spec fold_block(block(), cache()) -> {ok, fold_indexes()} | false.
+
+fold_block(Block, {route_cache, _, Keys, Blocks}) ->
+    case Blocks of
+        #{Block := Indexes} ->
+            {ok, {fold_indexes, Indexes, Keys}};
+
+        _ ->
+            false
+    end.
 
 %%====================================================================
 %% fold_indexes
