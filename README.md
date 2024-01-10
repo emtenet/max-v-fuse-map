@@ -43,6 +43,7 @@ My experiments are being run in the following
  * [LAB ena2](experiments/src/lab_ena2_experiment.erl)
  * [LAB ena2 vs s-load](experiments/src/lab_ena2_s_load_experiment.erl)
  * [LAB a-load](experiments/src/lab_a_load_experiment.erl)
+ * [LAB s-clr](experiments/src/lab_s_clr_experiment.erl)
 
 ## Maps
 
@@ -257,6 +258,23 @@ The LAB's a-load line is selected from one of the control lines.
 
 The LAB's a-load line is inverted.
 
+## `{lab(), s_clr, control}`
+
+The LAB's s-clr line is selected from one of the control lines.
+
+## `{lab(), s_clr, invert}`
+
+The LAB's s-clr line is inverted.
+
+## `{lab(), s_clr, control_5_not_4}`
+
+When the LAB's s-clr line is selected from a control line.
+
+The specific control line selected is:
+
+ * a `0` bit selects 5,
+ * a `1` bit selects 4.
+
 ## `{lab(), s_load, control}`
 
 The LAB's s-load line is selected from one of the control lines.
@@ -321,7 +339,7 @@ is named `{lc(), lut, a1b0c1d1}`.
 
 The stored bit is the result of the lookup.
 
-## `{lc(), s_load}`
+## `{lc(), s_clr_load}`
 
-The LC's s-load line is enabled.
+The LC's s-clr & s-load lines are enabled.
 

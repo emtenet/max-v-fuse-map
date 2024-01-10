@@ -1,36 +1,28 @@
--module(lab_s_load_experiment).
+-module(lab_s_clr_experiment).
 
 -export([run/0]).
 
-% This experiment was designed to look at how the LAB's s-load
+% This experiment was designed to look at how the LAB's s-clr
 % source was selected between the two (2) LAB control lines.
 %
-% The two control lines are specifically selected by:
+% The two control lines are specifically selected by routing
+% the clock through LC's 7 and 8. LC 7 can only be selected into
+% even control lines, and LC 8 into odd control lines.
 %
-% * routing the global clocks 2 and 3 into local interconnects.
-%   Global 2 can only be selected into interconnect 12 and then control 1.
-%   Global 3 can only be selected into interconnect 25 and then control 0.
+% It appears that the s-clr line can only be enabled for all LCs in
+% a LAB, not one at a time.
 %
-% * routing the clock through LC's 7 and 8. LC 7 can only be selected
-%   into even control lines, and LC 8 into odd control lines.
+% The LAB's s-clr line is enabled with:
 %
-% The s-load line is sourced from a control line when:
+%  * {{lab, X, Y}, s_clr}
 %
-%  * {{lab, X, Y}, s_load, control}
+% The s-clr line is selected between {control, 4} and {control, 5}:
 %
-% The s-load line is selected between {control, 0} and {control, 1}:
+%  * {{lab, X, Y}, s_clr, control_5_not_4}
 %
-%  * {{lab, X, Y}, ena2_s_load, control_0_not_1}
+% The s-clr line can be inverted with:
 %
-% The s-load line can be inverted with:
-%
-%  * {{lab, X, Y}, ena2_s_load, invert}
-%
-% The LC s-load is enabled with:
-%
-%  * {{lc, X, Y, N}, s_load}
-%
-% NOTE: Some of the fuses are shared with the ena2 line.
+%  * {{lab, X, Y}, s_clr, invert}
 
 %%====================================================================
 %% run
@@ -51,29 +43,29 @@ density(Density) ->
 device(Device) ->
     Gclks = device:gclk_pins(Device),
     Pins0 = lists:subtract(device:pins(Device), Gclks),
-    iterate:labs(Device, 4, Pins0,
+    iterate:labs(Device, 2, Pins0,
         fun (LAB, Pins) ->
             sources(Device, LAB, Gclks, Pins)
         end,
         fun (LAB, _, Experiments) ->
             experiments(Device, LAB, Experiments)
-        end
+        end,
+        {batch, 4}
      ).
 
 %%--------------------------------------------------------------------
 
 sources(Device, LAB, Gclks, Pins) ->
-    [SLoad, _, SLoad2, SLoad3] = Gclks,
-    {Clk, SData, D, Q} = Pins,
-    Common = {LAB, Clk, D, Q, SData},
+    [Clk, Clr, _, _] = Gclks,
+    {D, Q} = Pins,
+    Common = {LAB, Clk, D, Q, Clr},
     [
         source_never(Device, Common, never),
         source_always(Device, Common, always),
-        source_global(Device, Common, gclk2, SLoad2, <<"!">>),
-        source_global(Device, Common, gclk2, SLoad2, <<>>),
-        source_global(Device, Common, gclk3, SLoad3, <<>>),
-        source_local(Device, Common, local7, SLoad, 7),
-        source_local(Device, Common, local8, SLoad, 8)
+        source_global(Device, Common, global, <<"!">>),
+        source_global(Device, Common, global_not, <<>>),
+        source_local(Device, Common, local7, 7),
+        source_local(Device, Common, local8, 8)
     ].
 
 %%--------------------------------------------------------------------
@@ -82,85 +74,91 @@ experiments(Device, LAB, Experiments) ->
     io:format(" ==> ~p ~p~n", [Device, LAB]),
     Matrix0 = matrix:build(Device, Experiments),
     Matrix = matrix:remove_fuses(Matrix0, fun
-        ({{iob, _, _}, _}) -> true;
-        ({{iob, _, _}, _, _}) -> true;
-        ({{iob, _, _}, _, _, _}) -> true;
         ({{ioc, _, _, _}, _}) -> true;
         ({{ioc, _, _, _}, _, _}) -> true;
-        ({{ioc, _, _, _}, _, _, _}) -> true;
-        ({{lab, _, _}, clk1, _}) -> true;
         ({_, lut, _}) -> true;
+        ({_, data_b3, _}) -> true;
+        ({_, data_b6, _}) -> true;
+        ({_, data_c3, _}) -> true;
+        ({_, data_c6, _}) -> true;
+        ({_, data_d3, _}) -> true;
+        ({_, data_d6, _}) -> true;
         (_) -> false
     end),
     %
     %matrix:print(Matrix),
     %display:control_routing(Experiments),
     %
-    expect:fuse(Matrix, [1,1,0,0,0,0,0], {LAB, s_load, control}),
-    expect:fuse(Matrix, [0,1,0,0,0,0,0], {LAB, s_load, unknown}),
-    expect:fuse(Matrix, [1,1,0,1,1,1,1], {LAB, ena2_s_load, invert}),
+    % "always" is compiled to an LCELL outputting a constant 1
+    {always, _, #{signals := #{<<"~VCC">> := VCC}}}
+      = lists:keyfind(always, 1, Experiments),
+    #{dests := [#{port := s_clr}]} = VCC,
+    %
+    expect:fuse(Matrix, [1,0,0,0,0,0], {LAB, s_clr, control}),
+    expect:fuse(Matrix, [1,1,0,1,1,1], {LAB, s_clr, invert}),
     LC = lab:lc(LAB, 0),
-    expect:fuse(Matrix, [1,0,0,0,0,0,0], {LC, s_clr_load}),
+    expect:fuse(Matrix, [1,0,0,0,0,0], {LC, s_clr_load}),
+    %
+    [_, _, _, _, Local7, Local8] = Experiments,
+    expect:control(Local7, cc, 4, s_clr),
+    expect:control(Local8, cc, 5, s_clr),
     %
     Control = control_pattern(Experiments),
-    expect:fuse(Matrix, Control, {LAB, ena2_s_load, control_0_not_1}),
+    expect:fuse(Matrix, Control, {LAB, s_clr, control_5_not_4}),
     ok.
 
 %%--------------------------------------------------------------------
 
 control_pattern(Experiments) ->
     lists:map(fun ({_, _, #{signals := Signals}}) ->
-        control_pattern_bit(Signals)
+        maps:fold(fun control_pattern_bit/3, 1, Signals)
     end, Experiments).
 
 %%--------------------------------------------------------------------
 
-control_pattern_bit(#{ss := #{dests := [#{port := s_load, route := Route}]}}) ->
-    case  Route of
-        [{lab_control_mux, _, _, 0, 1} | _] ->
+control_pattern_bit(_, #{dests := [#{port := s_clr, route := Route}]}, _) ->
+    case Route of
+        [{lab_control_mux, _, _, 0, 4} | _] ->
             1;
 
-        [{lab_control_mux, _, _, 0, 0} | _] ->
+        [{lab_control_mux, _, _, 0, 5} | _] ->
             0
     end;
-control_pattern_bit(#{sload := #{dests := [#{port := s_load, route := Route}]}}) ->
-    case  Route of
-        [{lab_control_mux, _, _, 0, 1} | _] ->
-            1;
-
-        [{lab_control_mux, _, _, 0, 0} | _] ->
-            0
-    end;
-control_pattern_bit(_) ->
-    1.
+control_pattern_bit(_, _, Bit) ->
+    Bit.
 
 %%--------------------------------------------------------------------
 
-source_never(Device, {LAB, Clk, D, Q, SData}, Name) ->
-    % Ensure that s-load is not automatically compiled with:
-    %   d => d AND sdata
+source_never(Device, {LAB, Clk, D, Q, Clr}, Name) ->
     #{
         title => Name,
         device => Device,
         settings => [
-            {location, sdata, SData},
+            {location, clr, Clr},
+            {global_clock, clr, false},
             {location, ff, lab:lc(LAB, 0)},
             {location, clk, Clk},
+            {global_clock, clk, true},
             {location, d, D},
             {location, q, Q}
         ],
         verilog => <<
             "module experiment (\n"
             "  input wire clk,\n"
-            "  input wire sdata,\n"
+            "  input wire clr,\n"
             "  input wire d,\n"
             "  output wire q\n"
             ");\n"
-            "  dff ff (\n"
-            "    .d(d && sdata),\n"
+            "  dffeas ff (\n"
+            "    .d(d && clr),\n"
             "    .clk(clk),\n"
             "    .clrn(1),\n"
             "    .prn(1),\n"
+            "    .ena(1),\n"
+            "    .asdata(1),\n"
+            "    .aload(0),\n"
+            "    .sclr(0),\n"
+            "    .sload(0),\n"
             "    .q(q)\n"
             "  );\n"
             "endmodule\n"
@@ -169,21 +167,61 @@ source_never(Device, {LAB, Clk, D, Q, SData}, Name) ->
 
 %%--------------------------------------------------------------------
 
-source_always(Device, {LAB, Clk, D, Q, SData}, Name) ->
+source_always(Device, {LAB, Clk, D, Q, Clr}, Name) ->
     #{
         title => Name,
         device => Device,
         settings => [
-            {location, sdata, SData},
+            {location, clr, Clr},
+            {global_clock, clr, false},
             {location, ff, lab:lc(LAB, 0)},
             {location, clk, Clk},
+            {global_clock, clk, true},
             {location, d, D},
             {location, q, Q}
         ],
         verilog => <<
             "module experiment (\n"
             "  input wire clk,\n"
-            "  input wire sdata,\n"
+            "  input wire clr,\n"
+            "  input wire d,\n"
+            "  output wire q\n"
+            ");\n"
+            "  dffeas ff (\n"
+            "    .d(d && clr),\n"
+            "    .clk(clk),\n"
+            "    .clrn(1),\n"
+            "    .prn(1),\n"
+            "    .ena(1),\n"
+            "    .asdata(1),\n"
+            "    .aload(0),\n"
+            "    .sclr(1),\n"
+            "    .sload(0),\n"
+            "    .q(q)\n"
+            "  );\n"
+            "endmodule\n"
+        >>
+    }.
+
+%%--------------------------------------------------------------------
+
+source_global(Device, {LAB, Clk, D, Q, Clr}, Name, Not) ->
+    #{
+        title => Name,
+        device => Device,
+        settings => [
+            {location, clr, Clr},
+            {global_clock, clr, true},
+            {location, ff, lab:lc(LAB, 0)},
+            {location, clk, Clk},
+            {global_clock, clk, true},
+            {location, d, D},
+            {location, q, Q}
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire clk,\n"
+            "  input wire clr,\n"
             "  input wire d,\n"
             "  output wire q\n"
             ");\n"
@@ -193,9 +231,9 @@ source_always(Device, {LAB, Clk, D, Q, SData}, Name) ->
             "    .clrn(1),\n"
             "    .prn(1),\n"
             "    .ena(1),\n"
-            "    .asdata(sdata),\n"
+            "    .asdata(1),\n"
             "    .aload(0),\n"
-            "    .sclr(0),\n"
+            "    .sclr(", Not/binary, "clr),\n"
             "    .sload(1),\n"
             "    .q(q)\n"
             "  );\n"
@@ -205,71 +243,31 @@ source_always(Device, {LAB, Clk, D, Q, SData}, Name) ->
 
 %%--------------------------------------------------------------------
 
-source_global(Device, {LAB, Clk, D, Q, SData}, Name, SLoad, Not) ->
+source_local(Device, {LAB, Clk, D, Q, Clr}, Name, N) ->
     #{
         title => Name,
         device => Device,
         settings => [
-            {location, sdata, SData},
-            {location, sload, SLoad},
-            {global_clock, sload, true},
+            {location, clr, Clr},
+            {global_clock, clr, false},
+            {location, cc, lab:lc(LAB, N)},
             {location, ff, lab:lc(LAB, 0)},
             {location, clk, Clk},
+            {global_clock, clk, true},
             {location, d, D},
             {location, q, Q}
         ],
         verilog => <<
             "module experiment (\n"
             "  input wire clk,\n"
-            "  input wire sload,\n"
-            "  input wire sdata,\n"
+            "  input wire clr,\n"
             "  input wire d,\n"
             "  output wire q\n"
             ");\n"
-            "  dffeas ff (\n"
-            "    .d(d),\n"
-            "    .clk(clk),\n"
-            "    .clrn(1),\n"
-            "    .prn(1),\n"
-            "    .ena(1),\n"
-            "    .asdata(sdata),\n"
-            "    .aload(0),\n"
-            "    .sclr(0),\n"
-            "    .sload(", Not/binary, "sload),\n"
-            "    .q(q)\n"
-            "  );\n"
-            "endmodule\n"
-        >>
-    }.
-
-%%--------------------------------------------------------------------
-
-source_local(Device, {LAB, Clk, D, Q, SData}, Name, SLoad, N) ->
-    #{
-        title => Name,
-        device => Device,
-        settings => [
-            {location, sdata, SData},
-            {location, sload, SLoad},
-            {global_clock, sload, false},
-            {location, ss, lab:lc(LAB, N)},
-            {location, ff, lab:lc(LAB, 0)},
-            {location, clk, Clk},
-            {location, d, D},
-            {location, q, Q}
-        ],
-        verilog => <<
-            "module experiment (\n"
-            "  input wire clk,\n"
-            "  input wire sload,\n"
-            "  input wire sdata,\n"
-            "  input wire d,\n"
-            "  output wire q\n"
-            ");\n"
-            "  wire s;\n"
-            "  lcell ss (\n"
-            "    .in(sload),\n"
-            "    .out(s)\n"
+            "  wire c;\n"
+            "  lcell cc (\n"
+            "    .in(clr),\n"
+            "    .out(c)\n"
             "  );\n"
             "  dffeas ff (\n"
             "    .d(d),\n"
@@ -277,10 +275,10 @@ source_local(Device, {LAB, Clk, D, Q, SData}, Name, SLoad, N) ->
             "    .clrn(1),\n"
             "    .prn(1),\n"
             "    .ena(1),\n"
-            "    .asdata(sdata),\n"
+            "    .asdata(1),\n"
             "    .aload(0),\n"
-            "    .sclr(0),\n"
-            "    .sload(s),\n"
+            "    .sclr(c),\n"
+            "    .sload(0),\n"
             "    .q(q)\n"
             "  );\n"
             "endmodule\n"
