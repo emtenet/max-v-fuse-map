@@ -95,6 +95,7 @@ experiments(Device, LAB, Experiments) ->
     #{dests := [#{port := s_clr}]} = VCC,
     %
     expect:fuse(Matrix, [1,0,0,0,0,0], {LAB, s_clr, control}),
+    expect:fuse(Matrix, [0,0,1,1,0,0], {LAB, s_load, not_always}),
     expect:fuse(Matrix, [1,1,0,1,1,1], {LAB, s_clr, invert}),
     LC = lab:lc(LAB, 0),
     expect:fuse(Matrix, [1,0,0,0,0,0], {LC, s_clr_load}),

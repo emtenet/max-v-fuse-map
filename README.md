@@ -44,6 +44,7 @@ My experiments are being run in the following
  * [LAB ena2 vs s-load](experiments/src/lab_ena2_s_load_experiment.erl)
  * [LAB a-load](experiments/src/lab_a_load_experiment.erl)
  * [LAB s-clr](experiments/src/lab_s_clr_experiment.erl)
+ * [LAB s-load always](experiments/src/lab_s_load_always_experiment.erl)
 
 ## Maps
 
@@ -279,9 +280,9 @@ The specific control line selected is:
 
 The LAB's s-load line is selected from one of the control lines.
 
-## `{lab(), s_load, unknown}`
+## `{lab(), s_load, not_always}`
 
-This fuse seems to be relate to a LAB's s-load line.
+It has a bit `0` when the s-load is disconnected or connected to a signal.
 
 It has a bit `1` when the s-load line is a constant `1`.
 

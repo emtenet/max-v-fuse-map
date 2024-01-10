@@ -97,7 +97,7 @@ experiments(Device, LAB, Experiments) ->
     %display:control_routing(Experiments),
     %
     expect:fuse(Matrix, [1,1,0,0,0,0,0], {LAB, s_load, control}),
-    expect:fuse(Matrix, [0,1,0,0,0,0,0], {LAB, s_load, unknown}),
+    expect:fuse(Matrix, [0,1,0,0,0,0,0], {LAB, s_load, not_always}),
     expect:fuse(Matrix, [1,1,0,1,1,1,1], {LAB, ena2_s_load, invert}),
     LC = lab:lc(LAB, 0),
     expect:fuse(Matrix, [1,0,0,0,0,0,0], {LC, s_clr_load}),

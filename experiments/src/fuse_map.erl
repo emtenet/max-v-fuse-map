@@ -841,7 +841,7 @@
     ?LAB_LINE(19, 21, {s_load, control});
     ?LAB_LINE(19, 22, {clk2, invert});
     ?LAB_LINE(19, 25, {a_load, invert});
-    ?LAB_LINE(20, 20, {s_load, unknown});
+    ?LAB_LINE(20, 20, {s_load, not_always});
     ?LAB_LINE(20, 21, {a_clr1, global});
     ?LAB_LINE(20, 24, {ena2_s_load, invert});
     ?LAB_LINE(20, 25, {a_clr1, off});
