@@ -2,6 +2,7 @@
 
 -export([build/1]).
 -export([build/2]).
+-export([build_with_location/2]).
 -export([is_empty/1]).
 -export([fuse_count/1]).
 -export([find_fuse/2]).
@@ -74,6 +75,17 @@ fuse_map_to_name(Fuse, Density) ->
         {ok, N} -> N;
         {error, E} -> E
     end.
+
+%%====================================================================
+%% build_with_location
+%%====================================================================
+
+-spec build_with_location(density() | device(), [experiment()]) -> matrix().
+
+build_with_location(DensityOrDevice, Experiments) ->
+    Density = density:or_device(DensityOrDevice),
+    With = fun (Fuse) -> fuse_map:to_location(Fuse, Density) end,
+    build_with(With, Experiments).
 
 %%====================================================================
 %% build_with
