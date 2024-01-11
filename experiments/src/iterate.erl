@@ -119,5 +119,16 @@ pins_select(6, {[A, B, C, D], Tail = [E, F | Head]}) ->
 pins_select(6, {[A, B, C, D, E], Tail = [F | Head]}) ->
     {{A, B, C, D, E, F}, {Head, Tail}};
 pins_select(6, {[A, B, C, D, E, F | Head], Tail}) ->
-    {{A, B, C, D, E, F}, {Head, Tail}}.
+    {{A, B, C, D, E, F}, {Head, Tail}};
+pins_select(N, Pins) when N > 6 ->
+    pins_select(N, [], Pins).
+
+%%--------------------------------------------------------------------
+
+pins_select(0, Ps, Pins) ->
+    {list_to_tuple(lists:reverse(Ps)), Pins};
+pins_select(N, Ps, {[], Tail = [P | Head]}) ->
+    pins_select(N - 1, [P | Ps], {Head, Tail});
+pins_select(N, Ps, {[P | Head], Tail}) ->
+    pins_select(N - 1, [P | Ps], {Head, Tail}).
 
