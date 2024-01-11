@@ -49,6 +49,9 @@ My experiments are being run in the following
  * LAB interconnect MUX
    [playground 1](experiments/src/lab_interconnect_mux_playground.erl)
    and [playground 2](experiments/src/lab_interconnect_mux_playground2.erl)
+ * [LAB control](experiments/src/lab_control_experiment.erl)
+ * LAB control MUX
+   [playground](experiments/src/lab_cotntrol_mux_playground.erl)
 
 ## Maps
 
