@@ -46,6 +46,7 @@ My experiments are being run in the following
  * [LAB s-clr](experiments/src/lab_s_clr_experiment.erl)
  * [LAB s-load always](experiments/src/lab_s_load_always_experiment.erl)
  * [LC a-load](experiments/src/lc_a_load_experiment.erl)
+ * LAB interconnect MUX [playground](experiments/src/lab_interconnect_mux_playground.erl)
 
 ## Maps
 
