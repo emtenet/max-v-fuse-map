@@ -51,7 +51,8 @@ My experiments are being run in the following
    and [playground 2](experiments/src/lab_interconnect_mux_playground2.erl)
  * [LAB control](experiments/src/lab_control_experiment.erl)
  * LAB control MUX
-   [playground](experiments/src/lab_cotntrol_mux_playground.erl)
+   [playground](experiments/src/lab_control_mux_playground.erl)
+   and [theory](experiments/src/lab_control_mux_theory.erl)
 
 ## Maps
 
@@ -61,6 +62,7 @@ A mapping to and from fuse numbers, locations & names is encoded in
 The following mux mappings are encoded:
 
  * [LC data MUX](experiments/src/lc_data_mux_map.erl)
+ * [LAB control MUX](experiments/src/lab_control_mux_map.erl)
  * [IOC output MUX](experiments/src/ioc_output_mux_map.erl)
  * [IOC enable MUX](experiments/src/ioc_enable_mux_map.erl)
 
