@@ -72,14 +72,6 @@
 % * building up a local_interconnect model.
 %
 % Then match the model up with the RCF file.
-%
-%  Outliers
-% =========
-%
-% As of this writting, two outlier experiments where found that
-% contained data_#6 fuses _without_ a data_#3 fuse! (zero-hot!)
-% Assuming a mux0 fuse as default is enough to pass this theoryi
-% check for those two experiments.
 
 %%====================================================================
 %% run
@@ -225,9 +217,6 @@ theory(LC = {lc, X, Y, _}, data_a, Model) ->
         #{LC := #{data_a6 := Mux6, data_a3 := Mux3}}  ->
             theory(X, Y, data_a, Mux6, Mux3);
 
-        #{LC := #{data_a6 := Mux6}}  ->
-            theory(X, Y, data_a, Mux6, mux0);
-
         #{LC := Muxes} ->
             Muxes;
 
@@ -238,9 +227,6 @@ theory(LC = {lc, X, Y, _}, data_b, Model) ->
     case Model of
         #{LC := #{data_b6 := Mux6, data_b3 := Mux3}} ->
             theory(X, Y, data_b, Mux6, Mux3);
-
-        #{LC := #{data_b6 := Mux6}}  ->
-            theory(X, Y, data_b, Mux6, mux0);
 
         #{LC := Muxes} ->
             Muxes;
@@ -253,9 +239,6 @@ theory(LC = {lc, X, Y, _}, data_c, Model) ->
         #{LC := #{data_c6 := Mux6, data_c3 := Mux3}} ->
             theory(X, Y, data_c, Mux6, Mux3);
 
-        #{LC := #{data_c6 := Mux6}}  ->
-            theory(X, Y, data_c, Mux6, mux0);
-
         #{LC := Muxes} ->
             Muxes;
 
@@ -266,9 +249,6 @@ theory(LC = {lc, X, Y, _}, data_d, Model) ->
     case Model of
         #{LC := #{data_d6 := Mux6, data_d3 := Mux3}} ->
             theory(X, Y, data_d, Mux6, Mux3);
-
-        #{LC := #{data_d6 := Mux6}}  ->
-            theory(X, Y, data_d, Mux6, mux0);
 
         #{LC := Muxes} ->
             Muxes;
