@@ -2,6 +2,17 @@
 
 -export([run/0]).
 
+% This experiment looks for pairs of fuses that could form a
+% LAB's interconnect mux.
+%
+%  * look for fuses in the LAB's block {X, Y, _, _, cell, _}
+%  * only collect pairs of fuses
+%
+% Then for each interconnect 0..25 try and split the fuses into
+% two sides (left & right) of the two-dimentional mux.
+%
+% We find muxes of 3 x 4 dimentions.
+
 %%====================================================================
 %% run
 %%====================================================================
