@@ -128,6 +128,10 @@ from(_, _, [], _, _, _, _, Acc) ->
 from(N, Ns, [_ | Froms], Matrix, X, Y, Index, Acc0) ->
     Pattern = lists:map(fun (NN) when NN =:= N -> 0; (_) -> x end, Ns),
     case matrix:pattern_match(Matrix, Pattern) of
+        [{_, Fuse}] ->
+            Acc = interconnects_add_one(X, Y, Index, Fuse, Acc0),
+            from(N + 1, Ns, Froms, Matrix, X, Y, Index, Acc);
+
         [{_, Fuse1}, {_, Fuse2}] ->
             Acc = interconnects_add_pair(X, Y, Index, Fuse1, Fuse2, Acc0),
             from(N + 1, Ns, Froms, Matrix, X, Y, Index, Acc);
@@ -162,6 +166,13 @@ interconnects_add_pair(X, Y, Index, Fuse1, Fuse2, Acc) ->
     io:format("   ~-18w <- ~s ~w ~w~n", [{interconnect, Index}, Side, Key1, Key2]),
     Acc1 = interconnects_add(Side, Index, Key1, Key2, Acc),
     interconnects_add(Side, Index, Key2, Key1, Acc1).
+
+%%--------------------------------------------------------------------
+
+interconnects_add_one(X, Y, Index, Fuse, Acc) ->
+    {Side, Key} = fuse_key(X, Y, Fuse),
+    io:format("   ~-18w <- ~s ~w~n", [{interconnect, Index}, Side, Key]),
+    interconnects_add(Side, Index, Key, direct_link, Acc).
 
 %%--------------------------------------------------------------------
 

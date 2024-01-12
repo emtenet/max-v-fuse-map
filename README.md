@@ -98,6 +98,14 @@ so a user code bit of `1` is stored as a `0`.
 
 ## IOB Fuses
 
+### `{iob(), {interconnect, #}, direct_link}`
+
+Selects a direct-link from a neighbouring LAB onto an IOB's interconnect.
+
+Only applicable for IOBs on the left and right sides.
+
+Not used at the same time as the interconnect muxes below.
+
 ### `{iob(), {interconnect, #}, from4, mux#}`, `{iob(), {interconnect, #}, from3, mux#}` and `{iob(), {interconnect, 8/17}, from4, gclk}`
 
 Selects a direct-link, C4 or R4 onto an IOB's interconnect.
@@ -198,6 +206,12 @@ Schmitt Trigger on IOC inputs enabled with a POF bit of `0`.
 NOTE: Also enabled when in output mode.
 
 ## LAB Fuses
+
+### `{lab(), {interconnect, #}, direct_link}`
+
+Selects a direct-link from a neighbouring LAB onto a LAB's interconnect.
+
+Not used at the same time as the interconnect muxes below.
 
 ### `{lab(), {interconnect, #}, from4, mux#}`, `{lab(), {interconnect, #}, from3, mux#}` and `{lab(), {interconnect, 12/25}, from4, gclk}`
 
