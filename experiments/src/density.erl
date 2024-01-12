@@ -24,6 +24,7 @@
 -export([right_rows/1]).
 -export([global_block/1]).
 -export([block_type/3]).
+-export([is_global/3]).
 -export([is_lab/2]).
 -export([is_lab/3]).
 -export([is_iob/2]).
@@ -772,6 +773,21 @@ block(_, Y, #metric{indent_bottom_lab = B}) when Y < B ->
     false;
 block(_, _, _) ->
     logic.
+
+%%====================================================================
+%% is_global
+%%====================================================================
+
+-spec is_global(max_ii:x(), max_ii:y(), density()) -> boolean().
+
+is_global(9, 3, max_v_570z) ->
+    true;
+is_global(11, 3, max_v_1270z) ->
+    true;
+is_global(13, 3, max_v_2210z) ->
+    true;
+is_global(_, _, _) ->
+    false.
 
 %%====================================================================
 %% is_lab
