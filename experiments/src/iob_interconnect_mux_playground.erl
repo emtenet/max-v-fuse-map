@@ -152,10 +152,19 @@ remove_fuse(max_v_2210z, _, _, {13, 3, _, _, cell, 21}) -> true; % UFM
 remove_fuse(_, X, _, {XX, head, _, cell, 26})
         when XX < X - 1 orelse XX > X + 1 ->
     true;
-remove_fuse(Density, _, _, Location) ->
+remove_fuse(Density, X, Y, Location) ->
     case fuse_map:to_name(Location, Density) of
-        {ok, _} -> true;
-        {error, _} -> false
+        {ok, {{iob, X, Y}, {interconnect, _}, _}} ->
+            false;
+
+        {ok, {{iob, X, Y}, {interconnect, _}, _, _}} ->
+            false;
+
+        {ok, _} ->
+            true;
+
+        {error, _} ->
+            false
     end.
 
 %%--------------------------------------------------------------------
