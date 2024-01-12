@@ -52,7 +52,7 @@ iobs_loop(_, [], _, _, _, _) ->
 iobs_loop(Batch, IOBs0, Pins0, PinCount, Sources, Experiments) ->
     {IOBs, Pins, Sets} =
         iobs_sources(Batch, IOBs0, Pins0, PinCount, Sources, []),
-    Ss = lists:flatten([S || {_, _, S} <- Sets]),
+    Ss = lists:flatten([S || {_, _, _, S} <- Sets]),
     {ok, Es} = experiment:compile_to_fuses_and_rcf(Ss),
     iobs_experiments(Sets, Es, Experiments),
     iobs_loop(Batch, IOBs, Pins, PinCount, Sources, Experiments).
