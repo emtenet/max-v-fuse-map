@@ -14,7 +14,7 @@ run() ->
 density(Density) ->
     Device = density:largest_device(Density),
     Pins0 = device:pins(Device),
-    iterate:labs(Device, 1, Pins0,
+    iterate:labs(Device, Pins0, 1,
         fun (LAB, Pins) ->
             sources(Device, LAB, Pins)
         end,

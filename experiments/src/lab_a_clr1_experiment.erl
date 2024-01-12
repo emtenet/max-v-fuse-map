@@ -55,7 +55,7 @@ density(Density) ->
 device(Device) ->
     Gclks = device:gclk_pins(Device),
     Pins0 = lists:subtract(device:pins(Device), Gclks),
-    iterate:labs(Device, 3, Pins0,
+    iterate:labs(Device, Pins0, 3,
         fun (LAB, Pins) ->
             sources(Device, LAB, Gclks, Pins)
         end,
