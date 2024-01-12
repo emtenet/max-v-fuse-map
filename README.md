@@ -59,6 +59,7 @@ My experiments are being run in the following
    and [theory](experiments/src/global_network_theory.erl)
  * IOB interconnect MUX
    [playground](experiments/src/iob_interconnect_mux_playground.erl)
+ * [Global internal](experiments/src/global_internal_experiment.erl)
 
 ## Maps
 
