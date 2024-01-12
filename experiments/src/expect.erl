@@ -20,14 +20,14 @@ control({_, _, #{signals := Signals}}, Signal, Control, Port) ->
             io:format("  ~w -> control #~b -> ~s~n", [Signal, Control, Port]),
             io:format("Got:~n", []),
             io:format("  ~w -> control #~b -> ~s~n", [Signal, Other, Port]),
-            throw(stop);
+            throw(control_not_as_expected);
 
         Other ->
             io:format("Expect:~n", []),
             io:format("  ~w -> control #~b -> ~s~n", [Signal, Control, Port]),
             io:format("Got:~n", []),
             io:format("  ~p~n", [Other]),
-            throw(stop)
+            throw(control_not_found)
     end.
 
 %%====================================================================
@@ -41,21 +41,15 @@ fuse(Matrix, Pattern, Fuse) ->
 
         _ ->
             Fuses = matrix:pattern_is(Matrix, Pattern),
-            case Fuses of
-                [{_, Fuse}] ->
+            case lists:keyfind(Fuse, 2, Fuses) of
+                {_, _} ->
                     ok;
 
                 _ ->
-                    case lists:keyfind(Fuse, 2, Fuses) of
-                        {_, _} ->
-                            ok;
-
-                        false ->
-                            io:format("Pattern:~n  ~w~n", [Pattern]),
-                            io:format("Expecting:~n  ~w~n", [Fuse]),
-                            io:format("Candidates:~n  ~p~n", [Fuses]),
-                            throw(stop)
-                    end
+                    io:format("Pattern:~n  ~w~n", [Pattern]),
+                    io:format("Expecting:~n  ~w~n", [Fuse]),
+                    io:format("Candidates:~n  ~p~n", [Fuses]),
+                    throw(fuse_not_found)
             end
     end.
 
@@ -68,18 +62,17 @@ fuse(Matrix, Pattern, Fuse1, Fuse2) ->
 
         _ ->
             Fuses = matrix:pattern_is(Matrix, Pattern),
-            case Fuses of
-                [{_, Fuse1}, {_, Fuse2}] ->
-                    ok;
-
-                [{_, Fuse2}, {_, Fuse1}] ->
+            Found1 = lists:keyfind(Fuse1, 2, Fuses),
+            Found2 = lists:keyfind(Fuse2, 2, Fuses),
+            case {Found1, Found2} of
+                {{_, _}, {_, _}} ->
                     ok;
 
                 _ ->
                     io:format("Pattern:~n  ~w~n", [Pattern]),
                     io:format("Expecting:~n  ~w~n  ~w~n", [Fuse1, Fuse2]),
                     io:format("Candidates:~n  ~p~n", [Fuses]),
-                    throw(stop)
+                    throw(fuses_not_found)
             end
     end.
 
