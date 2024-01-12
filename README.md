@@ -53,8 +53,10 @@ My experiments are being run in the following
  * LAB control MUX
    [playground](experiments/src/lab_control_mux_playground.erl)
    and [theory](experiments/src/lab_control_mux_theory.erl)
- * [LAB global network playground](experiments/src/lab_global_network_playground.erl)
- * [IOB global network playground](experiments/src/iob_global_network_playground.erl)
+ * Global network
+   [LAB playground](experiments/src/lab_global_network_playground.erl)
+   and [IOB playground](experiments/src/iob_global_network_playground.erl)
+   and [theory](experiments/src/global_network_theory.erl)
 
 ## Maps
 
