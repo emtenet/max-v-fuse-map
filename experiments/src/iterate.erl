@@ -8,22 +8,26 @@
 
 -export([pins_start/1]).
 -export([pins_select/2]).
+-export([pins_select_except/3]).
 
 -type compile() :: experiment:compile().
 -type device() :: device:device().
 -type iob() :: iob:iob().
 -type lab() :: lab:lab().
 -type pin() :: pin:pin().
+-type pins() :: [pin()].
+-type pins_cycle() :: {pins(), pins()}.
 -type pin_count() :: pos_integer().
+-type pin_select() :: pin_count() | {pin_count(), except, pins()}.
 -type result() :: experiment:result().
 
 %%====================================================================
 %% iobs
 %%====================================================================
 
--spec iobs(device(), [pin()], PinCount, Sources, Experiments) -> ok
+-spec iobs(device(), pins(), PinCount, Sources, Experiments) -> ok
     when
-        PinCount :: pin_count() | fun((iob(), lab()) -> pin_count()),
+        PinCount :: pin_count() | fun((iob(), lab()) -> pin_select()),
         Sources :: fun((iob(), lab(), tuple()) -> [compile()]),
         Experiments :: fun((iob(), lab(), tuple(), [result()]) -> any()).
 
@@ -32,9 +36,9 @@ iobs(Device, Pins0, PinCount, Sources, Experiments) ->
 
 %%--------------------------------------------------------------------
 
--spec iobs(device(), [pin()], PinCount, Sources, Experiments, Batch) -> ok
+-spec iobs(device(), pins(), PinCount, Sources, Experiments, Batch) -> ok
     when
-        PinCount :: pin_count() | fun((iob(), lab()) -> pin_count()),
+        PinCount :: pin_count() | fun((iob(), lab()) -> pin_select()),
         Sources :: fun((iob(), lab(), tuple()) -> [compile()]),
         Experiments :: fun((iob(), lab(), tuple(), [result()]) -> any()),
         Batch :: {batch, pos_integer()}.
@@ -64,18 +68,23 @@ iobs_sources(0, IOBs, Pins, _, _, Sets) ->
 iobs_sources(_, IOBs = [], Pins, _, _, Sets) ->
     {IOBs, Pins, lists:reverse(Sets)};
 iobs_sources(N, [{IOB, LAB} | IOBs], Pins0, PinCount, Sources, Sets) ->
-    Count = iobs_pin_count(PinCount, IOB, LAB),
-    {Ps, Pins} = pins_select(Count, Pins0),
+    {Ps, Pins} = iobs_pins(PinCount, IOB, LAB, Pins0),
     Ss = Sources(IOB, LAB, Ps),
     Set = {IOB, LAB, Ps, Ss},
     iobs_sources(N - 1, IOBs, Pins, PinCount, Sources, [Set | Sets]).
 
 %%--------------------------------------------------------------------
 
-iobs_pin_count(Count, _, _) when is_integer(Count) ->
-    Count;
-iobs_pin_count(Fun, IOB, LAB) when is_function(Fun, 2) ->
-    Fun(IOB, LAB).
+iobs_pins(Count, _, _, Pins) when is_integer(Count) ->
+    pins_select(Count, Pins);
+iobs_pins(Fun, IOB, LAB, Pins) when is_function(Fun, 2) ->
+    case Fun(IOB, LAB) of
+        Count when is_integer(Count) ->
+            pins_select(Count, Pins);
+
+        {Count, except, Except} ->
+            pins_select_except(Count, Pins, Except)
+    end.
 
 %%--------------------------------------------------------------------
 
@@ -90,7 +99,7 @@ iobs_experiments([{IOB, LAB, Ps, Ss} | Sets], Es0, Experiments) ->
 %% labs
 %%====================================================================
 
--spec labs(device(), [pin()], pin_count(), Sources, Experiments) -> ok
+-spec labs(device(), pins(), pin_count(), Sources, Experiments) -> ok
     when
         Sources :: fun((lab(), tuple()) -> [compile()]),
         Experiments :: fun((lab(), tuple(), [result()]) -> any()).
@@ -101,7 +110,7 @@ labs(Device, Pins0, PinCount, Sources, Experiments)
 
 %%--------------------------------------------------------------------
 
--spec labs(device(), [pin()], pin_count(), Sources, Experiments, Batch) -> ok
+-spec labs(device(), pins(), pin_count(), Sources, Experiments, Batch) -> ok
     when
         Sources :: fun((lab(), tuple()) -> [compile()]),
         Experiments :: fun((lab(), tuple(), [result()]) -> any()),
@@ -148,15 +157,19 @@ labs_experiments([{LAB, Ps, Ss} | Sets], Es0, Experiments) ->
     labs_experiments(Sets, Es1, Experiments).
 
 %%====================================================================
-%% pins
+%% pins_start
 %%====================================================================
 
-pins_start(Pins = {_, _}) ->
-    Pins;
+-spec pins_start(pins()) -> pins_cycle().
+
 pins_start(Pins) when is_list(Pins) ->
     {Pins, Pins}.
 
-%%--------------------------------------------------------------------
+%%====================================================================
+%% pins_select
+%%====================================================================
+
+-spec pins_select(pin_count(), pins_cycle()) -> {tuple(), pins_cycle()}.
 
 pins_select(1, {[], Tail = [A | Head]}) ->
     {{A}, {Head, Tail}};
@@ -223,4 +236,29 @@ pins_select(N, Ps, {[], Tail = [P | Head]}) ->
     pins_select(N - 1, [P | Ps], {Head, Tail});
 pins_select(N, Ps, {[P | Head], Tail}) ->
     pins_select(N - 1, [P | Ps], {Head, Tail}).
+
+%%====================================================================
+%% pins_select_except
+%%====================================================================
+
+-spec pins_select_except(pin_count(), pins_cycle(), pins())
+    -> {tuple(), pins_cycle()}.
+
+pins_select_except(N, Pins, Except) ->
+    pins_select_except(N, [], Pins, Except).
+
+%%--------------------------------------------------------------------
+
+pins_select_except(0, Ps, Pins, _) ->
+    {list_to_tuple(lists:reverse(Ps)), Pins};
+pins_select_except(N, Ps, {[], Pins}, Except) ->
+    pins_select_except(N, Ps, {Pins, Pins}, Except);
+pins_select_except(N, Ps, {[P | Head], Tail}, Except) ->
+    case lists:member(P, Except) of
+        true ->
+            pins_select_except(N, Ps, {Head, Tail}, Except);
+
+        false ->
+            pins_select_except(N - 1, [P | Ps], {Head, Tail}, Except)
+    end.
 
