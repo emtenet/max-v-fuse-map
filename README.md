@@ -57,6 +57,8 @@ My experiments are being run in the following
    [LAB playground](experiments/src/lab_global_network_playground.erl)
    and [IOB playground](experiments/src/iob_global_network_playground.erl)
    and [theory](experiments/src/global_network_theory.erl)
+ * IOB interconnect MUX
+   [playground](experiments/src/iob_interconnect_mux_playground.erl)
 
 ## Maps
 
@@ -93,6 +95,21 @@ There are 32 bits of user oode numbered LSB (0) to MSB (31).
 
 The user code bits are stored in the POF file inverted,
 so a user code bit of `1` is stored as a `0`.
+
+## IOB Fuses
+
+### `{iob(), {interconnect, #}, from4, mux#}`, `{iob(), {interconnect, #}, from3, mux#}` and `{iob(), {interconnect, 8/17}, from4, gclk}`
+
+Selects a direct-link, C4 or R4 onto an IOB's interconnect.
+
+Not used at the same time as the dedicated direct-link above.
+
+Each interconnect has a two dimentional mux of size 4 x 3
+selecting from 12 alternative sources.
+
+As a special case, row interconnects 8 and 17 have an extra fuse expanding the
+mux to size 5 x 3. The extra 3 alternatives source from the global clock
+networks.
 
 ## IOC Fuses
 
@@ -181,6 +198,19 @@ Schmitt Trigger on IOC inputs enabled with a POF bit of `0`.
 NOTE: Also enabled when in output mode.
 
 ## LAB Fuses
+
+### `{lab(), {interconnect, #}, from4, mux#}`, `{lab(), {interconnect, #}, from3, mux#}` and `{lab(), {interconnect, 12/25}, from4, gclk}`
+
+Selects a direct-link, C4 or R4 onto a LAB's interconnect.
+
+Not used at the same time as the dedicated direct-link above.
+
+Each interconnect has a two dimentional mux of size 4 x 3
+selecting from 12 alternative sources.
+
+As a special case, interconnects 12 and 25 have an extra fuse expanding the
+mux to size 5 x 3. The extra 3 alternatives source from the global clock
+networks.
 
 ### `{lab(), clk#, global#}` and `{lab(), clk#, control}`
 
