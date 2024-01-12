@@ -39,7 +39,8 @@ iobs(Device, Pins0, PinCount, Sources, Experiments) ->
         Experiments :: fun((iob(), lab(), tuple(), [result()]) -> any()),
         Batch :: {batch, pos_integer()}.
 
-iobs(Device, Pins0, PinCount, Sources, Experiments, {batch, Batch}) ->
+iobs(Device, Pins0, PinCount, Sources, Experiments, {batch, Batch})
+        when is_integer(Batch) ->
     IOBs = device:iobs(Device),
     Pins = pins_start(Pins0),
     iobs_loop(Batch, IOBs, Pins, PinCount, Sources, Experiments).
@@ -94,7 +95,8 @@ iobs_experiments([{IOB, LAB, Ps, Ss} | Sets], Es0, Experiments) ->
         Sources :: fun((lab(), tuple()) -> [compile()]),
         Experiments :: fun((lab(), tuple(), [result()]) -> any()).
 
-labs(Device, Pins0, PinCount, Sources, Experiments) ->
+labs(Device, Pins0, PinCount, Sources, Experiments)
+        when is_integer(PinCount) ->
     labs(Device, Pins0, PinCount, Sources, Experiments, {batch, 1}).
 
 %%--------------------------------------------------------------------
@@ -105,7 +107,9 @@ labs(Device, Pins0, PinCount, Sources, Experiments) ->
         Experiments :: fun((lab(), tuple(), [result()]) -> any()),
         Batch :: {batch, pos_integer()}.
 
-labs(Device, Pins0, PinCount, Sources, Experiments, {batch, Batch}) ->
+labs(Device, Pins0, PinCount, Sources, Experiments, {batch, Batch})
+        when is_integer(PinCount) andalso
+             is_integer(Batch) ->
     LABs = device:labs(Device),
     Pins = pins_start(Pins0),
     labs_loop(Batch, LABs, Pins, PinCount, Sources, Experiments).
