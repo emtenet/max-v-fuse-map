@@ -63,6 +63,8 @@ My experiments are being run in the following
  * Global MUX
    [playground](experiments/src/global_mux_playground.erl)
    and [theory](experiments/src/global_mux_theory.erl)
+ * Global interconnect MUX
+   [playground](experiments/src/global_interconnect_mux_playground.erl)
 
 ## Maps
 
@@ -106,6 +108,16 @@ For other densities,
 each global network has a two dimentional mux of size 4 x 3
 selecting from 10 interconnects
 at `{iob,9,3}`, `{iob,11,3}` & `{iob,13,3}` respectively.
+
+### `{global(), {interconnect, #}, from4, mux#}` and `{global(), {interconnect, #}, from3, mux#}`
+
+Selects a direct-link, C4 or R4 onto the Global interconnect.
+
+Each interconnect has a two dimentional mux of size 4 x 3
+selecting from 12 alternative sources.
+
+This does not exist on the 5M240Z,
+it's global interconnect shares the interconnect of `{iob, 1, 3}`.
 
 ### `{user_code, bit()}`
 

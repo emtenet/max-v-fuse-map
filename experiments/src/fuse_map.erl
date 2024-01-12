@@ -157,14 +157,14 @@
 ).
 
 -define(GLOBAL_INTERCONNECTS(),
-    %?GLOBAL_INTERCONNECT_F(22, 2, from3, mux1);
-    %?GLOBAL_INTERCONNECT_F(22, 3, from3, mux2);
-    %?GLOBAL_INTERCONNECT_F(23, 2, from3, mux0);
+    ?GLOBAL_INTERCONNECT_F(22, 2, from3, mux1);
+    ?GLOBAL_INTERCONNECT_F(22, 3, from3, mux2);
+    ?GLOBAL_INTERCONNECT_F(23, 2, from3, mux0);
     %?GLOBAL_INTERCONNECT_D(23, 3, direct_link);
-    %?GLOBAL_INTERCONNECT_F(24, 2, from4, mux2);
-    %?GLOBAL_INTERCONNECT_F(24, 3, from4, mux3);
-    %?GLOBAL_INTERCONNECT_F(25, 2, from4, mux0);
-    %?GLOBAL_INTERCONNECT_F(25, 3, from4, mux1);
+    ?GLOBAL_INTERCONNECT_F(24, 2, from4, mux2);
+    ?GLOBAL_INTERCONNECT_F(24, 3, from4, mux3);
+    ?GLOBAL_INTERCONNECT_F(25, 2, from4, mux0);
+    ?GLOBAL_INTERCONNECT_F(25, 3, from4, mux1);
 ).
 
 -define(IOB_SIDES(),
