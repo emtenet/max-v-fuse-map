@@ -60,6 +60,8 @@ My experiments are being run in the following
  * IOB interconnect MUX
    [playground](experiments/src/iob_interconnect_mux_playground.erl)
  * [Global internal](experiments/src/global_internal_experiment.erl)
+ * Global MUX
+   [playground](experiments/src/global_mux_playground.erl)
 
 ## Maps
 
@@ -89,6 +91,19 @@ Each of the global clock networks can be driven from either:
  * internal interconnects.
 
 This fuse selects the dedicated pin.
+
+### `{global(), from3, mux#}` and `{global(), from4 / from6, mux#}`
+
+Selects an interconnect into each of the four global networks.
+
+For the 5M240Z,
+each global network has a two dimentional mux of size 6 x 3
+selecting from 18 interconnects at `{ioc,1,3}`.
+
+For other densities,
+each global network has a two dimentional mux of size 4 x 3
+selecting from 10 interconnects
+at `{iob,9,3}`, `{iob,11,3}` & `{iob,13,3}` respectively.
 
 ### `{user_code, bit()}`
 

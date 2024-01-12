@@ -147,13 +147,13 @@
 ).
 
 -define(GLOBAL_SELECTS(),
-    %?GLOBAL_SELECT(20, 0, from3, mux1);
-    %?GLOBAL_SELECT(20, 1, from3, mux0);
-    %?GLOBAL_SELECT(20, 2, from4, mux0);
-    %?GLOBAL_SELECT(20, 3, from4, mux1);
-    %?GLOBAL_SELECT(21, 0, from3, mux2);
-    %?GLOBAL_SELECT(21, 2, from4, mux2);
-    %?GLOBAL_SELECT(21, 3, from4, mux3);
+    ?GLOBAL_SELECT(20, 0, from3, mux1);
+    ?GLOBAL_SELECT(20, 1, from3, mux0);
+    ?GLOBAL_SELECT(20, 2, from4, mux0);
+    ?GLOBAL_SELECT(20, 3, from4, mux1);
+    ?GLOBAL_SELECT(21, 0, from3, mux2);
+    ?GLOBAL_SELECT(21, 2, from4, mux2);
+    ?GLOBAL_SELECT(21, 3, from4, mux3);
 ).
 
 -define(GLOBAL_INTERCONNECTS(),
@@ -2728,6 +2728,22 @@ from_density_r4(_, _, _) ->
         from_cell(X, Sector, Y, G, Index, With)
 ).
 
+from_global(0, {from3, Mux}, With = #with{density = max_v_240z}) ->
+    from_ioc_side(1, 3, 4, {output3, Mux}, With);
+from_global(0, {from6, Mux}, With = #with{density = max_v_240z}) ->
+    from_ioc_side(1, 3, 4, {output6, Mux}, With);
+from_global(1, {from3, Mux}, With = #with{density = max_v_240z}) ->
+    from_ioc_side(1, 3, 4, {enable3, Mux}, With);
+from_global(1, {from6, Mux}, With = #with{density = max_v_240z}) ->
+    from_ioc_side(1, 3, 4, {enable6, Mux}, With);
+from_global(2, {from3, Mux}, With = #with{density = max_v_240z}) ->
+    from_ioc_side(1, 3, 5, {output3, Mux}, With);
+from_global(2, {from6, Mux}, With = #with{density = max_v_240z}) ->
+    from_ioc_side(1, 3, 5, {output6, Mux}, With);
+from_global(3, {from3, Mux}, With = #with{density = max_v_240z}) ->
+    from_ioc_side(1, 3, 5, {enable3, Mux}, With);
+from_global(3, {from6, Mux}, With = #with{density = max_v_240z}) ->
+    from_ioc_side(1, 3, 5, {enable6, Mux}, With);
 ?GLOBAL_SKIPS()
 ?GLOBAL_SIDES()
 ?GLOBAL_SELECTS()
@@ -3813,6 +3829,9 @@ to_side_line(X, Y, Index, Sector, _) ->
         to_global(G, Name)
 ).
 -define(IOC_SIDE(Sector, Index, Name),
+    to_side(1, 3, N, Index, Sector, #with{density = max_v_240z})
+            when N =:= 6 orelse N =:= 7 ->
+        to_global_select(N, Name);
     to_side(X, Y, N, Index, Sector, _) when N >= 2 andalso N =< 8 ->
         to_ioc(X, Y, N - 2, Name);
     to_side(X, Y, N, Index, Sector, _) ->
@@ -4002,6 +4021,19 @@ to_global(G, {Name, Value}) ->
     {ok, {{global, G}, Name, Value}};
 to_global(G, Name) ->
     {ok, {{global, G}, Name}}.
+
+%%--------------------------------------------------------------------
+
+to_global_select(6, {output3, Mux}) -> {ok, {{global, 0}, from3, Mux}};
+to_global_select(6, {output6, Mux}) -> {ok, {{global, 0}, from6, Mux}};
+to_global_select(6, {enable3, Mux}) -> {ok, {{global, 1}, from3, Mux}};
+to_global_select(6, {enable6, Mux}) -> {ok, {{global, 1}, from6, Mux}};
+to_global_select(7, {output3, Mux}) -> {ok, {{global, 2}, from3, Mux}};
+to_global_select(7, {output6, Mux}) -> {ok, {{global, 2}, from6, Mux}};
+to_global_select(7, {enable3, Mux}) -> {ok, {{global, 3}, from3, Mux}};
+to_global_select(7, {enable6, Mux}) -> {ok, {{global, 3}, from6, Mux}};
+to_global_select(N, Name) ->
+    to_ioc(1, 3, N - 2, Name).
 
 %%--------------------------------------------------------------------
 
