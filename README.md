@@ -53,6 +53,8 @@ My experiments are being run in the following
  * LAB control MUX
    [playground](experiments/src/lab_control_mux_playground.erl)
    and [theory](experiments/src/lab_control_mux_theory.erl)
+ * [LAB global network playground](experiments/src/lab_global_network_playground.erl)
+ * [IOB global network playground](experiments/src/iob_global_network_playground.erl)
 
 ## Maps
 
@@ -67,6 +69,21 @@ The following mux mappings are encoded:
  * [IOC enable MUX](experiments/src/ioc_enable_mux_map.erl)
 
 ## Global Fuses
+
+### `{global(), row, off}` and `{global(), {column, #}, off}`
+
+Each of the four global clock networks are driven horizontally (row)
+and then to each column. Unused clock networks are turned off either
+at individual columns or for the whole row.
+
+### `{global(), dedicated}`
+
+Each of the global clock networks can be driven from either:
+
+ * dedicated pins, or
+ * internal interconnects.
+
+This fuse selects the dedicated pin.
 
 ### `{user_code, bit()}`
 

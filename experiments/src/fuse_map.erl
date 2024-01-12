@@ -77,34 +77,34 @@
 -define(LONG_SECTORS, (?COLUMN_SECTORS - ?SHORT_SECTORS)).
 
 -define(GLOBAL_SKIPS(),
-    %?GLOBAL_ROW_CELL_R( 5, 0);
-    %?GLOBAL_ROW_CELL_R( 1, 1);
-    %?GLOBAL_ROW_SIDE_L( 4, 2); % MAX_V_240Z
-    %?GLOBAL_ROW_SIDE_L(10, 3); % MAX_V_240Z
-    %?GLOBAL_ROW_CELL_L(25, 2); % others
-    %?GLOBAL_ROW_CELL_L(23, 3); % others
+    ?GLOBAL_ROW_CELL_R( 5, 0);
+    ?GLOBAL_ROW_CELL_R( 1, 1);
+    ?GLOBAL_ROW_SIDE_L( 4, 2); % MAX_V_240Z
+    ?GLOBAL_ROW_SIDE_L(10, 3); % MAX_V_240Z
+    ?GLOBAL_ROW_CELL_L(25, 2); % others
+    ?GLOBAL_ROW_CELL_L(23, 3); % others
 
-    %?GLOBAL_COLUMN_SIDE_0( 5, 0);
-    %?GLOBAL_COLUMN_SIDE_0( 6, 1);
-    %?GLOBAL_COLUMN_SIDE_0( 7, 2);
-    %?GLOBAL_COLUMN_SIDE_0( 8, 3);
+    ?GLOBAL_COLUMN_SIDE_0( 5, 0);
+    ?GLOBAL_COLUMN_SIDE_0( 6, 1);
+    ?GLOBAL_COLUMN_SIDE_0( 7, 2);
+    ?GLOBAL_COLUMN_SIDE_0( 8, 3);
 
-    %?GLOBAL_COLUMN_SIDE_L(12, 0);
-    %?GLOBAL_COLUMN_CELL_L(27, 0);
-    %?GLOBAL_COLUMN_SIDE_R(12, 1);
-    %?GLOBAL_COLUMN_SIDE_R(10, 2);
-    %?GLOBAL_COLUMN_SIDE_R( 9, 3);
-    %?GLOBAL_COLUMN_CELL_R( 0, 1);
-    %?GLOBAL_COLUMN_CELL_R( 2, 2);
-    %?GLOBAL_COLUMN_CELL_R( 3, 3);
+    ?GLOBAL_COLUMN_SIDE_L(12, 0);
+    ?GLOBAL_COLUMN_CELL_L(27, 0);
+    ?GLOBAL_COLUMN_SIDE_R(12, 1);
+    ?GLOBAL_COLUMN_SIDE_R(10, 2);
+    ?GLOBAL_COLUMN_SIDE_R( 9, 3);
+    ?GLOBAL_COLUMN_CELL_R( 0, 1);
+    ?GLOBAL_COLUMN_CELL_R( 2, 2);
+    ?GLOBAL_COLUMN_CELL_R( 3, 3);
 
-    %?GLOBAL_INTERCONNECT_CELL_R( 4, 0);
-    %?GLOBAL_INTERCONNECT_SIDE_L(11, 1); % MAX_V_240Z
-    %?GLOBAL_INTERCONNECT_SIDE_L( 3, 2); % MAX_V_240Z
-    %?GLOBAL_INTERCONNECT_SIDE_L( 9, 3); % MAX_V_240Z
-    %?GLOBAL_INTERCONNECT_CELL_L(26, 1); % others
-    %?GLOBAL_INTERCONNECT_CELL_L(24, 2); % others
-    %?GLOBAL_INTERCONNECT_CELL_L(22, 3); % others
+    ?GLOBAL_DEDICATED_CELL_R( 4, 0);
+    ?GLOBAL_DEDICATED_SIDE_L(11, 1); % MAX_V_240Z
+    ?GLOBAL_DEDICATED_SIDE_L( 3, 2); % MAX_V_240Z
+    ?GLOBAL_DEDICATED_SIDE_L( 9, 3); % MAX_V_240Z
+    ?GLOBAL_DEDICATED_CELL_L(26, 1); % others
+    ?GLOBAL_DEDICATED_CELL_L(24, 2); % others
+    ?GLOBAL_DEDICATED_CELL_L(22, 3); % others
 ).
 
 -define(GLOBAL_SIDES(),
@@ -2707,16 +2707,16 @@ from_density_r4(_, _, _) ->
     from_global(G, {{column, X}, off}, With) ->
         from_skip(X, Sector, With)
 ).
--define(GLOBAL_INTERCONNECT_SIDE_L(Sector, G),
-    from_global(G, interconnect, With = #with{density = max_v_240z, grow_x = X}) ->
+-define(GLOBAL_DEDICATED_SIDE_L(Sector, G),
+    from_global(G, dedicated, With = #with{density = max_v_240z, grow_x = X}) ->
         from_skip(X, Sector, With)
 ).
--define(GLOBAL_INTERCONNECT_CELL_L(Sector, G),
-    from_global(G, interconnect, With = #with{grow_x = X}) ->
+-define(GLOBAL_DEDICATED_CELL_L(Sector, G),
+    from_global(G, dedicated, With = #with{grow_x = X}) ->
         from_skip(X, Sector, With)
 ).
--define(GLOBAL_INTERCONNECT_CELL_R(Sector, G),
-    from_global(G, interconnect, With = #with{grow_x = X}) ->
+-define(GLOBAL_DEDICATED_CELL_R(Sector, G),
+    from_global(G, dedicated, With = #with{grow_x = X}) ->
         from_skip(X + 1, Sector, With)
 ).
 -define(GLOBAL_SIDE(Sector, N, Index, G, Name),
@@ -2742,9 +2742,9 @@ from_global(G, Name, _With) ->
 -undef(GLOBAL_COLUMN_CELL_L).
 -undef(GLOBAL_COLUMN_SIDE_R).
 -undef(GLOBAL_COLUMN_CELL_R).
--undef(GLOBAL_INTERCONNECT_SIDE_L).
--undef(GLOBAL_INTERCONNECT_CELL_L).
--undef(GLOBAL_INTERCONNECT_CELL_R).
+-undef(GLOBAL_DEDICATED_SIDE_L).
+-undef(GLOBAL_DEDICATED_CELL_L).
+-undef(GLOBAL_DEDICATED_CELL_R).
 -undef(GLOBAL_SIDE).
 -undef(GLOBAL_SELECT).
 
@@ -3184,8 +3184,8 @@ from_sector_skip(X, Sector, Offset, With) ->
 
 %%--------------------------------------------------------------------
 
-%from_skip(X, Sector, With = #with{skip = Skip}) ->
-%    from_sector_reverse(X, Sector, Skip, With).
+from_skip(X, Sector, With = #with{skip = Skip}) ->
+    from_sector_reverse(X, Sector, Skip, With).
 
 %%--------------------------------------------------------------------
 
@@ -3967,17 +3967,17 @@ to_cell(X, Y, N, I, Sector, _) ->
     to_skip(X, cell, Sector, #with{}) ->
         to_global(G, {{column, X}, off})
 ).
--define(GLOBAL_INTERCONNECT_SIDE_L(Sector, G),
+-define(GLOBAL_DEDICATED_SIDE_L(Sector, G),
     to_skip(X, side, Sector, #with{density = max_v_240z, grow_x = X}) ->
-        to_global(G, interconnect)
+        to_global(G, dedicated)
 ).
--define(GLOBAL_INTERCONNECT_CELL_L(Sector, G),
+-define(GLOBAL_DEDICATED_CELL_L(Sector, G),
     to_skip(X, cell, Sector, #with{grow_x = X}) ->
-        to_global(G, interconnect)
+        to_global(G, dedicated)
 ).
--define(GLOBAL_INTERCONNECT_CELL_R(Sector, G),
+-define(GLOBAL_DEDICATED_CELL_R(Sector, G),
     to_skip(XX, cell, Sector, #with{grow_x = X}) when XX =:= X + 1 ->
-        to_global(G, interconnect)
+        to_global(G, dedicated)
 ).
 
 ?GLOBAL_SKIPS()
@@ -3992,16 +3992,16 @@ to_skip(X, Cell, Sector, #with{skip = Skip}) ->
 -undef(GLOBAL_COLUMN_CELL_L).
 -undef(GLOBAL_COLUMN_SIDE_R).
 -undef(GLOBAL_COLUMN_CELL_R).
--undef(GLOBAL_INTERCONNECT_SIDE_L).
--undef(GLOBAL_INTERCONNECT_CELL_L).
--undef(GLOBAL_INTERCONNECT_CELL_R).
+-undef(GLOBAL_DEDICATED_SIDE_L).
+-undef(GLOBAL_DEDICATED_CELL_L).
+-undef(GLOBAL_DEDICATED_CELL_R).
 
 %%--------------------------------------------------------------------
 
-%to_global(G, {Name, Value}) ->
-%    {ok, {{global, G}, Name, Value}};
-%to_global(G, Name) ->
-%    {ok, {{global, G}, Name}}.
+to_global(G, {Name, Value}) ->
+    {ok, {{global, G}, Name, Value}};
+to_global(G, Name) ->
+    {ok, {{global, G}, Name}}.
 
 %%--------------------------------------------------------------------
 
