@@ -108,52 +108,52 @@
 ).
 
 -define(GLOBAL_SIDES(),
-    %?GLOBAL_SIDE( 2, 6, 0, 0, {from3, mux1});
-    %?GLOBAL_SIDE( 2, 6, 3, 1, {from3, mux1});
-    %?GLOBAL_SIDE( 2, 7, 0, 2, {from3, mux1});
-    %?GLOBAL_SIDE( 2, 7, 3, 3, {from3, mux1});
-    %?GLOBAL_SIDE( 3, 6, 0, 0, {from3, mux0});
-    %?GLOBAL_SIDE( 3, 6, 1, 0, {from3, mux2});
-    %?GLOBAL_SIDE( 3, 6, 2, 1, {from3, mux2});
-    %?GLOBAL_SIDE( 3, 6, 3, 1, {from3, mux0});
-    %?GLOBAL_SIDE( 3, 7, 0, 2, {from3, mux0});
-    %?GLOBAL_SIDE( 3, 7, 1, 2, {from3, mux2});
-    %?GLOBAL_SIDE( 3, 7, 2, 3, {from3, mux2});
-    %?GLOBAL_SIDE( 3, 7, 3, 3, {from3, mux0});
-    %?GLOBAL_SIDE( 4, 6, 0, 0, {from6, mux0});
-    %?GLOBAL_SIDE( 4, 6, 1, 0, {from6, mux1});
-    %?GLOBAL_SIDE( 4, 6, 2, 1, {from6, mux1});
-    %?GLOBAL_SIDE( 4, 6, 3, 1, {from6, mux0});
-    %?GLOBAL_SIDE( 4, 7, 0, 2, {from6, mux0});
-    %?GLOBAL_SIDE( 4, 7, 1, 2, {from6, mux1});
-    %?GLOBAL_SIDE( 4, 7, 2, 3, {from6, mux1});
-    %?GLOBAL_SIDE( 4, 7, 3, 3, {from6, mux0});
-    %?GLOBAL_SIDE( 5, 6, 0, 0, {from6, mux2});
-    %?GLOBAL_SIDE( 5, 6, 1, 0, {from6, mux3});
-    %?GLOBAL_SIDE( 5, 6, 2, 1, {from6, mux3});
-    %?GLOBAL_SIDE( 5, 6, 3, 1, {from6, mux2});
-    %?GLOBAL_SIDE( 5, 7, 0, 2, {from6, mux2});
-    %?GLOBAL_SIDE( 5, 7, 1, 2, {from6, mux3});
-    %?GLOBAL_SIDE( 5, 7, 2, 3, {from6, mux3});
-    %?GLOBAL_SIDE( 5, 7, 3, 3, {from6, mux2});
-    %?GLOBAL_SIDE( 6, 6, 0, 0, {from6, mux4});
-    %?GLOBAL_SIDE( 6, 6, 1, 0, {from6, mux5});
-    %?GLOBAL_SIDE( 6, 6, 2, 1, {from6, mux5});
-    %?GLOBAL_SIDE( 6, 6, 3, 1, {from6, mux4});
-    %?GLOBAL_SIDE( 6, 7, 0, 2, {from6, mux4});
-    %?GLOBAL_SIDE( 6, 7, 1, 2, {from6, mux5});
-    %?GLOBAL_SIDE( 6, 7, 2, 3, {from6, mux5});
-    %?GLOBAL_SIDE( 6, 7, 3, 3, {from6, mux4});
+    ?GLOBAL_SMALL_SELECT( 2, 6, 0, 0, {from3, mux1});
+    ?GLOBAL_SMALL_SELECT( 2, 6, 3, 1, {from3, mux1});
+    ?GLOBAL_SMALL_SELECT( 2, 7, 0, 2, {from3, mux1});
+    ?GLOBAL_SMALL_SELECT( 2, 7, 3, 3, {from3, mux1});
+    ?GLOBAL_SMALL_SELECT( 3, 6, 0, 0, {from3, mux0});
+    ?GLOBAL_SMALL_SELECT( 3, 6, 1, 0, {from3, mux2});
+    ?GLOBAL_SMALL_SELECT( 3, 6, 2, 1, {from3, mux2});
+    ?GLOBAL_SMALL_SELECT( 3, 6, 3, 1, {from3, mux0});
+    ?GLOBAL_SMALL_SELECT( 3, 7, 0, 2, {from3, mux0});
+    ?GLOBAL_SMALL_SELECT( 3, 7, 1, 2, {from3, mux2});
+    ?GLOBAL_SMALL_SELECT( 3, 7, 2, 3, {from3, mux2});
+    ?GLOBAL_SMALL_SELECT( 3, 7, 3, 3, {from3, mux0});
+    ?GLOBAL_SMALL_SELECT( 4, 6, 0, 0, {from6, mux0});
+    ?GLOBAL_SMALL_SELECT( 4, 6, 1, 0, {from6, mux1});
+    ?GLOBAL_SMALL_SELECT( 4, 6, 2, 1, {from6, mux1});
+    ?GLOBAL_SMALL_SELECT( 4, 6, 3, 1, {from6, mux0});
+    ?GLOBAL_SMALL_SELECT( 4, 7, 0, 2, {from6, mux0});
+    ?GLOBAL_SMALL_SELECT( 4, 7, 1, 2, {from6, mux1});
+    ?GLOBAL_SMALL_SELECT( 4, 7, 2, 3, {from6, mux1});
+    ?GLOBAL_SMALL_SELECT( 4, 7, 3, 3, {from6, mux0});
+    ?GLOBAL_SMALL_SELECT( 5, 6, 0, 0, {from6, mux2});
+    ?GLOBAL_SMALL_SELECT( 5, 6, 1, 0, {from6, mux3});
+    ?GLOBAL_SMALL_SELECT( 5, 6, 2, 1, {from6, mux3});
+    ?GLOBAL_SMALL_SELECT( 5, 6, 3, 1, {from6, mux2});
+    ?GLOBAL_SMALL_SELECT( 5, 7, 0, 2, {from6, mux2});
+    ?GLOBAL_SMALL_SELECT( 5, 7, 1, 2, {from6, mux3});
+    ?GLOBAL_SMALL_SELECT( 5, 7, 2, 3, {from6, mux3});
+    ?GLOBAL_SMALL_SELECT( 5, 7, 3, 3, {from6, mux2});
+    ?GLOBAL_SMALL_SELECT( 6, 6, 0, 0, {from6, mux4});
+    ?GLOBAL_SMALL_SELECT( 6, 6, 1, 0, {from6, mux5});
+    ?GLOBAL_SMALL_SELECT( 6, 6, 2, 1, {from6, mux5});
+    ?GLOBAL_SMALL_SELECT( 6, 6, 3, 1, {from6, mux4});
+    ?GLOBAL_SMALL_SELECT( 6, 7, 0, 2, {from6, mux4});
+    ?GLOBAL_SMALL_SELECT( 6, 7, 1, 2, {from6, mux5});
+    ?GLOBAL_SMALL_SELECT( 6, 7, 2, 3, {from6, mux5});
+    ?GLOBAL_SMALL_SELECT( 6, 7, 3, 3, {from6, mux4});
 ).
 
 -define(GLOBAL_SELECTS(),
-    ?GLOBAL_SELECT(20, 0, from3, mux1);
-    ?GLOBAL_SELECT(20, 1, from3, mux0);
-    ?GLOBAL_SELECT(20, 2, from4, mux0);
-    ?GLOBAL_SELECT(20, 3, from4, mux1);
-    ?GLOBAL_SELECT(21, 0, from3, mux2);
-    ?GLOBAL_SELECT(21, 2, from4, mux2);
-    ?GLOBAL_SELECT(21, 3, from4, mux3);
+    ?GLOBAL_LARGE_SELECT(20, 0, from3, mux1);
+    ?GLOBAL_LARGE_SELECT(20, 1, from3, mux0);
+    ?GLOBAL_LARGE_SELECT(20, 2, from4, mux0);
+    ?GLOBAL_LARGE_SELECT(20, 3, from4, mux1);
+    ?GLOBAL_LARGE_SELECT(21, 0, from3, mux2);
+    ?GLOBAL_LARGE_SELECT(21, 2, from4, mux2);
+    ?GLOBAL_LARGE_SELECT(21, 3, from4, mux3);
 ).
 
 -define(GLOBAL_INTERCONNECTS(),
@@ -2719,31 +2719,15 @@ from_density_r4(_, _, _) ->
     from_global(G, internal, With = #with{grow_x = X}) ->
         from_skip(X + 1, Sector, With)
 ).
--define(GLOBAL_SIDE(Sector, N, Index, G, Name),
+-define(GLOBAL_SMALL_SELECT(Sector, N, Index, G, Name),
     from_global(G, Name, With = #with{density = max_v_240z}) ->
         from_side(1, Sector, 3, N, Index, With)
 ).
--define(GLOBAL_SELECT(Sector, Index, From, Mux),
+-define(GLOBAL_LARGE_SELECT(Sector, Index, From, Mux),
     from_global(G, {From, Mux}, With = #with{grow_x = X, short_y = Y}) ->
         from_cell(X, Sector, Y, G, Index, With)
 ).
 
-from_global(0, {from3, Mux}, With = #with{density = max_v_240z}) ->
-    from_ioc_side(1, 3, 4, {output3, Mux}, With);
-from_global(0, {from6, Mux}, With = #with{density = max_v_240z}) ->
-    from_ioc_side(1, 3, 4, {output6, Mux}, With);
-from_global(1, {from3, Mux}, With = #with{density = max_v_240z}) ->
-    from_ioc_side(1, 3, 4, {enable3, Mux}, With);
-from_global(1, {from6, Mux}, With = #with{density = max_v_240z}) ->
-    from_ioc_side(1, 3, 4, {enable6, Mux}, With);
-from_global(2, {from3, Mux}, With = #with{density = max_v_240z}) ->
-    from_ioc_side(1, 3, 5, {output3, Mux}, With);
-from_global(2, {from6, Mux}, With = #with{density = max_v_240z}) ->
-    from_ioc_side(1, 3, 5, {output6, Mux}, With);
-from_global(3, {from3, Mux}, With = #with{density = max_v_240z}) ->
-    from_ioc_side(1, 3, 5, {enable3, Mux}, With);
-from_global(3, {from6, Mux}, With = #with{density = max_v_240z}) ->
-    from_ioc_side(1, 3, 5, {enable6, Mux}, With);
 ?GLOBAL_SKIPS()
 ?GLOBAL_SIDES()
 ?GLOBAL_SELECTS()
@@ -2761,8 +2745,8 @@ from_global(G, Name, _With) ->
 -undef(GLOBAL_INTERNAL_SIDE_L).
 -undef(GLOBAL_INTERNAL_CELL_L).
 -undef(GLOBAL_INTERNAL_CELL_R).
--undef(GLOBAL_SIDE).
--undef(GLOBAL_SELECT).
+-undef(GLOBAL_SMALL_SELECT).
+-undef(GLOBAL_LARGE_SELECT).
 
 %%--------------------------------------------------------------------
 
@@ -3824,14 +3808,11 @@ to_side_line(X, Y, Index, Sector, _) ->
     to_side(X, Y, U, V, Sector, With) when X =:= With#with.right_x ->
         to_ioc(X, Y, N, Name)
 ).
--define(GLOBAL_SIDE(Sector, N, Index, G, Name),
-    to_side(X, Y, N, Index, Sector, #with{density = max_v_240z}) when X =:= 1 andalso Y =:= 3 ->
+-define(GLOBAL_SMALL_SELECT(Sector, N, Index, G, Name),
+    to_side(1, 3, N, Index, Sector, #with{density = max_v_240z}) ->
         to_global(G, Name)
 ).
 -define(IOC_SIDE(Sector, Index, Name),
-    to_side(1, 3, N, Index, Sector, #with{density = max_v_240z})
-            when N =:= 6 orelse N =:= 7 ->
-        to_global_select(N, Name);
     to_side(X, Y, N, Index, Sector, _) when N >= 2 andalso N =< 8 ->
         to_ioc(X, Y, N - 2, Name);
     to_side(X, Y, N, Index, Sector, _) ->
@@ -3855,7 +3836,7 @@ to_side(X, Y, N, Index, Sector, _) ->
 -undef(IOB_SIDE).
 -undef(IOC_LEFT).
 -undef(IOC_RIGHT).
--undef(GLOBAL_SIDE).
+-undef(GLOBAL_SMALL_SELECT).
 -undef(IOC_SIDE).
 
 %%--------------------------------------------------------------------
@@ -3913,7 +3894,7 @@ to_cell_line(X, Y, Index, Sector, _) ->
     to_cell(X, Y, N, Index, Sector, #with{grow_x = X, short_y = Y}) ->
         to_iob(X, Y, {{interconnect, N}, From, Mux})
 ).
--define(GLOBAL_SELECT(Sector, Index, From, Mux),
+-define(GLOBAL_LARGE_SELECT(Sector, Index, From, Mux),
     to_cell(X, Y, G, Index, Sector, #with{grow_x = X, short_y = Y}) when G < 4 ->
         to_global(G, {From, Mux})
 ).
@@ -3948,7 +3929,7 @@ to_cell(X, Y, N, I, Sector, _) ->
 -undef(R4_CELL_R).
 -undef(GLOBAL_INTERCONNECTS_D).
 -undef(GLOBAL_INTERCONNECTS_F).
--undef(GLOBAL_SELECT).
+-undef(GLOBAL_LARGE_SELECT).
 -undef(LAB_CELL).
 -undef(LC_CELL).
 
@@ -4021,19 +4002,6 @@ to_global(G, {Name, Value}) ->
     {ok, {{global, G}, Name, Value}};
 to_global(G, Name) ->
     {ok, {{global, G}, Name}}.
-
-%%--------------------------------------------------------------------
-
-to_global_select(6, {output3, Mux}) -> {ok, {{global, 0}, from3, Mux}};
-to_global_select(6, {output6, Mux}) -> {ok, {{global, 0}, from6, Mux}};
-to_global_select(6, {enable3, Mux}) -> {ok, {{global, 1}, from3, Mux}};
-to_global_select(6, {enable6, Mux}) -> {ok, {{global, 1}, from6, Mux}};
-to_global_select(7, {output3, Mux}) -> {ok, {{global, 2}, from3, Mux}};
-to_global_select(7, {output6, Mux}) -> {ok, {{global, 2}, from6, Mux}};
-to_global_select(7, {enable3, Mux}) -> {ok, {{global, 3}, from3, Mux}};
-to_global_select(7, {enable6, Mux}) -> {ok, {{global, 3}, from6, Mux}};
-to_global_select(N, Name) ->
-    to_ioc(1, 3, N - 2, Name).
 
 %%--------------------------------------------------------------------
 
