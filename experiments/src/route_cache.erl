@@ -19,6 +19,8 @@
 -export([index_max/2]).
 -export([froms/2]).
 -export([froms/3]).
+-export([tos/2]).
+-export([tos/3]).
 -export([experiments/3]).
 -export([experiments/4]).
 
@@ -365,6 +367,44 @@ froms(Block, Index, {route_cache, _, _, Blocks}) ->
 
         _ ->
             false
+    end.
+
+%%====================================================================
+%% tos
+%%====================================================================
+
+-spec tos(block(), index(), cache()) -> {ok, [from()]}.
+
+tos({Type, X, Y}, Index, Cache = {route_cache, _, _, _}) ->
+    tos({Type, X, Y, 0, Index}, Cache).
+
+%%--------------------------------------------------------------------
+
+-spec tos(from(), cache()) -> {ok, [from()]}.
+
+tos(From = {_, _, _, 0, _}, {route_cache, _, _, Blocks}) ->
+    Tos = maps:fold(fun (Block, Indexes, Acc) ->
+        tos_blocks(From, Block, Indexes, Acc)
+    end, [], Blocks),
+    {ok, lists:sort(Tos)}.
+
+%%--------------------------------------------------------------------
+
+tos_blocks(From, Block, Indexes, Acc0) ->
+    maps:fold(fun (Index, Froms, Acc) ->
+        tos_froms(From, Block, Index, Froms, Acc)
+    end, Acc0, Indexes).
+
+%%--------------------------------------------------------------------
+
+tos_froms(From, Block, Index, Froms, Acc) ->
+    case Froms of
+        #{From := _} ->
+            {Type, X, Y} = Block,
+            [{Type, X, Y, 0, Index} | Acc];
+
+        _ ->
+            Acc
     end.
 
 %%====================================================================
