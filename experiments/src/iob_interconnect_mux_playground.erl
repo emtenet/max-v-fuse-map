@@ -97,7 +97,7 @@ block(Density, {local_interconnect, X, Y}, Indexes, Acc0) ->
 %%--------------------------------------------------------------------
 
 interconnect(Density, IOB, Index, Froms, Acc0) ->
-    io:format(" ==> ~p ~p~n", [IOB, Index]),
+    %io:format(" ==> ~p ~p~n", [IOB, Index]),
     case experiments(Froms) of
         [] ->
             Acc0;
@@ -172,7 +172,7 @@ remove_fuse(Density, X, Y, Location) ->
 interconnects_add_pair(X, Y, Index, Fuse1, Fuse2, Acc) ->
     {Side, Key1} = fuse_key(X, Y, Fuse1),
     {Side, Key2} = fuse_key(X, Y, Fuse2),
-    io:format("   ~-18w <- ~s ~w ~w~n", [{interconnect, Index}, Side, Key1, Key2]),
+    %io:format("   ~-18w <- ~s ~w ~w~n", [{interconnect, Index}, Side, Key1, Key2]),
     Acc1 = interconnects_add(Side, Index, Key1, Key2, Acc),
     interconnects_add(Side, Index, Key2, Key1, Acc1).
 
@@ -180,7 +180,7 @@ interconnects_add_pair(X, Y, Index, Fuse1, Fuse2, Acc) ->
 
 interconnects_add_one(X, Y, Index, Fuse, Acc) ->
     {Side, Key} = fuse_key(X, Y, Fuse),
-    io:format("   ~-18w <- ~s ~w~n", [{interconnect, Index}, Side, Key]),
+    %io:format("   ~-18w <- ~s ~w~n", [{interconnect, Index}, Side, Key]),
     interconnects_add(Side, Index, Key, direct_link, Acc).
 
 %%--------------------------------------------------------------------
