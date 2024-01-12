@@ -83,14 +83,14 @@ Each of the four global clock networks are driven horizontally (row)
 and then to each column. Unused clock networks are turned off either
 at individual columns or for the whole row.
 
-### `{global(), dedicated}`
+### `{global(), internal}`
 
 Each of the global clock networks can be driven from either:
 
  * dedicated pins, or
  * internal interconnects.
 
-This fuse selects the dedicated pin.
+This fuse selects the internal interconnects.
 
 ### `{global(), from3, mux#}` and `{global(), from4 / from6, mux#}`
 

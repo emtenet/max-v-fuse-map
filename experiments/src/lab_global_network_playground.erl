@@ -109,10 +109,10 @@ experiments(Device, LAB = {lab, X, _}, Experiments) ->
         {disable, 1} => [],
         {disable, 2} => [],
         {disable, 3} => [],
-        {dedicated, 0} => [],
-        {dedicated, 1} => [],
-        {dedicated, 2} => [],
-        {dedicated, 3} => []
+        {internal, 0} => [],
+        {internal, 1} => [],
+        {internal, 2} => [],
+        {internal, 3} => []
     }, Experiments),
     maps:foreach(fun (Name, Pattern) ->
         fuse(Name, Pattern, Matrix, X)
@@ -334,10 +334,10 @@ patterns({_Name, _, #{signals := Signals}}, Patterns) ->
         {disable, 1} => 0,
         {disable, 2} => 0,
         {disable, 3} => 0,
-        {dedicated, 0} => 1,
-        {dedicated, 1} => 1,
-        {dedicated, 2} => 1,
-        {dedicated, 3} => 1
+        {internal, 0} => 1,
+        {internal, 1} => 1,
+        {internal, 2} => 1,
+        {internal, 3} => 1
     }, Signals),
     maps:map(fun (Key, Pattern) ->
         #{Key := Bit} = Bits,
@@ -361,14 +361,14 @@ pattern_route([], Bits) ->
 pattern_route([{global_clk_h,_,_,_,G}, {clk_buffer,_,_,_,_} | _], Bits) ->
     Bits#{{disable, G} => 1};
 pattern_route([{global_clk_h,_,_,_,G}, {global_clk_mux,_,_,_,G} | _], Bits) ->
-    Bits#{{disable, G} => 1, {dedicated, G} => 0};
+    Bits#{{disable, G} => 1, {internal, G} => 0};
 pattern_route([_ | Route], Bits) ->
     pattern_route(Route, Bits).
 
 %%--------------------------------------------------------------------
 
-fuse({dedicated, N}, Pattern, Matrix, _) ->
-    Fuse = {{global, N}, dedicated},
+fuse({internal, N}, Pattern, Matrix, _) ->
+    Fuse = {{global, N}, internal},
     expect:fuse(Matrix, Pattern, Fuse);
 fuse({disable, N}, Pattern, Matrix, X) ->
     Row = {{global,N}, row, off},

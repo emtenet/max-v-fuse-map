@@ -5,7 +5,7 @@
 % This experiment checks the global network fuses for all cached
 % experiments. The fuses checked are:
 %
-%  * {{global, #}, dedicated}
+%  * {{global, #}, internal}
 %  * {{global, #}, row, off}
 %  * {{global, #}, {column #}, off}
 %
@@ -109,12 +109,12 @@ fuses(Density) ->
 
 fuses_global(Density, G) ->
     {ok, Row} = fuse_map:from_name({{global, G}, row, off}, Density),
-    {ok, Pin} = fuse_map:from_name({{global, G}, dedicated}, Density),
+    {ok, Pin} = fuse_map:from_name({{global, G}, internal}, Density),
     L = density:left_io(4, Density),
     R = density:right_io(Density),
     [
         {{G, row}, Row},
-        {{G, dedicated}, Pin},
+        {{G, internal}, Pin},
         fuses_column(Density, G, L),
         fuses_column(Density, G, R)
         |
@@ -157,9 +157,9 @@ network_dest(#{route := Route}, Network0) ->
 network_route([], Network) ->
     Network;
 network_route([{global_clk_h,_,_,_,G}, {clk_buffer,_,_,_,_}], Network) ->
-    Network#{{G, dedicated} => false, {G, row} => true};
+    Network#{{G, internal} => false, {G, row} => true};
 network_route([{global_clk_h,_,_,_,G}, {global_clk_mux,_,_,_,G} | _], Network) ->
-    Network#{{G, dedicated} => true, {G, row} => true};
+    Network#{{G, internal} => true, {G, row} => true};
 network_route([{lab_clk,X,_,_,G} | Route], Network) ->
     [{global_clk_h,_,_,_,G} | _] = Route,
     network_route(Route, Network#{{G, {column, X}} => true, {G, row} => true});
@@ -183,7 +183,7 @@ expect(Network, Fuses) ->
 
 %%--------------------------------------------------------------------
 
-expect_fuse(Network, {Key = {_, dedicated}, Fuse}) ->
+expect_fuse(Network, {Key = {_, internal}, Fuse}) ->
     % Check for existence
     case Network of
         #{Key := true} ->
