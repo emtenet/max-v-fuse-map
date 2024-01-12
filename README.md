@@ -62,6 +62,7 @@ My experiments are being run in the following
  * [Global internal](experiments/src/global_internal_experiment.erl)
  * Global MUX
    [playground](experiments/src/global_mux_playground.erl)
+   and [theory](experiments/src/global_mux_theory.erl)
 
 ## Maps
 
@@ -70,6 +71,7 @@ A mapping to and from fuse numbers, locations & names is encoded in
 
 The following mux mappings are encoded:
 
+ * [Global MUX](experiments/src/global_mux_map.erl)
  * [LC data MUX](experiments/src/lc_data_mux_map.erl)
  * [LAB control MUX](experiments/src/lab_control_mux_map.erl)
  * [IOC output MUX](experiments/src/ioc_output_mux_map.erl)

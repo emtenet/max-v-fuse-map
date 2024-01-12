@@ -169,7 +169,7 @@ froms(Density, Index, Experiments0, Acc0) ->
 
 from(_, _, [], _, _, Acc) ->
     Acc;
-from(N, Ns, [From | Froms], Matrix, Index, Acc0) ->
+from(N, Ns, [_ | Froms], Matrix, Index, Acc0) ->
     Pattern = lists:map(fun (NN) when NN =:= N -> 0; (_) -> x end, Ns),
     case matrix:pattern_match(Matrix, Pattern) of
         [{_, Fuse1}, {_, Fuse2}] ->
