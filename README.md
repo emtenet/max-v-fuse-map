@@ -65,6 +65,10 @@ My experiments are being run in the following
    and [theory](experiments/src/global_mux_theory.erl)
  * Global interconnect MUX
    [playground](experiments/src/global_interconnect_mux_playground.erl)
+ * C4 interconnect MUX
+   [playground](experiments/src/c4_interconnect_mux_playground.erl)
+ * R4 interconnect MUX
+   [playground](experiments/src/r4_interconnect_mux_playground.erl)
 
 ## Maps
 

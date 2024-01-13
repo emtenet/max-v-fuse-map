@@ -915,6 +915,12 @@
 ).
 
 -define(C4_SIDE_HEADS(),
+    ?C4_HEAD_DIRECT(11,  2)
+    ?C4_HEAD_DIRECT(11,  4)
+    ?C4_HEAD_DIRECT(11,  6)
+    ?C4_HEAD_DIRECT(11,  8)
+    ?C4_HEAD_DIRECT(11, 10)
+
     %?C4_SIDE_HEAD_L(11,  2, { 2, io_data_in1});
     %?C4_SIDE_HEAD_L(11,  4, { 3, io_data_in1});
     %?C4_SIDE_HEAD_L(11,  6, { 4, io_data_in1});
@@ -923,6 +929,12 @@
 ).
 
 -define(C4_SIDE_TAILS(),
+    ?C4_HEAD_DIRECT(11,  2)
+    ?C4_HEAD_DIRECT(11,  4)
+    ?C4_HEAD_DIRECT(11,  6)
+    ?C4_HEAD_DIRECT(11,  8)
+    ?C4_HEAD_DIRECT(11, 10)
+
     %?C4_SIDE_TAIL_L(11,  2, { 3, io_data_in1});
     %?C4_SIDE_TAIL_L(11,  4, { 4, io_data_in1});
     %?C4_SIDE_TAIL_L(11,  6, { 5, io_data_in1});
@@ -931,6 +943,76 @@
 ).
 
 -define(C4_SIDES(),
+    ?C4_CELL_DIRECT( 8, 0, 1)
+    ?C4_CELL_DIRECT( 8, 9, 1)
+
+    ?C4_CELL_PAIRED( 7, 0, 0)
+    ?C4_CELL_PAIRED( 7, 0, 1)
+    ?C4_CELL_PAIRED( 7, 9, 1)
+
+    ?C4_CELL_PAIRED( 8, 0, 0)
+    ?C4_CELL_PAIRED( 8, 9, 0)
+
+    ?C4_CELL_PAIRED( 9, 0, 0)
+    ?C4_CELL_PAIRED( 9, 0, 1)
+    ?C4_CELL_PAIRED( 9, 9, 0)
+    ?C4_CELL_PAIRED( 9, 9, 1)
+
+    ?C4_CELL_PAIRED(10, 0, 0)
+    ?C4_CELL_PAIRED(10, 0, 1)
+    ?C4_CELL_PAIRED(10, 9, 0)
+    ?C4_CELL_PAIRED(10, 9, 1)
+
+    ?C4_CELL_PAIRED(11, 0, 2)
+    ?C4_CELL_PAIRED(11, 0, 3)
+    ?C4_CELL_PAIRED(11, 1, 0)
+    ?C4_CELL_PAIRED(11, 1, 1)
+    ?C4_CELL_PAIRED(11, 2, 0)
+    ?C4_CELL_PAIRED(11, 2, 1)
+    ?C4_CELL_PAIRED(11, 2, 2)
+    ?C4_CELL_PAIRED(11, 2, 3)
+    ?C4_CELL_PAIRED(11, 3, 0)
+    ?C4_CELL_PAIRED(11, 3, 1)
+    ?C4_CELL_PAIRED(11, 4, 0)
+    ?C4_CELL_PAIRED(11, 4, 1)
+    ?C4_CELL_PAIRED(11, 5, 0)
+    ?C4_CELL_PAIRED(11, 5, 1)
+    ?C4_CELL_PAIRED(11, 6, 0)
+    ?C4_CELL_PAIRED(11, 6, 1)
+    ?C4_CELL_PAIRED(11, 7, 0)
+    ?C4_CELL_PAIRED(11, 7, 1)
+    ?C4_CELL_PAIRED(11, 7, 2)
+    ?C4_CELL_PAIRED(11, 7, 3)
+    ?C4_CELL_PAIRED(11, 8, 0)
+    ?C4_CELL_PAIRED(11, 8, 1)
+    ?C4_CELL_PAIRED(11, 9, 2)
+    ?C4_CELL_PAIRED(11, 9, 3)
+
+    ?C4_CELL_PAIRED(12, 0, 2)
+    ?C4_CELL_PAIRED(12, 0, 3)
+    ?C4_CELL_PAIRED(12, 1, 0)
+    ?C4_CELL_PAIRED(12, 1, 1)
+    ?C4_CELL_PAIRED(12, 2, 0)
+    ?C4_CELL_PAIRED(12, 2, 1)
+    ?C4_CELL_PAIRED(12, 2, 2)
+    ?C4_CELL_PAIRED(12, 2, 3)
+    ?C4_CELL_PAIRED(12, 3, 0)
+    ?C4_CELL_PAIRED(12, 3, 1)
+    ?C4_CELL_PAIRED(12, 5, 0)
+    ?C4_CELL_PAIRED(12, 4, 0)
+    ?C4_CELL_PAIRED(12, 4, 1)
+    ?C4_CELL_PAIRED(12, 5, 1)
+    ?C4_CELL_PAIRED(12, 6, 0)
+    ?C4_CELL_PAIRED(12, 6, 1)
+    ?C4_CELL_PAIRED(12, 7, 0)
+    ?C4_CELL_PAIRED(12, 7, 1)
+    ?C4_CELL_PAIRED(12, 7, 2)
+    ?C4_CELL_PAIRED(12, 7, 3)
+    ?C4_CELL_PAIRED(12, 8, 0)
+    ?C4_CELL_PAIRED(12, 8, 1)
+    ?C4_CELL_PAIRED(12, 9, 2)
+    ?C4_CELL_PAIRED(12, 9, 3)
+
     %?C4_SIDE_C( 7, 0, 0, { 0, from3, mux0});
     %?C4_SIDE_C( 7, 0, 1, { 0, from3, mux1});
     %?C4_SIDE_C( 8, 0, 0, { 0, from3, mux2});
@@ -1011,6 +1093,30 @@
 ).
 
 -define(C4_HEADS(),
+    ?C4_HEAD_DIRECT( 0,  1)
+    ?C4_HEAD_DIRECT( 0,  3)
+    ?C4_HEAD_DIRECT( 0,  5)
+    ?C4_HEAD_DIRECT( 0,  7)
+    ?C4_HEAD_DIRECT( 0,  9)
+
+    ?C4_HEAD_DIRECT(23,  1)
+    ?C4_HEAD_DIRECT(23,  3)
+    ?C4_HEAD_DIRECT(23,  5)
+    ?C4_HEAD_DIRECT(23,  7)
+    ?C4_HEAD_DIRECT(23,  9)
+
+    ?C4_HEAD_DIRECT(25,  2)
+    ?C4_HEAD_DIRECT(25,  4)
+    ?C4_HEAD_DIRECT(25,  6)
+    ?C4_HEAD_DIRECT(25,  8)
+    ?C4_HEAD_DIRECT(25, 10)
+
+    ?C4_HEAD_DIRECT(26,  2)
+    ?C4_HEAD_DIRECT(26,  4)
+    ?C4_HEAD_DIRECT(26,  6)
+    ?C4_HEAD_DIRECT(26,  8)
+    ?C4_HEAD_DIRECT(26, 10)
+
     %?C4_HEAD_L(23,  1, { 0, io_data_in0});
     %?C4_HEAD_L(23,  5, { 1, io_data_in0});
     %?C4_HEAD_R( 0,  1, { 2, io_data_in0});
@@ -1034,6 +1140,30 @@
 ).
 
 -define(C4_TAILS(),
+    ?C4_HEAD_DIRECT( 0,  1)
+    ?C4_HEAD_DIRECT( 0,  3)
+    ?C4_HEAD_DIRECT( 0,  5)
+    ?C4_HEAD_DIRECT( 0,  7)
+    ?C4_HEAD_DIRECT( 0,  9)
+
+    ?C4_HEAD_DIRECT(23,  1)
+    ?C4_HEAD_DIRECT(23,  3)
+    ?C4_HEAD_DIRECT(23,  5)
+    ?C4_HEAD_DIRECT(23,  7)
+    ?C4_HEAD_DIRECT(23,  9)
+
+    ?C4_HEAD_DIRECT(25,  2)
+    ?C4_HEAD_DIRECT(25,  4)
+    ?C4_HEAD_DIRECT(25,  6)
+    ?C4_HEAD_DIRECT(25,  8)
+    ?C4_HEAD_DIRECT(25, 10)
+
+    ?C4_HEAD_DIRECT(26,  2)
+    ?C4_HEAD_DIRECT(26,  4)
+    ?C4_HEAD_DIRECT(26,  6)
+    ?C4_HEAD_DIRECT(26,  8)
+    ?C4_HEAD_DIRECT(26, 10)
+
     %?C4_TAIL_L(23,  1, { 0, io_data_in0});
     %?C4_TAIL_L(23,  3, { 1, io_data_in0});
     %?C4_TAIL_L(23,  5, { 2, io_data_in0});
@@ -1057,6 +1187,129 @@
 ).
 
 -define(C4_CELLS(),
+    ?C4_CELL_DIRECT( 0, 0, 3)
+    ?C4_CELL_DIRECT( 0, 1, 1)
+    ?C4_CELL_DIRECT( 0, 2, 1)
+    ?C4_CELL_DIRECT( 0, 2, 3)
+    ?C4_CELL_DIRECT( 0, 3, 1)
+    ?C4_CELL_DIRECT( 0, 4, 1)
+    ?C4_CELL_DIRECT( 0, 5, 3)
+    ?C4_CELL_DIRECT( 0, 6, 1)
+    ?C4_CELL_DIRECT( 0, 7, 1)
+    ?C4_CELL_DIRECT( 0, 7, 3)
+    ?C4_CELL_DIRECT( 0, 8, 1)
+    ?C4_CELL_DIRECT( 0, 9, 1)
+
+    ?C4_CELL_DIRECT(23, 0, 1)
+    ?C4_CELL_DIRECT(23, 5, 1)
+
+    ?C4_CELL_EITHER(27, 0, 3)
+    ?C4_CELL_EITHER(27, 1, 1)
+    ?C4_CELL_EITHER(27, 2, 1)
+    ?C4_CELL_EITHER(27, 2, 3)
+    ?C4_CELL_EITHER(27, 3, 1)
+    ?C4_CELL_EITHER(27, 4, 1)
+    ?C4_CELL_EITHER(27, 5, 3)
+    ?C4_CELL_EITHER(27, 6, 1)
+    ?C4_CELL_EITHER(27, 7, 1)
+    ?C4_CELL_EITHER(27, 7, 3)
+    ?C4_CELL_EITHER(27, 8, 1)
+    ?C4_CELL_EITHER(27, 9, 1)
+
+    ?C4_CELL_PAIRED( 0, 0, 2)
+    ?C4_CELL_PAIRED( 0, 1, 0)
+    ?C4_CELL_PAIRED( 0, 2, 0)
+    ?C4_CELL_PAIRED( 0, 2, 2)
+    ?C4_CELL_PAIRED( 0, 3, 0)
+    ?C4_CELL_PAIRED( 0, 4, 0)
+    ?C4_CELL_PAIRED( 0, 5, 2)
+    ?C4_CELL_PAIRED( 0, 6, 0)
+    ?C4_CELL_PAIRED( 0, 7, 0)
+    ?C4_CELL_PAIRED( 0, 7, 2)
+    ?C4_CELL_PAIRED( 0, 8, 0)
+    ?C4_CELL_PAIRED( 0, 9, 0)
+
+    ?C4_CELL_PAIRED( 1, 0, 2)
+    ?C4_CELL_PAIRED( 1, 0, 3)
+    ?C4_CELL_PAIRED( 1, 1, 0)
+    ?C4_CELL_PAIRED( 1, 1, 1)
+    ?C4_CELL_PAIRED( 1, 2, 0)
+    ?C4_CELL_PAIRED( 1, 2, 1)
+    ?C4_CELL_PAIRED( 1, 2, 2)
+    ?C4_CELL_PAIRED( 1, 2, 3)
+    ?C4_CELL_PAIRED( 1, 3, 0)
+    ?C4_CELL_PAIRED( 1, 3, 1)
+    ?C4_CELL_PAIRED( 1, 4, 0)
+    ?C4_CELL_PAIRED( 1, 4, 1)
+    ?C4_CELL_PAIRED( 1, 5, 2)
+    ?C4_CELL_PAIRED( 1, 5, 3)
+    ?C4_CELL_PAIRED( 1, 6, 0)
+    ?C4_CELL_PAIRED( 1, 6, 1)
+    ?C4_CELL_PAIRED( 1, 7, 0)
+    ?C4_CELL_PAIRED( 1, 7, 1)
+    ?C4_CELL_PAIRED( 1, 7, 2)
+    ?C4_CELL_PAIRED( 1, 7, 3)
+    ?C4_CELL_PAIRED( 1, 8, 0)
+    ?C4_CELL_PAIRED( 1, 8, 1)
+    ?C4_CELL_PAIRED( 1, 9, 0)
+    ?C4_CELL_PAIRED( 1, 9, 1)
+
+    ?C4_CELL_PAIRED(22, 0, 0)
+    ?C4_CELL_PAIRED(22, 0, 1)
+    ?C4_CELL_PAIRED(22, 5, 0)
+    ?C4_CELL_PAIRED(22, 5, 1)
+
+    ?C4_CELL_PAIRED(23, 0, 0)
+    ?C4_CELL_PAIRED(23, 5, 0)
+
+    ?C4_CELL_PAIRED(24, 0, 0)
+    ?C4_CELL_PAIRED(24, 0, 1)
+    ?C4_CELL_PAIRED(24, 5, 0)
+    ?C4_CELL_PAIRED(24, 5, 1)
+
+    ?C4_CELL_PAIRED(25, 0, 0)
+    ?C4_CELL_PAIRED(25, 0, 1)
+    ?C4_CELL_PAIRED(25, 5, 0)
+    ?C4_CELL_PAIRED(25, 5, 1)
+
+    ?C4_CELL_PAIRED(26, 0, 2)
+    ?C4_CELL_PAIRED(26, 0, 3)
+    ?C4_CELL_PAIRED(26, 1, 0)
+    ?C4_CELL_PAIRED(26, 1, 1)
+    ?C4_CELL_PAIRED(26, 2, 0)
+    ?C4_CELL_PAIRED(26, 2, 1)
+    ?C4_CELL_PAIRED(26, 2, 2)
+    ?C4_CELL_PAIRED(26, 2, 3)
+    ?C4_CELL_PAIRED(26, 3, 0)
+    ?C4_CELL_PAIRED(26, 3, 1)
+    ?C4_CELL_PAIRED(26, 4, 0)
+    ?C4_CELL_PAIRED(26, 4, 1)
+    ?C4_CELL_PAIRED(26, 5, 2)
+    ?C4_CELL_PAIRED(26, 5, 3)
+    ?C4_CELL_PAIRED(26, 6, 0)
+    ?C4_CELL_PAIRED(26, 6, 1)
+    ?C4_CELL_PAIRED(26, 7, 0)
+    ?C4_CELL_PAIRED(26, 7, 1)
+    ?C4_CELL_PAIRED(26, 7, 2)
+    ?C4_CELL_PAIRED(26, 7, 3)
+    ?C4_CELL_PAIRED(26, 8, 0)
+    ?C4_CELL_PAIRED(26, 8, 1)
+    ?C4_CELL_PAIRED(26, 9, 0)
+    ?C4_CELL_PAIRED(26, 9, 1)
+
+    ?C4_CELL_PAIRED(27, 0, 2)
+    ?C4_CELL_PAIRED(27, 1, 0)
+    ?C4_CELL_PAIRED(27, 2, 0)
+    ?C4_CELL_PAIRED(27, 2, 2)
+    ?C4_CELL_PAIRED(27, 3, 0)
+    ?C4_CELL_PAIRED(27, 4, 0)
+    ?C4_CELL_PAIRED(27, 5, 2)
+    ?C4_CELL_PAIRED(27, 6, 0)
+    ?C4_CELL_PAIRED(27, 7, 0)
+    ?C4_CELL_PAIRED(27, 7, 2)
+    ?C4_CELL_PAIRED(27, 8, 0)
+    ?C4_CELL_PAIRED(27, 9, 0)
+
     %?C4_CELL_C(22, 0, 0, { 0, from3, mux0});
     %?C4_CELL_C(22, 0, 1, { 0, from3, mux1});
     %?C4_CELL_C(23, 0, 0, { 0, from3, mux2});
@@ -1233,6 +1486,54 @@
 ).
 
 -define(R4_SIDES(),
+    ?R4_CELL_DIRECT( 3, 0, 1)
+    ?R4_CELL_DIRECT( 3, 0, 3)
+    ?R4_CELL_DIRECT( 3, 9, 1)
+    ?R4_CELL_DIRECT( 3, 9, 3)
+
+    ?R4_CELL_DIRECT( 4, 0, 1)
+    ?R4_CELL_DIRECT( 4, 0, 3)
+    ?R4_CELL_DIRECT( 4, 9, 1)
+    ?R4_CELL_DIRECT( 4, 9, 3)
+
+    ?R4_CELL_DIRECT( 5, 0, 1)
+    ?R4_CELL_DIRECT( 5, 0, 3)
+    ?R4_CELL_DIRECT( 5, 9, 1)
+    ?R4_CELL_DIRECT( 5, 9, 3)
+
+    ?R4_CELL_DIRECT( 6, 0, 1)
+    ?R4_CELL_DIRECT( 6, 0, 3)
+    ?R4_CELL_DIRECT( 6, 9, 1)
+    ?R4_CELL_DIRECT( 6, 9, 3)
+
+    ?R4_CELL_PAIRED(11, 0, 0)
+    ?R4_CELL_PAIRED(11, 0, 1)
+    ?R4_CELL_PAIRED(11, 1, 2)
+    ?R4_CELL_PAIRED(11, 1, 3)
+    ?R4_CELL_PAIRED(11, 3, 2)
+    ?R4_CELL_PAIRED(11, 3, 3)
+    ?R4_CELL_PAIRED(11, 4, 2)
+    ?R4_CELL_PAIRED(11, 5, 2)
+    ?R4_CELL_PAIRED(11, 6, 2)
+    ?R4_CELL_PAIRED(11, 8, 2)
+    ?R4_CELL_PAIRED(11, 8, 3)
+    ?R4_CELL_PAIRED(11, 9, 0)
+    ?R4_CELL_PAIRED(11, 9, 1)
+
+    ?R4_CELL_PAIRED(12, 0, 0)
+    ?R4_CELL_PAIRED(12, 0, 1)
+    ?R4_CELL_PAIRED(12, 1, 2)
+    ?R4_CELL_PAIRED(12, 1, 3)
+    ?R4_CELL_PAIRED(12, 3, 2)
+    ?R4_CELL_PAIRED(12, 4, 2)
+    ?R4_CELL_PAIRED(12, 5, 2)
+    ?R4_CELL_PAIRED(12, 6, 2)
+    ?R4_CELL_PAIRED(12, 6, 3)
+    ?R4_CELL_PAIRED(12, 8, 2)
+    ?R4_CELL_PAIRED(12, 8, 3)
+    ?R4_CELL_PAIRED(12, 9, 0)
+    ?R4_CELL_PAIRED(12, 9, 1)
+
     %?R4_SIDE_L( 3, 0, 1, { 1, io_data_in0});
     %?R4_SIDE_L( 3, 0, 3, { 3, io_data_in0});
     %?R4_SIDE_L( 3, 9, 1, { 5, io_data_in0});
@@ -1295,6 +1596,146 @@
 ).
 
 -define(R4_CELLS(),
+    ?R4_CELL_DIRECT( 0, 0, 1)
+    ?R4_CELL_DIRECT( 0, 1, 3)
+    ?R4_CELL_DIRECT( 0, 3, 3)
+    ?R4_CELL_DIRECT( 0, 4, 3)
+    ?R4_CELL_DIRECT( 0, 5, 1)
+    ?R4_CELL_DIRECT( 0, 6, 3)
+    ?R4_CELL_DIRECT( 0, 8, 3)
+    ?R4_CELL_DIRECT( 0, 9, 3)
+
+    ?R4_CELL_DIRECT(23, 1, 1)
+    ?R4_CELL_DIRECT(23, 2, 1)
+    ?R4_CELL_DIRECT(23, 3, 1)
+    ?R4_CELL_DIRECT(23, 4, 1)
+    ?R4_CELL_DIRECT(23, 6, 1)
+    ?R4_CELL_DIRECT(23, 7, 1)
+    ?R4_CELL_DIRECT(23, 8, 1)
+    ?R4_CELL_DIRECT(23, 9, 1)
+
+    ?R4_CELL_EITHER(27, 0, 1)
+    ?R4_CELL_EITHER(27, 1, 3)
+    ?R4_CELL_EITHER(27, 9, 3)
+
+    ?R4_CELL_PAIRED( 0, 0, 0)
+    ?R4_CELL_PAIRED( 0, 1, 2)
+    ?R4_CELL_PAIRED( 0, 3, 2)
+    ?R4_CELL_PAIRED( 0, 4, 2)
+    ?R4_CELL_PAIRED( 0, 5, 0)
+    ?R4_CELL_PAIRED( 0, 6, 2)
+    ?R4_CELL_PAIRED( 0, 8, 2)
+    ?R4_CELL_PAIRED( 0, 9, 2)
+
+    ?R4_CELL_PAIRED( 1, 0, 0)
+    ?R4_CELL_PAIRED( 1, 0, 1)
+    ?R4_CELL_PAIRED( 1, 1, 2)
+    ?R4_CELL_PAIRED( 1, 1, 3)
+    ?R4_CELL_PAIRED( 1, 3, 2)
+    ?R4_CELL_PAIRED( 1, 3, 3)
+    ?R4_CELL_PAIRED( 1, 4, 2)
+    ?R4_CELL_PAIRED( 1, 4, 3)
+    ?R4_CELL_PAIRED( 1, 5, 0)
+    ?R4_CELL_PAIRED( 1, 5, 1)
+    ?R4_CELL_PAIRED( 1, 6, 2)
+    ?R4_CELL_PAIRED( 1, 6, 3)
+    ?R4_CELL_PAIRED( 1, 8, 2)
+    ?R4_CELL_PAIRED( 1, 8, 3)
+    ?R4_CELL_PAIRED( 1, 9, 2)
+    ?R4_CELL_PAIRED( 1, 9, 3)
+
+    ?R4_CELL_PAIRED(22, 1, 0)
+    ?R4_CELL_PAIRED(22, 1, 1)
+    ?R4_CELL_PAIRED(22, 2, 0)
+    ?R4_CELL_PAIRED(22, 2, 1)
+    ?R4_CELL_PAIRED(22, 3, 0)
+    ?R4_CELL_PAIRED(22, 3, 1)
+    ?R4_CELL_PAIRED(22, 4, 0)
+    ?R4_CELL_PAIRED(22, 4, 1)
+    ?R4_CELL_PAIRED(22, 6, 0)
+    ?R4_CELL_PAIRED(22, 6, 1)
+    ?R4_CELL_PAIRED(22, 7, 0)
+    ?R4_CELL_PAIRED(22, 7, 1)
+    ?R4_CELL_PAIRED(22, 8, 0)
+    ?R4_CELL_PAIRED(22, 8, 1)
+    ?R4_CELL_PAIRED(22, 9, 0)
+    ?R4_CELL_PAIRED(22, 9, 1)
+
+    ?R4_CELL_PAIRED(23, 1, 0)
+    ?R4_CELL_PAIRED(23, 2, 0)
+    ?R4_CELL_PAIRED(23, 3, 0)
+    ?R4_CELL_PAIRED(23, 4, 0)
+    ?R4_CELL_PAIRED(23, 6, 0)
+    ?R4_CELL_PAIRED(23, 7, 0)
+    ?R4_CELL_PAIRED(23, 8, 0)
+    ?R4_CELL_PAIRED(23, 9, 0)
+
+    ?R4_CELL_PAIRED(24, 1, 0)
+    ?R4_CELL_PAIRED(24, 1, 1)
+    ?R4_CELL_PAIRED(24, 2, 0)
+    ?R4_CELL_PAIRED(24, 2, 1)
+    ?R4_CELL_PAIRED(24, 3, 0)
+    ?R4_CELL_PAIRED(24, 3, 1)
+    ?R4_CELL_PAIRED(24, 4, 0)
+    ?R4_CELL_PAIRED(24, 4, 1)
+    ?R4_CELL_PAIRED(24, 6, 0)
+    ?R4_CELL_PAIRED(24, 6, 1)
+    ?R4_CELL_PAIRED(24, 8, 0)
+    ?R4_CELL_PAIRED(24, 7, 1)
+    ?R4_CELL_PAIRED(24, 7, 0)
+    ?R4_CELL_PAIRED(24, 8, 1)
+    ?R4_CELL_PAIRED(24, 9, 0)
+    ?R4_CELL_PAIRED(24, 9, 1)
+
+    ?R4_CELL_PAIRED(25, 1, 0)
+    ?R4_CELL_PAIRED(25, 1, 1)
+    ?R4_CELL_PAIRED(25, 2, 0)
+    ?R4_CELL_PAIRED(25, 2, 1)
+    ?R4_CELL_PAIRED(25, 3, 0)
+    ?R4_CELL_PAIRED(25, 3, 1)
+    ?R4_CELL_PAIRED(25, 4, 0)
+    ?R4_CELL_PAIRED(25, 4, 1)
+    ?R4_CELL_PAIRED(25, 6, 0)
+    ?R4_CELL_PAIRED(25, 6, 1)
+    ?R4_CELL_PAIRED(25, 7, 0)
+    ?R4_CELL_PAIRED(25, 7, 1)
+    ?R4_CELL_PAIRED(25, 8, 0)
+    ?R4_CELL_PAIRED(25, 8, 1)
+    ?R4_CELL_PAIRED(25, 9, 0)
+    ?R4_CELL_PAIRED(25, 9, 1)
+    ?R4_CELL_PAIRED(25, 9, 2)
+
+    ?R4_CELL_PAIRED(26, 0, 0)
+    ?R4_CELL_PAIRED(26, 0, 1)
+    ?R4_CELL_PAIRED(26, 1, 2)
+    ?R4_CELL_PAIRED(26, 1, 3)
+    ?R4_CELL_PAIRED(26, 3, 2)
+    ?R4_CELL_PAIRED(26, 3, 3)
+    ?R4_CELL_PAIRED(26, 4, 2)
+    ?R4_CELL_PAIRED(26, 4, 3)
+    ?R4_CELL_PAIRED(26, 5, 0)
+    ?R4_CELL_PAIRED(26, 5, 1)
+    ?R4_CELL_PAIRED(26, 6, 2)
+    ?R4_CELL_PAIRED(26, 6, 3)
+    ?R4_CELL_PAIRED(26, 8, 2)
+    ?R4_CELL_PAIRED(26, 8, 3)
+    ?R4_CELL_PAIRED(26, 9, 2)
+    ?R4_CELL_PAIRED(26, 9, 3)
+
+    ?R4_CELL_PAIRED(27, 0, 0)
+    ?R4_CELL_PAIRED(27, 1, 2)
+    ?R4_CELL_PAIRED(27, 3, 2)
+    ?R4_CELL_PAIRED(27, 3, 3)
+    ?R4_CELL_PAIRED(27, 4, 2)
+    ?R4_CELL_PAIRED(27, 4, 3)
+    ?R4_CELL_PAIRED(27, 5, 0)
+    ?R4_CELL_PAIRED(27, 5, 1)
+    ?R4_CELL_PAIRED(27, 6, 2)
+    ?R4_CELL_PAIRED(27, 6, 3)
+    ?R4_CELL_PAIRED(27, 8, 2)
+    ?R4_CELL_PAIRED(27, 8, 3)
+    ?R4_CELL_PAIRED(27, 9, 2)
+
     %?R4_CELL_R( 0, 0, 0, { 0, from3, mux2});
     %?R4_CELL_R( 0, 0, 1, { 0, direct_link});
     %?R4_CELL_R( 1, 0, 0, { 0, from3, mux0});
@@ -2877,6 +3318,16 @@ from_ioc(X, Y, N, Name, _With) ->
 
 %%--------------------------------------------------------------------
 
+-define(C4_CELL_DIRECT(Sector, N, I),
+).
+-define(C4_CELL_EITHER(Sector, N, I),
+).
+-define(C4_CELL_PAIRED(Sector, N, I),
+).
+-define(C4_HEAD_DIRECT(Sector, I),
+).
+-define(C4_HEAD_PAIRED(Sector, I),
+).
 -define(C4_SIDE_C(Sector, N, I, Name),
     from_c4(X, Y, Name, With) when X =:= With#with.left_x ->
         from_side(X, Sector, Y, N, I, With)
@@ -2961,9 +3412,24 @@ from_c4(X, Y, Name, _With) ->
 -undef(C4_CELL_E).
 -undef(C4_CELL_L).
 -undef(C4_CELL_R).
+-undef(C4_CELL_DIRECT).
+-undef(C4_CELL_EITHER).
+-undef(C4_CELL_PAIRED).
+-undef(C4_HEAD_DIRECT).
+-undef(C4_HEAD_PAIRED).
 
 %%--------------------------------------------------------------------
 
+-define(R4_CELL_DIRECT(Sector, N, I),
+).
+-define(R4_CELL_EITHER(Sector, N, I),
+).
+-define(R4_CELL_PAIRED(Sector, N, I),
+).
+-define(R4_HEAD_DIRECT(Sector, I),
+).
+-define(R4_HEAD_PAIRED(Sector, I),
+).
 -define(R4_SIDE_L(Sector, N, I, Name),
     from_r4(X, Y, Name, With) when X =:= With#with.left_x ->
         from_side(X, Sector, Y, N, I, With)
@@ -2997,6 +3463,11 @@ from_r4(X, Y, Name, _With) ->
 -undef(R4_CELL_E).
 -undef(R4_CELL_L).
 -undef(R4_CELL_R).
+-undef(R4_CELL_DIRECT).
+-undef(R4_CELL_EITHER).
+-undef(R4_CELL_PAIRED).
+-undef(R4_HEAD_DIRECT).
+-undef(R4_HEAD_PAIRED).
 
 %%--------------------------------------------------------------------
 
@@ -3638,6 +4109,14 @@ to_ioc_strip(X, Y, N, R, C) ->
 
 %%--------------------------------------------------------------------
 
+-define(C4_HEAD_DIRECT(Sector, I),
+    to_cell_head(X, I, Sector, _) ->
+        {ok, {c4, direct, {X, head, I, cell, Sector}}};
+).
+-define(C4_HEAD_MAPPED(Sector, I),
+    to_cell_head(X, I, Sector, _) ->
+        {ok, {c4, mapped, {X, head, I, cell, Sector}}};
+).
 -define(C4_HEAD_L(Sector, Index, Name),
     to_cell_head(X, Index, Sector, With) ->
         to_c4(X, With#with.top_y, Name)
@@ -3665,9 +4144,19 @@ to_cell_head(X, Index, Sector, _With) ->
 -undef(C4_HEAD_R).
 -undef(IOB_HEAD).
 -undef(IOC_HEAD).
+-undef(C4_HEAD_DIRECT).
+-undef(C4_HEAD_MAPPED).
 
 %%--------------------------------------------------------------------
 
+-define(C4_HEAD_DIRECT(Sector, I),
+    to_cell_tail(X, I, Sector, _) ->
+        {ok, {c4, direct, {X, tail, I, cell, Sector}}};
+).
+-define(C4_HEAD_MAPPED(Sector, I),
+    to_cell_tail(X, I, Sector, _) ->
+        {ok, {c4, mapped, {X, tail, I, cell, Sector}}};
+).
 -define(C4_TAIL_L(Sector, Index, Name),
     to_cell_tail(X, Index, Sector, With) when X < With#with.grow_x ->
         to_c4(X, With#with.short_y, Name);
@@ -3703,6 +4192,8 @@ to_cell_tail(X, Index, Sector, _With) ->
 -undef(C4_TAIL_R).
 -undef(IOB_HEAD).
 -undef(IOC_HEAD).
+-undef(C4_HEAD_DIRECT).
+-undef(C4_HEAD_MAPPED).
 
 %%--------------------------------------------------------------------
 
@@ -3719,6 +4210,10 @@ to_zero(X, Y, N, I) ->
 
 %%--------------------------------------------------------------------
 
+-define(C4_HEAD_DIRECT(Sector, I),
+    to_side_head(X, I, Sector, _) ->
+        {ok, {c4, direct, {X, head, I, side, Sector}}};
+).
 -define(C4_SIDE_HEAD_L(Sector, Index, Name),
     to_side_head(X, Index, Sector, With) when X =:= With#with.left_x ->
         to_c4(X, With#with.top_y, Name)
@@ -3729,9 +4224,14 @@ to_side_head(X, Index, Sector, _With) ->
     {error, {X, head, Index, side, Sector}}.
 
 -undef(C4_SIDE_HEAD_L).
+-undef(C4_HEAD_DIRECT).
 
 %%--------------------------------------------------------------------
 
+-define(C4_HEAD_DIRECT(Sector, I),
+    to_side_tail(X, I, Sector, _) ->
+        {ok, {c4, direct, {X, head, I, side, Sector}}};
+).
 -define(C4_SIDE_TAIL_L(Sector, Index, Name),
     to_side_tail(X, Index, Sector, With) when X =:= With#with.left_x ->
         to_c4(X, With#with.short_y, Name)
@@ -3742,6 +4242,7 @@ to_side_tail(X, Index, Sector, _With) ->
     {error, {X, tail, Index, side, Sector}}.
 
 -undef(C4_SIDE_TAIL_L).
+-undef(C4_HEAD_DIRECT).
 
 %%--------------------------------------------------------------------
 
@@ -3776,6 +4277,30 @@ to_side_line(X, Y, Index, Sector, _) ->
 
 %%--------------------------------------------------------------------
 
+-define(C4_CELL_DIRECT(Sector, N, I),
+    to_side(X, Y, N, I, Sector, _) ->
+        {ok, {c4, direct, {X, Y, N, I, side, Sector}}};
+).
+-define(C4_CELL_EITHER(Sector, N, I),
+    to_side(X, Y, N, I, Sector, _) ->
+        {ok, {c4, either, {X, Y, N, I, side, Sector}}};
+).
+-define(C4_CELL_PAIRED(Sector, N, I),
+    to_side(X, Y, N, I, Sector, _) ->
+        {ok, {c4, paired, {X, Y, N, I, side, Sector}}};
+).
+-define(R4_CELL_DIRECT(Sector, N, I),
+    to_side(X, Y, N, I, Sector, _) ->
+        {ok, {r4, direct, {X, Y, N, I, side, Sector}}};
+).
+-define(R4_CELL_EITHER(Sector, N, I),
+    to_side(X, Y, N, I, Sector, _) ->
+        {ok, {r4, either, {X, Y, N, I, side, Sector}}};
+).
+-define(R4_CELL_PAIRED(Sector, N, I),
+    to_side(X, Y, N, I, Sector, _) ->
+        {ok, {r4, paired, {X, Y, N, I, side, Sector}}};
+).
 -define(C4_SIDE_C(Sector, N, Index, Name),
     to_side(X, Y, N, Index, Sector, With) when X =:= With#with.left_x ->
         to_c4(X, Y, Name)
@@ -3838,6 +4363,12 @@ to_side(X, Y, N, Index, Sector, _) ->
 -undef(IOC_RIGHT).
 -undef(GLOBAL_SMALL_SELECT).
 -undef(IOC_SIDE).
+-undef(C4_CELL_DIRECT).
+-undef(C4_CELL_EITHER).
+-undef(C4_CELL_PAIRED).
+-undef(R4_CELL_DIRECT).
+-undef(R4_CELL_EITHER).
+-undef(R4_CELL_PAIRED).
 
 %%--------------------------------------------------------------------
 
@@ -3858,6 +4389,30 @@ to_cell_line(X, Y, Index, Sector, _) ->
 
 %%--------------------------------------------------------------------
 
+-define(C4_CELL_DIRECT(Sector, N, I),
+    to_cell(X, Y, N, I, Sector, _) ->
+        {ok, {c4, direct, {X, Y, N, I, cell, Sector}}};
+).
+-define(C4_CELL_EITHER(Sector, N, I),
+    to_cell(X, Y, N, I, Sector, _) ->
+        {ok, {c4, either, {X, Y, N, I, cell, Sector}}};
+).
+-define(C4_CELL_PAIRED(Sector, N, I),
+    to_cell(X, Y, N, I, Sector, _) ->
+        {ok, {c4, paired, {X, Y, N, I, cell, Sector}}};
+).
+-define(R4_CELL_DIRECT(Sector, N, I),
+    to_cell(X, Y, N, I, Sector, _) ->
+        {ok, {r4, direct, {X, Y, N, I, cell, Sector}}};
+).
+-define(R4_CELL_EITHER(Sector, N, I),
+    to_cell(X, Y, N, I, Sector, _) ->
+        {ok, {r4, either, {X, Y, N, I, cell, Sector}}};
+).
+-define(R4_CELL_PAIRED(Sector, N, I),
+    to_cell(X, Y, N, I, Sector, _) ->
+        {ok, {r4, paired, {X, Y, N, I, cell, Sector}}};
+).
 -define(C4_CELL_C(Sector, N, I, Name),
     to_cell(X, Y, N, I, Sector, _) ->
         to_c4(X, Y, Name)
@@ -3932,6 +4487,12 @@ to_cell(X, Y, N, I, Sector, _) ->
 -undef(GLOBAL_LARGE_SELECT).
 -undef(LAB_CELL).
 -undef(LC_CELL).
+-undef(C4_CELL_DIRECT).
+-undef(C4_CELL_EITHER).
+-undef(C4_CELL_PAIRED).
+-undef(R4_CELL_DIRECT).
+-undef(R4_CELL_EITHER).
+-undef(R4_CELL_PAIRED).
 
 %%--------------------------------------------------------------------
 
