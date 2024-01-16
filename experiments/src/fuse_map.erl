@@ -915,574 +915,324 @@
 ).
 
 -define(C4_SIDE_HEADS(),
-    ?C4_HEAD_DIRECT(11,  2)
-    ?C4_HEAD_DIRECT(11,  4)
-    ?C4_HEAD_DIRECT(11,  6)
-    ?C4_HEAD_DIRECT(11,  8)
-    ?C4_HEAD_DIRECT(11, 10)
-
-    %?C4_SIDE_HEAD_L(11,  2, { 2, io_data_in1});
-    %?C4_SIDE_HEAD_L(11,  4, { 3, io_data_in1});
-    %?C4_SIDE_HEAD_L(11,  6, { 4, io_data_in1});
-    %?C4_SIDE_HEAD_L(11,  8, { 5, io_data_in1});
-    %?C4_SIDE_HEAD_L(11, 10, { 6, io_data_in1});
+    ?C4_SIDE_HEAD_L(11,  2, { 9, io_data_in1});
+    ?C4_SIDE_HEAD_L(11,  4, {10, io_data_in1});
+    ?C4_SIDE_HEAD_L(11,  6, {11, io_data_in1});
+    ?C4_SIDE_HEAD_L(11,  8, {12, io_data_in1});
+    ?C4_SIDE_HEAD_L(11, 10, {13, io_data_in1});
 ).
 
 -define(C4_SIDE_TAILS(),
-    ?C4_HEAD_DIRECT(11,  2)
-    ?C4_HEAD_DIRECT(11,  4)
-    ?C4_HEAD_DIRECT(11,  6)
-    ?C4_HEAD_DIRECT(11,  8)
-    ?C4_HEAD_DIRECT(11, 10)
-
-    %?C4_SIDE_TAIL_L(11,  2, { 3, io_data_in1});
-    %?C4_SIDE_TAIL_L(11,  4, { 4, io_data_in1});
-    %?C4_SIDE_TAIL_L(11,  6, { 5, io_data_in1});
-    %?C4_SIDE_TAIL_L(11,  8, { 6, io_data_in1});
-    %?C4_SIDE_TAIL_L(11, 10, { 7, io_data_in1});
+    ?C4_SIDE_TAIL_L(11,  2, {10, io_data_in1});
+    ?C4_SIDE_TAIL_L(11,  4, {11, io_data_in1});
+    ?C4_SIDE_TAIL_L(11,  6, {12, io_data_in1});
+    ?C4_SIDE_TAIL_L(11,  8, {13, io_data_in1});
+    ?C4_SIDE_TAIL_L(11, 10, { 3, io_data_in1});
 ).
 
 -define(C4_SIDES(),
-    ?C4_CELL_DIRECT( 8, 0, 1)
-    ?C4_CELL_DIRECT( 8, 9, 1)
+    ?C4_SIDE_C( 7, 0, 0, { 0, from3, mux0});
+    ?C4_SIDE_C( 7, 0, 1, { 0, from3, mux1});
+    ?C4_SIDE_C( 8, 0, 0, { 0, from3, mux2});
+    ?C4_SIDE_C( 8, 0, 1, { 0, direct_link});
+    ?C4_SIDE_C( 9, 0, 0, { 0, from4, mux0});
+    ?C4_SIDE_C( 9, 0, 1, { 0, from4, mux1});
+    ?C4_SIDE_C(10, 0, 0, { 0, from4, mux2});
+    ?C4_SIDE_C(10, 0, 1, { 0, from4, mux3});
 
-    ?C4_CELL_PAIRED( 7, 0, 0)
-    ?C4_CELL_PAIRED( 7, 0, 1)
-    ?C4_CELL_PAIRED( 7, 9, 1)
+    ?C4_SIDE_E(11, 0, 2, { 7, from4, mux0});
+    ?C4_SIDE_E(11, 0, 3, { 7, from4, mux1});
+    ?C4_SIDE_E(12, 0, 2, { 7, from4, mux2});
+    ?C4_SIDE_E(12, 0, 3, { 7, from4, mux3});
 
-    ?C4_CELL_PAIRED( 8, 0, 0)
-    ?C4_CELL_PAIRED( 8, 9, 0)
+    ?C4_SIDE_E(11, 1, 0, { 1, from4, mux0});
+    ?C4_SIDE_E(11, 1, 1, { 1, from4, mux1});
+    ?C4_SIDE_E(12, 1, 0, { 1, from4, mux2});
+    ?C4_SIDE_E(12, 1, 1, { 1, from4, mux3});
 
-    ?C4_CELL_PAIRED( 9, 0, 0)
-    ?C4_CELL_PAIRED( 9, 0, 1)
-    ?C4_CELL_PAIRED( 9, 9, 0)
-    ?C4_CELL_PAIRED( 9, 9, 1)
+    ?C4_SIDE_E(11, 2, 0, { 8, from4, mux0});
+    ?C4_SIDE_E(11, 2, 1, { 8, from4, mux1});
+    ?C4_SIDE_E(12, 2, 0, { 8, from4, mux2});
+    ?C4_SIDE_E(12, 2, 1, { 8, from4, mux3});
 
-    ?C4_CELL_PAIRED(10, 0, 0)
-    ?C4_CELL_PAIRED(10, 0, 1)
-    ?C4_CELL_PAIRED(10, 9, 0)
-    ?C4_CELL_PAIRED(10, 9, 1)
+    ?C4_SIDE_E(11, 2, 2, { 2, from4, mux0});
+    ?C4_SIDE_E(11, 2, 3, { 2, from4, mux1});
+    ?C4_SIDE_E(12, 2, 2, { 2, from4, mux2});
+    ?C4_SIDE_E(12, 2, 3, { 2, from4, mux3});
 
-    ?C4_CELL_PAIRED(11, 0, 2)
-    ?C4_CELL_PAIRED(11, 0, 3)
-    ?C4_CELL_PAIRED(11, 1, 0)
-    ?C4_CELL_PAIRED(11, 1, 1)
-    ?C4_CELL_PAIRED(11, 2, 0)
-    ?C4_CELL_PAIRED(11, 2, 1)
-    ?C4_CELL_PAIRED(11, 2, 2)
-    ?C4_CELL_PAIRED(11, 2, 3)
-    ?C4_CELL_PAIRED(11, 3, 0)
-    ?C4_CELL_PAIRED(11, 3, 1)
-    ?C4_CELL_PAIRED(11, 4, 0)
-    ?C4_CELL_PAIRED(11, 4, 1)
-    ?C4_CELL_PAIRED(11, 5, 0)
-    ?C4_CELL_PAIRED(11, 5, 1)
-    ?C4_CELL_PAIRED(11, 6, 0)
-    ?C4_CELL_PAIRED(11, 6, 1)
-    ?C4_CELL_PAIRED(11, 7, 0)
-    ?C4_CELL_PAIRED(11, 7, 1)
-    ?C4_CELL_PAIRED(11, 7, 2)
-    ?C4_CELL_PAIRED(11, 7, 3)
-    ?C4_CELL_PAIRED(11, 8, 0)
-    ?C4_CELL_PAIRED(11, 8, 1)
-    ?C4_CELL_PAIRED(11, 9, 2)
-    ?C4_CELL_PAIRED(11, 9, 3)
+    ?C4_SIDE_E(11, 3, 0, { 9, from4, mux0});
+    ?C4_SIDE_E(11, 3, 1, { 9, from4, mux1});
+    ?C4_SIDE_E(12, 3, 0, { 9, from4, mux2});
+    ?C4_SIDE_E(12, 3, 1, { 9, from4, mux3});
 
-    ?C4_CELL_PAIRED(12, 0, 2)
-    ?C4_CELL_PAIRED(12, 0, 3)
-    ?C4_CELL_PAIRED(12, 1, 0)
-    ?C4_CELL_PAIRED(12, 1, 1)
-    ?C4_CELL_PAIRED(12, 2, 0)
-    ?C4_CELL_PAIRED(12, 2, 1)
-    ?C4_CELL_PAIRED(12, 2, 2)
-    ?C4_CELL_PAIRED(12, 2, 3)
-    ?C4_CELL_PAIRED(12, 3, 0)
-    ?C4_CELL_PAIRED(12, 3, 1)
-    ?C4_CELL_PAIRED(12, 5, 0)
-    ?C4_CELL_PAIRED(12, 4, 0)
-    ?C4_CELL_PAIRED(12, 4, 1)
-    ?C4_CELL_PAIRED(12, 5, 1)
-    ?C4_CELL_PAIRED(12, 6, 0)
-    ?C4_CELL_PAIRED(12, 6, 1)
-    ?C4_CELL_PAIRED(12, 7, 0)
-    ?C4_CELL_PAIRED(12, 7, 1)
-    ?C4_CELL_PAIRED(12, 7, 2)
-    ?C4_CELL_PAIRED(12, 7, 3)
-    ?C4_CELL_PAIRED(12, 8, 0)
-    ?C4_CELL_PAIRED(12, 8, 1)
-    ?C4_CELL_PAIRED(12, 9, 2)
-    ?C4_CELL_PAIRED(12, 9, 3)
+    ?C4_SIDE_E(11, 4, 0, { 3, from4, mux0});
+    ?C4_SIDE_E(11, 4, 1, { 3, from4, mux1});
+    ?C4_SIDE_E(12, 4, 0, { 3, from4, mux2});
+    ?C4_SIDE_E(12, 4, 1, { 3, from4, mux3});
 
-    %?C4_SIDE_C( 7, 0, 0, { 0, from3, mux0});
-    %?C4_SIDE_C( 7, 0, 1, { 0, from3, mux1});
-    %?C4_SIDE_C( 8, 0, 0, { 0, from3, mux2});
-    %?C4_SIDE_C( 8, 0, 1, { 0, direct_link});
-    %?C4_SIDE_C( 9, 0, 0, { 0, from4, mux0});
-    %?C4_SIDE_C( 9, 0, 1, { 0, from4, mux1});
-    %?C4_SIDE_C(10, 0, 0, { 0, from4, mux2});
-    %?C4_SIDE_C(10, 0, 1, { 0, from4, mux3});
+    ?C4_SIDE_E(11, 5, 0, {13, from4, mux0});
+    ?C4_SIDE_E(11, 5, 1, {13, from4, mux1});
+    ?C4_SIDE_E(12, 5, 0, {13, from4, mux2});
+    ?C4_SIDE_E(12, 5, 1, {13, from4, mux3});
 
-    %?C4_SIDE_E(11, 0, 2, { 7, from4, mux0});
-    %?C4_SIDE_E(11, 0, 3, { 7, from4, mux1});
-    %?C4_SIDE_E(12, 0, 2, { 7, from4, mux2});
-    %?C4_SIDE_E(12, 0, 3, { 7, from4, mux3});
+    ?C4_SIDE_E(11, 6, 0, { 6, from4, mux0});
+    ?C4_SIDE_E(11, 6, 1, { 6, from4, mux1});
+    ?C4_SIDE_E(12, 6, 0, { 6, from4, mux2});
+    ?C4_SIDE_E(12, 6, 1, { 6, from4, mux3});
 
-    %?C4_SIDE_E(11, 1, 0, { 1, from4, mux0});
-    %?C4_SIDE_E(11, 1, 1, { 1, from4, mux1});
-    %?C4_SIDE_E(12, 1, 0, { 1, from4, mux2});
-    %?C4_SIDE_E(12, 1, 1, { 1, from4, mux3});
+    ?C4_SIDE_E(11, 7, 0, { 5, from4, mux0});
+    ?C4_SIDE_E(11, 7, 1, { 5, from4, mux1});
+    ?C4_SIDE_E(12, 7, 0, { 5, from4, mux2});
+    ?C4_SIDE_E(12, 7, 1, { 5, from4, mux3});
 
-    %?C4_SIDE_E(11, 2, 0, { 8, from4, mux0});
-    %?C4_SIDE_E(11, 2, 1, { 8, from4, mux1});
-    %?C4_SIDE_E(12, 2, 0, { 8, from4, mux2});
-    %?C4_SIDE_E(12, 2, 1, { 8, from4, mux3});
+    ?C4_SIDE_E(11, 7, 2, {12, from4, mux0});
+    ?C4_SIDE_E(11, 7, 3, {12, from4, mux1});
+    ?C4_SIDE_E(12, 7, 2, {12, from4, mux2});
+    ?C4_SIDE_E(12, 7, 3, {12, from4, mux3});
 
-    %?C4_SIDE_E(11, 2, 2, { 2, from4, mux0});
-    %?C4_SIDE_E(11, 2, 3, { 2, from4, mux1});
-    %?C4_SIDE_E(12, 2, 2, { 2, from4, mux2});
-    %?C4_SIDE_E(12, 2, 3, { 2, from4, mux3});
+    ?C4_SIDE_E(11, 8, 0, {11, from4, mux0});
+    ?C4_SIDE_E(11, 8, 1, {11, from4, mux1});
+    ?C4_SIDE_E(12, 8, 0, {11, from4, mux2});
+    ?C4_SIDE_E(12, 8, 1, {11, from4, mux3});
 
-    %?C4_SIDE_E(11, 3, 0, { 9, from4, mux0});
-    %?C4_SIDE_E(11, 3, 1, { 9, from4, mux1});
-    %?C4_SIDE_E(12, 3, 0, { 9, from4, mux2});
-    %?C4_SIDE_E(12, 3, 1, { 9, from4, mux3});
+    ?C4_SIDE_C( 7, 9, 0, {10, from3, mux0});
+    ?C4_SIDE_C( 7, 9, 1, {10, from3, mux1});
+    ?C4_SIDE_C( 8, 9, 0, {10, from3, mux2});
+    ?C4_SIDE_C( 8, 9, 1, {10, direct_link});
+    ?C4_SIDE_C( 9, 9, 0, {10, from4, mux0});
+    ?C4_SIDE_C( 9, 9, 1, {10, from4, mux1});
+    ?C4_SIDE_C(10, 9, 0, {10, from4, mux2});
+    ?C4_SIDE_C(10, 9, 1, {10, from4, mux3});
 
-    %?C4_SIDE_E(11, 4, 0, { 3, from4, mux0});
-    %?C4_SIDE_E(11, 4, 1, { 3, from4, mux1});
-    %?C4_SIDE_E(12, 4, 0, { 3, from4, mux2});
-    %?C4_SIDE_E(12, 4, 1, { 3, from4, mux3});
-
-    %?C4_SIDE_E(11, 5, 0, {13, from4, mux0});
-    %?C4_SIDE_E(11, 5, 1, {13, from4, mux1});
-    %?C4_SIDE_E(12, 5, 0, {13, from4, mux2});
-    %?C4_SIDE_E(12, 5, 1, {13, from4, mux3});
-
-    %?C4_SIDE_E(11, 6, 0, { 6, from4, mux0});
-    %?C4_SIDE_E(11, 6, 1, { 6, from4, mux1});
-    %?C4_SIDE_E(12, 6, 0, { 6, from4, mux2});
-    %?C4_SIDE_E(12, 6, 1, { 6, from4, mux3});
-
-    %?C4_SIDE_E(11, 7, 0, { 5, from4, mux0});
-    %?C4_SIDE_E(11, 7, 1, { 5, from4, mux1});
-    %?C4_SIDE_E(12, 7, 0, { 5, from4, mux2});
-    %?C4_SIDE_E(12, 7, 1, { 5, from4, mux3});
-
-    %?C4_SIDE_E(11, 7, 2, {12, from4, mux0});
-    %?C4_SIDE_E(11, 7, 3, {12, from4, mux1});
-    %?C4_SIDE_E(12, 7, 2, {12, from4, mux2});
-    %?C4_SIDE_E(12, 7, 3, {12, from4, mux3});
-
-    %?C4_SIDE_E(11, 8, 0, {11, from4, mux0});
-    %?C4_SIDE_E(11, 8, 1, {11, from4, mux1});
-    %?C4_SIDE_E(12, 8, 0, {11, from4, mux2});
-    %?C4_SIDE_E(12, 8, 1, {11, from4, mux3});
-
-    %?C4_SIDE_C( 7, 9, 0, {10, from3, mux0});
-    %?C4_SIDE_C( 7, 9, 1, {10, from3, mux1});
-    %?C4_SIDE_C( 8, 9, 0, {10, from3, mux2});
-    %?C4_SIDE_C( 8, 9, 1, {10, direct_link});
-    %?C4_SIDE_C( 9, 9, 0, {10, from4, mux0});
-    %?C4_SIDE_C( 9, 9, 1, {10, from4, mux1});
-    %?C4_SIDE_C(10, 9, 0, {10, from4, mux2});
-    %?C4_SIDE_C(10, 9, 1, {10, from4, mux3});
-
-    %?C4_SIDE_E(11, 9, 2, { 4, from4, mux0});
-    %?C4_SIDE_E(11, 9, 3, { 4, from4, mux1});
-    %?C4_SIDE_E(12, 9, 2, { 4, from4, mux2});
-    %?C4_SIDE_E(12, 9, 3, { 4, from4, mux3});
+    ?C4_SIDE_E(11, 9, 2, { 4, from4, mux0});
+    ?C4_SIDE_E(11, 9, 3, { 4, from4, mux1});
+    ?C4_SIDE_E(12, 9, 2, { 4, from4, mux2});
+    ?C4_SIDE_E(12, 9, 3, { 4, from4, mux3});
 ).
 
 -define(C4_HEADS(),
-    ?C4_HEAD_DIRECT( 0,  1)
-    ?C4_HEAD_DIRECT( 0,  3)
-    ?C4_HEAD_DIRECT( 0,  5)
-    ?C4_HEAD_DIRECT( 0,  7)
-    ?C4_HEAD_DIRECT( 0,  9)
-
-    ?C4_HEAD_DIRECT(23,  1)
-    ?C4_HEAD_DIRECT(23,  3)
-    ?C4_HEAD_DIRECT(23,  5)
-    ?C4_HEAD_DIRECT(23,  7)
-    ?C4_HEAD_DIRECT(23,  9)
-
-    ?C4_HEAD_DIRECT(25,  2)
-    ?C4_HEAD_DIRECT(25,  4)
-    ?C4_HEAD_DIRECT(25,  6)
-    ?C4_HEAD_DIRECT(25,  8)
-    ?C4_HEAD_DIRECT(25, 10)
-
-    ?C4_HEAD_DIRECT(26,  2)
-    ?C4_HEAD_DIRECT(26,  4)
-    ?C4_HEAD_DIRECT(26,  6)
-    ?C4_HEAD_DIRECT(26,  8)
-    ?C4_HEAD_DIRECT(26, 10)
-
-    %?C4_HEAD_L(23,  1, { 0, io_data_in0});
-    %?C4_HEAD_L(23,  5, { 1, io_data_in0});
-    %?C4_HEAD_R( 0,  1, { 2, io_data_in0});
-    %?C4_HEAD_R( 0,  3, { 3, io_data_in0});
-    %?C4_HEAD_R( 0,  5, { 4, io_data_in0});
-    %?C4_HEAD_R( 0,  7, { 5, io_data_in0});
-    %?C4_HEAD_R( 0,  9, { 6, io_data_in0});
-    %?C4_HEAD_L(23,  3, { 7, io_data_in0});
-    %?C4_HEAD_L(23,  7, { 8, io_data_in0});
-    %?C4_HEAD_L(23,  9, { 9, io_data_in0});
-    %?C4_HEAD_L(25,  2, { 0, io_data_in1});
-    %?C4_HEAD_L(25,  6, { 1, io_data_in1});
-    %?C4_HEAD_L(26,  2, { 2, io_data_in1});
-    %?C4_HEAD_L(26,  4, { 3, io_data_in1});
-    %?C4_HEAD_L(26,  6, { 4, io_data_in1});
-    %?C4_HEAD_L(26,  8, { 5, io_data_in1});
-    %?C4_HEAD_L(26, 10, { 6, io_data_in1});
-    %?C4_HEAD_L(25,  4, { 7, io_data_in1});
-    %?C4_HEAD_L(25,  8, { 8, io_data_in1});
-    %?C4_HEAD_L(25, 10, { 9, io_data_in1});
+    ?C4_HEAD_L(23,  1, { 7, io_data_in0});
+    ?C4_HEAD_L(23,  5, { 8, io_data_in0});
+    ?C4_HEAD_R( 0,  1, { 9, io_data_in0});
+    ?C4_HEAD_R( 0,  3, {10, io_data_in0});
+    ?C4_HEAD_R( 0,  5, {11, io_data_in0});
+    ?C4_HEAD_R( 0,  7, {12, io_data_in0});
+    ?C4_HEAD_R( 0,  9, {13, io_data_in0});
+    ?C4_HEAD_L(23,  3, { 0, io_data_in0});
+    ?C4_HEAD_L(23,  7, { 1, io_data_in0});
+    ?C4_HEAD_L(23,  9, { 2, io_data_in0});
+    ?C4_HEAD_L(25,  2, { 7, io_data_in1});
+    ?C4_HEAD_L(25,  6, { 8, io_data_in1});
+    ?C4_HEAD_L(26,  2, { 9, io_data_in1});
+    ?C4_HEAD_L(26,  4, {10, io_data_in1});
+    ?C4_HEAD_L(26,  6, {11, io_data_in1});
+    ?C4_HEAD_L(26,  8, {12, io_data_in1});
+    ?C4_HEAD_L(26, 10, {13, io_data_in1});
+    ?C4_HEAD_L(25,  4, { 0, io_data_in1});
+    ?C4_HEAD_L(25,  8, { 1, io_data_in1});
+    ?C4_HEAD_L(25, 10, { 2, io_data_in1});
 ).
 
 -define(C4_TAILS(),
-    ?C4_HEAD_DIRECT( 0,  1)
-    ?C4_HEAD_DIRECT( 0,  3)
-    ?C4_HEAD_DIRECT( 0,  5)
-    ?C4_HEAD_DIRECT( 0,  7)
-    ?C4_HEAD_DIRECT( 0,  9)
+    ?C4_TAIL_R( 0,  1, {10, io_data_in0});
+    ?C4_TAIL_R( 0,  3, {11, io_data_in0});
+    ?C4_TAIL_R( 0,  5, {12, io_data_in0});
+    ?C4_TAIL_R( 0,  7, {13, io_data_in0});
+    ?C4_TAIL_R( 0,  9, { 3, io_data_in0});
 
-    ?C4_HEAD_DIRECT(23,  1)
-    ?C4_HEAD_DIRECT(23,  3)
-    ?C4_HEAD_DIRECT(23,  5)
-    ?C4_HEAD_DIRECT(23,  7)
-    ?C4_HEAD_DIRECT(23,  9)
+    ?C4_TAIL_L(23,  1, { 7, io_data_in0});
+    ?C4_TAIL_L(23,  3, { 8, io_data_in0});
+    ?C4_TAIL_L(23,  5, { 9, io_data_in0});
+    ?C4_TAIL_L(23,  7, { 0, io_data_in0});
+    ?C4_TAIL_L(23,  9, { 1, io_data_in0});
 
-    ?C4_HEAD_DIRECT(25,  2)
-    ?C4_HEAD_DIRECT(25,  4)
-    ?C4_HEAD_DIRECT(25,  6)
-    ?C4_HEAD_DIRECT(25,  8)
-    ?C4_HEAD_DIRECT(25, 10)
+    ?C4_TAIL_L(25,  2, { 7, io_data_in1});
+    ?C4_TAIL_L(25,  4, { 8, io_data_in1});
+    ?C4_TAIL_L(25,  6, { 9, io_data_in1});
+    ?C4_TAIL_L(25,  8, { 0, io_data_in1});
+    ?C4_TAIL_L(25, 10, { 1, io_data_in1});
 
-    ?C4_HEAD_DIRECT(26,  2)
-    ?C4_HEAD_DIRECT(26,  4)
-    ?C4_HEAD_DIRECT(26,  6)
-    ?C4_HEAD_DIRECT(26,  8)
-    ?C4_HEAD_DIRECT(26, 10)
-
-    %?C4_TAIL_L(23,  1, { 0, io_data_in0});
-    %?C4_TAIL_L(23,  3, { 1, io_data_in0});
-    %?C4_TAIL_L(23,  5, { 2, io_data_in0});
-    %?C4_TAIL_R( 0,  1, { 3, io_data_in0});
-    %?C4_TAIL_R( 0,  3, { 4, io_data_in0});
-    %?C4_TAIL_R( 0,  5, { 5, io_data_in0});
-    %?C4_TAIL_R( 0,  7, { 6, io_data_in0});
-    %?C4_TAIL_R( 0,  9, { 7, io_data_in0});
-    %?C4_TAIL_L(23,  7, { 8, io_data_in0});
-    %?C4_TAIL_L(23,  9, { 9, io_data_in0});
-    %?C4_TAIL_L(25,  2, { 0, io_data_in1});
-    %?C4_TAIL_L(25,  4, { 1, io_data_in1});
-    %?C4_TAIL_L(25,  6, { 2, io_data_in1});
-    %?C4_TAIL_L(26,  2, { 3, io_data_in1});
-    %?C4_TAIL_L(26,  4, { 4, io_data_in1});
-    %?C4_TAIL_L(26,  6, { 5, io_data_in1});
-    %?C4_TAIL_L(26,  8, { 6, io_data_in1});
-    %?C4_TAIL_L(26, 10, { 7, io_data_in1});
-    %?C4_TAIL_L(25,  8, { 8, io_data_in1});
-    %?C4_TAIL_L(25, 10, { 9, io_data_in1});
+    ?C4_TAIL_L(26,  2, {10, io_data_in1});
+    ?C4_TAIL_L(26,  4, {11, io_data_in1});
+    ?C4_TAIL_L(26,  6, {12, io_data_in1});
+    ?C4_TAIL_L(26,  8, {13, io_data_in1});
+    ?C4_TAIL_L(26, 10, { 3, io_data_in1});
 ).
 
 -define(C4_CELLS(),
-    ?C4_CELL_DIRECT( 0, 0, 3)
-    ?C4_CELL_DIRECT( 0, 1, 1)
-    ?C4_CELL_DIRECT( 0, 2, 1)
-    ?C4_CELL_DIRECT( 0, 2, 3)
-    ?C4_CELL_DIRECT( 0, 3, 1)
-    ?C4_CELL_DIRECT( 0, 4, 1)
-    ?C4_CELL_DIRECT( 0, 5, 3)
-    ?C4_CELL_DIRECT( 0, 6, 1)
-    ?C4_CELL_DIRECT( 0, 7, 1)
-    ?C4_CELL_DIRECT( 0, 7, 3)
-    ?C4_CELL_DIRECT( 0, 8, 1)
-    ?C4_CELL_DIRECT( 0, 9, 1)
+    ?C4_CELL_C(22, 0, 0, { 0, from3, mux0});
+    ?C4_CELL_C(22, 0, 1, { 0, from3, mux1});
+    ?C4_CELL_C(23, 0, 0, { 0, from3, mux2});
+    ?C4_CELL_C(23, 0, 1, { 0, direct_link});
+    ?C4_CELL_C(24, 0, 0, { 0, from4, mux0});
+    ?C4_CELL_C(24, 0, 1, { 0, from4, mux1});
+    ?C4_CELL_C(25, 0, 0, { 0, from4, mux2});
+    ?C4_CELL_C(25, 0, 1, { 0, from4, mux3});
 
-    ?C4_CELL_DIRECT(23, 0, 1)
-    ?C4_CELL_DIRECT(23, 5, 1)
+    ?C4_CELL_R( 0, 0, 2, { 7, from3, mux2});
+    ?C4_CELL_R( 0, 0, 3, { 7, direct_link});
+    ?C4_CELL_R( 1, 0, 2, { 7, from3, mux0});
+    ?C4_CELL_R( 1, 0, 3, { 7, from3, mux1});
+    ?C4_CELL_E(26, 0, 2, { 7, from3, mux0});
+    ?C4_CELL_E(26, 0, 3, { 7, from3, mux1});
+    ?C4_CELL_E(27, 0, 2, { 7, from3, mux2});
+    ?C4_CELL_E(27, 0, 3, { 7, direct_link});
+    ?C4_CELL_L(26, 0, 2, { 7, from4, mux0});
+    ?C4_CELL_L(26, 0, 3, { 7, from4, mux1});
+    ?C4_CELL_L(27, 0, 2, { 7, from4, mux2});
+    ?C4_CELL_L(27, 0, 3, { 7, from4, mux3});
 
-    ?C4_CELL_EITHER(27, 0, 3)
-    ?C4_CELL_EITHER(27, 1, 1)
-    ?C4_CELL_EITHER(27, 2, 1)
-    ?C4_CELL_EITHER(27, 2, 3)
-    ?C4_CELL_EITHER(27, 3, 1)
-    ?C4_CELL_EITHER(27, 4, 1)
-    ?C4_CELL_EITHER(27, 5, 3)
-    ?C4_CELL_EITHER(27, 6, 1)
-    ?C4_CELL_EITHER(27, 7, 1)
-    ?C4_CELL_EITHER(27, 7, 3)
-    ?C4_CELL_EITHER(27, 8, 1)
-    ?C4_CELL_EITHER(27, 9, 1)
+    ?C4_CELL_R( 0, 1, 0, { 1, from3, mux2});
+    ?C4_CELL_R( 0, 1, 1, { 1, direct_link});
+    ?C4_CELL_R( 1, 1, 0, { 1, from3, mux0});
+    ?C4_CELL_R( 1, 1, 1, { 1, from3, mux1});
+    ?C4_CELL_E(26, 1, 0, { 1, from3, mux0});
+    ?C4_CELL_E(26, 1, 1, { 1, from3, mux1});
+    ?C4_CELL_E(27, 1, 0, { 1, from3, mux2});
+    ?C4_CELL_E(27, 1, 1, { 1, direct_link});
+    ?C4_CELL_L(26, 1, 0, { 1, from4, mux0});
+    ?C4_CELL_L(26, 1, 1, { 1, from4, mux1});
+    ?C4_CELL_L(27, 1, 0, { 1, from4, mux2});
+    ?C4_CELL_L(27, 1, 1, { 1, from4, mux3});
 
-    ?C4_CELL_PAIRED( 0, 0, 2)
-    ?C4_CELL_PAIRED( 0, 1, 0)
-    ?C4_CELL_PAIRED( 0, 2, 0)
-    ?C4_CELL_PAIRED( 0, 2, 2)
-    ?C4_CELL_PAIRED( 0, 3, 0)
-    ?C4_CELL_PAIRED( 0, 4, 0)
-    ?C4_CELL_PAIRED( 0, 5, 2)
-    ?C4_CELL_PAIRED( 0, 6, 0)
-    ?C4_CELL_PAIRED( 0, 7, 0)
-    ?C4_CELL_PAIRED( 0, 7, 2)
-    ?C4_CELL_PAIRED( 0, 8, 0)
-    ?C4_CELL_PAIRED( 0, 9, 0)
+    ?C4_CELL_R( 0, 2, 0, { 8, from3, mux2});
+    ?C4_CELL_R( 0, 2, 1, { 8, direct_link});
+    ?C4_CELL_R( 1, 2, 0, { 8, from3, mux0});
+    ?C4_CELL_R( 1, 2, 1, { 8, from3, mux1});
+    ?C4_CELL_E(26, 2, 0, { 8, from3, mux0});
+    ?C4_CELL_E(26, 2, 1, { 8, from3, mux1});
+    ?C4_CELL_E(27, 2, 0, { 8, from3, mux2});
+    ?C4_CELL_E(27, 2, 1, { 8, direct_link});
+    ?C4_CELL_L(26, 2, 0, { 8, from4, mux0});
+    ?C4_CELL_L(26, 2, 1, { 8, from4, mux1});
+    ?C4_CELL_L(27, 2, 0, { 8, from4, mux2});
+    ?C4_CELL_L(27, 2, 1, { 8, from4, mux3});
 
-    ?C4_CELL_PAIRED( 1, 0, 2)
-    ?C4_CELL_PAIRED( 1, 0, 3)
-    ?C4_CELL_PAIRED( 1, 1, 0)
-    ?C4_CELL_PAIRED( 1, 1, 1)
-    ?C4_CELL_PAIRED( 1, 2, 0)
-    ?C4_CELL_PAIRED( 1, 2, 1)
-    ?C4_CELL_PAIRED( 1, 2, 2)
-    ?C4_CELL_PAIRED( 1, 2, 3)
-    ?C4_CELL_PAIRED( 1, 3, 0)
-    ?C4_CELL_PAIRED( 1, 3, 1)
-    ?C4_CELL_PAIRED( 1, 4, 0)
-    ?C4_CELL_PAIRED( 1, 4, 1)
-    ?C4_CELL_PAIRED( 1, 5, 2)
-    ?C4_CELL_PAIRED( 1, 5, 3)
-    ?C4_CELL_PAIRED( 1, 6, 0)
-    ?C4_CELL_PAIRED( 1, 6, 1)
-    ?C4_CELL_PAIRED( 1, 7, 0)
-    ?C4_CELL_PAIRED( 1, 7, 1)
-    ?C4_CELL_PAIRED( 1, 7, 2)
-    ?C4_CELL_PAIRED( 1, 7, 3)
-    ?C4_CELL_PAIRED( 1, 8, 0)
-    ?C4_CELL_PAIRED( 1, 8, 1)
-    ?C4_CELL_PAIRED( 1, 9, 0)
-    ?C4_CELL_PAIRED( 1, 9, 1)
+    ?C4_CELL_R( 0, 2, 2, { 2, from3, mux2});
+    ?C4_CELL_R( 0, 2, 3, { 2, direct_link});
+    ?C4_CELL_R( 1, 2, 2, { 2, from3, mux0});
+    ?C4_CELL_R( 1, 2, 3, { 2, from3, mux1});
+    ?C4_CELL_E(26, 2, 2, { 2, from3, mux0});
+    ?C4_CELL_E(26, 2, 3, { 2, from3, mux1});
+    ?C4_CELL_E(27, 2, 2, { 2, from3, mux2});
+    ?C4_CELL_E(27, 2, 3, { 2, direct_link});
+    ?C4_CELL_L(26, 2, 2, { 2, from4, mux0});
+    ?C4_CELL_L(26, 2, 3, { 2, from4, mux1});
+    ?C4_CELL_L(27, 2, 2, { 2, from4, mux2});
+    ?C4_CELL_L(27, 2, 3, { 2, from4, mux3});
 
-    ?C4_CELL_PAIRED(22, 0, 0)
-    ?C4_CELL_PAIRED(22, 0, 1)
-    ?C4_CELL_PAIRED(22, 5, 0)
-    ?C4_CELL_PAIRED(22, 5, 1)
+    ?C4_CELL_R( 0, 3, 0, { 9, from3, mux2});
+    ?C4_CELL_R( 0, 3, 1, { 9, direct_link});
+    ?C4_CELL_R( 1, 3, 0, { 9, from3, mux0});
+    ?C4_CELL_R( 1, 3, 1, { 9, from3, mux1});
+    ?C4_CELL_E(26, 3, 0, { 9, from3, mux0});
+    ?C4_CELL_E(26, 3, 1, { 9, from3, mux1});
+    ?C4_CELL_E(27, 3, 0, { 9, from3, mux2});
+    ?C4_CELL_E(27, 3, 1, { 9, direct_link});
+    ?C4_CELL_L(26, 3, 0, { 9, from4, mux0});
+    ?C4_CELL_L(26, 3, 1, { 9, from4, mux1});
+    ?C4_CELL_L(27, 3, 0, { 9, from4, mux2});
+    ?C4_CELL_L(27, 3, 1, { 9, from4, mux3});
 
-    ?C4_CELL_PAIRED(23, 0, 0)
-    ?C4_CELL_PAIRED(23, 5, 0)
+    ?C4_CELL_R( 0, 4, 0, { 3, from3, mux2});
+    ?C4_CELL_R( 0, 4, 1, { 3, direct_link});
+    ?C4_CELL_R( 1, 4, 0, { 3, from3, mux0});
+    ?C4_CELL_R( 1, 4, 1, { 3, from3, mux1});
+    ?C4_CELL_E(26, 4, 0, { 3, from3, mux0});
+    ?C4_CELL_E(26, 4, 1, { 3, from3, mux1});
+    ?C4_CELL_E(27, 4, 0, { 3, from3, mux2});
+    ?C4_CELL_E(27, 4, 1, { 3, direct_link});
+    ?C4_CELL_L(26, 4, 0, { 3, from4, mux0});
+    ?C4_CELL_L(26, 4, 1, { 3, from4, mux1});
+    ?C4_CELL_L(27, 4, 0, { 3, from4, mux2});
+    ?C4_CELL_L(27, 4, 1, { 3, from4, mux3});
 
-    ?C4_CELL_PAIRED(24, 0, 0)
-    ?C4_CELL_PAIRED(24, 0, 1)
-    ?C4_CELL_PAIRED(24, 5, 0)
-    ?C4_CELL_PAIRED(24, 5, 1)
+    ?C4_CELL_C(22, 5, 0, {10, from3, mux0});
+    ?C4_CELL_C(22, 5, 1, {10, from3, mux1});
+    ?C4_CELL_C(23, 5, 0, {10, from3, mux2});
+    ?C4_CELL_C(23, 5, 1, {10, direct_link});
+    ?C4_CELL_C(24, 5, 0, {10, from4, mux0});
+    ?C4_CELL_C(24, 5, 1, {10, from4, mux1});
+    ?C4_CELL_C(25, 5, 0, {10, from4, mux2});
+    ?C4_CELL_C(25, 5, 1, {10, from4, mux3});
 
-    ?C4_CELL_PAIRED(25, 0, 0)
-    ?C4_CELL_PAIRED(25, 0, 1)
-    ?C4_CELL_PAIRED(25, 5, 0)
-    ?C4_CELL_PAIRED(25, 5, 1)
+    ?C4_CELL_R( 0, 5, 2, { 4, from3, mux2});
+    ?C4_CELL_R( 0, 5, 3, { 4, direct_link});
+    ?C4_CELL_R( 1, 5, 2, { 4, from3, mux0});
+    ?C4_CELL_R( 1, 5, 3, { 4, from3, mux1});
+    ?C4_CELL_E(26, 5, 2, { 4, from3, mux0});
+    ?C4_CELL_E(26, 5, 3, { 4, from3, mux1});
+    ?C4_CELL_E(27, 5, 2, { 4, from3, mux2});
+    ?C4_CELL_E(27, 5, 3, { 4, direct_link});
+    ?C4_CELL_L(26, 5, 2, { 4, from4, mux0});
+    ?C4_CELL_L(26, 5, 3, { 4, from4, mux1});
+    ?C4_CELL_L(27, 5, 2, { 4, from4, mux2});
+    ?C4_CELL_L(27, 5, 3, { 4, from4, mux3});
 
-    ?C4_CELL_PAIRED(26, 0, 2)
-    ?C4_CELL_PAIRED(26, 0, 3)
-    ?C4_CELL_PAIRED(26, 1, 0)
-    ?C4_CELL_PAIRED(26, 1, 1)
-    ?C4_CELL_PAIRED(26, 2, 0)
-    ?C4_CELL_PAIRED(26, 2, 1)
-    ?C4_CELL_PAIRED(26, 2, 2)
-    ?C4_CELL_PAIRED(26, 2, 3)
-    ?C4_CELL_PAIRED(26, 3, 0)
-    ?C4_CELL_PAIRED(26, 3, 1)
-    ?C4_CELL_PAIRED(26, 4, 0)
-    ?C4_CELL_PAIRED(26, 4, 1)
-    ?C4_CELL_PAIRED(26, 5, 2)
-    ?C4_CELL_PAIRED(26, 5, 3)
-    ?C4_CELL_PAIRED(26, 6, 0)
-    ?C4_CELL_PAIRED(26, 6, 1)
-    ?C4_CELL_PAIRED(26, 7, 0)
-    ?C4_CELL_PAIRED(26, 7, 1)
-    ?C4_CELL_PAIRED(26, 7, 2)
-    ?C4_CELL_PAIRED(26, 7, 3)
-    ?C4_CELL_PAIRED(26, 8, 0)
-    ?C4_CELL_PAIRED(26, 8, 1)
-    ?C4_CELL_PAIRED(26, 9, 0)
-    ?C4_CELL_PAIRED(26, 9, 1)
+    ?C4_CELL_R( 0, 6, 0, {11, from3, mux2});
+    ?C4_CELL_R( 0, 6, 1, {11, direct_link});
+    ?C4_CELL_R( 1, 6, 0, {11, from3, mux0});
+    ?C4_CELL_R( 1, 6, 1, {11, from3, mux1});
+    ?C4_CELL_E(26, 6, 0, {11, from3, mux0});
+    ?C4_CELL_E(26, 6, 1, {11, from3, mux1});
+    ?C4_CELL_E(27, 6, 0, {11, from3, mux2});
+    ?C4_CELL_E(27, 6, 1, {11, direct_link});
+    ?C4_CELL_L(26, 6, 0, {11, from4, mux0});
+    ?C4_CELL_L(26, 6, 1, {11, from4, mux1});
+    ?C4_CELL_L(27, 6, 0, {11, from4, mux2});
+    ?C4_CELL_L(27, 6, 1, {11, from4, mux3});
 
-    ?C4_CELL_PAIRED(27, 0, 2)
-    ?C4_CELL_PAIRED(27, 1, 0)
-    ?C4_CELL_PAIRED(27, 2, 0)
-    ?C4_CELL_PAIRED(27, 2, 2)
-    ?C4_CELL_PAIRED(27, 3, 0)
-    ?C4_CELL_PAIRED(27, 4, 0)
-    ?C4_CELL_PAIRED(27, 5, 2)
-    ?C4_CELL_PAIRED(27, 6, 0)
-    ?C4_CELL_PAIRED(27, 7, 0)
-    ?C4_CELL_PAIRED(27, 7, 2)
-    ?C4_CELL_PAIRED(27, 8, 0)
-    ?C4_CELL_PAIRED(27, 9, 0)
+    ?C4_CELL_R( 0, 7, 0, { 5, from3, mux2});
+    ?C4_CELL_R( 0, 7, 1, { 5, direct_link});
+    ?C4_CELL_R( 1, 7, 0, { 5, from3, mux0});
+    ?C4_CELL_R( 1, 7, 1, { 5, from3, mux1});
+    ?C4_CELL_E(26, 7, 0, { 5, from3, mux0});
+    ?C4_CELL_E(26, 7, 1, { 5, from3, mux1});
+    ?C4_CELL_E(27, 7, 0, { 5, from3, mux2});
+    ?C4_CELL_E(27, 7, 1, { 5, direct_link});
+    ?C4_CELL_L(26, 7, 0, { 5, from4, mux0});
+    ?C4_CELL_L(26, 7, 1, { 5, from4, mux1});
+    ?C4_CELL_L(27, 7, 0, { 5, from4, mux2});
+    ?C4_CELL_L(27, 7, 1, { 5, from4, mux3});
 
-    %?C4_CELL_C(22, 0, 0, { 0, from3, mux0});
-    %?C4_CELL_C(22, 0, 1, { 0, from3, mux1});
-    %?C4_CELL_C(23, 0, 0, { 0, from3, mux2});
-    %?C4_CELL_C(23, 0, 1, { 0, direct_link});
-    %?C4_CELL_C(24, 0, 0, { 0, from4, mux0});
-    %?C4_CELL_C(24, 0, 1, { 0, from4, mux1});
-    %?C4_CELL_C(25, 0, 0, { 0, from4, mux2});
-    %?C4_CELL_C(25, 0, 1, { 0, from4, mux3});
+    ?C4_CELL_R( 0, 7, 2, {12, from3, mux2});
+    ?C4_CELL_R( 0, 7, 3, {12, direct_link});
+    ?C4_CELL_R( 1, 7, 2, {12, from3, mux0});
+    ?C4_CELL_R( 1, 7, 3, {12, from3, mux1});
+    ?C4_CELL_E(26, 7, 2, {12, from3, mux0});
+    ?C4_CELL_E(26, 7, 3, {12, from3, mux1});
+    ?C4_CELL_E(27, 7, 2, {12, from3, mux2});
+    ?C4_CELL_E(27, 7, 3, {12, direct_link});
+    ?C4_CELL_L(26, 7, 2, {12, from4, mux0});
+    ?C4_CELL_L(26, 7, 3, {12, from4, mux1});
+    ?C4_CELL_L(27, 7, 2, {12, from4, mux2});
+    ?C4_CELL_L(27, 7, 3, {12, from4, mux3});
 
-    %?C4_CELL_R( 0, 0, 2, { 7, from3, mux2});
-    %?C4_CELL_R( 0, 0, 3, { 7, direct_link});
-    %?C4_CELL_R( 1, 0, 2, { 7, from3, mux0});
-    %?C4_CELL_R( 1, 0, 3, { 7, from3, mux1});
-    %?C4_CELL_E(26, 0, 2, { 7, from3, mux0});
-    %?C4_CELL_E(26, 0, 3, { 7, from3, mux1});
-    %?C4_CELL_E(27, 0, 2, { 7, from3, mux2});
-    %?C4_CELL_E(27, 0, 3, { 7, direct_link});
-    %?C4_CELL_L(26, 0, 2, { 7, from4, mux0});
-    %?C4_CELL_L(26, 0, 3, { 7, from4, mux1});
-    %?C4_CELL_L(27, 0, 2, { 7, from4, mux2});
-    %?C4_CELL_L(27, 0, 3, { 7, from4, mux3});
+    ?C4_CELL_R( 0, 8, 0, { 6, from3, mux2});
+    ?C4_CELL_R( 0, 8, 1, { 6, direct_link});
+    ?C4_CELL_R( 1, 8, 0, { 6, from3, mux0});
+    ?C4_CELL_R( 1, 8, 1, { 6, from3, mux1});
+    ?C4_CELL_E(26, 8, 0, { 6, from3, mux0});
+    ?C4_CELL_E(26, 8, 1, { 6, from3, mux1});
+    ?C4_CELL_E(27, 8, 0, { 6, from3, mux2});
+    ?C4_CELL_E(27, 8, 1, { 6, direct_link});
+    ?C4_CELL_L(26, 8, 0, { 6, from4, mux0});
+    ?C4_CELL_L(26, 8, 1, { 6, from4, mux1});
+    ?C4_CELL_L(27, 8, 0, { 6, from4, mux2});
+    ?C4_CELL_L(27, 8, 1, { 6, from4, mux3});
 
-    %?C4_CELL_R( 0, 1, 0, { 1, from3, mux2});
-    %?C4_CELL_R( 0, 1, 1, { 1, direct_link});
-    %?C4_CELL_R( 1, 1, 0, { 1, from3, mux0});
-    %?C4_CELL_R( 1, 1, 1, { 1, from3, mux1});
-    %?C4_CELL_E(26, 1, 0, { 1, from3, mux0});
-    %?C4_CELL_E(26, 1, 1, { 1, from3, mux1});
-    %?C4_CELL_E(27, 1, 0, { 1, from3, mux2});
-    %?C4_CELL_E(27, 1, 1, { 1, direct_link});
-    %?C4_CELL_L(26, 1, 0, { 1, from4, mux0});
-    %?C4_CELL_L(26, 1, 1, { 1, from4, mux1});
-    %?C4_CELL_L(27, 1, 0, { 1, from4, mux2});
-    %?C4_CELL_L(27, 1, 1, { 1, from4, mux3});
-
-    %?C4_CELL_R( 0, 2, 0, { 8, from3, mux2});
-    %?C4_CELL_R( 0, 2, 1, { 8, direct_link});
-    %?C4_CELL_R( 1, 2, 0, { 8, from3, mux0});
-    %?C4_CELL_R( 1, 2, 1, { 8, from3, mux1});
-    %?C4_CELL_E(26, 2, 0, { 8, from3, mux0});
-    %?C4_CELL_E(26, 2, 1, { 8, from3, mux1});
-    %?C4_CELL_E(27, 2, 0, { 8, from3, mux2});
-    %?C4_CELL_E(27, 2, 1, { 8, direct_link});
-    %?C4_CELL_L(26, 2, 0, { 8, from4, mux0});
-    %?C4_CELL_L(26, 2, 1, { 8, from4, mux1});
-    %?C4_CELL_L(27, 2, 0, { 8, from4, mux2});
-    %?C4_CELL_L(27, 2, 1, { 8, from4, mux3});
-
-    %?C4_CELL_R( 0, 2, 2, { 2, from3, mux2});
-    %?C4_CELL_R( 0, 2, 3, { 2, direct_link});
-    %?C4_CELL_R( 1, 2, 2, { 2, from3, mux0});
-    %?C4_CELL_R( 1, 2, 3, { 2, from3, mux1});
-    %?C4_CELL_E(26, 2, 2, { 2, from3, mux0});
-    %?C4_CELL_E(26, 2, 3, { 2, from3, mux1});
-    %?C4_CELL_E(27, 2, 2, { 2, from3, mux2});
-    %?C4_CELL_E(27, 2, 3, { 2, direct_link});
-    %?C4_CELL_L(26, 2, 2, { 2, from4, mux0});
-    %?C4_CELL_L(26, 2, 3, { 2, from4, mux1});
-    %?C4_CELL_L(27, 2, 2, { 2, from4, mux2});
-    %?C4_CELL_L(27, 2, 3, { 2, from4, mux3});
-
-    %?C4_CELL_R( 0, 3, 0, { 9, from3, mux2});
-    %?C4_CELL_R( 0, 3, 1, { 9, direct_link});
-    %?C4_CELL_R( 1, 3, 0, { 9, from3, mux0});
-    %?C4_CELL_R( 1, 3, 1, { 9, from3, mux1});
-    %?C4_CELL_E(26, 3, 0, { 9, from3, mux0});
-    %?C4_CELL_E(26, 3, 1, { 9, from3, mux1});
-    %?C4_CELL_E(27, 3, 0, { 9, from3, mux2});
-    %?C4_CELL_E(27, 3, 1, { 9, direct_link});
-    %?C4_CELL_L(26, 3, 0, { 9, from4, mux0});
-    %?C4_CELL_L(26, 3, 1, { 9, from4, mux1});
-    %?C4_CELL_L(27, 3, 0, { 9, from4, mux2});
-    %?C4_CELL_L(27, 3, 1, { 9, from4, mux3});
-
-    %?C4_CELL_R( 0, 4, 0, { 3, from3, mux2});
-    %?C4_CELL_R( 0, 4, 1, { 3, direct_link});
-    %?C4_CELL_R( 1, 4, 0, { 3, from3, mux0});
-    %?C4_CELL_R( 1, 4, 1, { 3, from3, mux1});
-    %?C4_CELL_E(26, 4, 0, { 3, from3, mux0});
-    %?C4_CELL_E(26, 4, 1, { 3, from3, mux1});
-    %?C4_CELL_E(27, 4, 0, { 3, from3, mux2});
-    %?C4_CELL_E(27, 4, 1, { 3, direct_link});
-    %?C4_CELL_L(26, 4, 0, { 3, from4, mux0});
-    %?C4_CELL_L(26, 4, 1, { 3, from4, mux1});
-    %?C4_CELL_L(27, 4, 0, { 3, from4, mux2});
-    %?C4_CELL_L(27, 4, 1, { 3, from4, mux3});
-
-    %?C4_CELL_C(22, 5, 0, {10, from3, mux0});
-    %?C4_CELL_C(22, 5, 1, {10, from3, mux1});
-    %?C4_CELL_C(23, 5, 0, {10, from3, mux2});
-    %?C4_CELL_C(23, 5, 1, {10, direct_link});
-    %?C4_CELL_C(24, 5, 0, {10, from4, mux0});
-    %?C4_CELL_C(24, 5, 1, {10, from4, mux1});
-    %?C4_CELL_C(25, 5, 0, {10, from4, mux2});
-    %?C4_CELL_C(25, 5, 1, {10, from4, mux3});
-
-    %?C4_CELL_R( 0, 5, 2, { 4, from3, mux2});
-    %?C4_CELL_R( 0, 5, 3, { 4, direct_link});
-    %?C4_CELL_R( 1, 5, 2, { 4, from3, mux0});
-    %?C4_CELL_R( 1, 5, 3, { 4, from3, mux1});
-    %?C4_CELL_E(26, 5, 2, { 4, from3, mux0});
-    %?C4_CELL_E(26, 5, 3, { 4, from3, mux1});
-    %?C4_CELL_E(27, 5, 2, { 4, from3, mux2});
-    %?C4_CELL_E(27, 5, 3, { 4, direct_link});
-    %?C4_CELL_L(26, 5, 2, { 4, from4, mux0});
-    %?C4_CELL_L(26, 5, 3, { 4, from4, mux1});
-    %?C4_CELL_L(27, 5, 2, { 4, from4, mux2});
-    %?C4_CELL_L(27, 5, 3, { 4, from4, mux3});
-
-    %?C4_CELL_R( 0, 6, 0, {11, from3, mux2});
-    %?C4_CELL_R( 0, 6, 1, {11, direct_link});
-    %?C4_CELL_R( 1, 6, 0, {11, from3, mux0});
-    %?C4_CELL_R( 1, 6, 1, {11, from3, mux1});
-    %?C4_CELL_E(26, 6, 0, {11, from3, mux0});
-    %?C4_CELL_E(26, 6, 1, {11, from3, mux1});
-    %?C4_CELL_E(27, 6, 0, {11, from3, mux2});
-    %?C4_CELL_E(27, 6, 1, {11, direct_link});
-    %?C4_CELL_L(26, 6, 0, {11, from4, mux0});
-    %?C4_CELL_L(26, 6, 1, {11, from4, mux1});
-    %?C4_CELL_L(27, 6, 0, {11, from4, mux2});
-    %?C4_CELL_L(27, 6, 1, {11, from4, mux3});
-
-    %?C4_CELL_R( 0, 7, 0, { 5, from3, mux2});
-    %?C4_CELL_R( 0, 7, 1, { 5, direct_link});
-    %?C4_CELL_R( 1, 7, 0, { 5, from3, mux0});
-    %?C4_CELL_R( 1, 7, 1, { 5, from3, mux1});
-    %?C4_CELL_E(26, 7, 0, { 5, from3, mux0});
-    %?C4_CELL_E(26, 7, 1, { 5, from3, mux1});
-    %?C4_CELL_E(27, 7, 0, { 5, from3, mux2});
-    %?C4_CELL_E(27, 7, 1, { 5, direct_link});
-    %?C4_CELL_L(26, 7, 0, { 5, from4, mux0});
-    %?C4_CELL_L(26, 7, 1, { 5, from4, mux1});
-    %?C4_CELL_L(27, 7, 0, { 5, from4, mux2});
-    %?C4_CELL_L(27, 7, 1, { 5, from4, mux3});
-
-    %?C4_CELL_R( 0, 7, 2, {12, from3, mux2});
-    %?C4_CELL_R( 0, 7, 3, {12, direct_link});
-    %?C4_CELL_R( 1, 7, 2, {12, from3, mux0});
-    %?C4_CELL_R( 1, 7, 3, {12, from3, mux1});
-    %?C4_CELL_E(26, 7, 2, {12, from3, mux0});
-    %?C4_CELL_E(26, 7, 3, {12, from3, mux1});
-    %?C4_CELL_E(27, 7, 2, {12, from3, mux2});
-    %?C4_CELL_E(27, 7, 3, {12, direct_link});
-    %?C4_CELL_L(26, 7, 2, {12, from4, mux0});
-    %?C4_CELL_L(26, 7, 3, {12, from4, mux1});
-    %?C4_CELL_L(27, 7, 2, {12, from4, mux2});
-    %?C4_CELL_L(27, 7, 3, {12, from4, mux3});
-
-    %?C4_CELL_R( 0, 8, 0, { 6, from3, mux2});
-    %?C4_CELL_R( 0, 8, 1, { 6, direct_link});
-    %?C4_CELL_R( 1, 8, 0, { 6, from3, mux0});
-    %?C4_CELL_R( 1, 8, 1, { 6, from3, mux1});
-    %?C4_CELL_E(26, 8, 0, { 6, from3, mux0});
-    %?C4_CELL_E(26, 8, 1, { 6, from3, mux1});
-    %?C4_CELL_E(27, 8, 0, { 6, from3, mux2});
-    %?C4_CELL_E(27, 8, 1, { 6, direct_link});
-    %?C4_CELL_L(26, 8, 0, { 6, from4, mux0});
-    %?C4_CELL_L(26, 8, 1, { 6, from4, mux1});
-    %?C4_CELL_L(27, 8, 0, { 6, from4, mux2});
-    %?C4_CELL_L(27, 8, 1, { 6, from4, mux3});
-
-    %?C4_CELL_R( 0, 9, 0, {13, from3, mux2});
-    %?C4_CELL_R( 0, 9, 1, {13, direct_link});
-    %?C4_CELL_R( 1, 9, 0, {13, from3, mux0});
-    %?C4_CELL_R( 1, 9, 1, {13, from3, mux1});
-    %?C4_CELL_E(26, 9, 0, {13, from3, mux0});
-    %?C4_CELL_E(26, 9, 1, {13, from3, mux1});
-    %?C4_CELL_E(27, 9, 0, {13, from3, mux2});
-    %?C4_CELL_E(27, 9, 1, {13, direct_link});
-    %?C4_CELL_L(26, 9, 0, {13, from4, mux0});
-    %?C4_CELL_L(26, 9, 1, {13, from4, mux1});
-    %?C4_CELL_L(27, 9, 0, {13, from4, mux2});
-    %?C4_CELL_L(27, 9, 1, {13, from4, mux3});
+    ?C4_CELL_R( 0, 9, 0, {13, from3, mux2});
+    ?C4_CELL_R( 0, 9, 1, {13, direct_link});
+    ?C4_CELL_R( 1, 9, 0, {13, from3, mux0});
+    ?C4_CELL_R( 1, 9, 1, {13, from3, mux1});
+    ?C4_CELL_E(26, 9, 0, {13, from3, mux0});
+    ?C4_CELL_E(26, 9, 1, {13, from3, mux1});
+    ?C4_CELL_E(27, 9, 0, {13, from3, mux2});
+    ?C4_CELL_E(27, 9, 1, {13, direct_link});
+    ?C4_CELL_L(26, 9, 0, {13, from4, mux0});
+    ?C4_CELL_L(26, 9, 1, {13, from4, mux1});
+    ?C4_CELL_L(27, 9, 0, {13, from4, mux2});
+    ?C4_CELL_L(27, 9, 1, {13, from4, mux3});
 ).
 
 -define(R4_SIDES(),
@@ -4596,10 +4346,10 @@ to_lc(X, Y, N, Name) ->
 
 %%--------------------------------------------------------------------
 
-%to_c4(X, Y, {Index, Value}) ->
-%    {ok, {{c4, X, Y}, {mux, Index}, Value}};
-%to_c4(X, Y, {Index, Key, Value}) ->
-%    {ok, {{c4, X, Y}, {mux, Index}, Key, Value}}.
+to_c4(X, Y, {Mux, Value}) ->
+    {ok, {{c4, X, Y}, {mux, Mux}, Value}};
+to_c4(X, Y, {Mux, Key, Value}) ->
+    {ok, {{c4, X, Y}, {mux, Mux}, Key, Value}}.
 
 %%--------------------------------------------------------------------
 
