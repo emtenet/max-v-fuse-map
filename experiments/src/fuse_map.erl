@@ -1239,431 +1239,243 @@
 ).
 
 -define(R4_SIDES(),
-    ?R4_CELL_DIRECT( 3, 0, 1)
-    ?R4_CELL_DIRECT( 3, 0, 3)
-    ?R4_CELL_DIRECT( 3, 9, 1)
-    ?R4_CELL_DIRECT( 3, 9, 3)
+    ?R4_SIDE_L( 3, 0, 1, { 1, io_data_in0});
+    ?R4_SIDE_L( 3, 0, 3, { 3, io_data_in0});
+    ?R4_SIDE_L( 3, 9, 1, { 5, io_data_in0});
+    ?R4_SIDE_L( 3, 9, 3, { 7, io_data_in0});
 
-    ?R4_CELL_DIRECT( 4, 0, 1)
-    ?R4_CELL_DIRECT( 4, 0, 3)
-    ?R4_CELL_DIRECT( 4, 9, 1)
-    ?R4_CELL_DIRECT( 4, 9, 3)
+    ?R4_SIDE_L( 4, 0, 1, { 1, io_data_in1});
+    ?R4_SIDE_L( 4, 0, 3, { 3, io_data_in1});
+    ?R4_SIDE_L( 4, 9, 1, { 5, io_data_in1});
+    ?R4_SIDE_L( 4, 9, 3, { 7, io_data_in1});
 
-    ?R4_CELL_DIRECT( 5, 0, 1)
-    ?R4_CELL_DIRECT( 5, 0, 3)
-    ?R4_CELL_DIRECT( 5, 9, 1)
-    ?R4_CELL_DIRECT( 5, 9, 3)
+    ?R4_SIDE_L( 5, 0, 1, { 0, io_data_in0});
+    ?R4_SIDE_L( 5, 0, 3, { 2, io_data_in0});
+    ?R4_SIDE_L( 5, 9, 1, { 4, io_data_in0});
+    ?R4_SIDE_L( 5, 9, 3, { 6, io_data_in0});
 
-    ?R4_CELL_DIRECT( 6, 0, 1)
-    ?R4_CELL_DIRECT( 6, 0, 3)
-    ?R4_CELL_DIRECT( 6, 9, 1)
-    ?R4_CELL_DIRECT( 6, 9, 3)
+    ?R4_SIDE_L( 6, 0, 1, { 0, io_data_in1});
+    ?R4_SIDE_L( 6, 0, 3, { 2, io_data_in1});
+    ?R4_SIDE_L( 6, 9, 1, { 4, io_data_in1});
+    ?R4_SIDE_L( 6, 9, 3, { 6, io_data_in1});
 
-    ?R4_CELL_PAIRED(11, 0, 0)
-    ?R4_CELL_PAIRED(11, 0, 1)
-    ?R4_CELL_PAIRED(11, 1, 2)
-    ?R4_CELL_PAIRED(11, 1, 3)
-    ?R4_CELL_PAIRED(11, 3, 2)
-    ?R4_CELL_PAIRED(11, 3, 3)
-    ?R4_CELL_PAIRED(11, 4, 2)
-    ?R4_CELL_PAIRED(11, 5, 2)
-    ?R4_CELL_PAIRED(11, 6, 2)
-    ?R4_CELL_PAIRED(11, 8, 2)
-    ?R4_CELL_PAIRED(11, 8, 3)
-    ?R4_CELL_PAIRED(11, 9, 0)
-    ?R4_CELL_PAIRED(11, 9, 1)
+    ?R4_SIDE_E(11, 0, 0, { 0, from4, mux0});
+    ?R4_SIDE_E(11, 0, 1, { 0, from4, mux1});
+    ?R4_SIDE_E(12, 0, 0, { 0, from4, mux2});
+    ?R4_SIDE_E(12, 0, 1, { 0, from4, mux3});
 
-    ?R4_CELL_PAIRED(12, 0, 0)
-    ?R4_CELL_PAIRED(12, 0, 1)
-    ?R4_CELL_PAIRED(12, 1, 2)
-    ?R4_CELL_PAIRED(12, 1, 3)
-    ?R4_CELL_PAIRED(12, 3, 2)
-    ?R4_CELL_PAIRED(12, 4, 2)
-    ?R4_CELL_PAIRED(12, 5, 2)
-    ?R4_CELL_PAIRED(12, 6, 2)
-    ?R4_CELL_PAIRED(12, 6, 3)
-    ?R4_CELL_PAIRED(12, 8, 2)
-    ?R4_CELL_PAIRED(12, 8, 3)
-    ?R4_CELL_PAIRED(12, 9, 0)
-    ?R4_CELL_PAIRED(12, 9, 1)
+    ?R4_SIDE_E(11, 1, 2, { 1, from4, mux0});
+    ?R4_SIDE_E(11, 1, 3, { 1, from4, mux1});
+    ?R4_SIDE_E(12, 1, 2, { 1, from4, mux2});
+    ?R4_SIDE_E(12, 1, 3, { 1, from4, mux3});
 
-    %?R4_SIDE_L( 3, 0, 1, { 1, io_data_in0});
-    %?R4_SIDE_L( 3, 0, 3, { 3, io_data_in0});
-    %?R4_SIDE_L( 3, 9, 1, { 5, io_data_in0});
-    %?R4_SIDE_L( 3, 9, 3, { 7, io_data_in0});
+    ?R4_SIDE_E(11, 3, 2, { 2, from4, mux0});
+    ?R4_SIDE_E(11, 3, 3, { 2, from4, mux1});
+    ?R4_SIDE_E(12, 3, 2, { 2, from4, mux2});
+    ?R4_SIDE_E(12, 3, 3, { 2, from4, mux3});
 
-    %?R4_SIDE_L( 4, 0, 1, { 1, io_data_in1});
-    %?R4_SIDE_L( 4, 0, 3, { 3, io_data_in1});
-    %?R4_SIDE_L( 4, 9, 1, { 5, io_data_in1});
-    %?R4_SIDE_L( 4, 9, 3, { 7, io_data_in1});
+    ?R4_SIDE_E(11, 4, 2, { 3, from4, mux0});
+    ?R4_SIDE_E(11, 4, 3, { 3, from4, mux1});
+    ?R4_SIDE_E(12, 4, 2, { 3, from4, mux2});
+    ?R4_SIDE_E(12, 4, 3, { 3, from4, mux3});
 
-    %?R4_SIDE_L( 5, 0, 1, { 0, io_data_in0});
-    %?R4_SIDE_L( 5, 0, 3, { 2, io_data_in0});
-    %?R4_SIDE_L( 5, 9, 1, { 4, io_data_in0});
-    %?R4_SIDE_L( 5, 9, 3, { 6, io_data_in0});
+    ?R4_SIDE_E(11, 5, 2, { 7, from4, mux0});
+    ?R4_SIDE_E(11, 5, 3, { 7, from4, mux1});
+    ?R4_SIDE_E(12, 5, 2, { 7, from4, mux2});
+    ?R4_SIDE_E(12, 5, 3, { 7, from4, mux3});
 
-    %?R4_SIDE_L( 6, 0, 1, { 0, io_data_in1});
-    %?R4_SIDE_L( 6, 0, 3, { 2, io_data_in1});
-    %?R4_SIDE_L( 6, 9, 1, { 4, io_data_in1});
-    %?R4_SIDE_L( 6, 9, 3, { 6, io_data_in1});
+    ?R4_SIDE_E(11, 6, 2, { 6, from4, mux0});
+    ?R4_SIDE_E(11, 6, 3, { 6, from4, mux1});
+    ?R4_SIDE_E(12, 6, 2, { 6, from4, mux2});
+    ?R4_SIDE_E(12, 6, 3, { 6, from4, mux3});
 
-    %?R4_SIDE_E(11, 0, 0, { 0, from4, mux0});
-    %?R4_SIDE_E(11, 0, 1, { 0, from4, mux1});
-    %?R4_SIDE_E(12, 0, 0, { 0, from4, mux2});
-    %?R4_SIDE_E(12, 0, 1, { 0, from4, mux3});
+    ?R4_SIDE_E(11, 8, 2, { 5, from4, mux0});
+    ?R4_SIDE_E(11, 8, 3, { 5, from4, mux1});
+    ?R4_SIDE_E(12, 8, 2, { 5, from4, mux2});
+    ?R4_SIDE_E(12, 8, 3, { 5, from4, mux3});
 
-    %?R4_SIDE_E(11, 1, 2, { 1, from4, mux0});
-    %?R4_SIDE_E(11, 1, 3, { 1, from4, mux1});
-    %?R4_SIDE_E(12, 1, 2, { 1, from4, mux2});
-    %?R4_SIDE_E(12, 1, 3, { 1, from4, mux3});
-
-    %?R4_SIDE_E(11, 3, 2, { 2, from4, mux0});
-    %?R4_SIDE_E(11, 3, 3, { 2, from4, mux1});
-    %?R4_SIDE_E(12, 3, 2, { 2, from4, mux2});
-    %?R4_SIDE_E(12, 3, 3, { 2, from4, mux3});
-
-    %?R4_SIDE_E(11, 4, 2, { 3, from4, mux0});
-    %?R4_SIDE_E(11, 4, 3, { 3, from4, mux1});
-    %?R4_SIDE_E(12, 4, 2, { 3, from4, mux2});
-    %?R4_SIDE_E(12, 4, 3, { 3, from4, mux3});
-
-    %?R4_SIDE_E(11, 5, 2, { 7, from4, mux0});
-    %?R4_SIDE_E(11, 5, 3, { 7, from4, mux1});
-    %?R4_SIDE_E(12, 5, 2, { 7, from4, mux2});
-    %?R4_SIDE_E(12, 5, 3, { 7, from4, mux3});
-
-    %?R4_SIDE_E(11, 6, 2, { 6, from4, mux0});
-    %?R4_SIDE_E(11, 6, 3, { 6, from4, mux1});
-    %?R4_SIDE_E(12, 6, 2, { 6, from4, mux2});
-    %?R4_SIDE_E(12, 6, 3, { 6, from4, mux3});
-
-    %?R4_SIDE_E(11, 8, 2, { 5, from4, mux0});
-    %?R4_SIDE_E(11, 8, 3, { 5, from4, mux1});
-    %?R4_SIDE_E(12, 8, 2, { 5, from4, mux2});
-    %?R4_SIDE_E(12, 8, 3, { 5, from4, mux3});
-
-    %?R4_SIDE_E(11, 9, 0, { 4, from4, mux0});
-    %?R4_SIDE_E(11, 9, 1, { 4, from4, mux1});
-    %?R4_SIDE_E(12, 9, 0, { 4, from4, mux2});
-    %?R4_SIDE_E(12, 9, 1, { 4, from4, mux3});
+    ?R4_SIDE_E(11, 9, 0, { 4, from4, mux0});
+    ?R4_SIDE_E(11, 9, 1, { 4, from4, mux1});
+    ?R4_SIDE_E(12, 9, 0, { 4, from4, mux2});
+    ?R4_SIDE_E(12, 9, 1, { 4, from4, mux3});
 ).
 
 -define(R4_CELLS(),
-    ?R4_CELL_DIRECT( 0, 0, 1)
-    ?R4_CELL_DIRECT( 0, 1, 3)
-    ?R4_CELL_DIRECT( 0, 3, 3)
-    ?R4_CELL_DIRECT( 0, 4, 3)
-    ?R4_CELL_DIRECT( 0, 5, 1)
-    ?R4_CELL_DIRECT( 0, 6, 3)
-    ?R4_CELL_DIRECT( 0, 8, 3)
-    ?R4_CELL_DIRECT( 0, 9, 3)
+    ?R4_CELL_R( 0, 0, 0, { 0, from3, mux2});
+    ?R4_CELL_R( 0, 0, 1, { 0, direct_link});
+    ?R4_CELL_R( 1, 0, 0, { 0, from3, mux0});
+    ?R4_CELL_R( 1, 0, 1, { 0, from3, mux1});
+    ?R4_CELL_E(26, 0, 0, { 0, from3, mux0});
+    ?R4_CELL_E(26, 0, 1, { 0, from3, mux1});
+    ?R4_CELL_E(27, 0, 0, { 0, from3, mux2});
+    ?R4_CELL_E(27, 0, 1, { 0, direct_link});
+    ?R4_CELL_L(26, 0, 0, { 0, from4, mux0});
+    ?R4_CELL_L(26, 0, 1, { 0, from4, mux1});
+    ?R4_CELL_L(27, 0, 0, { 0, from4, mux2});
+    ?R4_CELL_L(27, 0, 1, { 0, from4, mux3});
 
-    ?R4_CELL_DIRECT(23, 1, 1)
-    ?R4_CELL_DIRECT(23, 2, 1)
-    ?R4_CELL_DIRECT(23, 3, 1)
-    ?R4_CELL_DIRECT(23, 4, 1)
-    ?R4_CELL_DIRECT(23, 6, 1)
-    ?R4_CELL_DIRECT(23, 7, 1)
-    ?R4_CELL_DIRECT(23, 8, 1)
-    ?R4_CELL_DIRECT(23, 9, 1)
+    ?R4_CELL_R(22, 1, 0, { 8, from3, mux0});
+    ?R4_CELL_R(22, 1, 1, { 8, from3, mux1});
+    ?R4_CELL_R(23, 1, 0, { 8, from3, mux2});
+    ?R4_CELL_R(23, 1, 1, { 8, direct_link});
+    ?R4_CELL_R(24, 1, 0, { 8, from4, mux0});
+    ?R4_CELL_R(24, 1, 1, { 8, from4, mux1});
+    ?R4_CELL_R(25, 1, 0, { 8, from4, mux2});
+    ?R4_CELL_R(25, 1, 1, { 8, from4, mux3});
 
-    ?R4_CELL_EITHER(27, 0, 1)
-    ?R4_CELL_EITHER(27, 1, 3)
-    ?R4_CELL_EITHER(27, 9, 3)
+    ?R4_CELL_R( 0, 1, 2, { 1, from3, mux2});
+    ?R4_CELL_R( 0, 1, 3, { 1, direct_link});
+    ?R4_CELL_R( 1, 1, 2, { 1, from3, mux0});
+    ?R4_CELL_R( 1, 1, 3, { 1, from3, mux1});
+    ?R4_CELL_E(26, 1, 2, { 1, from3, mux0});
+    ?R4_CELL_E(26, 1, 3, { 1, from3, mux1});
+    ?R4_CELL_E(27, 1, 2, { 1, from3, mux2});
+    ?R4_CELL_E(27, 1, 3, { 1, direct_link});
+    ?R4_CELL_L(26, 1, 2, { 1, from4, mux0});
+    ?R4_CELL_L(26, 1, 3, { 1, from4, mux1});
+    ?R4_CELL_L(27, 1, 2, { 1, from4, mux2});
+    ?R4_CELL_L(27, 1, 3, { 1, from4, mux3});
 
-    ?R4_CELL_PAIRED( 0, 0, 0)
-    ?R4_CELL_PAIRED( 0, 1, 2)
-    ?R4_CELL_PAIRED( 0, 3, 2)
-    ?R4_CELL_PAIRED( 0, 4, 2)
-    ?R4_CELL_PAIRED( 0, 5, 0)
-    ?R4_CELL_PAIRED( 0, 6, 2)
-    ?R4_CELL_PAIRED( 0, 8, 2)
-    ?R4_CELL_PAIRED( 0, 9, 2)
+    ?R4_CELL_R(22, 2, 0, { 9, from3, mux0});
+    ?R4_CELL_R(22, 2, 1, { 9, from3, mux1});
+    ?R4_CELL_R(23, 2, 0, { 9, from3, mux2});
+    ?R4_CELL_R(23, 2, 1, { 9, direct_link});
+    ?R4_CELL_R(24, 2, 0, { 9, from4, mux0});
+    ?R4_CELL_R(24, 2, 1, { 9, from4, mux1});
+    ?R4_CELL_R(25, 2, 0, { 9, from4, mux2});
+    ?R4_CELL_R(25, 2, 1, { 9, from4, mux3});
 
-    ?R4_CELL_PAIRED( 1, 0, 0)
-    ?R4_CELL_PAIRED( 1, 0, 1)
-    ?R4_CELL_PAIRED( 1, 1, 2)
-    ?R4_CELL_PAIRED( 1, 1, 3)
-    ?R4_CELL_PAIRED( 1, 3, 2)
-    ?R4_CELL_PAIRED( 1, 3, 3)
-    ?R4_CELL_PAIRED( 1, 4, 2)
-    ?R4_CELL_PAIRED( 1, 4, 3)
-    ?R4_CELL_PAIRED( 1, 5, 0)
-    ?R4_CELL_PAIRED( 1, 5, 1)
-    ?R4_CELL_PAIRED( 1, 6, 2)
-    ?R4_CELL_PAIRED( 1, 6, 3)
-    ?R4_CELL_PAIRED( 1, 8, 2)
-    ?R4_CELL_PAIRED( 1, 8, 3)
-    ?R4_CELL_PAIRED( 1, 9, 2)
-    ?R4_CELL_PAIRED( 1, 9, 3)
+    ?R4_CELL_R(22, 3, 0, {10, from3, mux0});
+    ?R4_CELL_R(22, 3, 1, {10, from3, mux1});
+    ?R4_CELL_R(23, 3, 0, {10, from3, mux2});
+    ?R4_CELL_R(23, 3, 1, {10, direct_link});
+    ?R4_CELL_R(24, 3, 0, {10, from4, mux0});
+    ?R4_CELL_R(24, 3, 1, {10, from4, mux1});
+    ?R4_CELL_R(25, 3, 0, {10, from4, mux2});
+    ?R4_CELL_R(25, 3, 1, {10, from4, mux3});
 
-    ?R4_CELL_PAIRED(22, 1, 0)
-    ?R4_CELL_PAIRED(22, 1, 1)
-    ?R4_CELL_PAIRED(22, 2, 0)
-    ?R4_CELL_PAIRED(22, 2, 1)
-    ?R4_CELL_PAIRED(22, 3, 0)
-    ?R4_CELL_PAIRED(22, 3, 1)
-    ?R4_CELL_PAIRED(22, 4, 0)
-    ?R4_CELL_PAIRED(22, 4, 1)
-    ?R4_CELL_PAIRED(22, 6, 0)
-    ?R4_CELL_PAIRED(22, 6, 1)
-    ?R4_CELL_PAIRED(22, 7, 0)
-    ?R4_CELL_PAIRED(22, 7, 1)
-    ?R4_CELL_PAIRED(22, 8, 0)
-    ?R4_CELL_PAIRED(22, 8, 1)
-    ?R4_CELL_PAIRED(22, 9, 0)
-    ?R4_CELL_PAIRED(22, 9, 1)
+    ?R4_CELL_R( 0, 3, 2, { 2, from3, mux2});
+    ?R4_CELL_R( 0, 3, 3, { 2, direct_link});
+    ?R4_CELL_R( 1, 3, 2, { 2, from3, mux0});
+    ?R4_CELL_R( 1, 3, 3, { 2, from3, mux1});
+    ?R4_CELL_E(26, 3, 2, { 2, from3, mux0});
+    ?R4_CELL_E(26, 3, 3, { 2, from3, mux1});
+    ?R4_CELL_E(27, 3, 2, { 2, from3, mux2});
+    ?R4_CELL_E(27, 3, 3, { 2, direct_link});
+    ?R4_CELL_L(26, 3, 2, { 2, from4, mux0});
+    ?R4_CELL_L(26, 3, 3, { 2, from4, mux1});
+    ?R4_CELL_L(27, 3, 2, { 2, from4, mux2});
+    ?R4_CELL_L(27, 3, 3, { 2, from4, mux3});
 
-    ?R4_CELL_PAIRED(23, 1, 0)
-    ?R4_CELL_PAIRED(23, 2, 0)
-    ?R4_CELL_PAIRED(23, 3, 0)
-    ?R4_CELL_PAIRED(23, 4, 0)
-    ?R4_CELL_PAIRED(23, 6, 0)
-    ?R4_CELL_PAIRED(23, 7, 0)
-    ?R4_CELL_PAIRED(23, 8, 0)
-    ?R4_CELL_PAIRED(23, 9, 0)
+    ?R4_CELL_R(22, 4, 0, {11, from3, mux0});
+    ?R4_CELL_R(22, 4, 1, {11, from3, mux1});
+    ?R4_CELL_R(23, 4, 0, {11, from3, mux2});
+    ?R4_CELL_R(23, 4, 1, {11, direct_link});
+    ?R4_CELL_R(24, 4, 0, {11, from4, mux0});
+    ?R4_CELL_R(24, 4, 1, {11, from4, mux1});
+    ?R4_CELL_R(25, 4, 0, {11, from4, mux2});
+    ?R4_CELL_R(25, 4, 1, {11, from4, mux3});
 
-    ?R4_CELL_PAIRED(24, 1, 0)
-    ?R4_CELL_PAIRED(24, 1, 1)
-    ?R4_CELL_PAIRED(24, 2, 0)
-    ?R4_CELL_PAIRED(24, 2, 1)
-    ?R4_CELL_PAIRED(24, 3, 0)
-    ?R4_CELL_PAIRED(24, 3, 1)
-    ?R4_CELL_PAIRED(24, 4, 0)
-    ?R4_CELL_PAIRED(24, 4, 1)
-    ?R4_CELL_PAIRED(24, 6, 0)
-    ?R4_CELL_PAIRED(24, 6, 1)
-    ?R4_CELL_PAIRED(24, 8, 0)
-    ?R4_CELL_PAIRED(24, 7, 1)
-    ?R4_CELL_PAIRED(24, 7, 0)
-    ?R4_CELL_PAIRED(24, 8, 1)
-    ?R4_CELL_PAIRED(24, 9, 0)
-    ?R4_CELL_PAIRED(24, 9, 1)
+    ?R4_CELL_R( 0, 4, 2, { 3, from3, mux2});
+    ?R4_CELL_R( 0, 4, 3, { 3, direct_link});
+    ?R4_CELL_R( 1, 4, 2, { 3, from3, mux0});
+    ?R4_CELL_R( 1, 4, 3, { 3, from3, mux1});
+    ?R4_CELL_E(26, 4, 2, { 3, from3, mux0});
+    ?R4_CELL_E(26, 4, 3, { 3, from3, mux1});
+    ?R4_CELL_E(27, 4, 2, { 3, from3, mux2});
+    ?R4_CELL_E(27, 4, 3, { 3, direct_link});
+    ?R4_CELL_L(26, 4, 2, { 3, from4, mux0});
+    ?R4_CELL_L(26, 4, 3, { 3, from4, mux1});
+    ?R4_CELL_L(27, 4, 2, { 3, from4, mux2});
+    ?R4_CELL_L(27, 4, 3, { 3, from4, mux3});
 
-    ?R4_CELL_PAIRED(25, 1, 0)
-    ?R4_CELL_PAIRED(25, 1, 1)
-    ?R4_CELL_PAIRED(25, 2, 0)
-    ?R4_CELL_PAIRED(25, 2, 1)
-    ?R4_CELL_PAIRED(25, 3, 0)
-    ?R4_CELL_PAIRED(25, 3, 1)
-    ?R4_CELL_PAIRED(25, 4, 0)
-    ?R4_CELL_PAIRED(25, 4, 1)
-    ?R4_CELL_PAIRED(25, 6, 0)
-    ?R4_CELL_PAIRED(25, 6, 1)
-    ?R4_CELL_PAIRED(25, 7, 0)
-    ?R4_CELL_PAIRED(25, 7, 1)
-    ?R4_CELL_PAIRED(25, 8, 0)
-    ?R4_CELL_PAIRED(25, 8, 1)
-    ?R4_CELL_PAIRED(25, 9, 0)
-    ?R4_CELL_PAIRED(25, 9, 1)
-    ?R4_CELL_PAIRED(25, 9, 2)
+    ?R4_CELL_R( 0, 5, 0, { 4, from3, mux2});
+    ?R4_CELL_R( 0, 5, 1, { 4, direct_link});
+    ?R4_CELL_R( 1, 5, 0, { 4, from3, mux0});
+    ?R4_CELL_R( 1, 5, 1, { 4, from3, mux1});
+    ?R4_CELL_E(26, 5, 0, { 4, from3, mux0});
+    ?R4_CELL_E(26, 5, 1, { 4, from3, mux1});
+    ?R4_CELL_E(27, 5, 0, { 4, from3, mux2});
+    ?R4_CELL_E(27, 5, 1, { 4, direct_link});
+    ?R4_CELL_L(26, 5, 0, { 4, from4, mux0});
+    ?R4_CELL_L(26, 5, 1, { 4, from4, mux1});
+    ?R4_CELL_L(27, 5, 0, { 4, from4, mux2});
+    ?R4_CELL_L(27, 5, 1, { 4, from4, mux3});
 
-    ?R4_CELL_PAIRED(26, 0, 0)
-    ?R4_CELL_PAIRED(26, 0, 1)
-    ?R4_CELL_PAIRED(26, 1, 2)
-    ?R4_CELL_PAIRED(26, 1, 3)
-    ?R4_CELL_PAIRED(26, 3, 2)
-    ?R4_CELL_PAIRED(26, 3, 3)
-    ?R4_CELL_PAIRED(26, 4, 2)
-    ?R4_CELL_PAIRED(26, 4, 3)
-    ?R4_CELL_PAIRED(26, 5, 0)
-    ?R4_CELL_PAIRED(26, 5, 1)
-    ?R4_CELL_PAIRED(26, 6, 2)
-    ?R4_CELL_PAIRED(26, 6, 3)
-    ?R4_CELL_PAIRED(26, 8, 2)
-    ?R4_CELL_PAIRED(26, 8, 3)
-    ?R4_CELL_PAIRED(26, 9, 2)
-    ?R4_CELL_PAIRED(26, 9, 3)
+    ?R4_CELL_R(22, 6, 0, {12, from3, mux0});
+    ?R4_CELL_R(22, 6, 1, {12, from3, mux1});
+    ?R4_CELL_R(23, 6, 0, {12, from3, mux2});
+    ?R4_CELL_R(23, 6, 1, {12, direct_link});
+    ?R4_CELL_R(24, 6, 0, {12, from4, mux0});
+    ?R4_CELL_R(24, 6, 1, {12, from4, mux1});
+    ?R4_CELL_R(25, 6, 0, {12, from4, mux2});
+    ?R4_CELL_R(25, 6, 1, {12, from4, mux3});
 
-    ?R4_CELL_PAIRED(27, 0, 0)
-    ?R4_CELL_PAIRED(27, 1, 2)
-    ?R4_CELL_PAIRED(27, 3, 2)
-    ?R4_CELL_PAIRED(27, 3, 3)
-    ?R4_CELL_PAIRED(27, 4, 2)
-    ?R4_CELL_PAIRED(27, 4, 3)
-    ?R4_CELL_PAIRED(27, 5, 0)
-    ?R4_CELL_PAIRED(27, 5, 1)
-    ?R4_CELL_PAIRED(27, 6, 2)
-    ?R4_CELL_PAIRED(27, 6, 3)
-    ?R4_CELL_PAIRED(27, 8, 2)
-    ?R4_CELL_PAIRED(27, 8, 3)
-    ?R4_CELL_PAIRED(27, 9, 2)
+    ?R4_CELL_R( 0, 6, 2, { 5, from3, mux2});
+    ?R4_CELL_R( 0, 6, 3, { 5, direct_link});
+    ?R4_CELL_R( 1, 6, 2, { 5, from3, mux0});
+    ?R4_CELL_R( 1, 6, 3, { 5, from3, mux1});
+    ?R4_CELL_E(26, 6, 2, { 5, from3, mux0});
+    ?R4_CELL_E(26, 6, 3, { 5, from3, mux1});
+    ?R4_CELL_E(27, 6, 2, { 5, from3, mux2});
+    ?R4_CELL_E(27, 6, 3, { 5, direct_link});
+    ?R4_CELL_L(26, 6, 2, { 5, from4, mux0});
+    ?R4_CELL_L(26, 6, 3, { 5, from4, mux1});
+    ?R4_CELL_L(27, 6, 2, { 5, from4, mux2});
+    ?R4_CELL_L(27, 6, 3, { 5, from4, mux3});
 
-    %?R4_CELL_R( 0, 0, 0, { 0, from3, mux2});
-    %?R4_CELL_R( 0, 0, 1, { 0, direct_link});
-    %?R4_CELL_R( 1, 0, 0, { 0, from3, mux0});
-    %?R4_CELL_R( 1, 0, 1, { 0, from3, mux1});
-    %?R4_CELL_E(26, 0, 0, { 0, from3, mux0});
-    %?R4_CELL_E(26, 0, 1, { 0, from3, mux1});
-    %?R4_CELL_E(27, 0, 0, { 0, from3, mux2});
-    %?R4_CELL_E(27, 0, 1, { 0, direct_link});
-    %?R4_CELL_L(26, 0, 0, { 0, from4, mux0});
-    %?R4_CELL_L(26, 0, 1, { 0, from4, mux1});
-    %?R4_CELL_L(27, 0, 0, { 0, from4, mux2});
-    %?R4_CELL_L(27, 0, 1, { 0, from4, mux3});
+    ?R4_CELL_R(22, 7, 0, {13, from3, mux0});
+    ?R4_CELL_R(22, 7, 1, {13, from3, mux1});
+    ?R4_CELL_R(23, 7, 0, {13, from3, mux2});
+    ?R4_CELL_R(23, 7, 1, {13, direct_link});
+    ?R4_CELL_R(24, 7, 0, {13, from4, mux0});
+    ?R4_CELL_R(24, 7, 1, {13, from4, mux1});
+    ?R4_CELL_R(25, 7, 0, {13, from4, mux2});
+    ?R4_CELL_R(25, 7, 1, {13, from4, mux3});
 
-    %?R4_CELL_R(22, 1, 0, { 8, from3, mux0});
-    %?R4_CELL_R(22, 1, 1, { 8, from3, mux1});
-    %?R4_CELL_R(23, 1, 0, { 8, from3, mux2});
-    %?R4_CELL_R(23, 1, 1, { 8, direct_link});
-    %?R4_CELL_R(24, 1, 0, { 8, from4, mux0});
-    %?R4_CELL_R(24, 1, 1, { 8, from4, mux1});
-    %?R4_CELL_R(25, 1, 0, { 8, from4, mux2});
-    %?R4_CELL_R(25, 1, 1, { 8, from4, mux3});
+    ?R4_CELL_R(22, 8, 0, {14, from3, mux0});
+    ?R4_CELL_R(22, 8, 1, {14, from3, mux1});
+    ?R4_CELL_R(23, 8, 0, {14, from3, mux2});
+    ?R4_CELL_R(23, 8, 1, {14, direct_link});
+    ?R4_CELL_R(24, 8, 0, {14, from4, mux0});
+    ?R4_CELL_R(24, 8, 1, {14, from4, mux1});
+    ?R4_CELL_R(25, 8, 0, {14, from4, mux2});
+    ?R4_CELL_R(25, 8, 1, {14, from4, mux3});
 
-    %?R4_CELL_R( 0, 1, 2, { 1, from3, mux2});
-    %?R4_CELL_R( 0, 1, 3, { 1, direct_link});
-    %?R4_CELL_R( 1, 1, 2, { 1, from3, mux0});
-    %?R4_CELL_R( 1, 1, 3, { 1, from3, mux1});
-    %?R4_CELL_E(26, 1, 2, { 1, from3, mux0});
-    %?R4_CELL_E(26, 1, 3, { 1, from3, mux1});
-    %?R4_CELL_E(27, 1, 2, { 1, from3, mux2});
-    %?R4_CELL_E(27, 1, 3, { 1, direct_link});
-    %?R4_CELL_L(26, 1, 2, { 1, from4, mux0});
-    %?R4_CELL_L(26, 1, 3, { 1, from4, mux1});
-    %?R4_CELL_L(27, 1, 2, { 1, from4, mux2});
-    %?R4_CELL_L(27, 1, 3, { 1, from4, mux3});
+    ?R4_CELL_R( 0, 8, 2, { 6, from3, mux2});
+    ?R4_CELL_R( 0, 8, 3, { 6, direct_link});
+    ?R4_CELL_R( 1, 8, 2, { 6, from3, mux0});
+    ?R4_CELL_R( 1, 8, 3, { 6, from3, mux1});
+    ?R4_CELL_E(26, 8, 2, { 6, from3, mux0});
+    ?R4_CELL_E(26, 8, 3, { 6, from3, mux1});
+    ?R4_CELL_E(27, 8, 2, { 6, from3, mux2});
+    ?R4_CELL_E(27, 8, 3, { 6, direct_link});
+    ?R4_CELL_L(26, 8, 2, { 6, from4, mux0});
+    ?R4_CELL_L(26, 8, 3, { 6, from4, mux1});
+    ?R4_CELL_L(27, 8, 2, { 6, from4, mux2});
+    ?R4_CELL_L(27, 8, 3, { 6, from4, mux3});
 
-    %?R4_CELL_R(22, 2, 0, { 9, from3, mux0});
-    %?R4_CELL_R(22, 2, 1, { 9, from3, mux1});
-    %?R4_CELL_R(23, 2, 0, { 9, from3, mux2});
-    %?R4_CELL_R(23, 2, 1, { 9, direct_link});
-    %?R4_CELL_R(24, 2, 0, { 9, from4, mux0});
-    %?R4_CELL_R(24, 2, 1, { 9, from4, mux1});
-    %?R4_CELL_R(25, 2, 0, { 9, from4, mux2});
-    %?R4_CELL_R(25, 2, 1, { 9, from4, mux3});
+    ?R4_CELL_R(22, 9, 0, {15, from3, mux0});
+    ?R4_CELL_R(22, 9, 1, {15, from3, mux1});
+    ?R4_CELL_R(23, 9, 0, {15, from3, mux2});
+    ?R4_CELL_R(23, 9, 1, {15, direct_link});
+    ?R4_CELL_R(24, 9, 0, {15, from4, mux0});
+    ?R4_CELL_R(24, 9, 1, {15, from4, mux1});
+    ?R4_CELL_R(25, 9, 0, {15, from4, mux2});
+    ?R4_CELL_R(25, 9, 1, {15, from4, mux3});
 
-    %?R4_CELL_R(22, 3, 0, {10, from3, mux0});
-    %?R4_CELL_R(22, 3, 1, {10, from3, mux1});
-    %?R4_CELL_R(23, 3, 0, {10, from3, mux2});
-    %?R4_CELL_R(23, 3, 1, {10, direct_link});
-    %?R4_CELL_R(24, 3, 0, {10, from4, mux0});
-    %?R4_CELL_R(24, 3, 1, {10, from4, mux1});
-    %?R4_CELL_R(25, 3, 0, {10, from4, mux2});
-    %?R4_CELL_R(25, 3, 1, {10, from4, mux3});
-
-    %?R4_CELL_R( 0, 3, 2, { 2, from3, mux2});
-    %?R4_CELL_R( 0, 3, 3, { 2, direct_link});
-    %?R4_CELL_R( 1, 3, 2, { 2, from3, mux0});
-    %?R4_CELL_R( 1, 3, 3, { 2, from3, mux1});
-    %?R4_CELL_E(26, 3, 2, { 2, from3, mux0});
-    %?R4_CELL_E(26, 3, 3, { 2, from3, mux1});
-    %?R4_CELL_E(27, 3, 2, { 2, from3, mux2});
-    %?R4_CELL_E(27, 3, 3, { 2, direct_link});
-    %?R4_CELL_L(26, 3, 2, { 2, from4, mux0});
-    %?R4_CELL_L(26, 3, 3, { 2, from4, mux1});
-    %?R4_CELL_L(27, 3, 2, { 2, from4, mux2});
-    %?R4_CELL_L(27, 3, 3, { 2, from4, mux3});
-
-    %?R4_CELL_R(22, 4, 0, {11, from3, mux0});
-    %?R4_CELL_R(22, 4, 1, {11, from3, mux1});
-    %?R4_CELL_R(23, 4, 0, {11, from3, mux2});
-    %?R4_CELL_R(23, 4, 1, {11, direct_link});
-    %?R4_CELL_R(24, 4, 0, {11, from4, mux0});
-    %?R4_CELL_R(24, 4, 1, {11, from4, mux1});
-    %?R4_CELL_R(25, 4, 0, {11, from4, mux2});
-    %?R4_CELL_R(25, 4, 1, {11, from4, mux3});
-
-    %?R4_CELL_R( 0, 4, 2, { 3, from3, mux2});
-    %?R4_CELL_R( 0, 4, 3, { 3, direct_link});
-    %?R4_CELL_R( 1, 4, 2, { 3, from3, mux0});
-    %?R4_CELL_R( 1, 4, 3, { 3, from3, mux1});
-    %?R4_CELL_E(26, 4, 2, { 3, from3, mux0});
-    %?R4_CELL_E(26, 4, 3, { 3, from3, mux1});
-    %?R4_CELL_E(27, 4, 2, { 3, from3, mux2});
-    %?R4_CELL_E(27, 4, 3, { 3, direct_link});
-    %?R4_CELL_L(26, 4, 2, { 3, from4, mux0});
-    %?R4_CELL_L(26, 4, 3, { 3, from4, mux1});
-    %?R4_CELL_L(27, 4, 2, { 3, from4, mux2});
-    %?R4_CELL_L(27, 4, 3, { 3, from4, mux3});
-
-    %?R4_CELL_R( 0, 5, 0, { 4, from3, mux2});
-    %?R4_CELL_R( 0, 5, 1, { 4, direct_link});
-    %?R4_CELL_R( 1, 5, 0, { 4, from3, mux0});
-    %?R4_CELL_R( 1, 5, 1, { 4, from3, mux1});
-    %?R4_CELL_E(26, 5, 0, { 4, from3, mux0});
-    %?R4_CELL_E(26, 5, 1, { 4, from3, mux1});
-    %?R4_CELL_E(27, 5, 0, { 4, from3, mux2});
-    %?R4_CELL_E(27, 5, 1, { 4, direct_link});
-    %?R4_CELL_L(26, 5, 0, { 4, from4, mux0});
-    %?R4_CELL_L(26, 5, 1, { 4, from4, mux1});
-    %?R4_CELL_L(27, 5, 0, { 4, from4, mux2});
-    %?R4_CELL_L(27, 5, 1, { 4, from4, mux3});
-
-    %?R4_CELL_R(22, 6, 0, {12, from3, mux0});
-    %?R4_CELL_R(22, 6, 1, {12, from3, mux1});
-    %?R4_CELL_R(23, 6, 0, {12, from3, mux2});
-    %?R4_CELL_R(23, 6, 1, {12, direct_link});
-    %?R4_CELL_R(24, 6, 0, {12, from4, mux0});
-    %?R4_CELL_R(24, 6, 1, {12, from4, mux1});
-    %?R4_CELL_R(25, 6, 0, {12, from4, mux2});
-    %?R4_CELL_R(25, 6, 1, {12, from4, mux3});
-
-    %?R4_CELL_R( 0, 6, 2, { 5, from3, mux2});
-    %?R4_CELL_R( 0, 6, 3, { 5, direct_link});
-    %?R4_CELL_R( 1, 6, 2, { 5, from3, mux0});
-    %?R4_CELL_R( 1, 6, 3, { 5, from3, mux1});
-    %?R4_CELL_E(26, 6, 2, { 5, from3, mux0});
-    %?R4_CELL_E(26, 6, 3, { 5, from3, mux1});
-    %?R4_CELL_E(27, 6, 2, { 5, from3, mux2});
-    %?R4_CELL_E(27, 6, 3, { 5, direct_link});
-    %?R4_CELL_L(26, 6, 2, { 5, from4, mux0});
-    %?R4_CELL_L(26, 6, 3, { 5, from4, mux1});
-    %?R4_CELL_L(27, 6, 2, { 5, from4, mux2});
-    %?R4_CELL_L(27, 6, 3, { 5, from4, mux3});
-
-    %?R4_CELL_R(22, 7, 0, {13, from3, mux0});
-    %?R4_CELL_R(22, 7, 1, {13, from3, mux1});
-    %?R4_CELL_R(23, 7, 0, {13, from3, mux2});
-    %?R4_CELL_R(23, 7, 1, {13, direct_link});
-    %?R4_CELL_R(24, 7, 0, {13, from4, mux0});
-    %?R4_CELL_R(24, 7, 1, {13, from4, mux1});
-    %?R4_CELL_R(25, 7, 0, {13, from4, mux2});
-    %?R4_CELL_R(25, 7, 1, {13, from4, mux3});
-
-    %?R4_CELL_R(22, 8, 0, {14, from3, mux0});
-    %?R4_CELL_R(22, 8, 1, {14, from3, mux1});
-    %?R4_CELL_R(23, 8, 0, {14, from3, mux2});
-    %?R4_CELL_R(23, 8, 1, {14, direct_link});
-    %?R4_CELL_R(24, 8, 0, {14, from4, mux0});
-    %?R4_CELL_R(24, 8, 1, {14, from4, mux1});
-    %?R4_CELL_R(25, 8, 0, {14, from4, mux2});
-    %?R4_CELL_R(25, 8, 1, {14, from4, mux3});
-
-    %?R4_CELL_R( 0, 8, 2, { 6, from3, mux2});
-    %?R4_CELL_R( 0, 8, 3, { 6, direct_link});
-    %?R4_CELL_R( 1, 8, 2, { 6, from3, mux0});
-    %?R4_CELL_R( 1, 8, 3, { 6, from3, mux1});
-    %?R4_CELL_E(26, 8, 2, { 6, from3, mux0});
-    %?R4_CELL_E(26, 8, 3, { 6, from3, mux1});
-    %?R4_CELL_E(27, 8, 2, { 6, from3, mux2});
-    %?R4_CELL_E(27, 8, 3, { 6, direct_link});
-    %?R4_CELL_L(26, 8, 2, { 6, from4, mux0});
-    %?R4_CELL_L(26, 8, 3, { 6, from4, mux1});
-    %?R4_CELL_L(27, 8, 2, { 6, from4, mux2});
-    %?R4_CELL_L(27, 8, 3, { 6, from4, mux3});
-
-    %?R4_CELL_R(22, 9, 0, {15, from3, mux0});
-    %?R4_CELL_R(22, 9, 1, {15, from3, mux1});
-    %?R4_CELL_R(23, 9, 0, {15, from3, mux2});
-    %?R4_CELL_R(23, 9, 1, {15, direct_link});
-    %?R4_CELL_R(24, 9, 0, {15, from4, mux0});
-    %?R4_CELL_R(24, 9, 1, {15, from4, mux1});
-    %?R4_CELL_R(25, 9, 0, {15, from4, mux2});
-    %?R4_CELL_R(25, 9, 1, {15, from4, mux3});
-
-    %?R4_CELL_R( 0, 9, 2, { 7, from3, mux2});
-    %?R4_CELL_R( 0, 9, 3, { 7, direct_link});
-    %?R4_CELL_R( 1, 9, 2, { 7, from3, mux0});
-    %?R4_CELL_R( 1, 9, 3, { 7, from3, mux1});
-    %?R4_CELL_E(26, 9, 2, { 7, from3, mux0});
-    %?R4_CELL_E(26, 9, 3, { 7, from3, mux1});
-    %?R4_CELL_E(27, 9, 2, { 7, from3, mux2});
-    %?R4_CELL_E(27, 9, 3, { 7, direct_link});
-    %?R4_CELL_L(26, 9, 2, { 7, from4, mux0});
-    %?R4_CELL_L(26, 9, 3, { 7, from4, mux1});
-    %?R4_CELL_L(27, 9, 2, { 7, from4, mux2});
-    %?R4_CELL_L(27, 9, 3, { 7, from4, mux3});
+    ?R4_CELL_R( 0, 9, 2, { 7, from3, mux2});
+    ?R4_CELL_R( 0, 9, 3, { 7, direct_link});
+    ?R4_CELL_R( 1, 9, 2, { 7, from3, mux0});
+    ?R4_CELL_R( 1, 9, 3, { 7, from3, mux1});
+    ?R4_CELL_E(26, 9, 2, { 7, from3, mux0});
+    ?R4_CELL_E(26, 9, 3, { 7, from3, mux1});
+    ?R4_CELL_E(27, 9, 2, { 7, from3, mux2});
+    ?R4_CELL_E(27, 9, 3, { 7, direct_link});
+    ?R4_CELL_L(26, 9, 2, { 7, from4, mux0});
+    ?R4_CELL_L(26, 9, 3, { 7, from4, mux1});
+    ?R4_CELL_L(27, 9, 2, { 7, from4, mux2});
+    ?R4_CELL_L(27, 9, 3, { 7, from4, mux3});
 ).
 
 -define(MAX_V_240Z_USER_CODES(),
@@ -3158,16 +2970,6 @@ from_c4(X, Y, Name, _With) ->
 
 %%--------------------------------------------------------------------
 
--define(R4_CELL_DIRECT(Sector, N, I),
-).
--define(R4_CELL_EITHER(Sector, N, I),
-).
--define(R4_CELL_PAIRED(Sector, N, I),
-).
--define(R4_HEAD_DIRECT(Sector, I),
-).
--define(R4_HEAD_PAIRED(Sector, I),
-).
 -define(R4_SIDE_L(Sector, N, I, Name),
     from_r4(X, Y, Name, With) when X =:= With#with.left_x ->
         from_side(X, Sector, Y, N, I, With)
@@ -3201,11 +3003,6 @@ from_r4(X, Y, Name, _With) ->
 -undef(R4_CELL_E).
 -undef(R4_CELL_L).
 -undef(R4_CELL_R).
--undef(R4_CELL_DIRECT).
--undef(R4_CELL_EITHER).
--undef(R4_CELL_PAIRED).
--undef(R4_HEAD_DIRECT).
--undef(R4_HEAD_PAIRED).
 
 %%--------------------------------------------------------------------
 
@@ -3985,18 +3782,6 @@ to_side_line(X, Y, Index, Sector, _) ->
 
 %%--------------------------------------------------------------------
 
--define(R4_CELL_DIRECT(Sector, N, I),
-    to_side(X, Y, N, I, Sector, _) ->
-        {ok, {r4, direct, {X, Y, N, I, side, Sector}}};
-).
--define(R4_CELL_EITHER(Sector, N, I),
-    to_side(X, Y, N, I, Sector, _) ->
-        {ok, {r4, either, {X, Y, N, I, side, Sector}}};
-).
--define(R4_CELL_PAIRED(Sector, N, I),
-    to_side(X, Y, N, I, Sector, _) ->
-        {ok, {r4, paired, {X, Y, N, I, side, Sector}}};
-).
 -define(C4_SIDE_C(Sector, N, Index, Name),
     to_side(X, Y, N, Index, Sector, With) when X =:= With#with.left_x ->
         to_c4(X, Y, Name)
@@ -4059,9 +3844,6 @@ to_side(X, Y, N, Index, Sector, _) ->
 -undef(IOC_RIGHT).
 -undef(GLOBAL_SMALL_SELECT).
 -undef(IOC_SIDE).
--undef(R4_CELL_DIRECT).
--undef(R4_CELL_EITHER).
--undef(R4_CELL_PAIRED).
 
 %%--------------------------------------------------------------------
 
@@ -4082,18 +3864,6 @@ to_cell_line(X, Y, Index, Sector, _) ->
 
 %%--------------------------------------------------------------------
 
--define(R4_CELL_DIRECT(Sector, N, I),
-    to_cell(X, Y, N, I, Sector, _) ->
-        {ok, {r4, direct, {X, Y, N, I, cell, Sector}}};
-).
--define(R4_CELL_EITHER(Sector, N, I),
-    to_cell(X, Y, N, I, Sector, _) ->
-        {ok, {r4, either, {X, Y, N, I, cell, Sector}}};
-).
--define(R4_CELL_PAIRED(Sector, N, I),
-    to_cell(X, Y, N, I, Sector, _) ->
-        {ok, {r4, paired, {X, Y, N, I, cell, Sector}}};
-).
 -define(C4_CELL_C(Sector, N, I, Name),
     to_cell(X, Y, N, I, Sector, _) ->
         to_c4(X, Y, Name)
@@ -4168,9 +3938,6 @@ to_cell(X, Y, N, I, Sector, _) ->
 -undef(GLOBAL_LARGE_SELECT).
 -undef(LAB_CELL).
 -undef(LC_CELL).
--undef(R4_CELL_DIRECT).
--undef(R4_CELL_EITHER).
--undef(R4_CELL_PAIRED).
 
 %%--------------------------------------------------------------------
 
@@ -4281,10 +4048,10 @@ to_c4(X, Y, {Mux, Key, Value}) ->
 
 %%--------------------------------------------------------------------
 
-%to_r4(X, Y, {Index, Value}) ->
-%    {ok, {{r4, X, Y}, {mux, Index}, Value}};
-%to_r4(X, Y, {Index, Key, Value}) ->
-%    {ok, {{r4, X, Y}, {mux, Index}, Key, Value}}.
+to_r4(X, Y, {Index, Value}) ->
+    {ok, {{r4, X, Y}, {mux, Index}, Value}};
+to_r4(X, Y, {Index, Key, Value}) ->
+    {ok, {{r4, X, Y}, {mux, Index}, Key, Value}}.
 
 %%====================================================================
 %% density
