@@ -69,6 +69,9 @@ My experiments are being run in the following
    [playground](experiments/src/c4_interconnect_mux_playground.erl)
  * R4 interconnect MUX
    [playground](experiments/src/r4_interconnect_mux_playground.erl)
+ * C4 fuse map
+   [generate](experiments/src/c4_fuse_map_generate.erl)
+   and [theory](experiments/src/c4_fuse_map_theory.erl)
 
 ## Maps
 
@@ -82,6 +85,7 @@ The following mux mappings are encoded:
  * [LAB control MUX](experiments/src/lab_control_mux_map.erl)
  * [IOC output MUX](experiments/src/ioc_output_mux_map.erl)
  * [IOC enable MUX](experiments/src/ioc_enable_mux_map.erl)
+ * [C4 fuse](experiments/src/c4_fuse_map.erl)
 
 ## Global Fuses
 
