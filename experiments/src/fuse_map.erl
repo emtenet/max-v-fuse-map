@@ -843,6 +843,7 @@
     ?LAB_LINE(19, 25, {a_load, invert});
     ?LAB_LINE(20, 20, {s_load, not_always});
     ?LAB_LINE(20, 21, {a_clr1, global});
+    %?LAB_LINE(20, 23, minimum_20_23);
     ?LAB_LINE(20, 24, {ena2_s_load, invert});
     ?LAB_LINE(20, 25, {a_clr1, off});
     ?LAB_LINE(21, 20, {s_clr, control});
@@ -908,7 +909,9 @@
     ?LC_CELL(18, 3, {lut, a0b1c1d0});
     ?LC_CELL(19, 1, {lut_out, right});
     ?LC_CELL(19, 2, clk2);
+    %?LC_CELL(19, 3, minimum_19_3);
     ?LC_CELL(20, 1, {lut_out, left});
+    %?LC_CELL(20, 2, minimum_20_2);
     ?LC_CELL(20, 3, a_clr1);
     ?LC_CELL(21, 0, s_clr_load);
     ?LC_CELL(21, 3, local_line);
@@ -3068,16 +3071,6 @@ from_ioc(X, Y, N, Name, _With) ->
 
 %%--------------------------------------------------------------------
 
--define(C4_CELL_DIRECT(Sector, N, I),
-).
--define(C4_CELL_EITHER(Sector, N, I),
-).
--define(C4_CELL_PAIRED(Sector, N, I),
-).
--define(C4_HEAD_DIRECT(Sector, I),
-).
--define(C4_HEAD_PAIRED(Sector, I),
-).
 -define(C4_SIDE_C(Sector, N, I, Name),
     from_c4(X, Y, Name, With) when X =:= With#with.left_x ->
         from_side(X, Sector, Y, N, I, With)
@@ -3162,11 +3155,6 @@ from_c4(X, Y, Name, _With) ->
 -undef(C4_CELL_E).
 -undef(C4_CELL_L).
 -undef(C4_CELL_R).
--undef(C4_CELL_DIRECT).
--undef(C4_CELL_EITHER).
--undef(C4_CELL_PAIRED).
--undef(C4_HEAD_DIRECT).
--undef(C4_HEAD_PAIRED).
 
 %%--------------------------------------------------------------------
 
@@ -3859,14 +3847,6 @@ to_ioc_strip(X, Y, N, R, C) ->
 
 %%--------------------------------------------------------------------
 
--define(C4_HEAD_DIRECT(Sector, I),
-    to_cell_head(X, I, Sector, _) ->
-        {ok, {c4, direct, {X, head, I, cell, Sector}}};
-).
--define(C4_HEAD_MAPPED(Sector, I),
-    to_cell_head(X, I, Sector, _) ->
-        {ok, {c4, mapped, {X, head, I, cell, Sector}}};
-).
 -define(C4_HEAD_L(Sector, Index, Name),
     to_cell_head(X, Index, Sector, With) ->
         to_c4(X, With#with.top_y, Name)
@@ -3894,19 +3874,9 @@ to_cell_head(X, Index, Sector, _With) ->
 -undef(C4_HEAD_R).
 -undef(IOB_HEAD).
 -undef(IOC_HEAD).
--undef(C4_HEAD_DIRECT).
--undef(C4_HEAD_MAPPED).
 
 %%--------------------------------------------------------------------
 
--define(C4_HEAD_DIRECT(Sector, I),
-    to_cell_tail(X, I, Sector, _) ->
-        {ok, {c4, direct, {X, tail, I, cell, Sector}}};
-).
--define(C4_HEAD_MAPPED(Sector, I),
-    to_cell_tail(X, I, Sector, _) ->
-        {ok, {c4, mapped, {X, tail, I, cell, Sector}}};
-).
 -define(C4_TAIL_L(Sector, Index, Name),
     to_cell_tail(X, Index, Sector, With) when X < With#with.grow_x ->
         to_c4(X, With#with.short_y, Name);
@@ -3942,8 +3912,6 @@ to_cell_tail(X, Index, Sector, _With) ->
 -undef(C4_TAIL_R).
 -undef(IOB_HEAD).
 -undef(IOC_HEAD).
--undef(C4_HEAD_DIRECT).
--undef(C4_HEAD_MAPPED).
 
 %%--------------------------------------------------------------------
 
@@ -3960,10 +3928,6 @@ to_zero(X, Y, N, I) ->
 
 %%--------------------------------------------------------------------
 
--define(C4_HEAD_DIRECT(Sector, I),
-    to_side_head(X, I, Sector, _) ->
-        {ok, {c4, direct, {X, head, I, side, Sector}}};
-).
 -define(C4_SIDE_HEAD_L(Sector, Index, Name),
     to_side_head(X, Index, Sector, With) when X =:= With#with.left_x ->
         to_c4(X, With#with.top_y, Name)
@@ -3974,14 +3938,9 @@ to_side_head(X, Index, Sector, _With) ->
     {error, {X, head, Index, side, Sector}}.
 
 -undef(C4_SIDE_HEAD_L).
--undef(C4_HEAD_DIRECT).
 
 %%--------------------------------------------------------------------
 
--define(C4_HEAD_DIRECT(Sector, I),
-    to_side_tail(X, I, Sector, _) ->
-        {ok, {c4, direct, {X, head, I, side, Sector}}};
-).
 -define(C4_SIDE_TAIL_L(Sector, Index, Name),
     to_side_tail(X, Index, Sector, With) when X =:= With#with.left_x ->
         to_c4(X, With#with.short_y, Name)
@@ -3992,7 +3951,6 @@ to_side_tail(X, Index, Sector, _With) ->
     {error, {X, tail, Index, side, Sector}}.
 
 -undef(C4_SIDE_TAIL_L).
--undef(C4_HEAD_DIRECT).
 
 %%--------------------------------------------------------------------
 
@@ -4027,18 +3985,6 @@ to_side_line(X, Y, Index, Sector, _) ->
 
 %%--------------------------------------------------------------------
 
--define(C4_CELL_DIRECT(Sector, N, I),
-    to_side(X, Y, N, I, Sector, _) ->
-        {ok, {c4, direct, {X, Y, N, I, side, Sector}}};
-).
--define(C4_CELL_EITHER(Sector, N, I),
-    to_side(X, Y, N, I, Sector, _) ->
-        {ok, {c4, either, {X, Y, N, I, side, Sector}}};
-).
--define(C4_CELL_PAIRED(Sector, N, I),
-    to_side(X, Y, N, I, Sector, _) ->
-        {ok, {c4, paired, {X, Y, N, I, side, Sector}}};
-).
 -define(R4_CELL_DIRECT(Sector, N, I),
     to_side(X, Y, N, I, Sector, _) ->
         {ok, {r4, direct, {X, Y, N, I, side, Sector}}};
@@ -4113,9 +4059,6 @@ to_side(X, Y, N, Index, Sector, _) ->
 -undef(IOC_RIGHT).
 -undef(GLOBAL_SMALL_SELECT).
 -undef(IOC_SIDE).
--undef(C4_CELL_DIRECT).
--undef(C4_CELL_EITHER).
--undef(C4_CELL_PAIRED).
 -undef(R4_CELL_DIRECT).
 -undef(R4_CELL_EITHER).
 -undef(R4_CELL_PAIRED).
@@ -4139,18 +4082,6 @@ to_cell_line(X, Y, Index, Sector, _) ->
 
 %%--------------------------------------------------------------------
 
--define(C4_CELL_DIRECT(Sector, N, I),
-    to_cell(X, Y, N, I, Sector, _) ->
-        {ok, {c4, direct, {X, Y, N, I, cell, Sector}}};
-).
--define(C4_CELL_EITHER(Sector, N, I),
-    to_cell(X, Y, N, I, Sector, _) ->
-        {ok, {c4, either, {X, Y, N, I, cell, Sector}}};
-).
--define(C4_CELL_PAIRED(Sector, N, I),
-    to_cell(X, Y, N, I, Sector, _) ->
-        {ok, {c4, paired, {X, Y, N, I, cell, Sector}}};
-).
 -define(R4_CELL_DIRECT(Sector, N, I),
     to_cell(X, Y, N, I, Sector, _) ->
         {ok, {r4, direct, {X, Y, N, I, cell, Sector}}};
@@ -4237,9 +4168,6 @@ to_cell(X, Y, N, I, Sector, _) ->
 -undef(GLOBAL_LARGE_SELECT).
 -undef(LAB_CELL).
 -undef(LC_CELL).
--undef(C4_CELL_DIRECT).
--undef(C4_CELL_EITHER).
--undef(C4_CELL_PAIRED).
 -undef(R4_CELL_DIRECT).
 -undef(R4_CELL_EITHER).
 -undef(R4_CELL_PAIRED).
