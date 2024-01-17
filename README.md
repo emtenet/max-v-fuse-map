@@ -75,6 +75,7 @@ My experiments are being run in the following
  * R4 fuse map
    [generate](experiments/src/r4_fuse_map_generate.erl)
    and [theory](experiments/src/r4_fuse_map_theory.erl)
+ * [Device pins](experiments/src/device_pins_experiment.erl)
 
 ## Maps
 
@@ -90,6 +91,18 @@ The following mux mappings are encoded:
  * [IOC enable MUX](experiments/src/ioc_enable_mux_map.erl)
  * [C4 fuse](experiments/src/c4_fuse_map.erl)
  * [R4 fuse](experiments/src/r4_fuse_map.erl)
+
+## Device Fuses
+
+### `{device, reset}`
+
+This enables the device wide reset pin
+that resets all registers in the device
+
+### `{device, output_enable}`
+
+This enables the device wide output enable pin
+to control the output enable for every output pin on the device.
 
 ## Global Fuses
 

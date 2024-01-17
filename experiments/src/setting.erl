@@ -14,6 +14,8 @@
 -type setting() ::
     % global
     {auto_global_clock, boolean()} |
+    {device_clrn, boolean()} |
+    {device_oe, boolean()} |
     {not_gate_push_back, boolean()} |
     {seed, pos_integer()} |
     {unused_pins, unused_pins()} |
@@ -103,6 +105,10 @@ defaults([_ | Settings], Defaults) ->
 
 setting({auto_global_clock, Value}) ->
     global(<<"AUTO_GLOBAL_CLOCK">>, boolean(Value));
+setting({device_clrn, Value}) ->
+    global(<<"ENABLE_DEVICE_WIDE_RESET">>, boolean(Value));
+setting({device_oe, Value}) ->
+    global(<<"ENABLE_DEVICE_WIDE_OE">>, boolean(Value));
 setting({not_gate_push_back, Value}) ->
     instance(<<"NOT_GATE_PUSH_BACK">>, <<"*">>, boolean(Value));
 setting({unused_pins, Value}) ->

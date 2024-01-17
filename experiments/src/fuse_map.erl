@@ -76,6 +76,14 @@
 -define(SHORT_SECTORS, 20).
 -define(LONG_SECTORS, (?COLUMN_SECTORS - ?SHORT_SECTORS)).
 
+-define(DEVICE_PINS(),
+    ?DEVICE_PIN_SIDE( 7, 1, reset)
+    ?DEVICE_PIN_SIDE( 8, 1, output_enable)
+
+    ?DEVICE_PIN_CELL( 8, 9, reset)
+    ?DEVICE_PIN_CELL( 9, 9, output_enable)
+).
+
 -define(GLOBAL_SKIPS(),
     ?GLOBAL_ROW_CELL_R( 5, 0);
     ?GLOBAL_ROW_CELL_R( 1, 1);
@@ -2456,6 +2464,8 @@ from_max_v_2210z(Name) ->
 
 %%--------------------------------------------------------------------
 
+from_density({device, Name}, With = #with{}) ->
+    from_device(Name, With);
 from_density({{global, G}, Name}, With = #with{}) ->
     case from_density_global(G) of
         ok ->
@@ -2677,6 +2687,24 @@ from_density_r4(X, Y, With = #with{})
     ok;
 from_density_r4(_, _, _) ->
     error.
+
+%%--------------------------------------------------------------------
+
+-define(DEVICE_PIN_CELL(Sector, Index, Name),
+    from_device(Name, With) when  With#with.density =/= max_v_240z ->
+        from_tail(With#with.grow_x, Sector, Index, With, With#with.short_lines);
+).
+-define(DEVICE_PIN_SIDE(Sector, Index, Name),
+    from_device(Name, With) when With#with.density =:= max_v_240z ->
+        from_tail(With#with.grow_x, Sector, Index, With, With#with.short_lines);
+).
+
+?DEVICE_PINS()
+from_device(Name, _With) ->
+    {error, {device, Name}}.
+
+-undef(DEVICE_PIN_CELL).
+-undef(DEVICE_PIN_SIDE).
 
 %%--------------------------------------------------------------------
 
@@ -3686,6 +3714,14 @@ to_cell_head(X, Index, Sector, _With) ->
     to_cell_tail(X, Index, Sector, With) when X > With#with.grow_x ->
         to_c4(X - 1, With#with.long_y, Name)
  ).
+-define(DEVICE_PIN_CELL(Sector, Index, Name),
+    to_cell_tail(X, Index, Sector, With)
+            when X =:= With#with.grow_x andalso
+                 With#with.density =/= max_v_240z ->
+        {ok, {device, Name}};
+ ).
+-define(DEVICE_PIN_SIDE(Sector, Index, Name),
+ ).
 -define(IOB_HEAD(Sector, Index, Name),
     to_cell_tail(X, Index, Sector, With) when X < With#with.grow_x ->
         to_iob(X, With#with.short_y, Name);
@@ -3700,6 +3736,7 @@ to_cell_head(X, Index, Sector, _With) ->
 ).
 
 ?C4_TAILS()
+?DEVICE_PINS()
 ?IOB_HEADS()
 ?IOC_HEADS()
 to_cell_tail(X, Index, Sector, _With) ->
@@ -3707,6 +3744,8 @@ to_cell_tail(X, Index, Sector, _With) ->
 
 -undef(C4_TAIL_L).
 -undef(C4_TAIL_R).
+-undef(DEVICE_PIN_CELL).
+-undef(DEVICE_PIN_SIDE).
 -undef(IOB_HEAD).
 -undef(IOC_HEAD).
 
@@ -3742,12 +3781,23 @@ to_side_head(X, Index, Sector, _With) ->
     to_side_tail(X, Index, Sector, With) when X =:= With#with.left_x ->
         to_c4(X, With#with.short_y, Name)
  ).
+-define(DEVICE_PIN_CELL(Sector, Index, Name),
+ ).
+-define(DEVICE_PIN_SIDE(Sector, Index, Name),
+    to_side_tail(X, Index, Sector, With)
+            when X =:= With#with.grow_x andalso
+                 With#with.density =:= max_v_240z ->
+        {ok, {device, Name}};
+ ).
 
 ?C4_SIDE_TAILS()
+?DEVICE_PINS()
 to_side_tail(X, Index, Sector, _With) ->
     {error, {X, tail, Index, side, Sector}}.
 
 -undef(C4_SIDE_TAIL_L).
+-undef(DEVICE_PIN_CELL).
+-undef(DEVICE_PIN_SIDE).
 
 %%--------------------------------------------------------------------
 
