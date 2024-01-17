@@ -23,7 +23,7 @@
 % matches are ignored and leave holes in the mapping tables.
 % These holes will be filled in mannualy when running r4_fuse_map_theory.
 
-%-define(DENSITY, max_v_1270z).
+%-define(DENSITY, max_v_240z).
 
 %%====================================================================
 %% run
@@ -69,10 +69,8 @@ fold_density(Density, Acc0) ->
 fold_block(Density, R4, Indexes, Acc0) ->
     %io:format(" ==> ~s ~w~n", [Density, R4]),
     route_cache:fold_indexes(
-        fun (Index, Froms, Acc) when Index < 70 ->
-                fold_interconnect({Density, R4, Index}, Froms, Acc);
-            (_, _, Acc) ->
-                Acc
+        fun (Index, Froms, Acc) ->
+            fold_interconnect({Density, R4, Index}, Froms, Acc)
         end,
         Acc0,
         Indexes
@@ -313,8 +311,8 @@ generate_density(Density, MMs) ->
 %%--------------------------------------------------------------------
 
 generate_max(max_v_240z) -> {8, 4};
-generate_max(max_v_570z) -> {13, 5};
-generate_max(max_v_1270z) -> {17, 11};
+generate_max(max_v_570z) -> {13, 7};
+generate_max(max_v_1270z) -> {17, 10};
 generate_max(max_v_2210z) -> {21, 13}.
 
 %%--------------------------------------------------------------------

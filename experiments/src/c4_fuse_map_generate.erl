@@ -56,10 +56,8 @@ fold_density(Density, Acc0) ->
 fold_block(Density, C4, Indexes, Acc0) ->
     %io:format(" ==> ~s ~w~n", [Density, C4]),
     route_cache:fold_indexes(
-        fun (Index, Froms, Acc) when Index < 70 ->
-                fold_interconnect({Density, C4, Index}, Froms, Acc);
-            (_, _, Acc) ->
-                Acc
+        fun (Index, Froms, Acc) ->
+            fold_interconnect({Density, C4, Index}, Froms, Acc)
         end,
         Acc0,
         Indexes

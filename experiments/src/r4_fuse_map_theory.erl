@@ -1,14 +1,14 @@
--module(c4_fuse_map_theory).
+-module(r4_fuse_map_theory).
 
 -export([run/0]).
 
 % This experiment checks that 100% of fuses can be matched to each
-% C4 interconnect.
+% R4 interconnect.
 %
-% This relies heavily on the fuse_map & c4_fuse_map generated
+% This relies heavily on the fuse_map & r4_fuse_map generated
 % previoisly.
 %
-% Initially the c4_fuse_map is incomplete and this aids manually
+% Initially the r4_fuse_map is incomplete and this aids manually
 % populating the holes.
 
 %-define(DENSITY, max_v_240z).
@@ -40,7 +40,7 @@ run() ->
 fold_density(Density, Acc0) ->
     {ok, Cache} = route_cache:open(Density),
     route_cache:fold_blocks(
-        c4,
+        r4,
         fun (Block, Indexes, Acc) ->
             fold_block(Density, Block, Indexes, Acc)
         end,
@@ -50,11 +50,11 @@ fold_density(Density, Acc0) ->
 
 %%--------------------------------------------------------------------
 
-fold_block(Density, C4, Indexes, Acc0) ->
-    %io:format(" ==> ~s ~w~n", [Density, C4]),
+fold_block(Density, R4, Indexes, Acc0) ->
+    %io:format(" ==> ~s ~w~n", [Density, R4]),
     route_cache:fold_indexes(
         fun (Index, Froms, Acc) ->
-            fold_interconnect({Density, C4, Index}, Froms, Acc)
+            fold_interconnect({Density, R4, Index}, Froms, Acc)
         end,
         Acc0,
         Indexes
@@ -136,25 +136,25 @@ interconnects(Block = {Density, _, _}, Experiments0, Acc0) ->
     %matrix:print(Matrix),
     %
     Ns = lists:seq(1, length(Experiments)),
-    interconnects(2, Ns, Experiments0, Block, Matrix, Matrix0, Acc0).
+    interconnects(2, Ns, Experiments0, Block, Matrix, Acc0).
 
 %%--------------------------------------------------------------------
 
-interconnects(_, _, [], _, _, _, Acc) ->
+interconnects(_, _, [], _, _, Acc) ->
     Acc;
-interconnects(N, Ns, [Experiment | Experiments], Block, Matrix, Matrix0, Acc) ->
+interconnects(N, Ns, [Experiment | Experiments], Block, Matrix, Acc) ->
     Pattern = lists:map(fun (NN) when NN =:= N -> 0; (_) -> x end, Ns),
-    interconnect(Block, Experiment, Matrix, Pattern, Matrix0),
-    interconnects(N + 1, Ns, Experiments, Block, Matrix, Matrix0, Acc).
+    interconnect(Block, Experiment, Matrix, Pattern),
+    interconnects(N + 1, Ns, Experiments, Block, Matrix, Acc).
 
 %%--------------------------------------------------------------------
 
-remove_fuse(Block = {Density, {c4, X, _}, _}, Fuse) ->
+remove_fuse(Block = {Density, {r4, _, Y}, _}, Fuse) ->
     case fuse_map:to_name(Fuse, Density) of
-        {ok, Mux = {{c4, X, _}, {mux, _}, _}} ->
+        {ok, Mux = {{r4, _, Y}, {mux, _}, _}} ->
             remove_fuse(Block, Fuse, Mux);
 
-        {ok, Mux = {{c4, X, _}, {mux, _}, _, _}} ->
+        {ok, Mux = {{r4, _, Y}, {mux, _}, _, _}} ->
             remove_fuse(Block, Fuse, Mux);
 
         _ ->
@@ -163,12 +163,12 @@ remove_fuse(Block = {Density, {c4, X, _}, _}, Fuse) ->
 
 %%--------------------------------------------------------------------
 
-remove_fuse(_Block = {Density, C4, I}, _Fuse, Mux) ->
-    case c4_fuse_map:to_name(Mux, Density) of
-        {ok, {C4, {interconnect, I}, _}} ->
+remove_fuse(_Block = {Density, R4, I}, _Fuse, Mux) ->
+    case r4_fuse_map:to_name(Mux, Density) of
+        {ok, {R4, {interconnect, I}, _}} ->
             false;
 
-        {ok, {C4, {interconnect, I}, _, _}} ->
+        {ok, {R4, {interconnect, I}, _, _}} ->
             false;
 
         {ok, _} ->
@@ -182,7 +182,7 @@ remove_fuse(_Block = {Density, C4, I}, _Fuse, Mux) ->
 %% interconnect
 %%====================================================================
 
-interconnect(Block, Experiment, Matrix, Pattern, _Matrix0) ->
+interconnect(Block, Experiment, Matrix, Pattern) ->
     case matrix:pattern_match(Matrix, Pattern) of
         [{_, Fuse}] ->
             interconnect_direct(Block, Experiment, Fuse);
@@ -190,29 +190,29 @@ interconnect(Block, Experiment, Matrix, Pattern, _Matrix0) ->
         [{_, Fuse1}, {_, Fuse2}] ->
             interconnect_pair(Block, Experiment, Fuse1, Fuse2);
 
-        Fuses ->
-            %matrix:print(Matrix0),
-            interconnect_not_found(Block, Experiment, [
+        Fuses0 ->
+            Fuses = [
                 Fuse
                 ||
-                {_, Fuse} <- Fuses
-            ])
+                {_, Fuse} <- Fuses0
+            ],
+            interconnect_not_found(Block, Experiment, Fuses)
     end.
 
 %%--------------------------------------------------------------------
 
-interconnect_direct(Block = {Density, C4, Index}, Experiment, Fuse) ->
+interconnect_direct(Block = {Density, R4, Index}, Experiment, Fuse) ->
     Interconnect = {interconnect, Index},
     case fuse_map:to_name(Fuse, Density) of
         {ok, Mux = {_, {mux, _}, _}} ->
-            case c4_fuse_map:to_name(Mux, Density) of
-                {ok, {C4, Interconnect, direct_link}} ->
+            case r4_fuse_map:to_name(Mux, Density) of
+                {ok, {R4, Interconnect, direct_link}} ->
                     ok;
 
-                {ok, {C4, Interconnect, io_data_in0}} ->
+                {ok, {R4, Interconnect, io_data_in0}} ->
                     ok;
 
-                {ok, {C4, Interconnect, io_data_in1}} ->
+                {ok, {R4, Interconnect, io_data_in1}} ->
                     ok;
 
                 _ ->
@@ -225,19 +225,19 @@ interconnect_direct(Block = {Density, C4, Index}, Experiment, Fuse) ->
 
 %%--------------------------------------------------------------------
 
-interconnect_pair(Block = {Density, C4, Index}, Experiment, Fuse1, Fuse2) ->
+interconnect_pair(Block = {Density, R4, Index}, Experiment, Fuse1, Fuse2) ->
     Interconnect = {interconnect, Index},
     case {fuse_map:to_name(Fuse1, Density), fuse_map:to_name(Fuse2, Density)} of
         {{ok, Mux1 = {_, {mux, _}, _, _}},
          {ok, Mux2 = {_, {mux, _}, _, _}}} ->
-            case {c4_fuse_map:to_name(Mux1, Density),
-                  c4_fuse_map:to_name(Mux2, Density)} of
-                {{ok, {C4, Interconnect, from3, _}},
-                 {ok, {C4, Interconnect, from4, _}}} ->
+            case {r4_fuse_map:to_name(Mux1, Density),
+                  r4_fuse_map:to_name(Mux2, Density)} of
+                {{ok, {R4, Interconnect, from3, _}},
+                 {ok, {R4, Interconnect, from4, _}}} ->
                     ok;
 
-                {{ok, {C4, Interconnect, from4, _}},
-                 {ok, {C4, Interconnect, from3, _}}} ->
+                {{ok, {R4, Interconnect, from4, _}},
+                 {ok, {R4, Interconnect, from3, _}}} ->
                     ok;
 
                 _ ->
@@ -250,12 +250,40 @@ interconnect_pair(Block = {Density, C4, Index}, Experiment, Fuse1, Fuse2) ->
 
 %%--------------------------------------------------------------------
 
-interconnect_not_found(Block, {From, _}, Fuses) ->
+interconnect_not_found(Block, Experiment = {From, _}, Fuses) ->
+    case interconnect_maybe_found(Block, Fuses) of
+        true ->
+            {Density, _, _} = Block,
+            io:format("SKIP ~p~n", [{Block, From, [
+                case fuse_map:to_name(Fuse, Density) of
+                    {ok, Mux} ->
+                        case r4_fuse_map:to_name(Mux, Density) of
+                            {ok, Name} ->
+                                {Fuse, Mux, Name};
+
+                            false ->
+                                {Fuse, Mux}
+                        end;
+
+                    {error, _} ->
+                        Fuse
+                end
+                ||
+                Fuse <- Fuses
+            ]}]);
+
+        false ->
+            interconnect_realy_not_found(Block, Experiment, Fuses)
+    end.
+
+%%--------------------------------------------------------------------
+
+interconnect_realy_not_found(Block, {From, _}, Fuses) ->
     {Density, _, _} = Block,
     throw({Block, From, [
         case fuse_map:to_name(Fuse, Density) of
             {ok, Mux} ->
-                case c4_fuse_map:to_name(Mux, Density) of
+                case r4_fuse_map:to_name(Mux, Density) of
                     {ok, Name} ->
                         {Fuse, Mux, Name};
 
@@ -269,4 +297,54 @@ interconnect_not_found(Block, {From, _}, Fuses) ->
         ||
         Fuse <- Fuses
     ]}).
+
+%%--------------------------------------------------------------------
+
+interconnect_maybe_found({Density, R4, Index}, Fuses) ->
+    Interconnect = {interconnect, Index},
+    case interconnect_maybe(Density, R4, Interconnect, Fuses, []) of
+        [{from3, _}, {from4, _}] ->
+            true;
+
+        [{from4, _}, {from3, _}] ->
+            true;
+
+        [direct_link] ->
+            true;
+
+        [io_data_in0] ->
+            true;
+
+        [io_data_in1] ->
+            true;
+
+        _ ->
+            false
+    end.
+
+%%--------------------------------------------------------------------
+
+interconnect_maybe(_, _, _, [], Names) ->
+    Names;
+interconnect_maybe(Density, R4, Interconnect, [Fuse | Fuses], Names) ->
+    case fuse_map:to_name(Fuse, Density) of
+        {ok, Mux} ->
+            case r4_fuse_map:to_name(Mux, Density) of
+                {ok, {R4, Interconnect, Key, Value}} ->
+                    interconnect_maybe(Density, R4, Interconnect, Fuses,
+                        [{Key, Value} | Names]
+                    );
+
+                {ok, {R4, Interconnect, Value}} ->
+                    interconnect_maybe(Density, R4, Interconnect, Fuses,
+                        [Value | Names]
+                    );
+
+                _ ->
+                    interconnect_maybe(Density, R4, Interconnect, Fuses, Names)
+            end;
+
+        _ ->
+             interconnect_maybe(Density, R4, Interconnect, Fuses, Names)
+    end.
 

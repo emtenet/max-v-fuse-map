@@ -74,6 +74,7 @@ My experiments are being run in the following
    and [theory](experiments/src/c4_fuse_map_theory.erl)
  * R4 fuse map
    [generate](experiments/src/r4_fuse_map_generate.erl)
+   and [theory](experiments/src/r4_fuse_map_theory.erl)
 
 ## Maps
 
