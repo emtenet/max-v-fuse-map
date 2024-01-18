@@ -2,7 +2,7 @@
 
 -export([encode/1]).
 -export([io_standards/0]).
--export([io_standard_output/1]).
+-export([io_schmitt_triggers/0]).
 -export([unused_pins/0]).
 
 -export_type([setting/0]).
@@ -25,6 +25,7 @@
     {bus_hold, signal(), boolean()} |
     {current_strength, signal(), current_strength()} |
     {global_clock, signal(), boolean()} |
+    {io_standard, io_standard()} |
     {io_standard, signal(), io_standard()} |
     {pci_compliance, signal(), boolean()} |
     {slow_slew_rate, signal(), boolean()} |
@@ -125,6 +126,8 @@ setting({current_strength, Signal, Value}) ->
     instance(<<"CURRENT_STRENGTH_NEW">>, Signal, current_strength(Value));
 setting({global_clock, Signal, Value}) ->
     instance(<<"GLOBAL_SIGNAL">>, Signal, global_clock(Value));
+setting({io_standard, Value}) ->
+    global(<<"STRATIX_DEVICE_IO_STANDARD">>, io_standard(Value));
 setting({io_standard, Signal, Value}) ->
     instance(<<"IO_STANDARD">>, Signal, io_standard(Value));
 setting({pci_compliance, Signal, Value}) ->
@@ -196,17 +199,14 @@ io_standards() ->
      v1_5,
      v1_8,
      v2_5,
-     v2_5_schmitt_trigger,
      v3_3_cmos,
-     v3_3_ttl,
-     v3_3_schmitt_trigger
-    ].
+     v3_3_ttl].
 
 %%--------------------------------------------------------------------
 
-io_standard_output(v2_5_schmitt_trigger) -> v2_5;
-io_standard_output(v3_3_schmitt_trigger) -> v3_3_ttl;
-io_standard_output(Standard) -> Standard.
+io_schmitt_triggers() ->
+    [{v2_5_schmitt_trigger, v2_5},
+     {v3_3_schmitt_trigger, v3_3_ttl}].
 
 %%====================================================================
 %% values
