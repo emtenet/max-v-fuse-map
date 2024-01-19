@@ -917,7 +917,7 @@
     ?LC_CELL(18, 3, {lut, a0b1c1d0});
     ?LC_CELL(19, 1, {lut_out, right});
     ?LC_CELL(19, 2, clk2);
-    %?LC_CELL(19, 3, minimum_19_3);
+    ?LC_CELL(19, 3, {lut_chain, off});
     ?LC_CELL(20, 1, {lut_out, left});
     %?LC_CELL(20, 2, minimum_20_2);
     ?LC_CELL(20, 3, a_clr1);

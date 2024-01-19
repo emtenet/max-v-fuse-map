@@ -78,6 +78,7 @@ My experiments are being run in the following
  * [Device pins](experiments/src/device_pins_experiment.erl)
  * [LC register types](experiments/src/lc_register_types_experiment.erl)
  * [IO standards](experiments/src/io_standards_experiment.erl)
+ * [LUT chain](experiments/src/lc_lut_chain_experiment.erl)
 
 ## Maps
 
@@ -456,6 +457,14 @@ This fuse either:
 
  * enables that output, or
  * selects between the LUT and registers to output.
+
+### `{lc(), lut_chain, off}`
+
+Each LC can receive a LUT input from the LUT output of the previous LC.
+
+The input always comes into the `data_d` input.
+
+The first LC in a LAB has this fuse, but not sure where that input comes from.
 
 ### `{lc(), lut_out, left | right}`
 
