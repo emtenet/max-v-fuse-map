@@ -9,6 +9,7 @@
 -export([iterate/0]).
 -export([iterate/1]).
 -export([iterate_read/1]).
+-export([iterate_read_all/1]).
 
 -export_type([slot/0]).
 -export_type([iterator/0]).
@@ -163,6 +164,26 @@ iterate_read(Key) ->
     end.
 
 %%====================================================================
+%% iterate_read_all
+%%====================================================================
+
+-spec iterate_read_all(base64())
+    -> {ok, experiment:result(), binary(), binary()} |
+       false.
+
+iterate_read_all(Key) ->
+    <<Head:2/binary, Tail/binary>> = Key,
+    File = filename:join(["cache", Head, <<Tail/binary, ".gz">>]),
+    case file:read_file(File) of
+        {ok, Zipped} ->
+            {Result, Settings, Verilog} = gunzip_all(Zipped),
+            {ok, Result, Settings, Verilog};
+
+        {error, enoent} ->
+            false
+    end.
+
+%%====================================================================
 %% internal
 %%====================================================================
 
@@ -223,4 +244,25 @@ gunzip(Zipped) ->
     [Device0, _] = binary:split(Signature, <<"\n">>),
     Device = device:from_name(Device0),
     {Device, POF, RCF}.
+
+
+%%--------------------------------------------------------------------
+
+gunzip_all(Zipped) ->
+    Packed = zlib:gunzip(Zipped),
+    <<
+        SignatureSize:32/integer,
+        POFSize:32/integer,
+        RCFSize:32/integer,
+        Rest/binary
+    >> = Packed,
+    <<
+        Signature:SignatureSize/binary,
+        POF:POFSize/binary,
+        RCF:RCFSize/binary
+    >> = Rest,
+    [Device0, Sources] = binary:split(Signature, <<"\n">>),
+    [Settings, Verilog] = binary:split(Sources, <<"\n====================\n">>),
+    Device = device:from_name(Device0),
+    {{Device, POF, RCF}, Settings, Verilog}.
 
