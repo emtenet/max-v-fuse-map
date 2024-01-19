@@ -163,7 +163,7 @@ remove_fuse(Block = {Density, {c4, X, _}, _}, Fuse) ->
 
 %%--------------------------------------------------------------------
 
-remove_fuse(_Block = {Density, C4, I}, _Fuse, Mux) ->
+remove_fuse(Block = {Density, C4, I}, Fuse, Mux) ->
     case c4_fuse_map:to_name(Mux, Density) of
         {ok, {C4, {interconnect, I}, _}} ->
             false;
@@ -175,7 +175,8 @@ remove_fuse(_Block = {Density, C4, I}, _Fuse, Mux) ->
             true;
 
         false ->
-            false % throw({Block, Fuse, Mux})
+            io:format("UNKNOWN ~w FUSE ~w MUX ~w~n", [Block, Fuse, Mux]),
+            false
     end.
 
 %%====================================================================
@@ -190,13 +191,13 @@ interconnect(Block, Experiment, Matrix, Pattern, _Matrix0) ->
         [{_, Fuse1}, {_, Fuse2}] ->
             interconnect_pair(Block, Experiment, Fuse1, Fuse2);
 
-        Fuses ->
-            %matrix:print(Matrix0),
-            interconnect_not_found(Block, Experiment, [
+        Fuses0 ->
+            Fuses = [
                 Fuse
                 ||
-                {_, Fuse} <- Fuses
-            ])
+                {_, Fuse} <- Fuses0
+            ],
+            interconnect_not_found(Block, Experiment, Fuses)
     end.
 
 %%--------------------------------------------------------------------
@@ -250,7 +251,35 @@ interconnect_pair(Block = {Density, C4, Index}, Experiment, Fuse1, Fuse2) ->
 
 %%--------------------------------------------------------------------
 
-interconnect_not_found(Block, {From, _}, Fuses) ->
+interconnect_not_found(Block, Experiment = {From, _}, Fuses) ->
+    case interconnect_maybe_found(Block, Fuses) of
+        true ->
+            {Density, _, _} = Block,
+            io:format("SKIP ~p~n", [{Block, From, [
+                case fuse_map:to_name(Fuse, Density) of
+                    {ok, Mux} ->
+                        case c4_fuse_map:to_name(Mux, Density) of
+                            {ok, Name} ->
+                                {Fuse, Mux, Name};
+
+                            false ->
+                                {Fuse, Mux}
+                        end;
+
+                    {error, _} ->
+                        Fuse
+                end
+                ||
+                Fuse <- Fuses
+            ]}]);
+
+        false ->
+            interconnect_realy_not_found(Block, Experiment, Fuses)
+    end.
+
+%%--------------------------------------------------------------------
+
+interconnect_realy_not_found(Block, {From, _}, Fuses) ->
     {Density, _, _} = Block,
     throw({Block, From, [
         case fuse_map:to_name(Fuse, Density) of
@@ -269,4 +298,54 @@ interconnect_not_found(Block, {From, _}, Fuses) ->
         ||
         Fuse <- Fuses
     ]}).
+
+%%--------------------------------------------------------------------
+
+interconnect_maybe_found({Density, R4, Index}, Fuses) ->
+    Interconnect = {interconnect, Index},
+    case interconnect_maybe(Density, R4, Interconnect, Fuses, []) of
+        [{from3, _}, {from4, _}] ->
+            true;
+
+        [{from4, _}, {from3, _}] ->
+            true;
+
+        [direct_link] ->
+            true;
+
+        [io_data_in0] ->
+            true;
+
+        [io_data_in1] ->
+            true;
+
+        _ ->
+            false
+    end.
+
+%%--------------------------------------------------------------------
+
+interconnect_maybe(_, _, _, [], Names) ->
+    Names;
+interconnect_maybe(Density, R4, Interconnect, [Fuse | Fuses], Names) ->
+    case fuse_map:to_name(Fuse, Density) of
+        {ok, Mux} ->
+            case c4_fuse_map:to_name(Mux, Density) of
+                {ok, {R4, Interconnect, Key, Value}} ->
+                    interconnect_maybe(Density, R4, Interconnect, Fuses,
+                        [{Key, Value} | Names]
+                    );
+
+                {ok, {R4, Interconnect, Value}} ->
+                    interconnect_maybe(Density, R4, Interconnect, Fuses,
+                        [Value | Names]
+                    );
+
+                _ ->
+                    interconnect_maybe(Density, R4, Interconnect, Fuses, Names)
+            end;
+
+        _ ->
+             interconnect_maybe(Density, R4, Interconnect, Fuses, Names)
+    end.
 

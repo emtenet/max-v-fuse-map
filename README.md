@@ -72,6 +72,7 @@ My experiments are being run in the following
  * C4 fuse map
    [generate](experiments/src/c4_fuse_map_generate.erl)
    and [theory](experiments/src/c4_fuse_map_theory.erl)
+   and [inverse](experiments/src/c4_fuse_map_inverse.erl)
  * R4 fuse map
    [generate](experiments/src/r4_fuse_map_generate.erl)
    and [theory](experiments/src/r4_fuse_map_theory.erl)
