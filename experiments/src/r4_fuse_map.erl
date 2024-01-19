@@ -1,6 +1,135 @@
 -module(r4_fuse_map).
 
+-export([run/0]).
+
+-export([from_name/2]).
 -export([to_name/2]).
+
+%%====================================================================
+%% run
+%%====================================================================
+
+run() ->
+    run(max_v_240z, 8, 4),
+    run(max_v_570z, 13, 7),
+    run(max_v_1270z, 17, 10),
+    run(max_v_2210z, 21, 13),
+    ok.
+
+%%--------------------------------------------------------------------
+
+run(Density, MaxX, MaxY) ->
+    io:format(" => ~s~n", [Density]),
+    [
+        run_at(Density, X, Y)
+        ||
+        Y <- lists:seq(0, MaxY),
+        X <- lists:seq(0, MaxX)
+    ],
+    ok.
+
+%%--------------------------------------------------------------------
+
+run_at(Density, X, Y) ->
+    [
+        run_from(Density, X, Y, I)
+        ||
+        I <- lists:seq(0, 34)
+    ],
+    [
+        run_to(Density, X, Y, M)
+        ||
+        M <- lists:seq(0, 13)
+    ],
+    ok.
+
+%%--------------------------------------------------------------------
+
+run_from(Density, X, Y, I) ->
+    Interconnect = {{c4, X, Y}, {interconnect, I}, direct_link},
+    case from_name(Interconnect, Density) of
+        {ok, Mux} ->
+            case to_name(Mux, Density) of
+                {ok, Interconnect} ->
+                    ok;
+
+                {ok, Different} ->
+                    throw({Density, Interconnect, to, Mux, from, Different});
+
+                false ->
+                    throw({Density, Interconnect, to, Mux, from, missing})
+            end;
+
+        false ->
+            ok
+    end.
+
+%%--------------------------------------------------------------------
+
+run_to(Density, XX, YY, MM) ->
+    Mux = {{c4, XX, YY}, {mux, MM}, direct_link},
+    case to_name(Mux, Density) of
+        {ok, Interconnect} ->
+            case from_name(Interconnect, Density) of
+                {ok, Mux} ->
+                    ok;
+
+                {ok, Different} ->
+                    throw({Density, Mux, to, Interconnect, from, Different});
+
+                false ->
+                    throw({Density, Mux, to, Interconnect, from, missing})
+            end;
+
+        false ->
+            ok
+    end.
+
+%%====================================================================
+%% from_name
+%%====================================================================
+
+from_name({{r4, X, Y}, {interconnect, I}, Value}, Density) ->
+    case from_name(X, Y, I, Density) of
+        {x, _} ->
+            false;
+
+        {_, x} ->
+            false;
+
+        {XX, MM} ->
+            {ok, {{r4, XX, Y}, {mux, MM}, Value}}
+    end;
+from_name({{r4, X, Y}, {interconnect, I}, Key, Value}, Density) ->
+    case from_name(X, Y, I, Density) of
+        {x, _} ->
+            false;
+
+        {_, x} ->
+            false;
+
+        {XX, MM} ->
+            {ok, {{r4, XX, Y}, {mux, MM}, Key, Value}}
+    end;
+from_name(_, _) ->
+    false.
+
+%%--------------------------------------------------------------------
+
+from_name(X, Y, _, _)
+        when not is_integer(X) orelse X < 0 orelse
+             not is_integer(Y) orelse Y < 0 ->
+    {x, x};
+from_name(X, Y, M, max_v_240z) ->
+    from_max_v_240z(X, Y, M);
+from_name(X, Y, M, max_v_570z) ->
+    from_max_v_570z(X, Y, M);
+from_name(X, Y, M, max_v_1270z) ->
+    from_max_v_1270z(X, Y, M);
+from_name(X, Y, M, max_v_2210z) ->
+    from_max_v_2210z(X, Y, M);
+from_name(_, _, _, _) ->
+    {x, x}.
 
 %%====================================================================
 %% to_name
@@ -46,6 +175,808 @@ to_name(XX, YY, MM, max_v_1270z) ->
 to_name(XX, YY, MM, max_v_2210z) ->
     to_max_v_2210z(XX, YY, MM);
 to_name(_, _, _, _) ->
+    {x, x}.
+
+%%====================================================================
+%% from_max_v_240z
+%%====================================================================
+
+from_max_v_240z(X, Y, _)
+        when X > 8 orelse Y > 4 ->
+    {x, x};
+from_max_v_240z(X, Y, 0) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  1
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  2
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  3
+        { x, x, 2, 3, 4, 5, 6, 7, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 0, 2, 0, 0, 2, 0, x}, %  1
+        { x, x, 2, 0, 0, 2, 0, 0, x}, %  2
+        { x, x, 0, 0, 2, 0, 0, 2, x}, %  3
+        { x, x, 0, 2, 0, 0, 2, 0, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 1) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  1
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  2
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  3
+        { x, x, 2, 3, 4, 5, 6, 7, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 3, 0, 3, 3, 0, 3, x}, %  1
+        { x, x, 0, 3, 3, 0, 3, 3, x}, %  2
+        { x, x, 3, 3, 0, 3, 3, 0, x}, %  3
+        { x, x, 3, 0, 3, 3, 0, 3, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 2) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  1
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  2
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  3
+        { x, x, 2, 3, 4, 5, 6, 7, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 2, 3, 1, 2, 3, 1, x}, %  1
+        { x, x, 3, 1, 2, 3, 1, 2, x}, %  2
+        { x, x, 1, 2, 3, 1, 2, 3, x}, %  3
+        { x, x, 2, 3, 1, 2, 3, 1, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 3) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 1, 2, 3, 4, 5, 6, 7, x}, %  1
+        { x, 1, 2, 3, 4, 5, 6, 7, x}, %  2
+        { x, 1, 2, 3, 4, 5, 6, 7, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 0, 1, 1, 2, 1, 1, 2, x}, %  1
+        { x, 0, 1, 2, 1, 1, 2, 1, x}, %  2
+        { x, 0, 2, 1, 1, 2, 1, 1, x}, %  3
+        { x, 0, 1, 1, 2, 1, 1, 2, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 4) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  1
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  2
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  3
+        { x, x, 2, 3, 4, 5, 6, 7, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 4, 6, 4, 4, 6, 4, x}, %  1
+        { x, x, 6, 4, 4, 6, 4, 4, x}, %  2
+        { x, x, 4, 4, 6, 4, 4, 6, x}, %  3
+        { x, x, 4, 6, 4, 4, 6, 4, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 5) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  1
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  2
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  3
+        { x, x, 2, 3, 4, 5, 6, 7, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 7, 4, 7, 7, 4, 7, x}, %  1
+        { x, x, 4, 7, 7, 4, 7, 7, x}, %  2
+        { x, x, 7, 7, 4, 7, 7, 4, x}, %  3
+        { x, x, 7, 4, 7, 7, 4, 7, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 6) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  1
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  2
+        { x, x, 2, 3, 4, 5, 6, 7, x}, %  3
+        { x, x, 2, 3, 4, 5, 6, 7, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 6, 7, 5, 6, 7, 5, x}, %  1
+        { x, x, 7, 5, 6, 7, 5, 6, x}, %  2
+        { x, x, 5, 6, 7, 5, 6, 7, x}, %  3
+        { x, x, 6, 7, 5, 6, 7, 5, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 7) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 1, 2, 3, 4, 5, 6, 7, x}, %  1
+        { x, 1, 2, 3, 4, 5, 6, 7, x}, %  2
+        { x, 1, 2, 3, 4, 5, 6, 7, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 1, 5, 5, 6, 5, 5, 6, x}, %  1
+        { x, 1, 5, 6, 5, 5, 6, 5, x}, %  2
+        { x, 1, 6, 5, 5, 6, 5, 5, x}, %  3
+        { x, 1, 5, 5, 6, 5, 5, 6, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 8) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 5, 6, 7, x, x, 8, x}, %  1
+        { x, x, 5, 6, 7, x, x, 8, x}, %  2
+        { x, x, 5, 6, 7, x, x, 8, x}, %  3
+        { x, x, 5, 6, 7, x, x, 8, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 8,10, 8, x, x, 0, x}, %  1
+        { x, x,10, 8, 8, x, x, 0, x}, %  2
+        { x, x, 8, 8,10, x, x, 0, x}, %  3
+        { x, x, 8,10, 8, x, x, 0, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 9) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 5, 6, 7, x, x, 8, x}, %  1
+        { x, x, 5, 6, 7, x, x, 8, x}, %  2
+        { x, x, 5, 6, 7, x, x, 8, x}, %  3
+        { x, x, 5, 6, 7, x, x, 8, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x,11, 8,11, x, x, 1, x}, %  1
+        { x, x, 8,11,11, x, x, 1, x}, %  2
+        { x, x,11,11, 8, x, x, 1, x}, %  3
+        { x, x,11, 8,11, x, x, 1, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 10) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 5, 6, 7, x, x, 8, x}, %  1
+        { x, x, 5, 6, 7, x, x, 8, x}, %  2
+        { x, x, 5, 6, 7, x, x, 8, x}, %  3
+        { x, x, 5, 6, 7, x, x, 8, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x,10,11, 9, x, x, 2, x}, %  1
+        { x, x,11, 9,10, x, x, 2, x}, %  2
+        { x, x, 9,10,11, x, x, 2, x}, %  3
+        { x, x,10,11, 9, x, x, 2, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 11) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 1, 5, 6, 7, x, x, 8, x}, %  1
+        { x, 1, 5, 6, 7, x, x, 8, x}, %  2
+        { x, 1, 5, 6, 7, x, x, 8, x}, %  3
+        { x, 1, 5, 6, 7, x, x, 8, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 2, 9, 9,10, x, x, 3, x}, %  1
+        { x, 2, 9,10, 9, x, x, 3, x}, %  2
+        { x, 2,10, 9, 9, x, x, 3, x}, %  3
+        { x, 2, 9, 9,10, x, x, 3, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 12) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 5, 6, 7, x, x, 8, x}, %  1
+        { x, x, 5, 6, 7, x, x, 8, x}, %  2
+        { x, x, 5, 6, 7, x, x, 8, x}, %  3
+        { x, x, 5, 6, 7, x, x, 8, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x,12,14,12, x, x, 4, x}, %  1
+        { x, x,14,12,12, x, x, 4, x}, %  2
+        { x, x,12,12,14, x, x, 4, x}, %  3
+        { x, x,12,14,12, x, x, 4, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 13) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 5, 6, 7, x, x, 8, x}, %  1
+        { x, x, 5, 6, 7, x, x, 8, x}, %  2
+        { x, x, 5, 6, 7, x, x, 8, x}, %  3
+        { x, x, 5, 6, 7, x, x, 8, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x,15,12,15, x, x, 5, x}, %  1
+        { x, x,12,15,15, x, x, 5, x}, %  2
+        { x, x,15,15,12, x, x, 5, x}, %  3
+        { x, x,15,12,15, x, x, 5, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 14) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, 5, 6, 7, x, x, 8, x}, %  1
+        { x, x, 5, 6, 7, x, x, 8, x}, %  2
+        { x, x, 5, 6, 7, x, x, 8, x}, %  3
+        { x, x, 5, 6, 7, x, x, 8, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, x,14,15,13, x, x, 6, x}, %  1
+        { x, x,15,13,14, x, x, 6, x}, %  2
+        { x, x,13,14,15, x, x, 6, x}, %  3
+        { x, x,14,15,13, x, x, 6, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 15) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 1, 5, 6, 7, x, x, 8, x}, %  1
+        { x, 1, 5, 6, 7, x, x, 8, x}, %  2
+        { x, 1, 5, 6, 7, x, x, 8, x}, %  3
+        { x, 1, 5, 6, 7, x, x, 8, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 3,13,13,14, x, x, 7, x}, %  1
+        { x, 3,13,14,13, x, x, 7, x}, %  2
+        { x, 3,14,13,13, x, x, 7, x}, %  3
+        { x, 3,13,13,14, x, x, 7, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 19) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 1, x, x, x, x, x, x, x}, %  1
+        { x, 1, x, x, x, x, x, x, x}, %  2
+        { x, 1, x, x, x, x, x, x, x}, %  3
+        { x, 1, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 4, x, x, x, x, x, x, x}, %  1
+        { x, 4, x, x, x, x, x, x, x}, %  2
+        { x, 4, x, x, x, x, x, x, x}, %  3
+        { x, 4, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 23) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 1, x, x, x, x, x, x, x}, %  1
+        { x, 1, x, x, x, x, x, x, x}, %  2
+        { x, 1, x, x, x, x, x, x, x}, %  3
+        { x, 1, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 5, x, x, x, x, x, x, x}, %  1
+        { x, 5, x, x, x, x, x, x, x}, %  2
+        { x, 5, x, x, x, x, x, x, x}, %  3
+        { x, 5, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 27) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 1, x, x, x, x, x, x, x}, %  1
+        { x, 1, x, x, x, x, x, x, x}, %  2
+        { x, 1, x, x, x, x, x, x, x}, %  3
+        { x, 1, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 6, x, x, x, x, x, x, x}, %  1
+        { x, 6, x, x, x, x, x, x, x}, %  2
+        { x, 6, x, x, x, x, x, x, x}, %  3
+        { x, 6, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 31) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 1, x, x, x, x, x, x, x}, %  1
+        { x, 1, x, x, x, x, x, x, x}, %  2
+        { x, 1, x, x, x, x, x, x, x}, %  3
+        { x, 1, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 7, x, x, x, x, x, x, x}, %  1
+        { x, 7, x, x, x, x, x, x, x}, %  2
+        { x, 7, x, x, x, x, x, x, x}, %  3
+        { x, 7, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 32) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 3, x, x, x, x, x, x, x}, %  1
+        { x, 3, x, x, x, x, x, x, x}, %  2
+        { x, 3, x, x, x, x, x, x, x}, %  3
+        { x, 3, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,10, x, x, x, x, x, x, x}, %  1
+        { x, 8, x, x, x, x, x, x, x}, %  2
+        { x, 8, x, x, x, x, x, x, x}, %  3
+        { x,10, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 33) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 2, x, x, x, x, x, x, x}, %  1
+        { x, 2, x, x, x, x, x, x, x}, %  2
+        { x, 2, x, x, x, x, x, x, x}, %  3
+        { x, 2, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 8, x, x, x, x, x, x, x}, %  1
+        { x,10, x, x, x, x, x, x, x}, %  2
+        { x, 8, x, x, x, x, x, x, x}, %  3
+        { x, 8, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 35) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 4, x, x, x, x, x, x, x}, %  1
+        { x, 4, x, x, x, x, x, x, x}, %  2
+        { x, 4, x, x, x, x, x, x, x}, %  3
+        { x, 4, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 8, x, x, x, x, x, x, x}, %  1
+        { x, 8, x, x, x, x, x, x, x}, %  2
+        { x,10, x, x, x, x, x, x, x}, %  3
+        { x, 8, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 36) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 3, x, x, x, x, x, x, x}, %  1
+        { x, 3, x, x, x, x, x, x, x}, %  2
+        { x, 3, x, x, x, x, x, x, x}, %  3
+        { x, 3, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 8, x, x, x, x, x, x, x}, %  1
+        { x,11, x, x, x, x, x, x, x}, %  2
+        { x,11, x, x, x, x, x, x, x}, %  3
+        { x, 8, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 37) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 2, x, x, x, x, x, x, x}, %  1
+        { x, 2, x, x, x, x, x, x, x}, %  2
+        { x, 2, x, x, x, x, x, x, x}, %  3
+        { x, 2, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,11, x, x, x, x, x, x, x}, %  1
+        { x, 8, x, x, x, x, x, x, x}, %  2
+        { x,11, x, x, x, x, x, x, x}, %  3
+        { x,11, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 39) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 4, x, x, x, x, x, x, x}, %  1
+        { x, 4, x, x, x, x, x, x, x}, %  2
+        { x, 4, x, x, x, x, x, x, x}, %  3
+        { x, 4, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,11, x, x, x, x, x, x, x}, %  1
+        { x,11, x, x, x, x, x, x, x}, %  2
+        { x, 8, x, x, x, x, x, x, x}, %  3
+        { x,11, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 40) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 3, x, x, x, x, x, x, x}, %  1
+        { x, 3, x, x, x, x, x, x, x}, %  2
+        { x, 3, x, x, x, x, x, x, x}, %  3
+        { x, 3, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,11, x, x, x, x, x, x, x}, %  1
+        { x, 9, x, x, x, x, x, x, x}, %  2
+        { x,10, x, x, x, x, x, x, x}, %  3
+        { x,11, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 41) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 2, x, x, x, x, x, x, x}, %  1
+        { x, 2, x, x, x, x, x, x, x}, %  2
+        { x, 2, x, x, x, x, x, x, x}, %  3
+        { x, 2, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,10, x, x, x, x, x, x, x}, %  1
+        { x,11, x, x, x, x, x, x, x}, %  2
+        { x, 9, x, x, x, x, x, x, x}, %  3
+        { x,10, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 43) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 4, x, x, x, x, x, x, x}, %  1
+        { x, 4, x, x, x, x, x, x, x}, %  2
+        { x, 4, x, x, x, x, x, x, x}, %  3
+        { x, 4, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 9, x, x, x, x, x, x, x}, %  1
+        { x,10, x, x, x, x, x, x, x}, %  2
+        { x,11, x, x, x, x, x, x, x}, %  3
+        { x, 9, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 44) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 3, x, x, x, x, x, x, x}, %  1
+        { x, 3, x, x, x, x, x, x, x}, %  2
+        { x, 3, x, x, x, x, x, x, x}, %  3
+        { x, 3, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 9, x, x, x, x, x, x, x}, %  1
+        { x,10, x, x, x, x, x, x, x}, %  2
+        { x, 9, x, x, x, x, x, x, x}, %  3
+        { x, 9, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 45) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 2, x, x, x, x, x, x, x}, %  1
+        { x, 2, x, x, x, x, x, x, x}, %  2
+        { x, 2, x, x, x, x, x, x, x}, %  3
+        { x, 2, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 9, x, x, x, x, x, x, x}, %  1
+        { x, 9, x, x, x, x, x, x, x}, %  2
+        { x,10, x, x, x, x, x, x, x}, %  3
+        { x, 9, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 47) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 4, x, x, x, x, x, x, x}, %  1
+        { x, 4, x, x, x, x, x, x, x}, %  2
+        { x, 4, x, x, x, x, x, x, x}, %  3
+        { x, 4, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,10, x, x, x, x, x, x, x}, %  1
+        { x, 9, x, x, x, x, x, x, x}, %  2
+        { x, 9, x, x, x, x, x, x, x}, %  3
+        { x,10, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 48) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 3, x, x, x, x, x, x, x}, %  1
+        { x, 3, x, x, x, x, x, x, x}, %  2
+        { x, 3, x, x, x, x, x, x, x}, %  3
+        { x, 3, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,14, x, x, x, x, x, x, x}, %  1
+        { x,12, x, x, x, x, x, x, x}, %  2
+        { x,12, x, x, x, x, x, x, x}, %  3
+        { x,14, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 49) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 2, x, x, x, x, x, x, x}, %  1
+        { x, 2, x, x, x, x, x, x, x}, %  2
+        { x, 2, x, x, x, x, x, x, x}, %  3
+        { x, 2, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,12, x, x, x, x, x, x, x}, %  1
+        { x,14, x, x, x, x, x, x, x}, %  2
+        { x,12, x, x, x, x, x, x, x}, %  3
+        { x,12, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 51) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 4, x, x, x, x, x, x, x}, %  1
+        { x, 4, x, x, x, x, x, x, x}, %  2
+        { x, 4, x, x, x, x, x, x, x}, %  3
+        { x, 4, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,12, x, x, x, x, x, x, x}, %  1
+        { x,12, x, x, x, x, x, x, x}, %  2
+        { x,14, x, x, x, x, x, x, x}, %  3
+        { x,12, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 52) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 3, x, x, x, x, x, x, x}, %  1
+        { x, 3, x, x, x, x, x, x, x}, %  2
+        { x, 3, x, x, x, x, x, x, x}, %  3
+        { x, 3, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,12, x, x, x, x, x, x, x}, %  1
+        { x,15, x, x, x, x, x, x, x}, %  2
+        { x,15, x, x, x, x, x, x, x}, %  3
+        { x,12, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 53) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 2, x, x, x, x, x, x, x}, %  1
+        { x, 2, x, x, x, x, x, x, x}, %  2
+        { x, 2, x, x, x, x, x, x, x}, %  3
+        { x, 2, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,15, x, x, x, x, x, x, x}, %  1
+        { x,12, x, x, x, x, x, x, x}, %  2
+        { x,15, x, x, x, x, x, x, x}, %  3
+        { x,15, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 55) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 4, x, x, x, x, x, x, x}, %  1
+        { x, 4, x, x, x, x, x, x, x}, %  2
+        { x, 4, x, x, x, x, x, x, x}, %  3
+        { x, 4, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,15, x, x, x, x, x, x, x}, %  1
+        { x,15, x, x, x, x, x, x, x}, %  2
+        { x,12, x, x, x, x, x, x, x}, %  3
+        { x,15, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 56) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 3, x, x, x, x, x, x, x}, %  1
+        { x, 3, x, x, x, x, x, x, x}, %  2
+        { x, 3, x, x, x, x, x, x, x}, %  3
+        { x, 3, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,15, x, x, x, x, x, x, x}, %  1
+        { x,13, x, x, x, x, x, x, x}, %  2
+        { x,14, x, x, x, x, x, x, x}, %  3
+        { x,15, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 57) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 2, x, x, x, x, x, x, x}, %  1
+        { x, 2, x, x, x, x, x, x, x}, %  2
+        { x, 2, x, x, x, x, x, x, x}, %  3
+        { x, 2, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,14, x, x, x, x, x, x, x}, %  1
+        { x,15, x, x, x, x, x, x, x}, %  2
+        { x,13, x, x, x, x, x, x, x}, %  3
+        { x,14, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 59) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 4, x, x, x, x, x, x, x}, %  1
+        { x, 4, x, x, x, x, x, x, x}, %  2
+        { x, 4, x, x, x, x, x, x, x}, %  3
+        { x, 4, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,13, x, x, x, x, x, x, x}, %  1
+        { x,14, x, x, x, x, x, x, x}, %  2
+        { x,15, x, x, x, x, x, x, x}, %  3
+        { x,13, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 60) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 3, x, x, x, x, x, x, x}, %  1
+        { x, 3, x, x, x, x, x, x, x}, %  2
+        { x, 3, x, x, x, x, x, x, x}, %  3
+        { x, 3, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,13, x, x, x, x, x, x, x}, %  1
+        { x,14, x, x, x, x, x, x, x}, %  2
+        { x,13, x, x, x, x, x, x, x}, %  3
+        { x,13, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 61) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 2, x, x, x, x, x, x, x}, %  1
+        { x, 2, x, x, x, x, x, x, x}, %  2
+        { x, 2, x, x, x, x, x, x, x}, %  3
+        { x, 2, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,13, x, x, x, x, x, x, x}, %  1
+        { x,13, x, x, x, x, x, x, x}, %  2
+        { x,14, x, x, x, x, x, x, x}, %  3
+        { x,13, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(X, Y, 63) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x, 4, x, x, x, x, x, x, x}, %  1
+        { x, 4, x, x, x, x, x, x, x}, %  2
+        { x, 4, x, x, x, x, x, x, x}, %  3
+        { x, 4, x, x, x, x, x, x, x}  %  4
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8
+        { x, x, x, x, x, x, x, x, x}, %  0
+        { x,14, x, x, x, x, x, x, x}, %  1
+        { x,13, x, x, x, x, x, x, x}, %  2
+        { x,13, x, x, x, x, x, x, x}, %  3
+        { x,14, x, x, x, x, x, x, x}  %  4
+    })),
+    {XX, MM};
+from_max_v_240z(_, _, _) ->
     {x, x}.
 
 %%====================================================================
@@ -344,6 +1275,1336 @@ to_max_v_240z(XX, YY, 15) ->
     })),
     {X, I};
 to_max_v_240z(_, _, _) ->
+    {x, x}.
+
+%%====================================================================
+%% from_max_v_570z
+%%====================================================================
+
+from_max_v_570z(X, Y, _)
+        when X > 13 orelse Y > 7 ->
+    {x, x};
+from_max_v_570z(X, Y, 0) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  3
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  4
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  5
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  6
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, 0, 2, 0, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, 2, 0, 0, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, 0, 0, 2, x}, %  3
+        { 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, x}, %  4
+        { 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, x}, %  5
+        { 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, x}, %  6
+        { 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 1) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, 3, 0, 3, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, 0, 3, 3, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, 3, 3, 0, x}, %  3
+        { x, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, x}, %  4
+        { x, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, x}, %  5
+        { x, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, x}, %  6
+        { x, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 2) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, 2, 3, 1, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, 3, 1, 2, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, 1, 2, 3, x}, %  3
+        { x, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, x}, %  4
+        { x, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, x}, %  5
+        { x, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, x}, %  6
+        { x, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 3) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, 1, 1, 2, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, 1, 2, 1, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, 2, 1, 1, x}, %  3
+        { x, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, x}, %  4
+        { x, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, x}, %  5
+        { x, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, x}, %  6
+        { x, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 4) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  3
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  4
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  5
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  6
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, 4, 6, 4, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, 6, 4, 4, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, 4, 4, 6, x}, %  3
+        { 1, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, x}, %  4
+        { 1, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, x}, %  5
+        { 1, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, x}, %  6
+        { 1, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 5) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, 7, 4, 7, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, 4, 7, 7, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, 7, 7, 4, x}, %  3
+        { x, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, x}, %  4
+        { x, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, x}, %  5
+        { x, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, x}, %  6
+        { x, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 6) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x,10,11,12, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, 6, 7, 5, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, 7, 5, 6, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, 5, 6, 7, x}, %  3
+        { x, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, x}, %  4
+        { x, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, x}, %  5
+        { x, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, x}, %  6
+        { x, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 7) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, 9,10,11,12, x}, %  1
+        { x, x, x, x, x, x, x, x, x, 9,10,11,12, x}, %  2
+        { x, x, x, x, x, x, x, x, x, 9,10,11,12, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, 9, 5, 5, 6, x}, %  1
+        { x, x, x, x, x, x, x, x, x, 9, 5, 6, 5, x}, %  2
+        { x, x, x, x, x, x, x, x, x, 9, 6, 5, 5, x}, %  3
+        { x, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, x}, %  4
+        { x, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, x}, %  5
+        { x, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, x}, %  6
+        { x, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 8) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  3
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  4
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  5
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  6
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 0, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 0, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 0, x}, %  3
+        { 2, 8,10, 8, 8,10, 8, 8,10, 8, x, x, 0, x}, %  4
+        { 2,10, 8, 8,10, 8, 8,10, 8, 8, x, x, 0, x}, %  5
+        { 2, 8, 8,10, 8, 8,10, 8, 8,10, x, x, 0, x}, %  6
+        { 2, 8,10, 8, 8,10, 8, 8,10, 8, x, x, 0, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 9) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 1, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 1, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 1, x}, %  3
+        { x,11, 8,11,11, 8,11,11, 8,11, x, x, 1, x}, %  4
+        { x, 8,11,11, 8,11,11, 8,11,11, x, x, 1, x}, %  5
+        { x,11,11, 8,11,11, 8,11,11, 8, x, x, 1, x}, %  6
+        { x,11, 8,11,11, 8,11,11, 8,11, x, x, 1, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 10) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 2, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 2, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 2, x}, %  3
+        { x,10,11, 9,10,11, 9,10,11, 9, x, x, 2, x}, %  4
+        { x,11, 9,10,11, 9,10,11, 9,10, x, x, 2, x}, %  5
+        { x, 9,10,11, 9,10,11, 9,10,11, x, x, 2, x}, %  6
+        { x,10,11, 9,10,11, 9,10,11, 9, x, x, 2, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 11) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 3, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 3, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 3, x}, %  3
+        { x, 9, 9,10, 9, 9,10, 9, 9,10, x, x, 3, x}, %  4
+        { x, 9,10, 9, 9,10, 9, 9,10, 9, x, x, 3, x}, %  5
+        { x,10, 9, 9,10, 9, 9,10, 9, 9, x, x, 3, x}, %  6
+        { x, 9, 9,10, 9, 9,10, 9, 9,10, x, x, 3, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 12) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  3
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  4
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  5
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  6
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 4, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 4, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 4, x}, %  3
+        { 3,12,14,12,12,14,12,12,14,12, x, x, 4, x}, %  4
+        { 3,14,12,12,14,12,12,14,12,12, x, x, 4, x}, %  5
+        { 3,12,12,14,12,12,14,12,12,14, x, x, 4, x}, %  6
+        { 3,12,14,12,12,14,12,12,14,12, x, x, 4, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 13) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 5, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 5, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 5, x}, %  3
+        { x,15,12,15,15,12,15,15,12,15, x, x, 5, x}, %  4
+        { x,12,15,15,12,15,15,12,15,15, x, x, 5, x}, %  5
+        { x,15,15,12,15,15,12,15,15,12, x, x, 5, x}, %  6
+        { x,15,12,15,15,12,15,15,12,15, x, x, 5, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 14) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,13, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 6, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 6, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 6, x}, %  3
+        { x,14,15,13,14,15,13,14,15,13, x, x, 6, x}, %  4
+        { x,15,13,14,15,13,14,15,13,14, x, x, 6, x}, %  5
+        { x,13,14,15,13,14,15,13,14,15, x, x, 6, x}, %  6
+        { x,14,15,13,14,15,13,14,15,13, x, x, 6, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 15) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, 9, x, x,13, x}, %  1
+        { x, x, x, x, x, x, x, x, x, 9, x, x,13, x}, %  2
+        { x, x, x, x, x, x, x, x, x, 9, x, x,13, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12, x, x,13, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,11, x, x, 7, x}, %  1
+        { x, x, x, x, x, x, x, x, x,11, x, x, 7, x}, %  2
+        { x, x, x, x, x, x, x, x, x,11, x, x, 7, x}, %  3
+        { x,13,13,14,13,13,14,13,13,14, x, x, 7, x}, %  4
+        { x,13,14,13,13,14,13,13,14,13, x, x, 7, x}, %  5
+        { x,14,13,13,14,13,13,14,13,13, x, x, 7, x}, %  6
+        { x,13,13,14,13,13,14,13,13,14, x, x, 7, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 16) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 19) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 20) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 23) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,13, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,13, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,13, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 24) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 28) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 31) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,15, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,15, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,15, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 32) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, 8, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, 8, x, x, x, x}, %  3
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 33) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, 8, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, 8, x, x, x, x}, %  3
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 34) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 35) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, 8, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, 8, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 36) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, 8, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  3
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 37) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, 8, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  3
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 38) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 39) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, 8, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 40) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  3
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 41) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  3
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 42) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 43) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 44) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  3
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 45) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  3
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 46) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 47) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, 9, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 48) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,14, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  3
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 49) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,14, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  3
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 50) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 51) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,14, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 52) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,15, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,15, x, x, x, x}, %  3
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 53) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,15, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,15, x, x, x, x}, %  3
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 54) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 55) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,15, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,15, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 56) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,15, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,13, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,14, x, x, x, x}, %  3
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 57) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,14, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,15, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,13, x, x, x, x}, %  3
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 58) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 59) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,13, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,14, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,15, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 60) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,11, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,13, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,14, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,13, x, x, x, x}, %  3
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 61) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,10, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,13, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,13, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,14, x, x, x, x}, %  3
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 62) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(X, Y, 63) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,12, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x,14, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x,13, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x,13, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x}  %  7
+    })),
+    {XX, MM};
+from_max_v_570z(_, _, _) ->
     {x, x}.
 
 %%====================================================================
@@ -738,6 +2999,1636 @@ to_max_v_570z(XX, YY, 15) ->
     })),
     {X, I};
 to_max_v_570z(_, _, _) ->
+    {x, x}.
+
+%%====================================================================
+%% from_max_v_1270z
+%%====================================================================
+
+from_max_v_1270z(X, Y, _)
+        when X > 17 orelse Y > 10 ->
+    {x, x};
+from_max_v_1270z(X, Y, 0) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  3
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  4
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  5
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  6
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  7
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  8
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  9
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 2, 0, 0, 2, 0, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 0, 0, 2, 0, 0, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 0, 2, 0, 0, 2, x}, %  3
+        { 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, x}, %  4
+        { 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, x}, %  5
+        { 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, x}, %  6
+        { 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, x}, %  7
+        { 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, x}, %  8
+        { 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, x}, %  9
+        { 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 1) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,11,12,13,14,15,16, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,11,12,13,14,15,16, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,11,12,13,14,15,16, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  7
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  8
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  9
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, 8, 0, 3, 3, 0, 3, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, 8, 3, 3, 0, 3, 3, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, 8, 3, 0, 3, 3, 0, x}, %  3
+        { x, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, x}, %  4
+        { x, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, x}, %  5
+        { x, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, x}, %  6
+        { x, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, x}, %  7
+        { x, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, x}, %  8
+        { x, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, x}, %  9
+        { x, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 2) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  7
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  8
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  9
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 3, 1, 2, 3, 1, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 1, 2, 3, 1, 2, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 2, 3, 1, 2, 3, x}, %  3
+        { x, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, x}, %  4
+        { x, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, x}, %  5
+        { x, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, x}, %  6
+        { x, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, x}, %  7
+        { x, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, x}, %  8
+        { x, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, x}, %  9
+        { x, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 3) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  7
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  8
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  9
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 1, 2, 1, 1, 2, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 2, 1, 1, 2, 1, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 1, 1, 2, 1, 1, x}, %  3
+        { x, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, x}, %  4
+        { x, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, x}, %  5
+        { x, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, x}, %  6
+        { x, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, x}, %  7
+        { x, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, x}, %  8
+        { x, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, x}, %  9
+        { x, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 4) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  3
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  4
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  5
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  6
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  7
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  8
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  9
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 6, 4, 4, 6, 4, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 4, 4, 6, 4, 4, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 4, 6, 4, 4, 6, x}, %  3
+        { 1, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, x}, %  4
+        { 1, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, x}, %  5
+        { 1, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, x}, %  6
+        { 1, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, x}, %  7
+        { 1, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, x}, %  8
+        { 1, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, x}, %  9
+        { 1, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 5) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,11,12,13,14,15,16, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,11,12,13,14,15,16, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,11,12,13,14,15,16, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  7
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  8
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  9
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, 9, 4, 7, 7, 4, 7, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, 9, 7, 7, 4, 7, 7, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, 9, 7, 4, 7, 7, 4, x}, %  3
+        { x, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, x}, %  4
+        { x, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, x}, %  5
+        { x, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, x}, %  6
+        { x, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, x}, %  7
+        { x, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, x}, %  8
+        { x, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, x}, %  9
+        { x, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 6) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  7
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  8
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  9
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 7, 5, 6, 7, 5, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 5, 6, 7, 5, 6, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 6, 7, 5, 6, 7, x}, %  3
+        { x, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, x}, %  4
+        { x, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, x}, %  5
+        { x, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, x}, %  6
+        { x, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, x}, %  7
+        { x, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, x}, %  8
+        { x, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, x}, %  9
+        { x, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 7) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,13,14,15,16, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  7
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  8
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}, %  9
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 5, 6, 5, 5, 6, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 6, 5, 5, 6, 5, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 5, 5, 6, 5, 5, x}, %  3
+        { x, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, x}, %  4
+        { x, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, x}, %  5
+        { x, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, x}, %  6
+        { x, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, x}, %  7
+        { x, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, x}, %  8
+        { x, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, x}, %  9
+        { x, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 8) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  3
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  4
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  5
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  6
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  7
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  8
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  9
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,10, 8, x, x, 0, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 8, 8, x, x, 0, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 8,10, x, x, 0, x}, %  3
+        { 2, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, x, x, 0, x}, %  4
+        { 2, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8, x, x, 0, x}, %  5
+        { 2,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, x, x, 0, x}, %  6
+        { 2, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, x, x, 0, x}, %  7
+        { 2, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8, x, x, 0, x}, %  8
+        { 2,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, x, x, 0, x}, %  9
+        { 2, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, x, x, 0, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 9) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  7
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  8
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  9
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 8,11, x, x, 1, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,11,11, x, x, 1, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,11, 8, x, x, 1, x}, %  3
+        { x,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11, x, x, 1, x}, %  4
+        { x,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, x, x, 1, x}, %  5
+        { x, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8, x, x, 1, x}, %  6
+        { x,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11, x, x, 1, x}, %  7
+        { x,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, x, x, 1, x}, %  8
+        { x, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8, x, x, 1, x}, %  9
+        { x,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11, x, x, 1, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 10) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  7
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  8
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  9
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,11, 9, x, x, 2, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, 9,10, x, x, 2, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,10,11, x, x, 2, x}, %  3
+        { x, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9, x, x, 2, x}, %  4
+        { x,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10, x, x, 2, x}, %  5
+        { x,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, x, x, 2, x}, %  6
+        { x, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9, x, x, 2, x}, %  7
+        { x,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10, x, x, 2, x}, %  8
+        { x,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, x, x, 2, x}, %  9
+        { x, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9, x, x, 2, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 11) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  7
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  8
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  9
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, 9,10, x, x, 3, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,10, 9, x, x, 3, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, 9, 9, x, x, 3, x}, %  3
+        { x,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, x, x, 3, x}, %  4
+        { x, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, x, x, 3, x}, %  5
+        { x, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9, x, x, 3, x}, %  6
+        { x,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, x, x, 3, x}, %  7
+        { x, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, x, x, 3, x}, %  8
+        { x, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9, x, x, 3, x}, %  9
+        { x,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, x, x, 3, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 12) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  3
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  4
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  5
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  6
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  7
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  8
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  9
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,14,12, x, x, 4, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,12, x, x, 4, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,12,14, x, x, 4, x}, %  3
+        { 3,12,12,14,12,12,14,12,12,14,12,12,14,12, x, x, 4, x}, %  4
+        { 3,12,14,12,12,14,12,12,14,12,12,14,12,12, x, x, 4, x}, %  5
+        { 3,14,12,12,14,12,12,14,12,12,14,12,12,14, x, x, 4, x}, %  6
+        { 3,12,12,14,12,12,14,12,12,14,12,12,14,12, x, x, 4, x}, %  7
+        { 3,12,14,12,12,14,12,12,14,12,12,14,12,12, x, x, 4, x}, %  8
+        { 3,14,12,12,14,12,12,14,12,12,14,12,12,14, x, x, 4, x}, %  9
+        { 3,12,12,14,12,12,14,12,12,14,12,12,14,12, x, x, 4, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 13) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,11,15,16, x, x,17, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,11,15,16, x, x,17, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,11,15,16, x, x,17, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  7
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  8
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  9
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,11,12,15, x, x, 5, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,11,15,15, x, x, 5, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,11,15,12, x, x, 5, x}, %  3
+        { x,15,15,12,15,15,12,15,15,12,15,15,12,15, x, x, 5, x}, %  4
+        { x,15,12,15,15,12,15,15,12,15,15,12,15,15, x, x, 5, x}, %  5
+        { x,12,15,15,12,15,15,12,15,15,12,15,15,12, x, x, 5, x}, %  6
+        { x,15,15,12,15,15,12,15,15,12,15,15,12,15, x, x, 5, x}, %  7
+        { x,15,12,15,15,12,15,15,12,15,15,12,15,15, x, x, 5, x}, %  8
+        { x,12,15,15,12,15,15,12,15,15,12,15,15,12, x, x, 5, x}, %  9
+        { x,15,15,12,15,15,12,15,15,12,15,15,12,15, x, x, 5, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 14) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  7
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  8
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  9
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,13, x, x, 6, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,13,14, x, x, 6, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,14,15, x, x, 6, x}, %  3
+        { x,13,14,15,13,14,15,13,14,15,13,14,15,13, x, x, 6, x}, %  4
+        { x,14,15,13,14,15,13,14,15,13,14,15,13,14, x, x, 6, x}, %  5
+        { x,15,13,14,15,13,14,15,13,14,15,13,14,15, x, x, 6, x}, %  6
+        { x,13,14,15,13,14,15,13,14,15,13,14,15,13, x, x, 6, x}, %  7
+        { x,14,15,13,14,15,13,14,15,13,14,15,13,14, x, x, 6, x}, %  8
+        { x,15,13,14,15,13,14,15,13,14,15,13,14,15, x, x, 6, x}, %  9
+        { x,13,14,15,13,14,15,13,14,15,13,14,15,13, x, x, 6, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 15) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,15,16, x, x,17, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  7
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  8
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}, %  9
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16, x, x,17, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x,13,14, x, x, 7, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x,14,13, x, x, 7, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x,13,13, x, x, 7, x}, %  3
+        { x,14,13,13,14,13,13,14,13,13,14,13,13,14, x, x, 7, x}, %  4
+        { x,13,13,14,13,13,14,13,13,14,13,13,14,13, x, x, 7, x}, %  5
+        { x,13,14,13,13,14,13,13,14,13,13,14,13,13, x, x, 7, x}, %  6
+        { x,14,13,13,14,13,13,14,13,13,14,13,13,14, x, x, 7, x}, %  7
+        { x,13,13,14,13,13,14,13,13,14,13,13,14,13, x, x, 7, x}, %  8
+        { x,13,14,13,13,14,13,13,14,13,13,14,13,13, x, x, 7, x}, %  9
+        { x,14,13,13,14,13,13,14,13,13,14,13,13,14, x, x, 7, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 16) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 20) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 24) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 25) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 28) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 29) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 32) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 33) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x}, %  3
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 34) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x}, %  3
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 35) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 36) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 37) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  3
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 38) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x}, %  3
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 39) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 40) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 41) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x}, %  3
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 42) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  3
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 43) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 44) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 45) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x}, %  3
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 46) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x}, %  3
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 47) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 48) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 49) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  3
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 50) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  3
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 51) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 52) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 53) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x}, %  3
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 54) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  3
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 55) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 56) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 57) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  3
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 58) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x}, %  3
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 59) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 60) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 61) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  3
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 62) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  3
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(X, Y, 63) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 10
+    })),
+    {XX, MM};
+from_max_v_1270z(_, _, _) ->
     {x, x}.
 
 %%====================================================================
@@ -1228,6 +5119,1996 @@ to_max_v_1270z(XX, YY, 15) ->
     })),
     {X, I};
 to_max_v_1270z(_, _, _) ->
+    {x, x}.
+
+%%====================================================================
+%% from_max_v_2210z
+%%====================================================================
+
+from_max_v_2210z(X, Y, _)
+        when X > 21 orelse Y > 13 ->
+    {x, x};
+from_max_v_2210z(X, Y, 0) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  3
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  4
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  5
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  6
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  7
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  8
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  9
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 10
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 11
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 12
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 0, 0, 2, 0, 0, 2, 0, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 0, 2, 0, 0, 2, 0, 0, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 2, 0, 0, 2, 0, 0, 2, x}, %  3
+        { 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, x}, %  4
+        { 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, x}, %  5
+        { 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, x}, %  6
+        { 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, x}, %  7
+        { 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, x}, %  8
+        { 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, x}, %  9
+        { 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, x}, % 10
+        { 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, x}, % 11
+        { 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, x}, % 12
+        { 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 1) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  7
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  8
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  9
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 10
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 11
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 12
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 3, 3, 0, 3, 3, 0, 3, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 3, 0, 3, 3, 0, 3, 3, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 0, 3, 3, 0, 3, 3, 0, x}, %  3
+        { x, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, x}, %  4
+        { x, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, x}, %  5
+        { x, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, x}, %  6
+        { x, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, x}, %  7
+        { x, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, x}, %  8
+        { x, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, x}, %  9
+        { x, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, x}, % 10
+        { x, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, x}, % 11
+        { x, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, x}, % 12
+        { x, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, 3, 0, 3, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 2) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  7
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  8
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  9
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 10
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 11
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 12
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 1, 2, 3, 1, 2, 3, 1, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 2, 3, 1, 2, 3, 1, 2, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 3, 1, 2, 3, 1, 2, 3, x}, %  3
+        { x, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, x}, %  4
+        { x, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, x}, %  5
+        { x, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, x}, %  6
+        { x, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, x}, %  7
+        { x, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, x}, %  8
+        { x, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, x}, %  9
+        { x, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, x}, % 10
+        { x, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, x}, % 11
+        { x, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, x}, % 12
+        { x, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 3) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  7
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  8
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  9
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 10
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 11
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 12
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 2, 1, 1, 2, 1, 1, 2, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 1, 1, 2, 1, 1, 2, 1, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 1, 2, 1, 1, 2, 1, 1, x}, %  3
+        { x, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, x}, %  4
+        { x, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, x}, %  5
+        { x, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, x}, %  6
+        { x, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, x}, %  7
+        { x, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, x}, %  8
+        { x, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, x}, %  9
+        { x, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, x}, % 10
+        { x, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, x}, % 11
+        { x, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, x}, % 12
+        { x, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 4) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  3
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  4
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  5
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  6
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  7
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  8
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  9
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 10
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 11
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 12
+        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 4, 4, 6, 4, 4, 6, 4, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 4, 6, 4, 4, 6, 4, 4, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 6, 4, 4, 6, 4, 4, 6, x}, %  3
+        { 1, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, x}, %  4
+        { 1, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, x}, %  5
+        { 1, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, x}, %  6
+        { 1, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, x}, %  7
+        { 1, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, x}, %  8
+        { 1, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, x}, %  9
+        { 1, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, x}, % 10
+        { 1, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, x}, % 11
+        { 1, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, x}, % 12
+        { 1, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, 4, 6, 4, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 5) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  7
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  8
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  9
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 10
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 11
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 12
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 7, 7, 4, 7, 7, 4, 7, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 7, 4, 7, 7, 4, 7, 7, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 4, 7, 7, 4, 7, 7, 4, x}, %  3
+        { x, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, x}, %  4
+        { x, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, x}, %  5
+        { x, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, x}, %  6
+        { x, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, x}, %  7
+        { x, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, x}, %  8
+        { x, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, x}, %  9
+        { x, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, x}, % 10
+        { x, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, x}, % 11
+        { x, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, x}, % 12
+        { x, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, 7, 4, 7, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 6) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,16,17,18,19,20, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  7
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  8
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  9
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 10
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 11
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 12
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 5, 6, 7, 5, 6, 7, 5, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 6, 7, 5, 6, 7, 5, 6, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 7, 5, 6, 7, 5, 6, 7, x}, %  3
+        { x, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, x}, %  4
+        { x, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, x}, %  5
+        { x, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, x}, %  6
+        { x, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, x}, %  7
+        { x, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, x}, %  8
+        { x, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, x}, %  9
+        { x, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, x}, % 10
+        { x, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, x}, % 11
+        { x, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, x}, % 12
+        { x, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 7) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13,14,15,16,17,18,19,20, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13,14,15,16,17,18,19,20, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13,14,15,16,17,18,19,20, x}, %  3
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  4
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  5
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  6
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  7
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  8
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, %  9
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 10
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 11
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}, % 12
+        { x, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 9, 6, 5, 5, 6, 5, 5, 6, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 9, 5, 5, 6, 5, 5, 6, 5, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 9, 5, 6, 5, 5, 6, 5, 5, x}, %  3
+        { x, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, x}, %  4
+        { x, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, x}, %  5
+        { x, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, x}, %  6
+        { x, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, x}, %  7
+        { x, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, x}, %  8
+        { x, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, x}, %  9
+        { x, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, x}, % 10
+        { x, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, x}, % 11
+        { x, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, x}, % 12
+        { x, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, 5, 5, 6, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 8) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  3
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  4
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  5
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  6
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  7
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  8
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  9
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 10
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 11
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 12
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 8, 8,10, 8, x, x, 0, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 8,10, 8, 8, x, x, 0, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,10, 8, 8,10, x, x, 0, x}, %  3
+        { 2,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, x, x, 0, x}, %  4
+        { 2, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8, x, x, 0, x}, %  5
+        { 2, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, x, x, 0, x}, %  6
+        { 2,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, x, x, 0, x}, %  7
+        { 2, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8, x, x, 0, x}, %  8
+        { 2, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, x, x, 0, x}, %  9
+        { 2,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, x, x, 0, x}, % 10
+        { 2, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8, x, x, 0, x}, % 11
+        { 2, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, x, x, 0, x}, % 12
+        { 2,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, 8,10, 8, x, x, 0, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 9) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  7
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  8
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  9
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 10
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 11
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 12
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,11,11, 8,11, x, x, 1, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,11, 8,11,11, x, x, 1, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 8,11,11, 8, x, x, 1, x}, %  3
+        { x, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11, x, x, 1, x}, %  4
+        { x,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, x, x, 1, x}, %  5
+        { x,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8, x, x, 1, x}, %  6
+        { x, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11, x, x, 1, x}, %  7
+        { x,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, x, x, 1, x}, %  8
+        { x,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8, x, x, 1, x}, %  9
+        { x, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11, x, x, 1, x}, % 10
+        { x,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, x, x, 1, x}, % 11
+        { x,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8, x, x, 1, x}, % 12
+        { x, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11,11, 8,11, x, x, 1, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 10) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  7
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  8
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  9
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 10
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 11
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 12
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 9,10,11, 9, x, x, 2, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,10,11, 9,10, x, x, 2, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,11, 9,10,11, x, x, 2, x}, %  3
+        { x,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9, x, x, 2, x}, %  4
+        { x, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10, x, x, 2, x}, %  5
+        { x,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, x, x, 2, x}, %  6
+        { x,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9, x, x, 2, x}, %  7
+        { x, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10, x, x, 2, x}, %  8
+        { x,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, x, x, 2, x}, %  9
+        { x,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9, x, x, 2, x}, % 10
+        { x, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10, x, x, 2, x}, % 11
+        { x,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, x, x, 2, x}, % 12
+        { x,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9,10,11, 9, x, x, 2, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 11) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  7
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  8
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  9
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 10
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 11
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 12
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,10, 9, 9,10, x, x, 3, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 9, 9,10, 9, x, x, 3, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, 9,10, 9, 9, x, x, 3, x}, %  3
+        { x, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, x, x, 3, x}, %  4
+        { x,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, x, x, 3, x}, %  5
+        { x, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9, x, x, 3, x}, %  6
+        { x, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, x, x, 3, x}, %  7
+        { x,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, x, x, 3, x}, %  8
+        { x, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9, x, x, 3, x}, %  9
+        { x, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, x, x, 3, x}, % 10
+        { x,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, x, x, 3, x}, % 11
+        { x, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9, x, x, 3, x}, % 12
+        { x, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, 9, 9,10, x, x, 3, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 12) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  3
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  4
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  5
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  6
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  7
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  8
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  9
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 10
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 11
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 12
+        { 0, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,12,12,14,12, x, x, 4, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,12,14,12,12, x, x, 4, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,12,12,14, x, x, 4, x}, %  3
+        { 3,14,12,12,14,12,12,14,12,12,14,12,12,14,12,12,14,12, x, x, 4, x}, %  4
+        { 3,12,12,14,12,12,14,12,12,14,12,12,14,12,12,14,12,12, x, x, 4, x}, %  5
+        { 3,12,14,12,12,14,12,12,14,12,12,14,12,12,14,12,12,14, x, x, 4, x}, %  6
+        { 3,14,12,12,14,12,12,14,12,12,14,12,12,14,12,12,14,12, x, x, 4, x}, %  7
+        { 3,12,12,14,12,12,14,12,12,14,12,12,14,12,12,14,12,12, x, x, 4, x}, %  8
+        { 3,12,14,12,12,14,12,12,14,12,12,14,12,12,14,12,12,14, x, x, 4, x}, %  9
+        { 3,14,12,12,14,12,12,14,12,12,14,12,12,14,12,12,14,12, x, x, 4, x}, % 10
+        { 3,12,12,14,12,12,14,12,12,14,12,12,14,12,12,14,12,12, x, x, 4, x}, % 11
+        { 3,12,14,12,12,14,12,12,14,12,12,14,12,12,14,12,12,14, x, x, 4, x}, % 12
+        { 3,14,12,12,14,12,12,14,12,12,14,12,12,14,12,12,14,12, x, x, 4, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 13) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  7
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  8
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  9
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 10
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 11
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 12
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,15,15,12,15, x, x, 5, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,15,12,15,15, x, x, 5, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,12,15,15,12, x, x, 5, x}, %  3
+        { x,12,15,15,12,15,15,12,15,15,12,15,15,12,15,15,12,15, x, x, 5, x}, %  4
+        { x,15,15,12,15,15,12,15,15,12,15,15,12,15,15,12,15,15, x, x, 5, x}, %  5
+        { x,15,12,15,15,12,15,15,12,15,15,12,15,15,12,15,15,12, x, x, 5, x}, %  6
+        { x,12,15,15,12,15,15,12,15,15,12,15,15,12,15,15,12,15, x, x, 5, x}, %  7
+        { x,15,15,12,15,15,12,15,15,12,15,15,12,15,15,12,15,15, x, x, 5, x}, %  8
+        { x,15,12,15,15,12,15,15,12,15,15,12,15,15,12,15,15,12, x, x, 5, x}, %  9
+        { x,12,15,15,12,15,15,12,15,15,12,15,15,12,15,15,12,15, x, x, 5, x}, % 10
+        { x,15,15,12,15,15,12,15,15,12,15,15,12,15,15,12,15,15, x, x, 5, x}, % 11
+        { x,15,12,15,15,12,15,15,12,15,15,12,15,15,12,15,15,12, x, x, 5, x}, % 12
+        { x,12,15,15,12,15,15,12,15,15,12,15,15,12,15,15,12,15, x, x, 5, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 14) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,17,18,19,20, x, x,21, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  7
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  8
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  9
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 10
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 11
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 12
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,13,14,15,13, x, x, 6, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,14,15,13,14, x, x, 6, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x,15,13,14,15, x, x, 6, x}, %  3
+        { x,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13, x, x, 6, x}, %  4
+        { x,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14, x, x, 6, x}, %  5
+        { x,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15, x, x, 6, x}, %  6
+        { x,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13, x, x, 6, x}, %  7
+        { x,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14, x, x, 6, x}, %  8
+        { x,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15, x, x, 6, x}, %  9
+        { x,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13, x, x, 6, x}, % 10
+        { x,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14, x, x, 6, x}, % 11
+        { x,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15, x, x, 6, x}, % 12
+        { x,15,13,14,15,13,14,15,13,14,15,13,14,15,13,14,15,13, x, x, 6, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 15) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13,17,18,19,20, x, x,21, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13,17,18,19,20, x, x,21, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13,17,18,19,20, x, x,21, x}, %  3
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  4
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  5
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  6
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  7
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  8
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, %  9
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 10
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 11
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}, % 12
+        { x, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20, x, x,21, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,11,14,13,13,14, x, x, 7, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,11,13,13,14,13, x, x, 7, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,11,13,14,13,13, x, x, 7, x}, %  3
+        { x,13,14,13,13,14,13,13,14,13,13,14,13,13,14,13,13,14, x, x, 7, x}, %  4
+        { x,14,13,13,14,13,13,14,13,13,14,13,13,14,13,13,14,13, x, x, 7, x}, %  5
+        { x,13,13,14,13,13,14,13,13,14,13,13,14,13,13,14,13,13, x, x, 7, x}, %  6
+        { x,13,14,13,13,14,13,13,14,13,13,14,13,13,14,13,13,14, x, x, 7, x}, %  7
+        { x,14,13,13,14,13,13,14,13,13,14,13,13,14,13,13,14,13, x, x, 7, x}, %  8
+        { x,13,13,14,13,13,14,13,13,14,13,13,14,13,13,14,13,13, x, x, 7, x}, %  9
+        { x,13,14,13,13,14,13,13,14,13,13,14,13,13,14,13,13,14, x, x, 7, x}, % 10
+        { x,14,13,13,14,13,13,14,13,13,14,13,13,14,13,13,14,13, x, x, 7, x}, % 11
+        { x,13,13,14,13,13,14,13,13,14,13,13,14,13,13,14,13,13, x, x, 7, x}, % 12
+        { x,13,14,13,13,14,13,13,14,13,13,14,13,13,14,13,13,14, x, x, 7, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 16) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 4, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 20) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 5, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 23) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 24) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 6, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 27) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 28) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 0, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 7, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 31) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 32) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x, x, x}, %  3
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 33) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x, x, x}, %  3
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 34) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 35) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 36) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x, x, x}, %  3
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 37) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x, x, x}, %  3
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 38) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 8, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 39) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 8, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 40) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x, x, x}, %  3
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 41) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x, x, x}, %  3
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 42) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {11, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 43) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,11, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 44) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x, x, x}, %  3
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 45) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x, x, x}, %  3
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 46) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {10, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 9, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 47) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,10, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, 9, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 48) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x, x, x}, %  3
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 49) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  3
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 50) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 51) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 52) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  3
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 53) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x, x, x}, %  3
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 54) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {12, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 55) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,12, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 56) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  3
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 57) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  3
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 58) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {15, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 59) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 60) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,15, x, x, x, x, x, x, x, x}, %  3
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 3, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  3
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 61) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  3
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 2, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  3
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 62) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { 1, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  3
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        {14, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        {13, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(X, Y, 63) ->
+    XX = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,16, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    MM = element(X + 1, element(Y + 1, {
+        % 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  0
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  1
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,14, x, x, x, x, x, x, x, x}, %  2
+        { x, x, x, x, x, x, x, x, x, x, x, x, x,13, x, x, x, x, x, x, x, x}, %  3
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  4
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  5
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  6
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  7
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  8
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, %  9
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 10
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 11
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}, % 12
+        { x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x}  % 13
+    })),
+    {XX, MM};
+from_max_v_2210z(_, _, _) ->
     {x, x}.
 
 %%====================================================================
