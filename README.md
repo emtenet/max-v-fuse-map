@@ -76,8 +76,8 @@ My experiments are being run in the following
    [generate](experiments/src/r4_fuse_map_generate.erl)
    and [theory](experiments/src/r4_fuse_map_theory.erl)
  * [Device pins](experiments/src/device_pins_experiment.erl)
- * [Register types](experiments/src/register_types_experiment.erl)
- * [IO standards](experiments/src/IO standards_experiment.erl)
+ * [LC register types](experiments/src/lc_register_types_experiment.erl)
+ * [IO standards](experiments/src/io_standards_experiment.erl)
 
 ## Maps
 

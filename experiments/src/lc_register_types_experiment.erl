@@ -1,4 +1,4 @@
--module(register_types_experiment).
+-module(lc_register_types_experiment).
 
 -export([run/0]).
 
