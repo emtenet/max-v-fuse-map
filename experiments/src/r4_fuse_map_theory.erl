@@ -163,7 +163,7 @@ remove_fuse(Block = {Density, {r4, _, Y}, _}, Fuse) ->
 
 %%--------------------------------------------------------------------
 
-remove_fuse(_Block = {Density, R4, I}, _Fuse, Mux) ->
+remove_fuse(Block = {Density, R4, I}, Fuse, Mux) ->
     case r4_fuse_map:to_name(Mux, Density) of
         {ok, {R4, {interconnect, I}, _}} ->
             false;
@@ -175,7 +175,8 @@ remove_fuse(_Block = {Density, R4, I}, _Fuse, Mux) ->
             true;
 
         false ->
-            false % throw({Block, Fuse, Mux})
+            io:format("UNKNOWN ~w FUSE ~w MUX ~w~n", [Block, Fuse, Mux]),
+            false
     end.
 
 %%====================================================================
