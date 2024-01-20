@@ -16,7 +16,9 @@
     {auto_global_clock, boolean()} |
     {device_clrn, boolean()} |
     {device_oe, boolean()} |
+    {io_standard, io_standard()} |
     {not_gate_push_back, boolean()} |
+    {security_bit, boolean()} |
     {seed, pos_integer()} |
     {unused_pins, unused_pins()} |
     {user_code_as_checksum, boolean()} |
@@ -25,7 +27,6 @@
     {bus_hold, signal(), boolean()} |
     {current_strength, signal(), current_strength()} |
     {global_clock, signal(), boolean()} |
-    {io_standard, io_standard()} |
     {io_standard, signal(), io_standard()} |
     {pci_compliance, signal(), boolean()} |
     {slow_slew_rate, signal(), boolean()} |
@@ -110,24 +111,27 @@ setting({device_clrn, Value}) ->
     global(<<"ENABLE_DEVICE_WIDE_RESET">>, boolean(Value));
 setting({device_oe, Value}) ->
     global(<<"ENABLE_DEVICE_WIDE_OE">>, boolean(Value));
+setting({io_standard, Value}) ->
+    global(<<"STRATIX_DEVICE_IO_STANDARD">>, io_standard(Value));
 setting({not_gate_push_back, Value}) ->
     instance(<<"NOT_GATE_PUSH_BACK">>, <<"*">>, boolean(Value));
 setting({unused_pins, Value}) ->
     global(<<"RESERVE_ALL_UNUSED_PINS">>, unused_pins(Value));
+setting({security_bit, Value}) ->
+    global(<<"SECURITY_BIT">>, boolean(Value));
 setting({seed, Value}) ->
     global(<<"SEED">>, integer(Value));
 setting({user_code_as_checksum, Value}) ->
     global(<<"USE_CHECKSUM_AS_USERCODE">>, boolean(Value));
 setting({user_code, Value}) ->
     global(<<"STRATIX_JTAG_USER_CODE">>, Value);
+% instance
 setting({bus_hold, Signal, Value}) ->
     instance(<<"ENABLE_BUS_HOLD_CIRCUITRY">>, Signal, boolean(Value));
 setting({current_strength, Signal, Value}) ->
     instance(<<"CURRENT_STRENGTH_NEW">>, Signal, current_strength(Value));
 setting({global_clock, Signal, Value}) ->
     instance(<<"GLOBAL_SIGNAL">>, Signal, global_clock(Value));
-setting({io_standard, Value}) ->
-    global(<<"STRATIX_DEVICE_IO_STANDARD">>, io_standard(Value));
 setting({io_standard, Signal, Value}) ->
     instance(<<"IO_STANDARD">>, Signal, io_standard(Value));
 setting({pci_compliance, Signal, Value}) ->

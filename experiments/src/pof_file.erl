@@ -65,7 +65,13 @@ decode_part(17, Data, Parts) ->
 decode_part(24, Data, Parts) ->
     decode_flash(ufm, Data, Parts);
 decode_part(5, Data, Parts) ->
-    decode_skip(<<0,0>>, Data, Parts);
+    case Data of
+        <<0, 0>> ->
+            Parts#{security => off};
+
+        <<1, 0>> ->
+            Parts#{security => on}
+    end;
 decode_part(8, _Data, Parts) ->
     % checksum ?
     Parts.
@@ -85,12 +91,6 @@ decode_flash(Name, <<0,0,0,0,0,0, Size:32/little, 1,0, Data/binary>>, Parts) ->
         data => Data,
         size => Size
     }}.
-
-%%--------------------------------------------------------------------
-
-decode_skip(Expect, Data, Parts) ->
-    Expect = Data,
-    Parts.
 
 %%====================================================================
 %% fuse_count

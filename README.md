@@ -81,6 +81,7 @@ My experiments are being run in the following
  * [LC register types](experiments/src/lc_register_types_experiment.erl)
  * [IO standards](experiments/src/io_standards_experiment.erl)
  * [LUT chain](experiments/src/lc_lut_chain_experiment.erl)
+ * [Security bit](experiments/src/security_bit_experiment.erl)
 
 ## Maps
 
