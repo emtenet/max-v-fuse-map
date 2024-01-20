@@ -3,12 +3,14 @@
 -export([encode/1]).
 -export([io_standards/0]).
 -export([io_schmitt_triggers/0]).
+-export([isp_clamps/0]).
 -export([unused_pins/0]).
 
 -export_type([setting/0]).
 
 -export_type([current_strength/0]).
 -export_type([io_standard/0]).
+-export_type([isp_clamp/0]).
 -export_type([unused_pins/0]).
 
 -type setting() ::
@@ -17,6 +19,7 @@
     {device_clrn, boolean()} |
     {device_oe, boolean()} |
     {io_standard, io_standard()} |
+    {isp_clamp, isp_clamp()} |
     {not_gate_push_back, boolean()} |
     {security_bit, boolean()} |
     {seed, pos_integer()} |
@@ -60,6 +63,12 @@
     v3_3_cmos |
     v3_3_ttl |
     v3_3_schmitt_trigger.
+
+-type isp_clamp() ::
+    high |
+    low |
+    sample_and_sustain |
+    tri_state.
 
 -type unused_pins() ::
     input_tri_stated |
@@ -113,6 +122,8 @@ setting({device_oe, Value}) ->
     global(<<"ENABLE_DEVICE_WIDE_OE">>, boolean(Value));
 setting({io_standard, Value}) ->
     global(<<"STRATIX_DEVICE_IO_STANDARD">>, io_standard(Value));
+setting({isp_clamp, Value}) ->
+    global(<<"ISP_CLAMP_STATE_DEFAULT">>, isp_clamp(Value));
 setting({not_gate_push_back, Value}) ->
     instance(<<"NOT_GATE_PUSH_BACK">>, <<"*">>, boolean(Value));
 setting({unused_pins, Value}) ->
@@ -212,6 +223,14 @@ io_schmitt_triggers() ->
     [{v2_5_schmitt_trigger, v2_5},
      {v3_3_schmitt_trigger, v3_3_ttl}].
 
+%%--------------------------------------------------------------------
+
+isp_clamps() ->
+    [high,
+     low,
+     sample_and_sustain,
+     tri_state].
+
 %%====================================================================
 %% values
 %%====================================================================
@@ -271,6 +290,17 @@ io_standard(v3_3_ttl) ->
     <<"\"3.3-V LVTTL\"">>;
 io_standard(v3_3_schmitt_trigger) ->
     <<"\"3.3V SCHMITT TRIGGER INPUT\"">>.
+
+%%--------------------------------------------------------------------
+
+isp_clamp(high) ->
+    <<"HIGH">>;
+isp_clamp(low) ->
+    <<"LOW">>;
+isp_clamp(sample_and_sustain) ->
+    <<"\"SAMPLE AND SUSTAIN\"">>;
+isp_clamp(tri_state) ->
+    <<"\"TRI-STATE\"">>.
 
 %%--------------------------------------------------------------------
 
