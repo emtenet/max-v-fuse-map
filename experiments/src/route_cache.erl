@@ -564,9 +564,6 @@ fold_cached(Init, Seed, Fold, {fold_cached, KeyIndexes0, Keys}, Options) ->
         [] ->
             false;
 
-        [_] ->
-            false;
-
         [KeyIndex0 | KeyIndexes] ->
             {ok, lists:foldl(
                 fun (KeyIndex, Acc) ->
