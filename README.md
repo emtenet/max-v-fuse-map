@@ -49,6 +49,7 @@ My experiments are being run in the following
  * LAB interconnect MUX
    [playground 1](experiments/src/lab_interconnect_mux_playground.erl)
    and [playground 2](experiments/src/lab_interconnect_mux_playground2.erl)
+   and [database](experiments/src/lab_interconnect_mux_database.erl)
  * [LAB control](experiments/src/lab_control_experiment.erl)
  * LAB control MUX
    [playground](experiments/src/lab_control_mux_playground.erl)
@@ -59,6 +60,7 @@ My experiments are being run in the following
    and [theory](experiments/src/global_network_theory.erl)
  * IOB interconnect MUX
    [playground](experiments/src/iob_interconnect_mux_playground.erl)
+   and [database](experiments/src/iob_interconnect_mux_database.erl)
  * [Global internal](experiments/src/global_internal_experiment.erl)
  * Global MUX
    [playground](experiments/src/global_mux_playground.erl)
@@ -98,6 +100,15 @@ The following mux mappings are encoded:
  * [IOC enable MUX](experiments/src/ioc_enable_mux_map.erl)
  * [C4 fuse](experiments/src/c4_fuse_map.erl)
  * [R4 fuse](experiments/src/r4_fuse_map.erl)
+
+## Databases
+
+Some MUX databases have been collected:
+
+ * [LAB interconnect MUX](experiments/src/lab_interconnect_mux_database.erl)
+   `database/*.lab-interconnect`
+ * [IOB interconnect MUX](experiments/src/iob_interconnect_mux_database.erl)
+   `database/*.iob-interconnect`
 
 ## Device Fuses
 
