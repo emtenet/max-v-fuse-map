@@ -85,6 +85,7 @@ My experiments are being run in the following
  * [LUT chain](experiments/src/lc_lut_chain_experiment.erl)
  * [Security bit](experiments/src/security_bit_experiment.erl)
  * [ISP clamp](experiments/src/isp_clamp_experiment.erl)
+ * [6502](experiments/src/sample_6502_experiment.erl)
 
 ## Maps
 
