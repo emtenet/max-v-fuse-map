@@ -33,7 +33,7 @@
     {ok, #{job_ref() => result()}} |
     false.
 
--define(SUBMIT_TIMEOUT, 10000). % milliseconds
+-define(SUBMIT_TIMEOUT, 20000). % milliseconds
 
 %%====================================================================
 %% submit
@@ -182,7 +182,7 @@ submit(Source, State0) ->
 
 submit_to_quartus(Source) ->
     experiment_compile:connect(),
-    gen_server:call({global, quartus}, {submit, Source, self()}).
+    gen_server:call({global, quartus}, {submit, Source, self()}, 20000).
 
 %%--------------------------------------------------------------------
 
