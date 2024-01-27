@@ -39,7 +39,7 @@ run_at(Density, X, Y) ->
     [
         run_to(Density, X, Y, M)
         ||
-        M <- lists:seq(0, 13)
+        M <- lists:seq(0, 15)
     ],
     ok.
 
