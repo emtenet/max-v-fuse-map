@@ -10,9 +10,7 @@
 
 -type rcf() :: #{
     device => binary(),
-    signals := #{name() => signal()},
-    iocs := #{ioc() => signal()},
-    lcs := #{lc() => signal()}
+    signals := #{name() => signal()}
 }.
 
 -type name() :: atom() | binary().
@@ -181,21 +179,9 @@ decode_coord(<<I, ";">>, X, Y, S)
 
 decode_signal_lines([<<"}">> | Lines], RCF, Signal, Stack, _) ->
     [] = Stack,
-    case Signal of
-        #{name := Name, lc := LC}  ->
-            #{signals := Signals, lcs := LCS} = RCF,
-                decode_lines(Lines, RCF#{
-                    signals => Signals#{Name => Signal},
-                    lcs => LCS#{LC => Signal}
-                });
-
-        #{name := Name, ioc := IOC} ->
-            #{signals := Signals, iocs := IOCS} = RCF,
-                decode_lines(Lines, RCF#{
-                    signals => Signals#{Name => Signal},
-                    iocs => IOCS#{IOC => Signal}
-                })
-    end;
+    #{name := Name} = Signal,
+    #{signals := Signals} = RCF,
+    decode_lines(Lines, RCF#{signals => Signals#{Name => Signal}});
 decode_signal_lines([<<>> | Lines], RCF, Signal, [], Labels) ->
     decode_signal_lines(Lines, RCF, Signal, [], Labels);
 decode_signal_lines([Line0 | Lines], RCF, Signal0, Stack0, Labels0) ->
