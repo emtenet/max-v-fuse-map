@@ -171,6 +171,8 @@ pins_start(Pins) when is_list(Pins) ->
 
 -spec pins_select(pin_count(), pins_cycle()) -> {tuple(), pins_cycle()}.
 
+pins_select(0, Cycle) ->
+    {{}, Cycle};
 pins_select(1, {[], Tail = [A | Head]}) ->
     {{A}, {Head, Tail}};
 pins_select(1, {[A | Head], Tail}) ->
