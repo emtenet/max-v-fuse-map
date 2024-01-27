@@ -38,7 +38,7 @@ density(Density) ->
     ])),
     Matrix0 = matrix:build(Density, Experiments),
     Matrix = matrix:remove_fuses(Matrix0, fun
-        ({_, local_line}) -> true;
+        ({_, local_line, lut}) -> true;
         ({_, lut, _}) -> true;
         ({XX, YY, _, _, cell, _}) when XX =/= X; YY =/= Y -> true;
         ({XX, YY, II, _, cell, _}) when XX =:= X, YY =:= Y, II =/= I -> true;

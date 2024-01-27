@@ -109,7 +109,7 @@ fuse({_LAB, {interconnect, _}, _}) -> $L;
 fuse({_LAB, {interconnect, _}, _, _}) -> $L;
 fuse({_LC, clk}) -> $k;
 fuse({_LC, clr}) -> $r;
-fuse({_LC, local_line}) -> $l;
+fuse({_LC, local_line, lut}) -> $l;
 fuse({_LC, lut, _}) -> $#;
 fuse({_LC, lut_out, left}) -> $<;
 fuse({_LC, lut_out, right}) -> $>;

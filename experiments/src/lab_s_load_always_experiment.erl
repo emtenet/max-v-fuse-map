@@ -53,7 +53,7 @@ device(Density, Device) ->
     Matrix = matrix:remove_fuses(Matrix0, fun
         ({{ioc, _, _, _}, _}) -> true;
         ({_, lut, _}) -> true;
-        ({_, local_line}) -> true;
+        ({_, local_line, lut}) -> true;
         ({_, data_a3, _}) -> true;
         ({_, data_a6, _}) -> true;
         ({_, data_b3, _}) -> true;

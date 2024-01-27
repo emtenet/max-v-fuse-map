@@ -88,7 +88,7 @@ experiments(Device, LAB, Experiments) ->
         ({{lab, _, _}, {control, _}, _, _}) -> true;
         ({{lab, _, _}, {interconnect, _}, _}) -> true;
         ({{lab, _, _}, {interconnect, _}, _, _}) -> true;
-        ({{lc, _, _, _}, local_line}) -> true;
+        ({{lc, _, _, _}, local_line, lut}) -> true;
         ({_, lut, _}) -> true;
         ({_, data_c3, _}) -> true;
         ({_, data_c6, _}) -> true;

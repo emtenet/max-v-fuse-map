@@ -30,7 +30,7 @@ My experiments are being run in the following
  * [LAB a-clr1](experiments/src/lab_a_clr1_experiment.erl)
  * [LAB clk2](experiments/src/lab_clk2_experiment.erl)
  * [LAB a-clr2](experiments/src/lab_a_clr2_experiment.erl)
- * [local line](experiments/src/local_line_experiment.erl)
+ * [LC local line](experiments/src/lc_local_line_experiment.erl)
  * [LAB interconnect limit](experiments/src/lab_interconnect_limit_experiment.erl)
  * LC data MUX [playground](experiments/src/lc_data_mux_playground.erl)
    and [theory](experiments/src/lc_data_mux_theory.erl)
@@ -465,15 +465,12 @@ For example the fuses
 `{lc(), data_c3, mux2}` and `{lc(), data_c6, mux5}`
 select local line 7.
 
-### `{lc(), local_line}`
+### `{lc(), local_line, lut}`
 
 Each LC can drive the LUT or register output to the local interconnect
 via it's __local line__.
 
-This fuse either:
-
- * enables that output, or
- * selects between the LUT and registers to output.
+This fuse selects the LUT output.
 
 ### `{lc(), lut_chain, off}`
 
