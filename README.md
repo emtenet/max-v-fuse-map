@@ -86,6 +86,7 @@ My experiments are being run in the following
  * [Security bit](experiments/src/security_bit_experiment.erl)
  * [ISP clamp](experiments/src/isp_clamp_experiment.erl)
  * [6502](experiments/src/sample_6502_experiment.erl)
+ * [SAP-1](experiments/src/sample_sap1_experiment.erl)
 
 ## Maps
 
