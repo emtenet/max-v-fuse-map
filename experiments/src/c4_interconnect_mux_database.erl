@@ -1,4 +1,4 @@
--module(iob_interconnect_mux_database).
+-module(c4_interconnect_mux_database).
 
 -export([run/0]).
 
@@ -18,26 +18,23 @@
 -type density() :: density:density().
 
 -type blocks() :: #{block() => indexes()}.
--type block() :: iob:iob().
+-type block() :: c4:c4().
 
 -type indexes() :: #{index() => mux()}.
--type index() :: 0..17.
+-type index() :: 0..13.
 
 -type mux() :: #{mux_key() => from()}.
--type mux_key() :: direct_link | {mux4(), mux3()}.
--type mux4() :: max_ii:mux4().
--type mux3() :: max_ii:mux3().
--type from() :: max_ii:c4() | max_ii:le_buffer() | max_ii:r4().
+-type mux_key() :: direct_link | io_data_in0 | io_data_in1 | {mux4(), mux3()}.
+-type mux4() :: max_v:mux4().
+-type mux3() :: max_v:mux3().
+-type from() :: max_v:c4() | max_v:le_buffer() | max_v:r4().
 
 %%====================================================================
 %% run
 %%====================================================================
 
 run() ->
-    %fold(epm240),
-    %fold(epm570),
-    %fold(epm1270),
-    %fold(epm2210),
+    %fold(max_v_240z),
     lists:foreach(fun fold/1, density:list()),
     ok.
 
@@ -47,7 +44,7 @@ fold(Density) ->
     {ok, Db0} = open(Density),
     {ok, Cache} = route_cache:open(Density),
     Db1 = route_cache:fold_blocks(
-        local_interconnect,
+        c4,
         fun (Block, Indexes, Acc) ->
             fold_block(Density, Block, Indexes, Acc)
         end,
@@ -59,22 +56,15 @@ fold(Density) ->
 
 %%--------------------------------------------------------------------
 
-fold_block(Density, {local_interconnect, X, Y}, Indexes, Db0) ->
-    case density:is_iob(X, Y, Density) of
-        true ->
-            Block = {iob, X, Y},
-            io:format(" ==> ~s ~p~n", [Density, Block]),
-            route_cache:fold_indexes(
-                fun (Index, Froms, Acc) ->
-                    fold_index(Density, Block, Index, Froms, Acc)
-                end,
-                Db0,
-                Indexes
-            );
-
-        false ->
-            Db0
-    end.
+fold_block(Density, Block = {c4, _, _}, Indexes, Db0) ->
+    io:format(" ==> ~s ~p~n", [Density, Block]),
+    route_cache:fold_indexes(
+        fun (Index, Froms, Acc) ->
+            fold_index(Density, Block, Index, Froms, Acc)
+        end,
+        Db0,
+        Indexes
+    ).
 
 %%--------------------------------------------------------------------
 
@@ -89,7 +79,9 @@ fold_index(Density, Block, Index, Froms, Db0) ->
 
 %%--------------------------------------------------------------------
 
-fold_from_check(Density, Block, Index, From0, Cached, Db) ->
+fold_from_check(Density, C4, I, From0, Cached, Db) ->
+    Name = {C4, {interconnect, I}, dummy},
+    {ok, {Block, {mux, Index}, _}} = c4_fuse_map:from_name(Name, Density),
     From = fold_from(Density, From0),
     case find_key(Block, Index, From, Db) of
         {ok, _} ->
@@ -170,7 +162,7 @@ fold_mux(_, _, _, [], Acc) ->
     false;
 fold_mux(Density, Block, Index, [Fuse | Fuses], Acc) ->
     case fuse_map:to_name(Fuse, Density) of
-        {ok, {Block, {interconnect, Index}, from3, From3}} ->
+        {ok, {Block, {mux, Index}, from3, From3}} ->
             case Acc of
                 {from4, From4} ->
                     {ok, {From4, From3}};
@@ -179,7 +171,7 @@ fold_mux(Density, Block, Index, [Fuse | Fuses], Acc) ->
                     fold_mux(Density, Block, Index, Fuses, {from3, From3})
             end;
 
-        {ok, {Block, {interconnect, Index}, From, From4}} ->
+        {ok, {Block, {mux, Index}, From, From4}} ->
             from4 = From,
             case Acc of
                 {from3, From3} ->
@@ -189,10 +181,18 @@ fold_mux(Density, Block, Index, [Fuse | Fuses], Acc) ->
                     fold_mux(Density, Block, Index, Fuses, {from4, From4})
             end;
 
-        {ok, {Block, {interconnect, Index}, Direct}} ->
-            direct_link = Direct,
+        {ok, {Block, {mux, Index}, Direct}} ->
             undefined = Acc,
-            {ok, direct_link};
+            case Direct of
+                direct_link ->
+                    {ok, direct_link};
+
+                io_data_in0 ->
+                    {ok, io_data_in0};
+
+                io_data_in1 ->
+                    {ok, io_data_in1}
+            end;
 
         _ ->
             fold_mux(Density, Block, Index, Fuses, Acc)
@@ -210,7 +210,7 @@ open(Density) ->
         {ok, []} ->
             {ok, #{}};
 
-        {ok, [{Block = {iob, _, _}, {interconnect, Index}} | Lines]} ->
+        {ok, [{Block = {c4, _, _}, {mux, Index}} | Lines]} ->
             Blocks = open(Lines, #{}, Block, Index, #{}),
             {ok, Blocks};
 
@@ -228,7 +228,7 @@ open([], Blocks, Block, Index, Mux) ->
         _ ->
             Blocks#{Block => #{Index => Mux}}
     end;
-open([{NextBlock = {iob, _, _}, {interconnect, NextIndex}} | Lines],
+open([{NextBlock = {c4, _, _}, {mux, NextIndex}} | Lines],
      Blocks, Block, Index, Mux) ->
     case Blocks of
         #{Block := Indexes} ->
@@ -277,7 +277,7 @@ save_index(Block, Index, Indexes) ->
     [
         iolist_to_binary(io_lib:format(
             "{~p,~p}.~n",
-            [Block, {interconnect, Index}]
+            [Block, {mux, Index}]
         ))
         |
         [
@@ -301,7 +301,7 @@ add(Block, Index, Key, From, Blocks) ->
 
         #{Block := #{Index := #{Key := Existing}}} ->
             throw({
-                iob_interconnect, Block, Index, Key,
+                c4_interconnect, Block, Index, Key,
                 add, From, existing, Existing
             });
 
@@ -345,5 +345,5 @@ find_key(From, {_, _, Iterator}) ->
 %%====================================================================
 
 database_file(Density) ->
-    lists:flatten(io_lib:format("../database/~s.iob-interconnect", [Density])).
+    lists:flatten(io_lib:format("../database/~s.c4-interconnect", [Density])).
 

@@ -69,8 +69,10 @@ My experiments are being run in the following
    [playground](experiments/src/global_interconnect_mux_playground.erl)
  * C4 interconnect MUX
    [playground](experiments/src/c4_interconnect_mux_playground.erl)
+   and [database](experiments/src/c4_interconnect_mux_database.erl)
  * R4 interconnect MUX
    [playground](experiments/src/r4_interconnect_mux_playground.erl)
+   and [database](experiments/src/r4_interconnect_mux_database.erl)
  * C4 fuse map
    [generate](experiments/src/c4_fuse_map_generate.erl)
    and [theory](experiments/src/c4_fuse_map_theory.erl)
@@ -112,6 +114,10 @@ Some MUX databases have been collected:
    `database/*.lab-interconnect`
  * [IOB interconnect MUX](experiments/src/iob_interconnect_mux_database.erl)
    `database/*.iob-interconnect`
+ * [C4 interconnect MUX](experiments/src/c4_interconnect_mux_database.erl)
+   `database/*.c4-interconnect`
+ * [R4 interconnect MUX](experiments/src/r4_interconnect_mux_database.erl)
+   `database/*.r4-interconnect`
 
 ## Device Fuses
 
