@@ -5,6 +5,7 @@
 -export([in_out/4]).
 -export([in_out/5]).
 -export([in_lut_out/5]).
+-export([in_reg_out/6]).
 -export([ins_lut_outs/6]).
 -export([lut_out/3]).
 -export([open_drain/4]).
@@ -305,6 +306,63 @@ in_lut_out(Device, Title, I, LC, O) ->
             "  output wire o\n"
             ");\n"
             "  lcell via (.in(i), .out(o));\n"
+            "endmodule\n"
+        >>
+    }.
+
+%%====================================================================
+%% in_reg_out
+%%====================================================================
+
+in_reg_out(Device, Title, Clk, I, LC, O) when is_integer(I) ->
+    #{
+        title => Title,
+        device => Device,
+        settings => [
+            {location, clk, Clk},
+            {global_clock, clk, true},
+            {location, via, LC},
+            {location, o, pin(O)}
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire clk,\n"
+            "  output wire o\n"
+            ");\n"
+            "  dff via (\n"
+            "    .d(", ($0 + I), "),\n"
+            "    .clk(clk),\n"
+            "    .clrn(1),\n"
+            "    .prn(1),\n"
+            "    .q(o)\n"
+            "  );\n"
+            "endmodule\n"
+        >>
+    };
+in_reg_out(Device, Title, Clk, I, LC, O) ->
+    #{
+        title => Title,
+        device => Device,
+        settings => [
+            {location, clk, Clk},
+            {global_clock, clk, true},
+            {location, i, pin(I)},
+            {location, via, LC},
+            {location, o, pin(O)}
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire clk,\n"
+            "  input wire i,\n"
+            "  output wire o\n"
+            ");\n"
+            "  dff via (\n"
+            "    .d(i),\n"
+            "    .clk(clk),\n"
+            "    .clrn(1),\n"
+            "    .prn(1),\n"
+            "    .q(o)\n"
+            "  );\n"
             "endmodule\n"
         >>
     }.
