@@ -87,6 +87,7 @@ My experiments are being run in the following
  * [ISP clamp](experiments/src/isp_clamp_experiment.erl)
  * [6502](experiments/src/sample_6502_experiment.erl)
  * [SAP-1](experiments/src/sample_sap1_experiment.erl)
+ * [LC feedback](experiments/src/lc_feedback_experiment.erl)
 
 ## Maps
 
@@ -464,6 +465,14 @@ select local interconnect 3.
 For example the fuses
 `{lc(), data_c3, mux2}` and `{lc(), data_c6, mux5}`
 select local line 7.
+
+### `{lc(), feedback}`
+
+Each LC can __feedback__ the register output into it's own LUT at `data_c`.
+
+This fuse enables that feedback.
+
+NOTE: The normal `data_c` selection can then only be used as a `s_load` source.
 
 ### `{lc(), output_local, lut}`
 

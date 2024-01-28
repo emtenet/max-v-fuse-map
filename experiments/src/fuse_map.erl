@@ -915,6 +915,7 @@
     ?LC_CELL(18, 1, {lut, a0b0c1d1});
     ?LC_CELL(18, 2, {lut, a0b0c1d0});
     ?LC_CELL(18, 3, {lut, a0b1c1d0});
+    ?LC_CELL(19, 0, feedback);
     ?LC_CELL(19, 1, {output_right, lut});
     ?LC_CELL(19, 2, clk2);
     ?LC_CELL(19, 3, {lut_chain, off});
