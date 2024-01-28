@@ -11,7 +11,8 @@
 % Initially the r4_fuse_map is incomplete and this aids manually
 % populating the holes.
 
-%-define(DENSITY, max_v_240z).
+%-define(DENSITY, max_v_2210z).
+%-define(START_AT, {r4, 19, 0}).
 
 %%====================================================================
 %% run
@@ -50,6 +51,13 @@ fold_density(Density, Acc0) ->
 
 %%--------------------------------------------------------------------
 
+-ifndef(START_AT).
+-define(START_AT, {r4, 0, 0}).
+-endif.
+
+fold_block(Density, R4, _, Acc) when R4 < ?START_AT ->
+    io:format(" ==> SKIP ~s ~w~n", [Density, R4]),
+    Acc;
 fold_block(Density, R4, Indexes, Acc0) ->
     %io:format(" ==> ~s ~w~n", [Density, R4]),
     route_cache:fold_indexes(
