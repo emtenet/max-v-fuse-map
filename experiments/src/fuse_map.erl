@@ -915,14 +915,14 @@
     ?LC_CELL(18, 1, {lut, a0b0c1d1});
     ?LC_CELL(18, 2, {lut, a0b0c1d0});
     ?LC_CELL(18, 3, {lut, a0b1c1d0});
-    ?LC_CELL(19, 1, {lut_out, right});
+    ?LC_CELL(19, 1, {output_right, lut});
     ?LC_CELL(19, 2, clk2);
     ?LC_CELL(19, 3, {lut_chain, off});
-    ?LC_CELL(20, 1, {lut_out, left});
+    ?LC_CELL(20, 1, {output_left, lut});
     %?LC_CELL(20, 2, minimum_20_2);
     ?LC_CELL(20, 3, a_clr1);
     ?LC_CELL(21, 0, s_clr_load);
-    ?LC_CELL(21, 3, {local_line, lut});
+    ?LC_CELL(21, 3, {output_local, lut});
 ).
 
 -define(C4_SIDE_HEADS(),

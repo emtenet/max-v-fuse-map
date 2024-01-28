@@ -62,7 +62,7 @@ experiments(Device, LAB = {lab, X, Y}, Experiments) ->
     lists:foreach(fun always_local_line/1, Experiments),
     %
     [
-        expect:fuse(Matrix, pattern(N), {{lc, X, Y, N}, local_line, lut})
+        expect:fuse(Matrix, pattern(N), {{lc, X, Y, N}, output_local, lut})
         ||
         N <- lists:seq(0, 9)
     ],

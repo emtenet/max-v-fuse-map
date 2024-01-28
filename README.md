@@ -38,7 +38,7 @@ My experiments are being run in the following
    and [theory](experiments/src/ioc_output_mux_theory.erl)
  * IOC enable MUX [playground](experiments/src/ioc_output_mux_playground.erl)
    and [theory](experiments/src/ioc_output_mux_theory.erl)
- * [LC output](experiments/src/lc_output_experiment.erl)
+ * [LC direct-link](experiments/src/lc_direct_link_experiment.erl)
  * [LAB ena1](experiments/src/lab_ena1_experiment.erl)
  * [LAB ena2](experiments/src/lab_ena2_experiment.erl)
  * [LAB ena2 vs s-load](experiments/src/lab_ena2_s_load_experiment.erl)
@@ -465,12 +465,19 @@ For example the fuses
 `{lc(), data_c3, mux2}` and `{lc(), data_c6, mux5}`
 select local line 7.
 
-### `{lc(), local_line, lut}`
+### `{lc(), output_local, lut}`
 
 Each LC can drive the LUT or register output to the local interconnect
 via it's __local line__.
 
-This fuse selects the LUT output.
+This fuse selects the LUT output (instead of register output).
+
+### `{lc(), output_left | output_right, lut}`
+
+Each LC can drive the LUT or register output to the left and right
+via direct-links, fast-outs, R4s & C4s.
+
+These fuses select the LUT output (instead of register output).
 
 ### `{lc(), lut_chain, off}`
 
@@ -479,11 +486,6 @@ Each LC can receive a LUT input from the LUT output of the previous LC.
 The input always comes into the `data_d` input.
 
 The first LC in a LAB has this fuse, but not sure where that input comes from.
-
-### `{lc(), lut_out, left | right}`
-
-Each LC can drive the LUT output to the left or right
-via direct-links, fast-outs, r4s & c4s.
 
 ### `{lc(), lut, a#b#c#d#}`
 

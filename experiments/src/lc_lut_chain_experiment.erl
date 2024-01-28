@@ -54,7 +54,8 @@ experiments(Device, LAB = {lab, X, Y}, Experiments) ->
         ({_, {interconnect, _}, _, _}) -> true;
         ({_, output3, _}) -> true;
         ({_, output6, _}) -> true;
-        ({_, lut_out, _}) -> true;
+        ({_, output_left, _}) -> true;
+        ({_, output_right, _}) -> true;
         ({_, lut, _}) -> true;
         ({_, data_a3, _}) -> true;
         ({_, data_a6, _}) -> true;
