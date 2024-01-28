@@ -47,6 +47,9 @@ control_routing_dest(D = #{lc := LC, port := Port, route := Route}, Routing) ->
     end;
 control_routing_dest(#{ioc := IOC, route := Route}, Routing) ->
     case Route of
+        [{io_bypass_out, _, _, _, 0}, From | _] ->
+            [{IOC, bypass, From} | Routing];
+
         [{io_data_out, _, _, _, 0}, From | _] ->
             [{IOC, output, From} | Routing];
 
