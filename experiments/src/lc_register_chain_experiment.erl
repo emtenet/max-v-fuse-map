@@ -2,9 +2,9 @@
 
 -export([run/0]).
 
-% This experiment looks for the LUT Chain fuse.
+% This experiment looks for the register chain fuse.
 %
-% There seems to be a fuse for a LUT Chain into LC #0 but not
+% There seems to be a fuse for a register chain into LC #0 but not
 % sure if it is possible or what source might show it.
 
 %%====================================================================
