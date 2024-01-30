@@ -920,7 +920,7 @@
     ?LC_CELL(19, 2, clk2);
     ?LC_CELL(19, 3, {lut_chain, off});
     ?LC_CELL(20, 1, {output_left, lut});
-    %?LC_CELL(20, 2, minimum_20_2);
+    ?LC_CELL(20, 2, {register_chain, off});
     ?LC_CELL(20, 3, a_clr1);
     ?LC_CELL(21, 0, s_clr_load);
     ?LC_CELL(21, 3, {output_local, lut});

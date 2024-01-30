@@ -90,6 +90,7 @@ My experiments are being run in the following
  * [6502](experiments/src/sample_6502_experiment.erl)
  * [SAP-1](experiments/src/sample_sap1_experiment.erl)
  * [LC feedback](experiments/src/lc_feedback_experiment.erl)
+ * [Register chain](experiments/src/lc_register_chain_experiment.erl)
 
 ## Maps
 
@@ -510,6 +511,13 @@ The fuse for LUT term `a AND (NOT b) AND c AND d`
 is named `{lc(), lut, a1b0c1d1}`.
 
 The stored bit is the result of the lookup.
+
+### `{lc(), register_chain, off}`
+
+Each LC register can chain it's output directly to the next LC without using
+the second LC's LUT. It enters the second LC just before the `s-load` selection.
+
+The first LC in a LAB has this fuse, but not sure where that input comes from.
 
 ## `{lc(), s_clr_load}`
 
