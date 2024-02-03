@@ -25,6 +25,7 @@
 {{r4,1,2},{mux,2}}.
 {io_data_in1,{io_data_in,1,2,0,0}}.
 {{r4,1,2},{mux,3}}.
+{io_data_in0,{jtag_tck_tap,1,2,5,0}}.
 {io_data_in1,{io_data_in,1,2,0,0}}.
 {{r4,1,2},{mux,4}}.
 {io_data_in0,{io_data_in,1,2,1,0}}.
@@ -60,8 +61,11 @@
 {io_data_in1,{io_data_in,1,4,0,0}}.
 {{r4,1,4},{mux,4}}.
 {io_data_in0,{io_data_in,1,4,1,0}}.
+{io_data_in1,{jtag_tdi_tap,1,4,5,0}}.
 {{r4,1,4},{mux,5}}.
 {io_data_in0,{io_data_in,1,4,1,0}}.
+{{r4,1,4},{mux,6}}.
+{io_data_in0,{io_data_in,1,4,2,0}}.
 {{r4,1,4},{mux,7}}.
 {io_data_in0,{io_data_in,1,4,2,0}}.
 {{r4,2,1},{mux,0}}.
@@ -149,6 +153,7 @@
 {direct_link,{le_buffer,2,2,0,0}}.
 {{mux0,mux2},{io_data_in,1,2,0,0}}.
 {{mux1,mux0},{c4,1,4,mux,7}}.
+{{mux2,mux1},{le_buffer,2,3,0,10}}.
 {{mux2,mux2},{c4,1,3,mux,7}}.
 {{mux3,mux0},{r4,2,2,mux,10}}.
 {{mux3,mux1},{c4,1,0,mux,3}}.
@@ -161,7 +166,9 @@
 {{r4,2,2},{mux,2}}.
 {direct_link,{io_data_in,1,2,3,0}}.
 {{mux0,mux0},{le_buffer,2,2,0,6}}.
+{{mux3,mux0},{r4,3,2,mux,10}}.
 {{r4,2,2},{mux,3}}.
+{{mux0,mux0},{r4,2,2,mux,9}}.
 {{mux0,mux1},{c4,1,1,mux,3}}.
 {{mux2,mux0},{le_buffer,2,2,0,8}}.
 {{r4,2,2},{mux,4}}.
@@ -170,6 +177,7 @@
 {{mux1,mux0},{r4,2,2,mux,14}}.
 {{mux2,mux0},{c4,1,5,mux,10}}.
 {{r4,2,2},{mux,5}}.
+{direct_link,{jtag_tms_tap,1,2,5,0}}.
 {{mux0,mux1},{le_buffer,2,2,0,12}}.
 {{mux1,mux2},{r4,2,2,mux,12}}.
 {{mux2,mux1},{c4,1,3,mux,11}}.
@@ -198,6 +206,7 @@
 {{r4,2,2},{mux,9}}.
 {direct_link,{le_buffer,3,2,0,4}}.
 {{mux1,mux1},{c4,2,3,mux,8}}.
+{{mux2,mux2},{le_buffer,2,2,0,5}}.
 {{mux3,mux1},{r4,6,2,mux,11}}.
 {{r4,2,2},{mux,10}}.
 {direct_link,{le_buffer,3,2,0,6}}.
@@ -238,6 +247,7 @@
 {{mux3,mux1},{c4,1,1,mux,0}}.
 {{r4,2,3},{mux,1}}.
 {direct_link,{io_data_in,1,3,1,0}}.
+{{mux0,mux0},{c4,1,4,mux,8}}.
 {{mux0,mux1},{c4,1,2,mux,1}}.
 {{mux0,mux2},{le_buffer,2,3,0,4}}.
 {{mux2,mux1},{le_buffer,2,3,0,2}}.
@@ -253,15 +263,18 @@
 {{mux0,mux2},{c4,1,0,mux,10}}.
 {{r4,2,3},{mux,4}}.
 {direct_link,{le_buffer,2,3,0,10}}.
+{{mux1,mux0},{r4,2,3,mux,12}}.
 {{r4,2,3},{mux,5}}.
 {{mux0,mux1},{le_buffer,2,3,0,12}}.
 {{mux0,mux2},{c4,1,0,mux,12}}.
 {{mux1,mux2},{r4,2,3,mux,15}}.
+{{mux2,mux0},{c4,1,2,mux,5}}.
 {{mux2,mux2},{le_buffer,2,3,0,14}}.
 {{r4,2,3},{mux,6}}.
 {direct_link,{io_data_in,1,3,1,0}}.
 {{mux0,mux0},{le_buffer,2,3,0,18}}.
 {{mux0,mux1},{c4,1,5,mux,12}}.
+{{mux1,mux0},{r4,3,3,mux,13}}.
 {{mux2,mux0},{le_buffer,2,3,0,16}}.
 {{r4,2,3},{mux,7}}.
 {direct_link,{io_data_in,1,3,2,0}}.
@@ -284,9 +297,11 @@
 {{mux0,mux2},{le_buffer,2,3,0,7}}.
 {{mux1,mux0},{c4,2,0,mux,10}}.
 {{mux2,mux0},{le_buffer,2,3,0,5}}.
+{{mux2,mux1},{r4,5,3,mux,9}}.
 {{mux3,mux2},{r4,6,3,mux,10}}.
 {{r4,2,3},{mux,11}}.
 {direct_link,{le_buffer,3,3,0,8}}.
+{{mux0,mux2},{c4,2,2,mux,3}}.
 {{mux1,mux0},{c4,2,0,mux,10}}.
 {{mux1,mux1},{r4,5,3,mux,10}}.
 {{mux2,mux0},{c4,2,5,mux,9}}.
@@ -321,6 +336,7 @@
 {{mux3,mux2},{c4,2,5,mux,13}}.
 {{r4,2,4},{mux,0}}.
 {direct_link,{le_buffer,2,4,0,0}}.
+{{mux0,mux0},{c4,1,1,mux,0}}.
 {{mux0,mux2},{io_data_in,1,4,0,0}}.
 {{mux2,mux1},{c4,1,3,mux,0}}.
 {{mux3,mux1},{c4,1,2,mux,0}}.
@@ -340,6 +356,7 @@
 {{mux2,mux2},{c4,1,0,mux,10}}.
 {{r4,2,4},{mux,4}}.
 {direct_link,{le_buffer,2,4,0,10}}.
+{{mux0,mux1},{le_buffer,2,3,0,0}}.
 {{mux1,mux1},{c4,1,5,mux,10}}.
 {{r4,2,4},{mux,5}}.
 {{mux0,mux0},{c4,1,0,mux,12}}.
@@ -351,6 +368,7 @@
 {{mux3,mux0},{c4,1,0,mux,13}}.
 {{r4,2,4},{mux,7}}.
 {direct_link,{io_data_in,1,4,2,0}}.
+{{mux2,mux0},{r4,2,4,mux,13}}.
 {{r4,2,4},{mux,8}}.
 {direct_link,{le_buffer,3,4,0,2}}.
 {{mux0,mux1},{le_buffer,3,4,0,0}}.
@@ -384,7 +402,9 @@
 {direct_link,{le_buffer,3,4,0,14}}.
 {{mux0,mux0},{le_buffer,2,4,0,13}}.
 {{mux1,mux1},{r4,6,4,mux,12}}.
+{{mux3,mux2},{r4,5,4,mux,15}}.
 {{r4,2,4},{mux,14}}.
+{direct_link,{le_buffer,3,4,0,16}}.
 {{mux0,mux0},{le_buffer,2,4,0,15}}.
 {{mux1,mux0},{c4,2,1,mux,6}}.
 {{mux1,mux2},{r4,6,4,mux,15}}.
@@ -407,6 +427,7 @@
 {{mux1,mux2},{c4,2,3,mux,8}}.
 {{mux2,mux0},{c4,2,5,mux,8}}.
 {{mux2,mux1},{le_buffer,3,1,0,2}}.
+{{mux3,mux2},{r4,3,1,mux,8}}.
 {{r4,3,1},{mux,2}}.
 {direct_link,{le_buffer,2,1,0,7}}.
 {{mux0,mux0},{le_buffer,3,1,0,6}}.
@@ -434,6 +455,7 @@
 {{r4,3,1},{mux,6}}.
 {direct_link,{le_buffer,2,1,0,17}}.
 {{mux0,mux0},{le_buffer,3,1,0,18}}.
+{{mux1,mux0},{r4,4,1,mux,14}}.
 {{mux1,mux1},{r4,1,1,mux,7}}.
 {{mux2,mux0},{le_buffer,3,1,0,16}}.
 {{mux2,mux1},{r4,3,1,mux,13}}.
@@ -442,6 +464,7 @@
 {direct_link,{le_buffer,2,1,0,19}}.
 {{mux0,mux0},{le_buffer,3,1,0,18}}.
 {{mux0,mux2},{c4,2,5,mux,13}}.
+{{mux1,mux0},{r4,4,1,mux,14}}.
 {{mux1,mux1},{r4,1,1,mux,7}}.
 {{r4,3,1},{mux,8}}.
 {direct_link,{le_buffer,4,1,0,2}}.
@@ -468,6 +491,7 @@
 {{mux3,mux1},{r4,7,1,mux,10}}.
 {{r4,3,1},{mux,12}}.
 {direct_link,{le_buffer,4,1,0,12}}.
+{{mux0,mux0},{le_buffer,3,1,0,11}}.
 {{mux1,mux0},{r4,7,1,mux,12}}.
 {{mux2,mux0},{c4,3,5,mux,11}}.
 {{mux2,mux1},{le_buffer,4,1,0,10}}.
@@ -520,6 +544,7 @@
 {{r4,3,2},{mux,5}}.
 {direct_link,{le_buffer,2,2,0,13}}.
 {{mux0,mux1},{le_buffer,3,2,0,12}}.
+{{mux2,mux0},{c4,2,1,mux,5}}.
 {{mux2,mux2},{le_buffer,3,2,0,14}}.
 {{mux3,mux1},{c4,2,5,mux,11}}.
 {{mux3,mux2},{c4,2,0,mux,12}}.
@@ -532,7 +557,9 @@
 {{r4,3,2},{mux,7}}.
 {direct_link,{le_buffer,2,2,0,19}}.
 {{mux1,mux1},{r4,1,2,mux,7}}.
+{{mux1,mux2},{r4,2,2,mux,5}}.
 {{mux2,mux0},{r4,3,2,mux,14}}.
+{{mux2,mux1},{c4,2,3,mux,13}}.
 {{r4,3,2},{mux,8}}.
 {direct_link,{le_buffer,4,2,0,2}}.
 {{mux0,mux1},{le_buffer,4,2,0,0}}.
@@ -563,6 +590,7 @@
 {{mux2,mux1},{le_buffer,4,2,0,10}}.
 {{r4,3,2},{mux,13}}.
 {direct_link,{le_buffer,4,2,0,14}}.
+{{mux0,mux1},{c4,3,3,mux,11}}.
 {{mux1,mux1},{r4,7,2,mux,15}}.
 {{mux2,mux1},{r4,3,2,mux,7}}.
 {{mux3,mux1},{c4,3,1,mux,5}}.
@@ -583,8 +611,10 @@
 {{mux0,mux0},{c4,2,0,mux,7}}.
 {{mux1,mux0},{c4,2,5,mux,7}}.
 {{mux2,mux1},{le_buffer,3,4,0,10}}.
+{{mux2,mux2},{c4,2,4,mux,7}}.
 {{r4,3,3},{mux,1}}.
 {direct_link,{le_buffer,2,3,0,3}}.
+{{mux0,mux1},{c4,2,2,mux,1}}.
 {{mux0,mux2},{le_buffer,3,3,0,4}}.
 {{mux1,mux1},{c4,2,0,mux,8}}.
 {{mux1,mux2},{c4,2,5,mux,8}}.
@@ -605,20 +635,24 @@
 {direct_link,{le_buffer,3,3,0,10}}.
 {{mux0,mux0},{c4,2,0,mux,11}}.
 {{mux0,mux2},{c4,2,2,mux,4}}.
+{{mux1,mux0},{r4,3,3,mux,12}}.
 {{mux2,mux2},{le_buffer,2,3,0,11}}.
 {{r4,3,3},{mux,5}}.
 {direct_link,{le_buffer,2,3,0,13}}.
 {{mux0,mux2},{c4,2,0,mux,12}}.
+{{mux2,mux0},{c4,2,2,mux,5}}.
 {{mux2,mux2},{le_buffer,3,3,0,14}}.
 {{r4,3,3},{mux,6}}.
 {direct_link,{le_buffer,2,3,0,17}}.
 {{mux0,mux0},{le_buffer,3,3,0,18}}.
 {{mux0,mux1},{c4,2,5,mux,12}}.
+{{mux1,mux0},{r4,4,3,mux,13}}.
 {{mux1,mux1},{r4,1,3,mux,7}}.
 {{mux2,mux0},{le_buffer,3,3,0,16}}.
 {{r4,3,3},{mux,7}}.
 {direct_link,{le_buffer,2,3,0,19}}.
 {{mux2,mux0},{r4,3,3,mux,13}}.
+{{mux3,mux0},{r4,6,3,mux,13}}.
 {{mux3,mux1},{r4,5,3,mux,14}}.
 {{r4,3,3},{mux,8}}.
 {direct_link,{le_buffer,4,3,0,2}}.
@@ -641,6 +675,7 @@
 {{mux3,mux2},{r4,7,3,mux,11}}.
 {{r4,3,3},{mux,11}}.
 {direct_link,{le_buffer,4,3,0,8}}.
+{{mux0,mux1},{le_buffer,3,3,0,7}}.
 {{mux0,mux2},{c4,3,2,mux,3}}.
 {{mux1,mux0},{c4,3,0,mux,10}}.
 {{mux1,mux2},{c4,3,1,mux,3}}.
@@ -650,6 +685,7 @@
 {{mux3,mux2},{r4,3,3,mux,2}}.
 {{r4,3,3},{mux,12}}.
 {{mux0,mux0},{le_buffer,3,3,0,11}}.
+{{mux0,mux2},{le_buffer,3,3,0,13}}.
 {{mux1,mux0},{r4,7,3,mux,14}}.
 {{mux1,mux1},{c4,3,1,mux,4}}.
 {{mux2,mux2},{c4,3,5,mux,11}}.
@@ -662,6 +698,7 @@
 {{mux1,mux0},{c4,3,1,mux,5}}.
 {{mux1,mux2},{c4,3,0,mux,12}}.
 {{mux2,mux2},{c4,3,5,mux,11}}.
+{{mux3,mux0},{r4,5,3,mux,15}}.
 {{mux3,mux2},{r4,6,3,mux,15}}.
 {{r4,3,3},{mux,14}}.
 {direct_link,{le_buffer,4,3,0,16}}.
@@ -669,6 +706,7 @@
 {{mux1,mux0},{c4,3,0,mux,13}}.
 {{mux1,mux2},{r4,7,3,mux,15}}.
 {{mux2,mux1},{c4,3,2,mux,6}}.
+{{mux2,mux2},{le_buffer,3,3,0,17}}.
 {{r4,3,3},{mux,15}}.
 {direct_link,{le_buffer,4,3,0,18}}.
 {{mux0,mux0},{c4,3,1,mux,6}}.
@@ -702,11 +740,14 @@
 {{r4,3,4},{mux,4}}.
 {direct_link,{le_buffer,3,4,0,10}}.
 {{mux0,mux1},{le_buffer,3,3,0,0}}.
+{{mux0,mux2},{c4,2,3,mux,4}}.
 {{mux1,mux1},{c4,2,5,mux,10}}.
+{{mux2,mux1},{r4,1,4,mux,4}}.
 {{r4,3,4},{mux,5}}.
 {{mux0,mux1},{le_buffer,3,4,0,12}}.
 {{mux2,mux2},{le_buffer,3,4,0,14}}.
 {{mux3,mux0},{r4,1,4,mux,5}}.
+{{mux3,mux2},{c4,2,2,mux,5}}.
 {{r4,3,4},{mux,6}}.
 {{mux1,mux0},{r4,4,4,mux,14}}.
 {{mux1,mux1},{r4,1,4,mux,7}}.
@@ -715,6 +756,7 @@
 {{mux0,mux0},{le_buffer,3,4,0,18}}.
 {{mux2,mux0},{r4,3,4,mux,13}}.
 {{mux2,mux1},{c4,2,5,mux,13}}.
+{{mux3,mux0},{r4,6,4,mux,13}}.
 {{r4,3,4},{mux,8}}.
 {{mux0,mux1},{le_buffer,4,4,0,0}}.
 {{mux1,mux1},{c4,3,5,mux,0}}.
@@ -737,10 +779,12 @@
 {{r4,3,4},{mux,12}}.
 {{mux1,mux0},{r4,7,4,mux,12}}.
 {{mux2,mux1},{le_buffer,4,4,0,10}}.
+{{mux3,mux0},{c4,3,3,mux,4}}.
 {{mux3,mux1},{c4,3,0,mux,11}}.
 {{r4,3,4},{mux,13}}.
 {direct_link,{le_buffer,4,4,0,14}}.
 {{mux0,mux2},{le_buffer,3,4,0,15}}.
+{{mux1,mux0},{c4,3,2,mux,5}}.
 {{mux1,mux1},{r4,7,4,mux,15}}.
 {{r4,3,4},{mux,14}}.
 {direct_link,{le_buffer,4,4,0,16}}.
@@ -796,6 +840,7 @@
 {{mux2,mux1},{r4,4,1,mux,14}}.
 {{mux2,mux2},{c4,3,5,mux,12}}.
 {{mux3,mux1},{r4,1,1,mux,6}}.
+{{mux3,mux2},{c4,3,4,mux,13}}.
 {{r4,4,1},{mux,7}}.
 {direct_link,{le_buffer,3,1,0,19}}.
 {{mux0,mux0},{le_buffer,4,1,0,18}}.
@@ -807,6 +852,7 @@
 {{mux0,mux1},{le_buffer,5,1,0,0}}.
 {{mux1,mux0},{c4,4,2,mux,7}}.
 {{mux1,mux1},{c4,4,5,mux,7}}.
+{{mux1,mux2},{r4,7,1,mux,8}}.
 {{mux2,mux0},{le_buffer,4,1,0,1}}.
 {{mux3,mux1},{c4,4,3,mux,7}}.
 {{r4,4,1},{mux,9}}.
@@ -832,6 +878,7 @@
 {{mux3,mux0},{c4,4,0,mux,11}}.
 {{r4,4,1},{mux,13}}.
 {direct_link,{le_buffer,5,1,0,14}}.
+{{mux0,mux0},{le_buffer,4,1,0,13}}.
 {{mux0,mux1},{c4,4,2,mux,11}}.
 {{mux0,mux2},{le_buffer,4,1,0,15}}.
 {{mux2,mux0},{c4,4,2,mux,12}}.
@@ -840,6 +887,7 @@
 {{r4,4,1},{mux,14}}.
 {direct_link,{le_buffer,5,1,0,16}}.
 {{mux0,mux0},{le_buffer,4,1,0,15}}.
+{{mux2,mux0},{c4,4,3,mux,12}}.
 {{mux2,mux1},{c4,4,0,mux,13}}.
 {{mux2,mux2},{le_buffer,4,1,0,17}}.
 {{r4,4,1},{mux,15}}.
@@ -848,15 +896,18 @@
 {{mux1,mux0},{le_buffer,4,1,0,19}}.
 {{mux2,mux1},{le_buffer,4,1,0,17}}.
 {{mux3,mux1},{r4,7,1,mux,14}}.
+{{mux3,mux2},{c4,4,3,mux,13}}.
 {{r4,4,2},{mux,0}}.
 {direct_link,{le_buffer,4,2,0,0}}.
 {{mux0,mux2},{le_buffer,3,2,0,1}}.
 {{mux2,mux0},{c4,3,5,mux,7}}.
+{{mux2,mux1},{le_buffer,4,3,0,10}}.
 {{mux3,mux1},{c4,3,0,mux,7}}.
 {{r4,4,2},{mux,1}}.
 {direct_link,{le_buffer,3,2,0,3}}.
 {{mux0,mux0},{c4,3,3,mux,8}}.
 {{mux0,mux2},{le_buffer,4,2,0,4}}.
+{{mux1,mux0},{r4,2,2,mux,0}}.
 {{mux2,mux1},{le_buffer,4,2,0,2}}.
 {{mux2,mux2},{c4,3,5,mux,8}}.
 {{r4,4,2},{mux,2}}.
@@ -891,6 +942,7 @@
 {{r4,4,2},{mux,7}}.
 {direct_link,{le_buffer,3,2,0,19}}.
 {{mux1,mux2},{r4,3,2,mux,6}}.
+{{mux2,mux1},{c4,3,3,mux,13}}.
 {{r4,4,2},{mux,8}}.
 {direct_link,{le_buffer,5,2,0,2}}.
 {{mux0,mux1},{le_buffer,5,2,0,0}}.
@@ -899,6 +951,7 @@
 {{mux3,mux1},{c4,4,4,mux,7}}.
 {{r4,4,2},{mux,9}}.
 {direct_link,{le_buffer,5,2,0,4}}.
+{{mux2,mux2},{le_buffer,4,2,0,5}}.
 {{r4,4,2},{mux,10}}.
 {direct_link,{le_buffer,5,2,0,6}}.
 {{mux3,mux0},{c4,4,5,mux,9}}.
@@ -908,6 +961,7 @@
 {{mux1,mux2},{c4,4,0,mux,10}}.
 {{r4,4,2},{mux,12}}.
 {direct_link,{le_buffer,5,2,0,12}}.
+{{mux0,mux0},{le_buffer,4,2,0,11}}.
 {{mux0,mux1},{c4,4,5,mux,10}}.
 {{mux1,mux2},{c4,4,5,mux,11}}.
 {{mux2,mux1},{le_buffer,5,2,0,10}}.
@@ -916,8 +970,10 @@
 {direct_link,{le_buffer,5,2,0,14}}.
 {{mux0,mux1},{c4,4,3,mux,11}}.
 {{mux2,mux0},{c4,4,3,mux,12}}.
+{{mux2,mux1},{r4,4,2,mux,7}}.
 {{r4,4,2},{mux,14}}.
 {direct_link,{le_buffer,5,2,0,16}}.
+{{mux0,mux0},{le_buffer,4,2,0,15}}.
 {{mux2,mux0},{c4,4,4,mux,12}}.
 {{mux2,mux2},{le_buffer,4,2,0,17}}.
 {{mux3,mux0},{c4,4,5,mux,13}}.
@@ -926,6 +982,7 @@
 {direct_link,{le_buffer,5,2,0,18}}.
 {{mux0,mux0},{c4,4,0,mux,13}}.
 {{mux1,mux0},{le_buffer,4,2,0,19}}.
+{{mux2,mux2},{c4,4,3,mux,13}}.
 {{mux3,mux0},{c4,4,5,mux,13}}.
 {{mux3,mux2},{c4,4,4,mux,13}}.
 {{r4,4,3},{mux,0}}.
@@ -936,6 +993,7 @@
 {{mux3,mux0},{r4,4,3,mux,10}}.
 {{r4,4,3},{mux,1}}.
 {direct_link,{le_buffer,3,3,0,3}}.
+{{mux0,mux0},{c4,3,4,mux,8}}.
 {{mux0,mux2},{le_buffer,4,3,0,4}}.
 {{mux1,mux1},{c4,3,0,mux,8}}.
 {{mux1,mux2},{c4,3,5,mux,8}}.
@@ -950,10 +1008,12 @@
 {direct_link,{le_buffer,3,3,0,9}}.
 {{mux0,mux2},{c4,3,0,mux,10}}.
 {{mux2,mux0},{le_buffer,4,3,0,8}}.
+{{mux3,mux0},{r4,5,3,mux,10}}.
 {{r4,4,3},{mux,4}}.
 {direct_link,{le_buffer,4,3,0,10}}.
 {{mux0,mux0},{c4,3,0,mux,11}}.
 {{mux0,mux1},{le_buffer,4,2,0,0}}.
+{{mux1,mux1},{c4,3,4,mux,10}}.
 {{mux2,mux2},{le_buffer,3,3,0,11}}.
 {{r4,4,3},{mux,5}}.
 {direct_link,{le_buffer,3,3,0,13}}.
@@ -996,6 +1056,7 @@
 {{mux1,mux0},{c4,4,0,mux,10}}.
 {{mux1,mux2},{c4,4,1,mux,3}}.
 {{mux2,mux0},{c4,4,5,mux,9}}.
+{{mux3,mux2},{r4,4,3,mux,3}}.
 {{r4,4,3},{mux,12}}.
 {direct_link,{le_buffer,5,3,0,12}}.
 {{mux2,mux1},{le_buffer,5,3,0,10}}.
@@ -1041,6 +1102,7 @@
 {{mux2,mux0},{le_buffer,4,4,0,8}}.
 {{mux2,mux1},{c4,3,2,mux,2}}.
 {{mux2,mux2},{r4,2,4,mux,2}}.
+{{mux3,mux0},{r4,5,4,mux,9}}.
 {{mux3,mux1},{r4,2,4,mux,1}}.
 {{r4,4,4},{mux,3}}.
 {direct_link,{le_buffer,3,4,0,9}}.
@@ -1051,12 +1113,14 @@
 {{r4,4,4},{mux,4}}.
 {direct_link,{le_buffer,4,4,0,10}}.
 {{mux0,mux1},{le_buffer,4,3,0,0}}.
+{{mux0,mux2},{c4,3,3,mux,4}}.
 {{mux1,mux1},{c4,3,5,mux,10}}.
 {{mux2,mux2},{le_buffer,3,4,0,11}}.
 {{r4,4,4},{mux,5}}.
 {direct_link,{le_buffer,3,4,0,13}}.
 {{mux0,mux0},{c4,3,0,mux,12}}.
 {{mux0,mux1},{le_buffer,4,4,0,12}}.
+{{mux0,mux2},{c4,3,1,mux,5}}.
 {{mux2,mux0},{c4,3,3,mux,5}}.
 {{mux2,mux2},{le_buffer,4,4,0,14}}.
 {{r4,4,4},{mux,6}}.
@@ -1088,6 +1152,7 @@
 {{mux1,mux1},{r4,7,4,mux,10}}.
 {{mux1,mux2},{c4,4,2,mux,3}}.
 {{mux2,mux1},{c4,4,0,mux,10}}.
+{{mux3,mux0},{le_buffer,4,4,0,9}}.
 {{r4,4,4},{mux,12}}.
 {direct_link,{le_buffer,5,4,0,12}}.
 {{mux1,mux1},{c4,4,2,mux,4}}.
@@ -1095,6 +1160,7 @@
 {{mux3,mux0},{c4,4,3,mux,4}}.
 {{mux3,mux1},{c4,4,0,mux,11}}.
 {{r4,4,4},{mux,13}}.
+{direct_link,{le_buffer,5,4,0,14}}.
 {{mux1,mux0},{c4,4,2,mux,5}}.
 {{mux1,mux2},{c4,4,1,mux,5}}.
 {{mux2,mux0},{c4,4,5,mux,12}}.
@@ -1108,6 +1174,7 @@
 {{r4,4,4},{mux,15}}.
 {{mux0,mux0},{c4,4,2,mux,6}}.
 {{mux1,mux0},{le_buffer,4,4,0,19}}.
+{{mux2,mux0},{r4,1,4,mux,6}}.
 {{mux2,mux1},{le_buffer,4,4,0,17}}.
 {{mux3,mux1},{r4,7,4,mux,14}}.
 {{r4,5,1},{mux,0}}.
@@ -1157,6 +1224,7 @@
 {{mux1,mux2},{r4,1,1,mux,6}}.
 {{mux2,mux0},{le_buffer,5,1,0,16}}.
 {{mux3,mux1},{r4,2,1,mux,6}}.
+{{mux3,mux2},{c4,4,4,mux,13}}.
 {{r4,5,1},{mux,7}}.
 {direct_link,{le_buffer,4,1,0,19}}.
 {{mux0,mux0},{le_buffer,5,1,0,18}}.
@@ -1178,6 +1246,7 @@
 {direct_link,{le_buffer,6,1,0,6}}.
 {{mux0,mux2},{le_buffer,5,1,0,7}}.
 {{mux1,mux1},{c4,5,5,mux,9}}.
+{{mux3,mux0},{c4,5,4,mux,9}}.
 {{r4,5,1},{mux,11}}.
 {direct_link,{le_buffer,6,1,0,8}}.
 {{mux0,mux1},{le_buffer,5,1,0,7}}.
@@ -1197,6 +1266,7 @@
 {{mux3,mux1},{c4,5,0,mux,12}}.
 {{r4,5,1},{mux,14}}.
 {direct_link,{le_buffer,6,1,0,16}}.
+{{mux2,mux0},{c4,5,3,mux,12}}.
 {{mux2,mux1},{c4,5,0,mux,13}}.
 {{mux2,mux2},{le_buffer,5,1,0,17}}.
 {{mux3,mux0},{c4,5,4,mux,13}}.
@@ -1211,6 +1281,7 @@
 {{mux2,mux0},{c4,4,5,mux,7}}.
 {{mux2,mux1},{le_buffer,5,3,0,10}}.
 {{mux2,mux2},{c4,4,3,mux,7}}.
+{{mux3,mux0},{r4,5,2,mux,10}}.
 {{mux3,mux1},{c4,4,0,mux,7}}.
 {{r4,5,2},{mux,1}}.
 {direct_link,{le_buffer,4,2,0,3}}.
@@ -1229,6 +1300,7 @@
 {{r4,5,2},{mux,3}}.
 {direct_link,{le_buffer,4,2,0,9}}.
 {{mux0,mux1},{c4,4,1,mux,3}}.
+{{mux1,mux1},{r4,7,2,mux,9}}.
 {{mux1,mux2},{r4,2,2,mux,1}}.
 {{mux2,mux0},{le_buffer,5,2,0,8}}.
 {{mux2,mux1},{r4,1,2,mux,3}}.
@@ -1273,11 +1345,14 @@
 {{r4,5,2},{mux,10}}.
 {direct_link,{le_buffer,6,2,0,6}}.
 {{mux0,mux0},{c4,5,0,mux,9}}.
+{{mux0,mux2},{le_buffer,5,2,0,7}}.
 {{mux2,mux0},{le_buffer,5,2,0,5}}.
 {{mux3,mux0},{c4,5,5,mux,9}}.
 {{r4,5,2},{mux,11}}.
 {direct_link,{le_buffer,6,2,0,8}}.
 {{mux1,mux2},{c4,5,0,mux,10}}.
+{{mux2,mux0},{c4,5,4,mux,9}}.
+{{mux3,mux0},{le_buffer,5,2,0,9}}.
 {{r4,5,2},{mux,12}}.
 {direct_link,{le_buffer,6,2,0,12}}.
 {{mux0,mux1},{c4,5,5,mux,10}}.
@@ -1288,8 +1363,10 @@
 {direct_link,{le_buffer,6,2,0,14}}.
 {{mux0,mux2},{le_buffer,5,2,0,15}}.
 {{mux1,mux0},{c4,5,0,mux,12}}.
+{{mux2,mux2},{c4,5,4,mux,11}}.
 {{r4,5,2},{mux,14}}.
 {direct_link,{le_buffer,6,2,0,16}}.
+{{mux2,mux1},{c4,5,1,mux,6}}.
 {{mux2,mux2},{le_buffer,5,2,0,17}}.
 {{mux3,mux0},{c4,5,5,mux,13}}.
 {{mux3,mux2},{c4,5,5,mux,12}}.
@@ -1332,6 +1409,7 @@
 {{r4,5,3},{mux,4}}.
 {{mux0,mux0},{c4,4,0,mux,11}}.
 {{mux0,mux1},{le_buffer,5,2,0,0}}.
+{{mux1,mux0},{r4,5,3,mux,12}}.
 {{mux2,mux2},{le_buffer,4,3,0,11}}.
 {{mux3,mux0},{c4,4,1,mux,4}}.
 {{r4,5,3},{mux,5}}.
@@ -1341,6 +1419,7 @@
 {{mux1,mux0},{r4,2,3,mux,7}}.
 {{mux2,mux0},{c4,4,2,mux,5}}.
 {{mux2,mux1},{c4,4,4,mux,11}}.
+{{mux2,mux2},{le_buffer,5,3,0,14}}.
 {{mux3,mux2},{c4,4,1,mux,5}}.
 {{r4,5,3},{mux,6}}.
 {direct_link,{le_buffer,4,3,0,17}}.
@@ -1349,12 +1428,14 @@
 {{mux0,mux2},{r4,3,3,mux,6}}.
 {{mux1,mux1},{r4,3,3,mux,5}}.
 {{mux2,mux0},{le_buffer,5,3,0,16}}.
+{{mux2,mux1},{r4,5,3,mux,14}}.
 {{r4,5,3},{mux,7}}.
 {direct_link,{le_buffer,4,3,0,19}}.
 {{mux0,mux0},{le_buffer,5,3,0,18}}.
 {{mux0,mux1},{r4,1,3,mux,7}}.
 {{mux1,mux1},{r4,3,3,mux,5}}.
 {{mux2,mux0},{r4,5,3,mux,14}}.
+{{mux3,mux2},{r4,2,3,mux,6}}.
 {{r4,5,3},{mux,8}}.
 {direct_link,{le_buffer,6,3,0,2}}.
 {{mux0,mux1},{le_buffer,6,3,0,0}}.
@@ -1366,6 +1447,8 @@
 {{mux3,mux2},{c4,5,0,mux,8}}.
 {{r4,5,3},{mux,9}}.
 {direct_link,{le_buffer,6,3,0,4}}.
+{{mux0,mux0},{c4,5,2,mux,2}}.
+{{mux0,mux1},{r4,5,3,mux,3}}.
 {{mux0,mux2},{c4,5,1,mux,1}}.
 {{mux1,mux0},{r4,7,3,mux,8}}.
 {{mux2,mux1},{c4,5,2,mux,1}}.
@@ -1374,8 +1457,10 @@
 {direct_link,{le_buffer,6,3,0,6}}.
 {{mux1,mux0},{c4,5,0,mux,10}}.
 {{mux2,mux0},{le_buffer,5,3,0,5}}.
+{{mux2,mux2},{r4,2,3,mux,1}}.
 {{r4,5,3},{mux,11}}.
 {direct_link,{le_buffer,6,3,0,8}}.
+{{mux0,mux1},{le_buffer,5,3,0,7}}.
 {{mux1,mux0},{c4,5,0,mux,10}}.
 {{mux1,mux2},{c4,5,1,mux,3}}.
 {{mux2,mux0},{c4,5,5,mux,9}}.
@@ -1383,6 +1468,7 @@
 {{r4,5,3},{mux,12}}.
 {direct_link,{le_buffer,6,3,0,12}}.
 {{mux0,mux0},{le_buffer,5,3,0,11}}.
+{{mux0,mux2},{le_buffer,5,3,0,13}}.
 {{mux2,mux1},{le_buffer,6,3,0,10}}.
 {{mux2,mux2},{c4,5,5,mux,11}}.
 {{mux3,mux0},{c4,5,2,mux,4}}.
@@ -1398,13 +1484,16 @@
 {{mux2,mux1},{c4,5,2,mux,6}}.
 {{r4,5,3},{mux,15}}.
 {direct_link,{le_buffer,6,3,0,18}}.
+{{mux0,mux0},{c4,5,1,mux,6}}.
 {{mux1,mux0},{le_buffer,5,3,0,19}}.
 {{mux1,mux2},{r4,5,3,mux,5}}.
 {{mux2,mux1},{le_buffer,5,3,0,17}}.
+{{mux2,mux2},{c4,5,4,mux,13}}.
 {{mux3,mux2},{c4,5,5,mux,13}}.
 {{r4,5,4},{mux,0}}.
 {direct_link,{le_buffer,5,4,0,0}}.
 {{mux0,mux2},{le_buffer,4,4,0,1}}.
+{{mux1,mux1},{r4,2,4,mux,0}}.
 {{mux1,mux2},{c4,4,0,mux,7}}.
 {{mux2,mux2},{c4,4,5,mux,7}}.
 {{r4,5,4},{mux,1}}.
@@ -1435,6 +1524,7 @@
 {{r4,5,4},{mux,4}}.
 {{mux0,mux1},{le_buffer,5,3,0,0}}.
 {{mux1,mux1},{c4,4,5,mux,10}}.
+{{mux1,mux2},{r4,1,4,mux,4}}.
 {{mux2,mux2},{le_buffer,4,4,0,11}}.
 {{r4,5,4},{mux,5}}.
 {direct_link,{le_buffer,4,4,0,13}}.
@@ -1449,6 +1539,7 @@
 {{r4,5,4},{mux,6}}.
 {direct_link,{le_buffer,4,4,0,17}}.
 {{mux0,mux0},{le_buffer,5,4,0,18}}.
+{{mux1,mux2},{r4,1,4,mux,6}}.
 {{mux2,mux0},{le_buffer,5,4,0,16}}.
 {{mux3,mux0},{c4,4,0,mux,13}}.
 {{mux3,mux1},{r4,2,4,mux,6}}.
@@ -1458,10 +1549,13 @@
 {direct_link,{le_buffer,6,4,0,2}}.
 {{mux0,mux0},{c4,5,0,mux,8}}.
 {{mux0,mux1},{le_buffer,6,4,0,0}}.
+{{mux0,mux2},{c4,5,2,mux,1}}.
 {{mux1,mux1},{c4,5,5,mux,0}}.
 {{mux2,mux0},{le_buffer,5,4,0,1}}.
+{{mux2,mux2},{le_buffer,5,4,0,3}}.
 {{r4,5,4},{mux,9}}.
 {direct_link,{le_buffer,6,4,0,4}}.
+{{mux0,mux1},{r4,5,4,mux,3}}.
 {{mux2,mux2},{le_buffer,5,4,0,5}}.
 {{r4,5,4},{mux,10}}.
 {direct_link,{le_buffer,6,4,0,6}}.
@@ -1471,12 +1565,14 @@
 {{mux1,mux1},{c4,5,5,mux,2}}.
 {{r4,5,4},{mux,11}}.
 {direct_link,{le_buffer,6,4,0,8}}.
+{{mux0,mux2},{c4,5,3,mux,3}}.
 {{mux2,mux1},{c4,5,0,mux,10}}.
 {{mux3,mux0},{le_buffer,5,4,0,9}}.
 {{r4,5,4},{mux,12}}.
 {direct_link,{le_buffer,6,4,0,12}}.
 {{mux0,mux0},{le_buffer,5,4,0,11}}.
 {{mux2,mux1},{le_buffer,6,4,0,10}}.
+{{mux3,mux0},{c4,5,3,mux,4}}.
 {{mux3,mux1},{c4,5,0,mux,11}}.
 {{r4,5,4},{mux,13}}.
 {direct_link,{le_buffer,6,4,0,14}}.
@@ -1486,10 +1582,12 @@
 {{mux2,mux0},{c4,5,5,mux,12}}.
 {{r4,5,4},{mux,14}}.
 {direct_link,{le_buffer,6,4,0,16}}.
+{{mux2,mux1},{c4,5,3,mux,6}}.
 {{mux2,mux2},{le_buffer,5,4,0,17}}.
 {{mux3,mux1},{c4,5,0,mux,13}}.
 {{r4,5,4},{mux,15}}.
 {direct_link,{le_buffer,6,4,0,18}}.
+{{mux0,mux0},{c4,5,2,mux,6}}.
 {{mux1,mux0},{le_buffer,5,4,0,19}}.
 {{mux2,mux2},{c4,5,5,mux,13}}.
 {{r4,6,1},{mux,0}}.
@@ -1557,6 +1655,7 @@
 {{mux0,mux1},{c4,6,2,mux,9}}.
 {{mux0,mux2},{le_buffer,6,1,0,7}}.
 {{mux1,mux1},{c4,6,5,mux,9}}.
+{{mux2,mux0},{le_buffer,6,1,0,5}}.
 {{mux3,mux0},{c4,6,4,mux,9}}.
 {{mux3,mux2},{r4,8,1,mux,2}}.
 {{r4,6,1},{mux,11}}.
@@ -1585,6 +1684,7 @@
 {{mux0,mux0},{le_buffer,6,1,0,15}}.
 {{mux1,mux1},{c4,6,5,mux,12}}.
 {{mux1,mux2},{r4,8,1,mux,6}}.
+{{mux3,mux0},{c4,6,4,mux,13}}.
 {{r4,6,1},{mux,15}}.
 {direct_link,{le_buffer,7,1,0,18}}.
 {{mux0,mux1},{c4,6,5,mux,13}}.
@@ -1596,6 +1696,7 @@
 {{mux0,mux2},{le_buffer,5,2,0,1}}.
 {{mux1,mux1},{r4,3,2,mux,0}}.
 {{mux2,mux0},{c4,5,5,mux,7}}.
+{{mux2,mux1},{le_buffer,6,3,0,10}}.
 {{mux3,mux1},{c4,5,0,mux,7}}.
 {{mux3,mux2},{r4,2,2,mux,2}}.
 {{r4,6,2},{mux,1}}.
@@ -1612,6 +1713,7 @@
 {direct_link,{le_buffer,5,2,0,9}}.
 {{mux0,mux1},{c4,5,1,mux,3}}.
 {{mux2,mux1},{r4,2,2,mux,1}}.
+{{mux3,mux0},{r4,7,2,mux,9}}.
 {{r4,6,2},{mux,4}}.
 {{mux0,mux1},{le_buffer,6,1,0,0}}.
 {{mux1,mux2},{r4,2,2,mux,6}}.
@@ -1637,6 +1739,7 @@
 {{mux0,mux2},{c4,6,0,mux,8}}.
 {{mux1,mux0},{c4,6,3,mux,7}}.
 {{mux2,mux0},{le_buffer,6,2,0,1}}.
+{{mux3,mux1},{c4,6,4,mux,7}}.
 {{r4,6,2},{mux,9}}.
 {direct_link,{le_buffer,7,2,0,4}}.
 {{mux0,mux1},{r4,6,2,mux,3}}.
@@ -1678,6 +1781,7 @@
 {{mux2,mux1},{r4,6,2,mux,7}}.
 {{r4,6,2},{mux,14}}.
 {{mux1,mux2},{r4,8,2,mux,6}}.
+{{mux2,mux1},{c4,6,1,mux,6}}.
 {{mux2,mux2},{le_buffer,6,2,0,17}}.
 {{mux3,mux0},{c4,6,5,mux,13}}.
 {{mux3,mux2},{c4,6,5,mux,12}}.
@@ -1686,12 +1790,15 @@
 {{mux1,mux0},{le_buffer,6,2,0,19}}.
 {{mux2,mux2},{c4,6,3,mux,13}}.
 {{mux3,mux0},{c4,6,5,mux,13}}.
+{{mux3,mux2},{c4,6,4,mux,13}}.
 {{r4,6,3},{mux,0}}.
 {{mux0,mux0},{c4,5,0,mux,7}}.
 {{mux1,mux0},{c4,5,5,mux,7}}.
+{{mux2,mux1},{le_buffer,6,4,0,10}}.
 {{mux2,mux2},{c4,5,4,mux,7}}.
 {{mux3,mux2},{r4,2,3,mux,0}}.
 {{r4,6,3},{mux,1}}.
+{{mux0,mux0},{c4,5,4,mux,8}}.
 {{mux0,mux2},{le_buffer,6,3,0,4}}.
 {{mux1,mux1},{c4,5,0,mux,8}}.
 {{mux1,mux2},{c4,5,5,mux,8}}.
@@ -1699,6 +1806,7 @@
 {direct_link,{le_buffer,5,3,0,7}}.
 {{mux1,mux1},{r4,3,3,mux,2}}.
 {{mux1,mux2},{c4,5,0,mux,10}}.
+{{mux3,mux1},{r4,4,3,mux,1}}.
 {{mux3,mux2},{r4,2,3,mux,1}}.
 {{r4,6,3},{mux,3}}.
 {direct_link,{le_buffer,5,3,0,9}}.
@@ -1717,6 +1825,7 @@
 {{mux2,mux0},{le_buffer,6,3,0,16}}.
 {{mux2,mux1},{r4,6,3,mux,13}}.
 {{r4,6,3},{mux,7}}.
+{{mux0,mux0},{le_buffer,6,3,0,18}}.
 {{mux0,mux1},{r4,2,3,mux,6}}.
 {{mux2,mux1},{c4,5,4,mux,13}}.
 {{r4,6,3},{mux,8}}.
@@ -1750,6 +1859,7 @@
 {{mux2,mux0},{c4,6,5,mux,9}}.
 {{mux3,mux0},{le_buffer,6,3,0,9}}.
 {{mux3,mux1},{r4,8,3,mux,3}}.
+{{mux3,mux2},{r4,6,3,mux,2}}.
 {{r4,6,3},{mux,12}}.
 {direct_link,{le_buffer,7,3,0,12}}.
 {{mux0,mux0},{le_buffer,6,3,0,11}}.
@@ -1775,6 +1885,7 @@
 {direct_link,{le_buffer,7,3,0,18}}.
 {{mux1,mux0},{le_buffer,6,3,0,19}}.
 {{mux1,mux1},{r4,8,3,mux,7}}.
+{{mux2,mux2},{c4,6,4,mux,13}}.
 {{mux3,mux2},{c4,6,5,mux,13}}.
 {{r4,6,4},{mux,0}}.
 {direct_link,{le_buffer,6,4,0,0}}.
@@ -1787,6 +1898,7 @@
 {{mux3,mux1},{c4,5,2,mux,0}}.
 {{mux3,mux2},{r4,2,4,mux,0}}.
 {{r4,6,4},{mux,1}}.
+{direct_link,{le_buffer,5,4,0,3}}.
 {{mux2,mux0},{c4,5,5,mux,1}}.
 {{mux3,mux1},{r4,2,4,mux,3}}.
 {{r4,6,4},{mux,2}}.
@@ -1794,6 +1906,7 @@
 {{mux0,mux0},{le_buffer,6,4,0,6}}.
 {{mux1,mux0},{c4,5,5,mux,2}}.
 {{mux1,mux2},{c4,5,1,mux,3}}.
+{{mux3,mux1},{r4,4,4,mux,2}}.
 {{mux3,mux2},{r4,2,4,mux,2}}.
 {{r4,6,4},{mux,3}}.
 {direct_link,{le_buffer,5,4,0,9}}.
@@ -1801,7 +1914,9 @@
 {{mux0,mux2},{c4,5,1,mux,3}}.
 {{mux1,mux2},{r4,3,4,mux,1}}.
 {{mux2,mux1},{r4,2,4,mux,1}}.
+{{mux3,mux1},{r4,4,4,mux,2}}.
 {{r4,6,4},{mux,4}}.
+{{mux0,mux1},{le_buffer,6,3,0,0}}.
 {{mux0,mux2},{c4,5,3,mux,4}}.
 {{mux1,mux2},{r4,2,4,mux,4}}.
 {{mux2,mux1},{r4,4,4,mux,4}}.
@@ -1810,7 +1925,9 @@
 {direct_link,{le_buffer,5,4,0,13}}.
 {{mux1,mux1},{r4,2,4,mux,7}}.
 {{mux2,mux0},{c4,5,3,mux,5}}.
+{{mux2,mux2},{le_buffer,6,4,0,14}}.
 {{r4,6,4},{mux,6}}.
+{{mux0,mux0},{le_buffer,6,4,0,18}}.
 {{mux1,mux2},{r4,2,4,mux,6}}.
 {{mux2,mux0},{le_buffer,6,4,0,16}}.
 {{r4,6,4},{mux,7}}.
@@ -1827,6 +1944,7 @@
 {{mux3,mux0},{r4,8,4,mux,0}}.
 {{r4,6,4},{mux,9}}.
 {direct_link,{le_buffer,7,4,0,4}}.
+{{mux0,mux2},{c4,6,2,mux,1}}.
 {{r4,6,4},{mux,10}}.
 {direct_link,{le_buffer,7,4,0,6}}.
 {{mux0,mux1},{c4,6,5,mux,9}}.
@@ -1834,6 +1952,7 @@
 {{mux1,mux1},{c4,6,5,mux,2}}.
 {{mux1,mux2},{c4,6,1,mux,2}}.
 {{mux2,mux0},{le_buffer,6,4,0,5}}.
+{{mux2,mux2},{r4,3,4,mux,3}}.
 {{mux3,mux1},{c4,6,0,mux,9}}.
 {{mux3,mux2},{r4,8,4,mux,2}}.
 {{r4,6,4},{mux,11}}.
@@ -1870,6 +1989,7 @@
 {{mux0,mux2},{le_buffer,6,1,0,1}}.
 {{mux1,mux1},{r4,4,1,mux,0}}.
 {{mux1,mux2},{c4,6,0,mux,0}}.
+{{mux3,mux0},{r4,7,1,mux,8}}.
 {{mux3,mux2},{r4,3,1,mux,2}}.
 {{r4,7,1},{mux,1}}.
 {{mux3,mux1},{r4,3,1,mux,0}}.
@@ -1912,6 +2032,7 @@
 {{mux3,mux0},{c4,7,4,mux,9}}.
 {{r4,7,1},{mux,11}}.
 {direct_link,{io_data_in,8,1,4,0}}.
+{{mux1,mux1},{r4,8,1,mux,3}}.
 {{mux2,mux0},{c4,7,3,mux,9}}.
 {{mux3,mux0},{le_buffer,7,1,0,9}}.
 {{r4,7,1},{mux,12}}.
@@ -1927,6 +2048,7 @@
 {{r4,7,1},{mux,14}}.
 {direct_link,{io_data_in,8,1,1,0}}.
 {{mux0,mux0},{le_buffer,7,1,0,15}}.
+{{mux2,mux0},{c4,7,3,mux,12}}.
 {{mux2,mux2},{le_buffer,7,1,0,17}}.
 {{mux3,mux2},{c4,7,4,mux,12}}.
 {{r4,7,1},{mux,15}}.
@@ -2003,6 +2125,7 @@
 {{r4,7,2},{mux,15}}.
 {direct_link,{io_data_in,8,2,2,0}}.
 {{mux1,mux0},{le_buffer,7,2,0,19}}.
+{{mux2,mux1},{le_buffer,7,2,0,17}}.
 {{mux2,mux2},{c4,7,3,mux,13}}.
 {{r4,7,3},{mux,0}}.
 {{mux0,mux1},{r4,5,3,mux,0}}.
@@ -2042,6 +2165,7 @@
 {direct_link,{io_data_in,8,3,1,0}}.
 {{mux0,mux1},{io_data_in,8,3,0,0}}.
 {{mux1,mux0},{c4,7,4,mux,7}}.
+{{mux1,mux2},{r4,8,3,mux,0}}.
 {{mux2,mux1},{c4,7,0,mux,7}}.
 {{mux3,mux1},{c4,7,5,mux,7}}.
 {{r4,7,3},{mux,9}}.
@@ -2051,6 +2175,7 @@
 {{mux3,mux0},{c4,7,5,mux,8}}.
 {{r4,7,3},{mux,10}}.
 {direct_link,{io_data_in,8,3,3,0}}.
+{{mux0,mux0},{c4,7,1,mux,2}}.
 {{mux0,mux1},{c4,7,4,mux,9}}.
 {{mux0,mux2},{le_buffer,7,3,0,7}}.
 {{mux1,mux2},{c4,7,0,mux,9}}.
@@ -2097,6 +2222,7 @@
 {{mux0,mux0},{le_buffer,7,4,0,18}}.
 {{mux0,mux1},{r4,3,4,mux,5}}.
 {{mux1,mux1},{r4,5,4,mux,5}}.
+{{mux1,mux2},{r4,6,4,mux,5}}.
 {{mux3,mux2},{r4,4,4,mux,6}}.
 {{r4,7,4},{mux,8}}.
 {direct_link,{io_data_in,8,4,1,0}}.
@@ -2124,14 +2250,18 @@
 {{r4,7,4},{mux,11}}.
 {direct_link,{io_data_in,8,4,4,0}}.
 {{mux0,mux2},{c4,7,3,mux,3}}.
+{{mux1,mux2},{c4,7,2,mux,3}}.
+{{mux2,mux2},{r4,4,4,mux,2}}.
 {{mux3,mux0},{le_buffer,7,4,0,9}}.
 {{r4,7,4},{mux,12}}.
 {{mux0,mux0},{le_buffer,7,4,0,11}}.
+{{mux1,mux1},{c4,7,2,mux,4}}.
 {{mux3,mux1},{c4,7,0,mux,1}}.
 {{r4,7,4},{mux,13}}.
 {direct_link,{io_data_in,8,4,0,0}}.
 {{mux0,mux0},{le_buffer,7,4,0,13}}.
 {{mux1,mux0},{c4,7,2,mux,5}}.
+{{mux2,mux1},{r4,7,4,mux,7}}.
 {{mux3,mux1},{c4,7,3,mux,5}}.
 {{r4,7,4},{mux,14}}.
 {direct_link,{io_data_in,8,4,1,0}}.
@@ -2149,11 +2279,13 @@
 {{mux1,mux2},{c4,7,5,mux,8}}.
 {{mux2,mux1},{io_data_in,8,1,1,0}}.
 {{r4,8,1},{mux,2}}.
+{{mux1,mux0},{c4,7,3,mux,9}}.
 {{mux2,mux1},{le_buffer,7,1,0,5}}.
 {{mux2,mux2},{io_data_in,8,1,3,0}}.
 {{r4,8,1},{mux,3}}.
 {{mux1,mux0},{c4,7,3,mux,9}}.
 {{mux2,mux0},{io_data_in,8,1,4,0}}.
+{{mux3,mux1},{r4,6,1,mux,1}}.
 {{r4,8,1},{mux,5}}.
 {direct_link,{le_buffer,7,1,0,13}}.
 {{mux2,mux2},{io_data_in,8,1,0,0}}.
@@ -2170,9 +2302,11 @@
 {{mux1,mux1},{c4,7,4,mux,7}}.
 {{mux2,mux2},{c4,7,3,mux,7}}.
 {{r4,8,2},{mux,1}}.
+{{mux0,mux0},{c4,7,4,mux,8}}.
 {{mux0,mux2},{io_data_in,8,2,2,0}}.
 {{mux2,mux1},{io_data_in,8,2,1,0}}.
 {{r4,8,2},{mux,2}}.
+{{mux0,mux0},{r4,6,2,mux,1}}.
 {{mux2,mux2},{io_data_in,8,2,3,0}}.
 {{r4,8,2},{mux,3}}.
 {{mux1,mux0},{c4,7,4,mux,9}}.
@@ -2187,6 +2321,7 @@
 {{mux1,mux2},{r4,6,2,mux,6}}.
 {{r4,8,3},{mux,0}}.
 {direct_link,{io_data_in,8,3,0,0}}.
+{{mux3,mux1},{c4,7,1,mux,0}}.
 {{r4,8,3},{mux,1}}.
 {{mux0,mux1},{c4,7,0,mux,8}}.
 {{mux0,mux2},{io_data_in,8,3,2,0}}.
@@ -2201,10 +2336,12 @@
 {{r4,8,3},{mux,4}}.
 {{mux1,mux0},{r4,7,3,mux,6}}.
 {{mux2,mux0},{io_data_in,8,2,0,0}}.
+{{mux2,mux1},{r4,4,3,mux,6}}.
 {{r4,8,3},{mux,5}}.
 {{mux2,mux2},{io_data_in,8,3,0,0}}.
 {{r4,8,3},{mux,6}}.
 {{mux0,mux2},{io_data_in,8,3,1,0}}.
+{{mux1,mux1},{r4,7,3,mux,7}}.
 {{r4,8,3},{mux,7}}.
 {{mux0,mux0},{io_data_in,8,3,2,0}}.
 {{mux1,mux2},{r4,5,3,mux,6}}.

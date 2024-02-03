@@ -116,6 +116,12 @@ fold_from(_, From = {lab_clk, _, _, 0, _}) ->
 fold_from(_, From = {le_buffer, _, _, 0, _}) ->
     From;
 fold_from(_, From = {io_data_in, _, _, _, 0}) ->
+    From;
+fold_from(_, From = {jtag_tck_tap, _, _, _, 0}) ->
+    From;
+fold_from(_, From = {jtag_tdi_tap, _, _, _, 0}) ->
+    From;
+fold_from(_, From = {jtag_tms_tap, _, _, _, 0}) ->
     From.
 
 %%--------------------------------------------------------------------
