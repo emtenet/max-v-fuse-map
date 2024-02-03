@@ -17,7 +17,7 @@ control_routing_experiment({Name, _, #{signals := Signals}}) ->
     io:format(" --> ~p~n", [Name]),
     Routing = maps:fold(fun control_routing_signal/3, [], Signals),
     [
-        io:format("  ~12w ~6w <- ~p~n", [LC, Port, Route])
+        io:format("  ~12w ~8w <- ~p~n", [LC, Port, Route])
         ||
         {LC, Port, Route} <- lists:sort(Routing)
     ].
@@ -45,16 +45,27 @@ control_routing_dest(D = #{lc := LC, port := Port, route := Route}, Routing) ->
             #{route_port := Data} = D,
             [{LC, Data, From} | Routing]
     end;
-control_routing_dest(#{ioc := IOC, route := Route}, Routing) ->
+control_routing_dest(#{ioc := IOC, port := Port, route := Route}, Routing) ->
     case Route of
         [{io_bypass_out, _, _, _, 0}, From | _] ->
-            [{IOC, bypass, From} | Routing];
+            [{IOC, Port, From} | Routing];
 
         [{io_data_out, _, _, _, 0}, From | _] ->
-            [{IOC, output, From} | Routing];
+            [{IOC, Port, From} | Routing];
 
         [{io_oe, _, _, _, 0}, From | _] ->
-            [{IOC, enable, From} | Routing]
+            [{IOC, Port, From} | Routing];
+
+        [] ->
+            [{IOC, Port, internal} | Routing]
+    end;
+control_routing_dest(#{jtag := JTAG, port := Port, route := Route}, Routing) ->
+    case Route of
+        [{jtag_tdo_user, _, _, _, _}, From | _] ->
+            [{JTAG, Port, From} | Routing];
+
+        [] ->
+            [{JTAG, Port, internal} | Routing]
     end.
 
 %%====================================================================

@@ -91,6 +91,7 @@ My experiments are being run in the following
  * [SAP-1](experiments/src/sample_sap1_experiment.erl)
  * [LC feedback](experiments/src/lc_feedback_experiment.erl)
  * [Register chain](experiments/src/lc_register_chain_experiment.erl)
+ * [megafunctions](experiments/src/megafunctions_experiment.erl)
 
 ## Maps
 

@@ -104,6 +104,14 @@ decode(<<"signal_name = ", Line/binary>>, _) ->
                 name => decode_name(Signal),
                 ioc => IOC,
                 dests => []
+            }};
+
+        <<"JTAG_", _/binary>> ->
+            {ok, JTAG, <<>>} = jtag:parse(Comment),
+            {signal, #{
+                name => decode_name(Signal),
+                jtag => JTAG,
+                dests => []
             }}
     end.
 
@@ -243,6 +251,18 @@ decode_signal(<<"IO_DATAOUT:", Line/binary>>) ->
 decode_signal(<<"IO_OE_PIN:", Line/binary>>) ->
     {X, Y, S, I} = decode_coord(Line),
     {push, {io_oe, X, Y, S, I}};
+decode_signal(<<"JTAG_TCKUTAP_PIN:", Line/binary>>) ->
+    {X, Y, S, I} = decode_coord(Line),
+    {push, {jtag_tck_tap, X, Y, S, I}};
+decode_signal(<<"JTAG_TDIUTAP_PIN:", Line/binary>>) ->
+    {X, Y, S, I} = decode_coord(Line),
+    {push, {jtag_tdi_tap, X, Y, S, I}};
+decode_signal(<<"JTAG_TDOUSER_PIN:", Line/binary>>) ->
+    {X, Y, S, I} = decode_coord(Line),
+    {push, {jtag_tdo_user, X, Y, S, I}};
+decode_signal(<<"JTAG_TMSUTAP_PIN:", Line/binary>>) ->
+    {X, Y, S, I} = decode_coord(Line),
+    {push, {jtag_tms_tap, X, Y, S, I}};
 decode_signal(<<"LAB_CLK:", Line/binary>>) ->
     {X, Y, S, I} = decode_coord(Line),
     {push, {lab_clk, X, Y, S, I}};
@@ -297,7 +317,17 @@ decode_dest(Name, <<"SCLR )", Line/binary>>) ->
 decode_dest(Name, <<"SLOAD )", Line/binary>>) ->
     decode_dest_lc(Name, s_load, Line);
 decode_dest(Name, <<"SYNCH_DATA ), route_port = ", Line/binary>>) ->
-    decode_dest_route(Name, s_data, Line).
+    decode_dest_route(Name, s_data, Line);
+decode_dest(Name, <<"TCK )", Line/binary>>) ->
+    decode_dest_jtag(Name, tck, Line);
+decode_dest(Name, <<"TDI )", Line/binary>>) ->
+    decode_dest_jtag(Name, tdi, Line);
+decode_dest(Name, <<"TDO )", Line/binary>>) ->
+    decode_dest_jtag(Name, tdo, Line);
+decode_dest(Name, <<"TDOUSER )", Line/binary>>) ->
+    decode_dest_jtag(Name, tdo_user, Line);
+decode_dest(Name, <<"TMS )", Line/binary>>) ->
+    decode_dest_jtag(Name, tms, Line).
 
 %%--------------------------------------------------------------------
 
@@ -307,6 +337,16 @@ decode_dest_ioc(Name, Port, <<";\t#", IOC0/binary>>) ->
         name => Name,
         port => Port,
         ioc => IOC
+    }}.
+
+%%--------------------------------------------------------------------
+
+decode_dest_jtag(Name, Port, <<";\t#", JTAG0/binary>>) ->
+    {ok, JTAG, <<>>} = jtag:parse(JTAG0),
+    {dest, #{
+        name => Name,
+        port => Port,
+        jtag => JTAG
     }}.
 
 %%--------------------------------------------------------------------
