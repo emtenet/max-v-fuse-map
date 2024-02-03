@@ -222,7 +222,24 @@ collect_dest(Dest = #{route := Route}, Key, Blocks0) ->
             Index = N,
             collect_block(Block, Index, From, Key, Blocks);
 
+        #{ioc := {ioc, X, Y, N}, port := Type, route := []} ->
+            Block = {Type, X, Y},
+            Index = N,
+            From = internal,
+            collect_block(Block, Index, From, Key, Blocks);
+
         #{ioc := {ioc, X, Y, N}, port := Type, route := [From | _]} ->
+            Block = {Type, X, Y},
+            Index = N,
+            collect_block(Block, Index, From, Key, Blocks);
+
+        #{jtag := {jtag, X, Y, N}, port := Type, route := []} ->
+            Block = {Type, X, Y},
+            Index = N,
+            From = internal,
+            collect_block(Block, Index, From, Key, Blocks);
+
+        #{jtag := {jtag, X, Y, N}, port := Type, route := [From | _]} ->
             Block = {Type, X, Y},
             Index = N,
             collect_block(Block, Index, From, Key, Blocks)
@@ -246,6 +263,8 @@ collect_thru({Type = io_bypass_out, X, Y, Index, 0}) ->
 collect_thru({Type = io_data_out, X, Y, Index, 0}) ->
     {{Type, X, Y}, Index};
 collect_thru({Type = io_oe, X, Y, Index, 0}) ->
+    {{Type, X, Y}, Index};
+collect_thru({Type = jtag_tdo_user, X, Y, Index, 0}) ->
     {{Type, X, Y}, Index};
 collect_thru({Type, X, Y, 0, Index}) ->
     {{Type, X, Y}, Index}.
