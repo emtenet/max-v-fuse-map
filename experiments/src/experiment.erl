@@ -4,6 +4,7 @@
 -export([compile_to_fuses/1]).
 -export([compile_to_fuses_and_rcf/1]).
 -export([compile_to_rcf/1]).
+-export([fit_error/1]).
 -export([flush/1]).
 -export([fuses/1]).
 -export([pof/1]).
@@ -38,7 +39,7 @@
 
 compile(Compile = #{device := Device}) ->
     Source = experiment_compile:pre(Compile),
-    submit_single(Device, Source);
+    submit_single(Device, Source, compile);
 compile([]) ->
     {ok, []};
 compile(Compiles) when is_list(Compiles) ->
@@ -122,6 +123,16 @@ compile_to_rcf([Compile | Compiles], [Result | Results], Answers) ->
     compile_to_rcf(Compiles, Results, [Answer | Answers]).
 
 %%====================================================================
+%% fit_error
+%%====================================================================
+
+-spec fit_error(compile()) -> ok | {ok, result()} | error.
+
+fit_error(Compile = #{device := Device}) ->
+    Source = experiment_compile:pre(Compile),
+    submit_single(Device, Source, fit_error).
+
+%%====================================================================
 %% flush
 %%====================================================================
 
@@ -168,29 +179,36 @@ rcf({_, _, RCFBinary}) ->
 %% single
 %%====================================================================
 
-submit_single(Device, Source) ->
+submit_single(Device, Source, Compile) ->
     case experiment_server:submit(Source) of
         {ok, Cached} ->
             {ok, Cached};
 
         {pickup, JobRef} ->
-            pickup_single(Device, JobRef);
+            pickup_single(Device, JobRef, Compile);
 
         busy ->
-            submit_single(Device, Source)
+            submit_single(Device, Source, Compile)
     end.
 
 %%--------------------------------------------------------------------
 
-pickup_single(Device, JobRef) ->
+pickup_single(Device, JobRef, Compile) ->
     case experiment_server:pickup_sleep([JobRef]) of
         {ok, Replies} ->
             #{JobRef := Result} = Replies,
-            experiment_compile:post(Device, Result);
+            result_single(Device, Result, Compile);
 
         false ->
-            pickup_single(Device, JobRef)
+            pickup_single(Device, JobRef, Compile)
     end.
+
+%%--------------------------------------------------------------------
+
+result_single(Device, Result, compile) ->
+    experiment_compile:post(Device, Result);
+result_single(Device, Result, fit_error) ->
+    experiment_compile:fit_error(Device, Result).
 
 %%====================================================================
 %% batch

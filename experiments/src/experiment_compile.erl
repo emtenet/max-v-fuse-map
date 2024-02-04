@@ -3,6 +3,7 @@
 -export([pre/1]).
 -export([connect/0]).
 -export([post/2]).
+-export([fit_error/2]).
 
 -export_type([files/0]).
 -export_type([job_ref/0]).
@@ -96,5 +97,25 @@ post_out(Who, Exit, Out) ->
     io:format("~s~n", [Out]),
     io:format("========================================~n", []),
     io:format("QUARTUS ~s: exit # ~p~n", [Who, Exit]),
+    error.
+
+%%====================================================================
+%% fit_error
+%%====================================================================
+
+-spec fit_error(device(), result()) -> ok | {ok, experiment:result()} | error.
+
+fit_error(Device, {ok, #{pof := POF, rcf := RCF}}) ->
+    {ok, {Device, POF, RCF}};
+fit_error(_, {error, {quartus_map, Exit, Out}}) ->
+    post_out("MAP", Exit, Out);
+fit_error(_, {error, {quartus_fit, _, _}}) ->
+    ok;
+fit_error(_, {error, {quartus_asm, Exit, Out}}) ->
+    post_out("ASM", Exit, Out);
+fit_error(_, {error, {quartus_cdb, Exit, Out}}) ->
+    post_out("CDB", Exit, Out);
+fit_error(_, {error, Error}) ->
+    io:format("QUARTUS: ~p~n", [Error]),
     error.
 
