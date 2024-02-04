@@ -92,6 +92,7 @@ My experiments are being run in the following
  * [LC feedback](experiments/src/lc_feedback_experiment.erl)
  * [Register chain](experiments/src/lc_register_chain_experiment.erl)
  * [megafunctions](experiments/src/megafunctions_experiment.erl)
+ * [Carry chain](experiments/src/lc_carry_chain_experiment.erl)
 
 ## Maps
 
@@ -495,6 +496,21 @@ Each LC can drive the LUT or register output to the left and right
 via direct-links, fast-outs, R4s & C4s.
 
 These fuses select the LUT output (instead of register output).
+
+### `{lc(), carry_in}`
+
+Most LCs can receive a carry-in from the "previous" LC.
+
+The carry-in always comes into the `data_c` input.
+
+The "previous" LC to `{lc, X, Y, N}` is:
+
+ * `{lc, X, Y, N - 1}` for `N` in `1..9`, otherwise
+ * `{lc, X - 1, Y, 9}` for `N` is `0`.
+
+NOTE: The carry-change can go across the whole row.
+
+NOTE: The left most `{lc, _, _, 0}` of each row cannot receive a carry-in.
 
 ### `{lc(), lut_chain, off}`
 

@@ -919,6 +919,7 @@
     ?LC_CELL(19, 1, {output_right, lut});
     ?LC_CELL(19, 2, clk2);
     ?LC_CELL(19, 3, {lut_chain, off});
+    ?LC_CELL(20, 0, carry_in);
     ?LC_CELL(20, 1, {output_left, lut});
     ?LC_CELL(20, 2, {register_chain, off});
     ?LC_CELL(20, 3, a_clr1);
