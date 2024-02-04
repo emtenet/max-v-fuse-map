@@ -126,8 +126,11 @@ routing(Experiments, Density) ->
 
 routing_experiment({Name, Fuses, #{signals := Signals}}, Density) ->
     io:format(" --> ~p~n", [Name]),
-    Routing0 = {#{}, #{}},
+    Routing0 = {#{}, #{}, #{}},
     Routing = maps:fold(fun routing_signal/3, Routing0, Signals),
+    lists:foreach(fun (Cell) ->
+        routing_cell(<<"JTAG">>, Cell, Fuses, Density)
+    end, lists:sort(maps:to_list(element(3, Routing)))),
     lists:foreach(fun (Cell) ->
         routing_cell(<<"IO">>, Cell, Fuses, Density)
     end, lists:sort(maps:to_list(element(2, Routing)))),
@@ -154,31 +157,46 @@ routing_dest(From, Dest, Routing) ->
             routing_add_lc(Name, LC, Route, Port, From, Routing);
 
         #{name := Name, ioc := IO, route := Route, port := Port} ->
-            routing_add_io(Name, IO, Route, Port, From, Routing)
+            routing_add_io(Name, IO, Route, Port, From, Routing);
+
+        #{name := Name, jtag := JTAG, route := Route, port := Port} ->
+            routing_add_jtag(Name, JTAG, Route, Port, From, Routing)
     end.
 
 %%--------------------------------------------------------------------
 
-routing_add_lc(Name, LC, Route, Port, From, {LCs, IOs}) ->
+routing_add_lc(Name, LC, Route, Port, From, {LCs, IOs, JTAGs}) ->
     case LCs of
         #{Name := Existing} ->
             {LC, Ports} = Existing,
-            {LCs#{Name => {LC, Ports#{Port => {From, Route}}}}, IOs};
+            {LCs#{Name => {LC, Ports#{Port => {From, Route}}}}, IOs, JTAGs};
 
         _ ->
-            {LCs#{Name => {LC, #{Port => {From, Route}}}}, IOs}
+            {LCs#{Name => {LC, #{Port => {From, Route}}}}, IOs, JTAGs}
     end.
 
 %%--------------------------------------------------------------------
 
-routing_add_io(Name, IO, Route, Port, From, {LCs, IOs}) ->
+routing_add_io(Name, IO, Route, Port, From, {LCs, IOs, JTAGs}) ->
     case IOs of
         #{Name := Existing} ->
             {IO, Ports} = Existing,
-            {LCs, IOs#{Name => {IO, Ports#{Port => {From, Route}}}}};
+            {LCs, IOs#{Name => {IO, Ports#{Port => {From, Route}}}}, JTAGs};
 
         _ ->
-            {LCs, IOs#{Name => {IO, #{Port => {From, Route}}}}}
+            {LCs, IOs#{Name => {IO, #{Port => {From, Route}}}}, JTAGs}
+    end.
+
+%%--------------------------------------------------------------------
+
+routing_add_jtag(Name, JTAG, Route, Port, From, {LCs, IOs, JTAGs}) ->
+    case JTAGs of
+        #{Name := Existing} ->
+            {JTAG, Ports} = Existing,
+            {LCs, IOs, JTAGs#{Name => {JTAG, Ports#{Port => {From, Route}}}}};
+
+        _ ->
+            {LCs, IOs, JTAGs#{Name => {JTAG, #{Port => {From, Route}}}}}
     end.
 
 %%--------------------------------------------------------------------
