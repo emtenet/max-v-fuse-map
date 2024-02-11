@@ -1,4 +1,4 @@
--module(lc_carry_chain_experiment).
+-module(lc_carry_chain_3_experiment).
 
 -export([run/0]).
 
@@ -40,26 +40,24 @@ density(Density) ->
 %%--------------------------------------------------------------------
 
 sources(Density, Device, LAB, Pins) ->
-    Adjacent0 = source(Device, LAB, 7, 8, 9, Pins),
-    Adjacent = case adjacent(Density, LAB) of
+    case adjacent(Density, LAB) of
         {ok, _} ->
-            [Adjacent0];
+            [
+                source(Device, LAB, N, Pins)
+                ||
+                N <- lists:seq(0, 9)
+            ];
 
         false ->
-            ok = experiment:fit_error(Adjacent0),
-            []
-    end,
-    [
-        source(Device, LAB, 0, 1, 2, Pins),
-        source(Device, LAB, 1, 2, 3, Pins),
-        source(Device, LAB, 2, 3, 4, Pins),
-        source(Device, LAB, 3, 4, 5, Pins),
-        source(Device, LAB, 4, 5, 6, Pins),
-        source(Device, LAB, 5, 6, 7, Pins),
-        source(Device, LAB, 6, 7, 8, Pins)
-        |
-        Adjacent
-    ].
+            ok = experiment:fit_error(
+                source(Device, LAB, 7, Pins)
+            ),
+            [
+                source(Device, LAB, N, Pins)
+                ||
+                N <- lists:seq(0, 6)
+            ]
+    end.
 
 %%--------------------------------------------------------------------
 
@@ -102,44 +100,46 @@ experiments(Density, Device, LAB, Experiments) ->
     %
     %matrix:print(Matrix),
     %display:control_routing(Experiments),
+    %display:routing(Experiments, Density),
     %
-    case adjacent(Density, LAB) of
-        {ok, ADJ} ->
-            expect:fuse(Matrix, [0,1,1,1,1,1,1,1], {lab:lc(LAB, 1), carry_in}),
-            expect:fuse(Matrix, [0,0,1,1,1,1,1,1], {lab:lc(LAB, 2), carry_in}),
-            expect:fuse(Matrix, [0,0,0,1,1,1,1,1], {lab:lc(LAB, 3), carry_in}),
-            expect:fuse(Matrix, [1,0,0,0,1,1,1,1], {lab:lc(LAB, 4), carry_in}),
-            expect:fuse(Matrix, [1,1,0,0,0,1,1,1], {lab:lc(LAB, 5), carry_in}),
-            expect:fuse(Matrix, [1,1,1,0,0,0,1,1], {lab:lc(LAB, 6), carry_in}),
-            expect:fuse(Matrix, [1,1,1,1,0,0,0,1], {lab:lc(LAB, 7), carry_in}),
-            expect:fuse(Matrix, [1,1,1,1,1,0,0,0], {lab:lc(LAB, 8), carry_in}),
-            expect:fuse(Matrix, [1,1,1,1,1,1,0,0], {lab:lc(LAB, 9), carry_in}),
-            expect:fuse(Matrix, [1,1,1,1,1,1,1,0], {lab:lc(ADJ, 0), carry_in});
-
-        false ->
-            expect:fuse(Matrix, [0,1,1,1,1,1,1], {lab:lc(LAB, 1), carry_in}),
-            expect:fuse(Matrix, [0,0,1,1,1,1,1], {lab:lc(LAB, 2), carry_in}),
-            expect:fuse(Matrix, [0,0,0,1,1,1,1], {lab:lc(LAB, 3), carry_in}),
-            expect:fuse(Matrix, [1,0,0,0,1,1,1], {lab:lc(LAB, 4), carry_in}),
-            expect:fuse(Matrix, [1,1,0,0,0,1,1], {lab:lc(LAB, 5), carry_in}),
-            expect:fuse(Matrix, [1,1,1,0,0,0,1], {lab:lc(LAB, 6), carry_in}),
-            expect:fuse(Matrix, [1,1,1,1,0,0,0], {lab:lc(LAB, 7), carry_in}),
-            expect:fuse(Matrix, [1,1,1,1,1,0,0], {lab:lc(LAB, 8), carry_in}),
-            expect:fuse(Matrix, [1,1,1,1,1,1,0], {lab:lc(LAB, 9), carry_in})
-    end,
+    expect(Matrix, LAB, adjacent(Density, LAB)),
     %
     ok.
 
 %%--------------------------------------------------------------------
 
-source(Device, LAB, X, Y, Z, {A0, A1, A2, B0, B1, B2, S0, S1, S2, C3}) ->
+expect(Matrix, LAB, {ok, ADJ}) ->
+    expect:fuse(Matrix, [0,1,1,1,1,1,1,1,1,1], {lab:lc(LAB, 1), carry_in}),
+    expect:fuse(Matrix, [0,0,1,1,1,1,1,1,1,1], {lab:lc(LAB, 2), carry_in}),
+    expect:fuse(Matrix, [0,0,0,1,1,1,1,1,1,1], {lab:lc(LAB, 3), carry_in}),
+    expect:fuse(Matrix, [1,0,0,0,1,1,1,1,1,1], {lab:lc(LAB, 4), carry_in}),
+    expect:fuse(Matrix, [1,1,0,0,0,1,1,1,1,1], {lab:lc(LAB, 5), carry_in}),
+    expect:fuse(Matrix, [1,1,1,0,0,0,1,1,1,1], {lab:lc(LAB, 6), carry_in}),
+    expect:fuse(Matrix, [1,1,1,1,0,0,0,1,1,1], {lab:lc(LAB, 7), carry_in}),
+    expect:fuse(Matrix, [1,1,1,1,1,0,0,0,1,1], {lab:lc(LAB, 8), carry_in}),
+    expect:fuse(Matrix, [1,1,1,1,1,1,0,0,0,1], {lab:lc(LAB, 9), carry_in}),
+    expect:fuse(Matrix, [1,1,1,1,1,1,1,0,0,0], {lab:lc(ADJ, 0), carry_in}),
+    expect:fuse(Matrix, [1,1,1,1,1,1,1,1,0,0], {lab:lc(ADJ, 1), carry_in}),
+    expect:fuse(Matrix, [1,1,1,1,1,1,1,1,1,0], {lab:lc(ADJ, 2), carry_in});
+expect(Matrix, LAB, false) ->
+    expect:fuse(Matrix, [0,1,1,1,1,1,1], {lab:lc(LAB, 1), carry_in}),
+    expect:fuse(Matrix, [0,0,1,1,1,1,1], {lab:lc(LAB, 2), carry_in}),
+    expect:fuse(Matrix, [0,0,0,1,1,1,1], {lab:lc(LAB, 3), carry_in}),
+    expect:fuse(Matrix, [1,0,0,0,1,1,1], {lab:lc(LAB, 4), carry_in}),
+    expect:fuse(Matrix, [1,1,0,0,0,1,1], {lab:lc(LAB, 5), carry_in}),
+    expect:fuse(Matrix, [1,1,1,0,0,0,1], {lab:lc(LAB, 6), carry_in}),
+    expect:fuse(Matrix, [1,1,1,1,0,0,0], {lab:lc(LAB, 7), carry_in}),
+    expect:fuse(Matrix, [1,1,1,1,1,0,0], {lab:lc(LAB, 8), carry_in}),
+    expect:fuse(Matrix, [1,1,1,1,1,1,0], {lab:lc(LAB, 9), carry_in}).
+
+%%--------------------------------------------------------------------
+
+source(Device, LAB, N, {A0, A1, A2, B0, B1, B2, S0, S1, S2, C3}) ->
     #{
-        title => {LAB, adder, X, Y, Z},
+        title => {LAB, adder, N},
         device => Device,
         settings => [
-            {location, <<"cs0~0">>, lab:lc(LAB, X)},
-            {location, <<"cs0~5">>, lab:lc(LAB, Y)},
-            {location, <<"cs0~10">>, lab:lc(LAB, Z)},
+            {location, <<"cs0~0">>, lab:lc(LAB, N)},
             {location, <<"a[0]">>, A0},
             {location, <<"a[1]">>, A1},
             {location, <<"a[2]">>, A2},

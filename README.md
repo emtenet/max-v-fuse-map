@@ -92,7 +92,10 @@ My experiments are being run in the following
  * [LC feedback](experiments/src/lc_feedback_experiment.erl)
  * [Register chain](experiments/src/lc_register_chain_experiment.erl)
  * [megafunctions](experiments/src/megafunctions_experiment.erl)
- * [Carry chain](experiments/src/lc_carry_chain_experiment.erl)
+ * [Carry chain 3](experiments/src/lc_carry_chain_3_experiment.erl)
+   ([4](experiments/src/lc_carry_chain_4_experiment.erl)
+   , [5](experiments/src/lc_carry_chain_5_experiment.erl)
+   , [9](experiments/src/lc_carry_chain_9_experiment.erl))
 
 ## Maps
 
