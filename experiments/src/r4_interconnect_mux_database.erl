@@ -95,14 +95,24 @@ fold_from_check(Density, R4, I, From0, Cached, Db) ->
 
 fold_from(Density, {c4, X, Y, 0, I}) ->
     Interconnect = {{c4, X, Y}, {interconnect, I}, dummy},
-    {ok, Mux} = c4_fuse_map:from_name(Interconnect, Density),
-    {{c4, XX, YY}, {mux, MM}, _} = Mux,
-    {c4, XX, YY, mux, MM};
+    case c4_fuse_map:from_name(Interconnect, Density) of
+        {ok, Mux} ->
+            {{c4, XX, YY}, {mux, MM}, _} = Mux,
+            {c4, XX, YY, mux, MM};
+
+        false ->
+            throw({c4_fuse_map,Interconnect})
+    end;
 fold_from(Density, {r4, X, Y, 0, I}) ->
     Interconnect = {{r4, X, Y}, {interconnect, I}, dummy},
-    {ok, Mux} = r4_fuse_map:from_name(Interconnect, Density),
-    {{r4, XX, YY}, {mux, MM}, _} = Mux,
-    {r4, XX, YY, mux, MM};
+    case r4_fuse_map:from_name(Interconnect, Density) of
+        {ok, Mux} ->
+            {{r4, XX, YY}, {mux, MM}, _} = Mux,
+            {r4, XX, YY, mux, MM};
+
+        false ->
+            throw({r4_fuse_map,Interconnect})
+    end;
 fold_from(_, From = {lab_clk, _, _, 0, _}) ->
     From;
 fold_from(_, From = {le_buffer, _, _, 0, _}) ->
