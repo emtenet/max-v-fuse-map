@@ -32,6 +32,7 @@ density(Density) ->
         source(Device, 2, Settings2),
         source(Device, 3, Settings3)
     ]),
+    _ = Experiments,
     %
     %Matrix0 = matrix:build(Device, Experiments),
     %Matrix = matrix:remove_fuses(Matrix0, fun
@@ -54,8 +55,7 @@ density(Density) ->
     %    (_) -> false
     %end),
     %matrix:print(Matrix),
-    display:routing(Experiments, Density),
-    %throw(stop),
+    %display:routing(Experiments, Density),
     %
     ok.
 

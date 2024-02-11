@@ -16,11 +16,15 @@ run() ->
 
 density(Density) ->
     Device = density:largest_device(Density),
-    {ok, _} = experiment:compile([
+    %ok = experiment:flush(source(Device, 1)),
+    {ok, Experiments} = experiment:compile_to_fuses_and_rcf([
         source(Device, Seed)
         ||
         Seed <- lists:seq(1, 20)
     ]),
+    _ = Experiments,
+    %[Experiment | _] = Experiments,
+    %display:routing([Experiment], Density),
     ok.
 
 %%--------------------------------------------------------------------

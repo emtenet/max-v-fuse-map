@@ -54,7 +54,7 @@ pins(Density, Device, [Pin | Pins], Other) ->
 pin(_Density, Device, Pin, Other) ->
     IOC = source:ioc(Pin),
     io:format(" => ~s ~w~n", [Device, IOC]),
-    {ok, Experiments} = experiment:compile_to_fuses([
+    {ok, Experiments} = experiment:compile_to_fuses_and_rcf([
         source:in_out(Device, input, [], Pin, Other),
         source:in_out(Device, bus_hold, [
             {bus_hold, i, true}
@@ -80,6 +80,7 @@ pin(_Density, Device, Pin, Other) ->
     ]),
     Matrix = matrix:build(Device, Experiments),
     %matrix:print(Matrix),
+    %display:routing(Experiments, _Density),
     %
     % in/out:     i i i i i o o o o
     fuse(Matrix, [1,0,1,1,1,1,1,1,1], IOC, bus_hold),

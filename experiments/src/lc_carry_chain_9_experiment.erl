@@ -67,9 +67,8 @@ experiments(Density, Device, LAB, Experiments) ->
     _ = Matrix,
     %matrix:print(Matrix),
     %display:control_routing(Experiments),
-    display:routing(Experiments, Density),
+    %display:routing(Experiments, Density),
     %
-    throw(stop),
     ok.
 
 %%--------------------------------------------------------------------

@@ -34,9 +34,13 @@ density(Density) ->
 
 block(Density, Device, {IOB, _}) ->
     Pins = device:iocs(Device, IOB),
+    [OO | _] = lists:subtract(
+        device:pins(Device),
+        lists:map(fun source:pin/1, Pins)
+    ),
     case lists:reverse(Pins) of
         [Other, Extra, _ | _] ->
-            pins(Density, Device, Pins, Other, Extra);
+            pins(Density, Device, Pins, Other, Extra, OO);
 
         _ ->
             ok
@@ -44,15 +48,15 @@ block(Density, Device, {IOB, _}) ->
 
 %%--------------------------------------------------------------------
 
-pins(_, _, [], _, _) ->
+pins(_, _, [], _, _, _) ->
     ok;
-pins(Density, Device, [Pin | Pins], Other, Extra) ->
-    pin(Density, Device, Pin, Other, Extra),
-    pins(Density, Device, Pins, Pin, Other).
+pins(Density, Device, [Pin | Pins], Other, Extra, OO) ->
+    pin(Density, Device, Pin, Other, Extra, OO),
+    pins(Density, Device, Pins, Pin, Other, OO).
 
 %%--------------------------------------------------------------------
 
-pin(_Density, Device, O, I, OE) ->
+pin(_Density, Device, O, I, OE, OO) ->
     io:format(" => ~s ~w (oe ~w)~n", [Device, source:ioc(O), source:ioc(OE)]),
     {ok, Experiments} = experiment:compile_to_fuses_and_rcf([
         source:in_out(Device, out, I, O),
@@ -64,7 +68,7 @@ pin(_Density, Device, O, I, OE) ->
         source:in_out(Device, out_0, 0, O),
         source:in_out(Device, out_inv, {inv, I}, O),
         source:in_out(Device, in, [], O, I),
-        bidir(Device, bidir, [], OE, O, I)
+        bidir(Device, bidir, [], I, OE, O, OO)
     ]),
     %io:format("~p~n", [[{Title, RCF} || {Title, _, RCF} <- Experiments]]),
     %throw(stop),
@@ -76,6 +80,7 @@ pin(_Density, Device, O, I, OE) ->
         (_) -> false
     end),
     %matrix:print(Matrix),
+    %display:routing(Experiments, _Density),
     %
     % think of a 1 when an _input_
     fuse(Matrix, [0,0,0,0,0,0,0,0,1,1], O, input_off),
@@ -113,12 +118,13 @@ fuse(Matrix, Pattern, Pin, Name) ->
 
 %%--------------------------------------------------------------------
 
-bidir(Device, Title, Settings, OE, IO, O) ->
+bidir(Device, Title, Settings, I, OE, IO, O) ->
     #{
         title => Title,
         device => Device,
         settings => [
             {location, oe, source:pin(OE)},
+            {location, i, source:pin(I)},
             {location, io, source:pin(IO)},
             {location, o, source:pin(O)}
             |
@@ -127,10 +133,11 @@ bidir(Device, Title, Settings, OE, IO, O) ->
         verilog => <<
             "module experiment (\n"
             "  input wire oe,\n"
+            "  input wire i,\n"
             "  inout wire io,\n"
             "  output wire o\n"
             ");\n"
-            "  alt_iobuf pad (.i(1), .oe(oe), .io(io), .o(o));\n"
+            "  alt_iobuf pad (.i(i), .oe(oe), .io(io), .o(o));\n"
             "endmodule\n"
         >>
     }.

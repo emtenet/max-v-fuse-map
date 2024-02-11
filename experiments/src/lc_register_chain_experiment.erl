@@ -25,7 +25,7 @@ density(Density) ->
             sources(Device, LAB, Clk, Pins)
         end,
         fun (LAB, _, Experiments) ->
-            experiments(Device, LAB, Experiments)
+            experiments(Density, Device, LAB, Experiments)
         end,
         {batch, 1}
      ).
@@ -45,7 +45,7 @@ sources(Device, LAB, Clk, Pins) ->
 
 %%--------------------------------------------------------------------
 
-experiments(Device, LAB, Experiments) ->
+experiments(_Density, Device, LAB, Experiments) ->
     io:format(" ==> ~s ~p~n", [Device, LAB]),
     Matrix0 = matrix:build(Device, Experiments),
     Matrix = matrix:remove_fuses(Matrix0, fun
@@ -76,6 +76,7 @@ experiments(Device, LAB, Experiments) ->
     %
     %matrix:print(Matrix),
     %display:control_routing(Experiments),
+    %display:routing(Experiments, _Density),
     %
     expect:fuse(Matrix, [1,0,0,0,0,0,0], {lab:lc(LAB, 1), register_chain, off}),
     expect:fuse(Matrix, [1,1,0,0,0,0,0], {lab:lc(LAB, 2), register_chain, off}),
