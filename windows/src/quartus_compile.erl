@@ -118,7 +118,7 @@ exec_map(Dir, Family, Device) ->
     Bin = "quartus_map",
     Args = [
         "experiment",
-        "--source=experiment.vhd",
+        "--source=experiment.v",
         "--family=" ++ binary_to_list(Family)
     ],
     case exec(Dir, Bin, Args) of
