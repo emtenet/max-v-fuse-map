@@ -25,19 +25,19 @@
 
 -type mux() :: #{mux_key() => from()}.
 -type mux_key() :: direct_link | {mux4(), mux3()}.
--type mux4() :: max_ii:mux4().
--type mux3() :: max_ii:mux3().
--type from() :: max_ii:c4() | max_ii:le_buffer() | max_ii:r4().
+-type mux4() :: max_v:mux4().
+-type mux3() :: max_v:mux3().
+-type from() :: max_v:c4() | max_v:le_buffer() | max_v:r4().
 
 %%====================================================================
 %% run
 %%====================================================================
 
 run() ->
-    %fold(epm240),
-    %fold(epm570),
-    %fold(epm1270),
-    %fold(epm2210),
+    %fold(max_v_240z),
+    %fold(max_v_570z),
+    %fold(max_v_1270z),
+    %fold(max_v_2210z),
     lists:foreach(fun fold/1, density:list()),
     ok.
 

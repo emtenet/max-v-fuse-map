@@ -11,9 +11,9 @@
 -export_type([input/0]).
 
 -type lab() :: lab:lab().
--type x() :: max_ii:x().
--type y() :: max_ii:y().
--type n() :: max_ii:n().
+-type x() :: max_v:x().
+-type y() :: max_v:y().
+-type n() :: max_v:n().
 
 -type lc() :: {lc, x(), y(), n()}.
 

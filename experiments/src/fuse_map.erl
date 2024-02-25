@@ -36,10 +36,10 @@
 -type type() :: cell | side.
 -type index() :: non_neg_integer().
 -type sector() :: non_neg_integer().
--type x() :: max_ii:x().
--type y() :: max_ii:y().
--type n() :: max_ii:n().
--type i() :: max_ii:i().
+-type x() :: max_v:x().
+-type y() :: max_v:y().
+-type n() :: max_v:n().
+-type i() :: max_v:i().
 
 -record(with, {
     density :: density(),

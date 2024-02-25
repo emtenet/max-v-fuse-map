@@ -6,7 +6,7 @@
 %   {le_buffer, 3, 10, 0, 18} -> {r4, 0, 10, 0, 53}
 % would be cached as:
 %   {route_cache,
-%    epm240,
+%    max_v_240z,
 %    #{0 => "cache/D3/--V_pLoF0A47cHkSUqXNWubGTYrRCaI264C8u6HWI"},
 %    #{{r4,0,10} => #{53 => #{{le_buffer,3,10,0,18} => 0}}}
 %   }
@@ -46,13 +46,13 @@
 -type key_index() :: non_neg_integer().
 
 -type blocks() :: #{block() => indexes()}.
--type block() :: {atom(), max_ii:x(), max_ii:y()}.
+-type block() :: {atom(), max_v:x(), max_v:y()}.
 
 -type indexes() :: #{index() => froms()}.
 -type index() :: non_neg_integer().
 
 -type froms() :: #{from() => [key_index()]}.
--type from() :: {atom(), max_ii:x(), max_ii:y(), non_neg_integer(), non_neg_integer()}.
+-type from() :: {atom(), max_v:x(), max_v:y(), non_neg_integer(), non_neg_integer()}.
 
 -type experiment() :: {experiment:title(), experiment:fuses(), rcf_file:rcf()}.
 

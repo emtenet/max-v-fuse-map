@@ -599,7 +599,7 @@ bottom_lab(X, Density) ->
 %% columns
 %%====================================================================
 
--spec columns(density()) -> [max_ii:x()].
+-spec columns(density()) -> [max_v:x()].
 
 columns(max_v_240z) -> [2,3,4,5,6,7];
 columns(max_v_570z) -> [1,2,3,4,5,6,7,8,9,10,11,12];
@@ -610,7 +610,7 @@ columns(max_v_2210z) -> [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].
 %% rows
 %%====================================================================
 
--spec rows(density()) -> [max_ii:y()].
+-spec rows(density()) -> [max_v:y()].
 
 rows(max_v_240z) -> [1,2,3,4];
 rows(max_v_570z) -> [1,2,3,4,5,6,7];
@@ -621,7 +621,7 @@ rows(max_v_2210z) -> [1,2,3,4,5,6,7,8,9,10,11,12,13].
 %% left_rows
 %%====================================================================
 
--spec left_rows(density()) -> [max_ii:y()].
+-spec left_rows(density()) -> [max_v:y()].
 
 left_rows(Density = max_v_240z) ->
     rows(Density);
@@ -633,7 +633,7 @@ left_rows(Density) ->
 %% right_rows
 %%====================================================================
 
--spec right_rows(density()) -> [max_ii:y()].
+-spec right_rows(density()) -> [max_v:y()].
 
 right_rows(Density) ->
     rows(Density).
@@ -642,7 +642,7 @@ right_rows(Density) ->
 %% global_block
 %%====================================================================
 
--spec global_block(density()) -> {max_ii:x(), max_ii:y()} | false.
+-spec global_block(density()) -> {max_v:x(), max_v:y()} | false.
 
 global_block(max_v_240z) -> false;
 global_block(max_v_570z) -> {9, 3};
@@ -718,7 +718,7 @@ block_type_test(X, Y, Density, IOBs, LABs, Global, Tally) ->
 
 %%--------------------------------------------------------------------
 
--spec block_type(max_ii:x(), max_ii:y(), density())
+-spec block_type(max_v:x(), max_v:y(), density())
     -> logic | row | column | global | false.
 
 block_type(X, Y, Density) ->
@@ -778,7 +778,7 @@ block(_, _, _) ->
 %% is_global
 %%====================================================================
 
--spec is_global(max_ii:x(), max_ii:y(), density()) -> boolean().
+-spec is_global(max_v:x(), max_v:y(), density()) -> boolean().
 
 is_global(9, 3, max_v_570z) ->
     true;
@@ -800,7 +800,7 @@ is_lab({lab, X, Y}, Density) ->
 
 %%--------------------------------------------------------------------
 
--spec is_lab(max_ii:x(), max_ii:y(), density()) -> boolean().
+-spec is_lab(max_v:x(), max_v:y(), density()) -> boolean().
 
 is_lab(X, Y, Density) ->
     case metric(Density) of
@@ -835,7 +835,7 @@ is_iob({iob, X, Y}, Density) ->
 
 %%--------------------------------------------------------------------
 
--spec is_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
+-spec is_iob(max_v:x(), max_v:y(), density()) -> boolean().
 
 is_iob(X, Y, Density) ->
     case metric(Density) of
@@ -869,7 +869,7 @@ is_column_iob({iob, X, Y}, Density) ->
 
 %%--------------------------------------------------------------------
 
--spec is_column_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
+-spec is_column_iob(max_v:x(), max_v:y(), density()) -> boolean().
 
 is_column_iob(X, Y, Density) ->
     case metric(Density) of
@@ -897,7 +897,7 @@ is_row_iob({iob, X, Y}, Density) ->
 
 %%--------------------------------------------------------------------
 
--spec is_row_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
+-spec is_row_iob(max_v:x(), max_v:y(), density()) -> boolean().
 
 is_row_iob(X, Y, Density) ->
     case metric(Density) of
@@ -922,7 +922,7 @@ is_left_iob({iob, X, Y}, Density) ->
 
 %%--------------------------------------------------------------------
 
--spec is_left_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
+-spec is_left_iob(max_v:x(), max_v:y(), density()) -> boolean().
 
 is_left_iob(X, Y, Density) ->
     case metric(Density) of
@@ -944,7 +944,7 @@ is_top_iob({iob, X, Y}, Density) ->
 
 %%--------------------------------------------------------------------
 
--spec is_top_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
+-spec is_top_iob(max_v:x(), max_v:y(), density()) -> boolean().
 
 is_top_iob(X, Y, Density) ->
     case metric(Density) of
@@ -966,7 +966,7 @@ is_right_iob({iob, X, Y}, Density) ->
 
 %%--------------------------------------------------------------------
 
--spec is_right_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
+-spec is_right_iob(max_v:x(), max_v:y(), density()) -> boolean().
 
 is_right_iob(X, Y, Density) ->
     case metric(Density) of
@@ -988,7 +988,7 @@ is_bottom_iob({iob, X, Y}, Density) ->
 
 %%--------------------------------------------------------------------
 
--spec is_bottom_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
+-spec is_bottom_iob(max_v:x(), max_v:y(), density()) -> boolean().
 
 is_bottom_iob(X, Y, Density) ->
     case metric(Density) of
@@ -1013,7 +1013,7 @@ is_pci_iob({iob, X, Y}, Density) ->
 
 %%--------------------------------------------------------------------
 
--spec is_pci_iob(max_ii:x(), max_ii:y(), density()) -> boolean().
+-spec is_pci_iob(max_v:x(), max_v:y(), density()) -> boolean().
 
 is_pci_iob(_, _, max_v_240z) ->
     false;

@@ -10,9 +10,9 @@
 -export_type([interconnect/0]).
 -export_type([interconnect_or_local_line/0]).
 
--type x() :: max_ii:x().
--type y() :: max_ii:y().
--type n() :: max_ii:n().
+-type x() :: max_v:x().
+-type y() :: max_v:y().
+-type n() :: max_v:n().
 -type lc() :: lc:lc().
 
 -type lab() :: {lab, x(), y()}.

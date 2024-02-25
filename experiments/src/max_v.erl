@@ -33,7 +33,7 @@
 -type le_buffer() :: {le_buffer, x(), y(), 0, 0..19}.
 
 -type c4() :: {c4, x(), y(), 0, 0..63}.
--type c4_block() :: {c4, max_ii:x(), max_ii:y()}.
+-type c4_block() :: {c4, max_v:x(), max_v:y()}.
 -type c4_index() :: {mux, 0..13}.
 -type c4_select() ::
     direct_link |
@@ -41,7 +41,7 @@
     {mux4(), mux3()}.
 
 -type r4() :: {r4, x(), y(), 0, 0..63}.
--type r4_block() :: {r4, max_ii:x(), max_ii:y()}.
+-type r4_block() :: {r4, max_v:x(), max_v:y()}.
 -type r4_index() :: {mux, 0..15}.
 -type r4_select() :: direct_link | {mux4(), mux3()}.
 
