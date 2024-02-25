@@ -170,6 +170,13 @@ collect_dest(Signal, Dest, Cells0) ->
                 collect_lut_port(LC, Name, Port, Route, Signal)
             end, collect_source(Signal, Route0, Cells0));
 
+        #{name := Name, lc := At, route := Route0, port := Port}
+                when Port =:= invert_a ->
+            Route = collect_route(Route0, Cells0),
+            collect_lc(At, fun(LC) ->
+                collect_lut_port(LC, Name, Port, Route, Signal)
+            end, collect_source(Signal, Route0, Cells0));
+
         #{name := Name, lc := At, route := Route0, port := Port} ->
             Route = collect_route(Route0, Cells0),
             collect_lc(At, fun(LC) ->
@@ -852,7 +859,7 @@ routing_jtag(At, #jtag{name = Name, ports = Ports}) ->
 
 %%--------------------------------------------------------------------
 
-routing_lut(_, #lc{lut_name = undefined}) ->
+routing_lut(_, #lc{lut_name = undefined, carry_out = false}) ->
     ok;
 routing_lut(At, LC = #lc{lut_name = Name}) ->
     io:format("LUT ~w ~s~n", [At, Name]),
@@ -919,11 +926,11 @@ routing_port(Port, {From0, Route0}) ->
     Route = iolist_to_binary(io_lib:format("~w", [Route0])),
     case 14 + byte_size(From) + byte_size(Route) of
         W when W > 79 ->
-            io:format("    ~6s <- ~s~n", [Port, From]),
+            io:format(" ~9s <- ~s~n", [Port, From]),
             io:format("              ~s~n", [Route]);
 
         _ ->
-            io:format("    ~6s <- ~s ~s~n", [Port, From, Route])
+            io:format(" ~9s <- ~s ~s~n", [Port, From, Route])
     end.
 
 %%--------------------------------------------------------------------
@@ -935,10 +942,10 @@ routing_port_inverted(Port, {From0, Route0}) ->
     Route = iolist_to_binary(io_lib:format("~w", [Route0])),
     case 14 + byte_size(From) + byte_size(Route) of
         W when W > 77 ->
-            io:format("    ~6s <- ! ~s~n", [Port, From]),
+            io:format(" ~9s <- ! ~s~n", [Port, From]),
             io:format("              ~s~n", [Route]);
 
         _ ->
-            io:format("    ~6s <- ! ~s ~s~n", [Port, From, Route])
+            io:format(" ~9s <- ! ~s ~s~n", [Port, From, Route])
     end.
 
