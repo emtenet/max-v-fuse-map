@@ -36,27 +36,53 @@ run() ->
 density(Density) ->
     io:format(" ==> ~s~n", [Density]),
     Device = density:largest_device(Density),
+    %ok = experiment:flush(source_add_sub(Device)),
     {ok, Experiments} = experiment:compile_to_fuses_and_rcf([
+        % 7289 |*| | {2,3,line,23,cell,15}
+        % 8568 |*| | {2,3,line,22,cell,20}
+        % 9082 |*| | {2,3,line,24,cell,22}
         %source_add_sub(Device, <<"3">>, <<"4">>, 1)
         %source_add_sub(Device, <<"7">>, <<"8">>, 1)
+        %  7289 |*| | {2,3,line,23,cell,15}
+        %  8568 |*| | {2,3,line,22,cell,20}
+        %  9082 |*| | {2,3,line,24,cell,22}
+        % 15736 |*| | {3,3,line,22,cell,20}
         %source_add_sub(Device, <<"11">>, <<"12">>, 1)
+        %  8568 |*| | | | | | | {2,3,line,22,cell,20}
+        %  9082 |*| | | | | | | {2,3,line,24,cell,22}
+        % 15736 |*| | | | | | | {3,3,line,22,cell,20}
+        %  7289 |*| | | | |*| | {2,3,line,23,cell,15}
+        % 14457 |*|*|*| | | |*| {3,3,line,23,cell,15}
+        %          4 4 4 4 3 4  {{lab,2,3},add_sub,{control,?}}
+        %          3 3 4 4 4 3  {{lab,3,3},add_sub,{control,?}}
         %source_add_sub(Device, <<"15">>, <<"16">>, 1),
         %source_add_sub(Device, <<"15">>, <<"16">>, 2),
         %source_add_sub(Device, <<"15">>, <<"16">>, 3),
         %source_add_sub(Device, <<"15">>, <<"16">>, 4),
         %source_add_sub(Device, <<"15">>, <<"16">>, 5),
         %source_add_sub(Device, <<"15">>, <<"16">>, 6)
+        %  8568 |*| | {2,3,line,22,cell,20}
+        %  9082 |*| | {2,3,line,24,cell,22}
+        % 15736 |*| | {3,3,line,22,cell,20}
         %source_add_sub(Device, <<"19">>, <<"20">>, 1)
-        %source_add_sub(Device, <<"23">>, <<"24">>, 1),
-        %source_add_sub(Device, <<"23">>, <<"24">>, 2),
-        %source_add_sub(Device, <<"23">>, <<"24">>, 3)
+        %  8568 |*| | | | {2,3,line,22,cell,20}
+        %  9082 |*| | | | {2,3,line,24,cell,22}
+        % 15736 |*| | | | {3,3,line,22,cell,20}
+        % 22904 |*| | | | {4,3,line,22,cell,20}
+        source_add_sub(Device, <<"23">>, <<"24">>, 1),
+        source_add_sub(Device, <<"23">>, <<"24">>, 2),
+        source_add_sub(Device, <<"23">>, <<"24">>, 3)
         %
         %source_add(Device),
         %source_sub(Device),
         %source_add_sub(Device),
         %source_cin_add(Device),
+        %source_cin_0_add(Device),
+        %source_cin_1_add(Device),
         %source_cin_sub(Device),
-        %source_cin_add_sub(Device)
+        %source_cin_add_sub(Device),
+        %source_cin_0_add_sub(Device),
+        %source_cin_1_add_sub(Device)
         %
         %source_accumulator(Device),
         %source_accumulator2(Device)
@@ -78,35 +104,39 @@ density(Density) ->
         %
         %source_ram_1_port(Device)
         %
-        source_sld_virtual_jtag(Device, <<"0">>),
-        source_sld_virtual_jtag(Device, <<"1">>)
+        %source_sld_virtual_jtag(Device, <<"0">>),
+        %source_sld_virtual_jtag(Device, <<"1">>)
     ]),
     Minimal = density:minimal_fuses(Density),
     Matrix0 = matrix:build(Density, [{minimal, Minimal} | Experiments]),
     Matrix = matrix:remove_fuses(Matrix0, fun
+        ({{iob, _, _}, _, _}) -> true;
         ({{iob, _, _}, _, _, _}) -> true;
         ({{ioc, _, _, _}, _}) -> true;
         ({{ioc, _, _, _}, _, _}) -> true;
+        ({{lab, _, _}, {control, _}, _, _}) -> true;
+        ({{lab, _, _}, {interconnect, _}, _}) -> true;
+        ({{lab, _, _}, {interconnect, _}, _, _}) -> true;
         ({_, {mux, _}, _}) -> true;
         ({_, {mux, _}, _, _}) -> true;
         ({_, {interconnect, _}, _, _}) -> true;
         ({_, lut, _}) -> true;
-        %({_, output_local, lut}) -> true;
-        %({_, output_left, lut}) -> true;
-        %({_, output_right, lut}) -> true;
-        %({_, data_a3, _}) -> true;
-        %({_, data_a6, _}) -> true;
-        %({_, data_b3, _}) -> true;
-        %({_, data_b6, _}) -> true;
-        %({_, data_c3, _}) -> true;
-        %({_, data_c6, _}) -> true;
-        %({_, data_d3, _}) -> true;
-        %({_, data_d6, _}) -> true;
+        ({_, output_local, lut}) -> true;
+        ({_, output_left, lut}) -> true;
+        ({_, output_right, lut}) -> true;
+        ({_, data_a3, _}) -> true;
+        ({_, data_a6, _}) -> true;
+        ({_, data_b3, _}) -> true;
+        ({_, data_b6, _}) -> true;
+        ({_, data_c3, _}) -> true;
+        ({_, data_c6, _}) -> true;
+        ({_, data_d3, _}) -> true;
+        ({_, data_d6, _}) -> true;
         (_) -> false
     end),
     matrix:print(Matrix),
-    display:control_routing(Experiments),
-    %display:routing(Experiments, Density),
+    %display:control_routing(Experiments),
+    display:routing(Experiments, Density),
     throw(stop),
     ok.
 
@@ -242,6 +272,68 @@ source_cin_add(Device) ->
 
 %%--------------------------------------------------------------------
 
+source_cin_0_add(Device) ->
+    #{
+        title => cin_0_add,
+        device => Device,
+        settings => [
+            {location, <<"lpm_add_sub:mega|addcore:adder|a_csnbuffer:result_node|cs_buffer[0]~0">>, {lc, 5, 2, 1}}
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire [13:0] a,\n"
+            "  input wire [13:0] b,\n"
+            "  output wire [13:0] s\n"
+            ");\n"
+            "  lpm_add_sub mega (\n"
+            "    .cin(0),\n"
+            "    .dataa(a),\n"
+            "    .datab(b),\n"
+            "    .result(s)\n"
+            "  );\n"
+            "  defparam\n"
+            "    mega.lpm_direction = \"ADD\",\n"
+            "    mega.lpm_hint = \"ONE_INPUT_IS_CONSTANT=NO,CIN_USED=YES\",\n"
+            "    mega.lpm_representation = \"UNSIGNED\",\n"
+            "    mega.lpm_type = \"LPM_ADD_SUB\",\n"
+            "    mega.lpm_width = 14;\n"
+            "endmodule\n"
+        >>
+    }.
+
+%%--------------------------------------------------------------------
+
+source_cin_1_add(Device) ->
+    #{
+        title => cin_1_add,
+        device => Device,
+        settings => [
+            {location, <<"lpm_add_sub:mega|addcore:adder|a_csnbuffer:result_node|cs_buffer[0]~0">>, {lc, 5, 2, 1}}
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire [13:0] a,\n"
+            "  input wire [13:0] b,\n"
+            "  output wire [13:0] s\n"
+            ");\n"
+            "  lpm_add_sub mega (\n"
+            "    .cin(1),\n"
+            "    .dataa(a),\n"
+            "    .datab(b),\n"
+            "    .result(s)\n"
+            "  );\n"
+            "  defparam\n"
+            "    mega.lpm_direction = \"ADD\",\n"
+            "    mega.lpm_hint = \"ONE_INPUT_IS_CONSTANT=NO,CIN_USED=YES\",\n"
+            "    mega.lpm_representation = \"UNSIGNED\",\n"
+            "    mega.lpm_type = \"LPM_ADD_SUB\",\n"
+            "    mega.lpm_width = 14;\n"
+            "endmodule\n"
+        >>
+    }.
+
+%%--------------------------------------------------------------------
+
 source_cin_sub(Device) ->
     #{
         title => cin_sub,
@@ -291,6 +383,76 @@ source_cin_add_sub(Device) ->
             ");\n"
             "  lpm_add_sub mega (\n"
             "    .cin(cin),\n"
+            "    .add_sub(add_sub),\n"
+            "    .dataa(a),\n"
+            "    .datab(b),\n"
+            %"    .cout(cout),\n"
+            %"    .overflow(overflow),\n"
+            "    .result(s)\n"
+            "  );\n"
+            "  defparam\n"
+            "    mega.lpm_direction = \"UNUSED\",\n"
+            "    mega.lpm_hint = \"ONE_INPUT_IS_CONSTANT=NO,CIN_USED=YES\",\n"
+            "    mega.lpm_representation = \"UNSIGNED\",\n"
+            "    mega.lpm_type = \"LPM_ADD_SUB\",\n"
+            "    mega.lpm_width = 14;\n"
+            "endmodule\n"
+        >>
+    }.
+
+%%--------------------------------------------------------------------
+
+source_cin_0_add_sub(Device) ->
+    #{
+        title => cin_0_add_sub,
+        device => Device,
+        settings => [
+            {location, <<"lpm_add_sub:mega|alt_stratix_add_sub:stratix_adder|result[0]">>, {lc, 5, 2, 0}}
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire [13:0] a,\n"
+            "  input wire [13:0] b,\n"
+            "  input wire add_sub,\n"
+            "  output wire [13:0] s\n"
+            ");\n"
+            "  lpm_add_sub mega (\n"
+            "    .cin(0),\n"
+            "    .add_sub(add_sub),\n"
+            "    .dataa(a),\n"
+            "    .datab(b),\n"
+            %"    .cout(cout),\n"
+            %"    .overflow(overflow),\n"
+            "    .result(s)\n"
+            "  );\n"
+            "  defparam\n"
+            "    mega.lpm_direction = \"UNUSED\",\n"
+            "    mega.lpm_hint = \"ONE_INPUT_IS_CONSTANT=NO,CIN_USED=YES\",\n"
+            "    mega.lpm_representation = \"UNSIGNED\",\n"
+            "    mega.lpm_type = \"LPM_ADD_SUB\",\n"
+            "    mega.lpm_width = 14;\n"
+            "endmodule\n"
+        >>
+    }.
+
+%%--------------------------------------------------------------------
+
+source_cin_1_add_sub(Device) ->
+    #{
+        title => cin_1_add_sub,
+        device => Device,
+        settings => [
+            {location, <<"lpm_add_sub:mega|alt_stratix_add_sub:stratix_adder|result[0]">>, {lc, 5, 2, 0}}
+        ],
+        verilog => <<
+            "module experiment (\n"
+            "  input wire [13:0] a,\n"
+            "  input wire [13:0] b,\n"
+            "  input wire add_sub,\n"
+            "  output wire [13:0] s\n"
+            ");\n"
+            "  lpm_add_sub mega (\n"
+            "    .cin(1),\n"
             "    .add_sub(add_sub),\n"
             "    .dataa(a),\n"
             "    .datab(b),\n"
