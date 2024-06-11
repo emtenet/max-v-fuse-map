@@ -80,14 +80,30 @@ g.other > rect {
   stroke: var(--comment);
 }
 
+g.block:focus {
+  outline: none;
+}
+
+g.block:focus-within > rect {
+  stroke: var(--blue);
+}
+
 g.interconnects > rect {
   fill: var(--background);
 }
 
-g.mux-set > text {
+g.interconnects > text {
   font-size: 20px;
   text-anchor: middle;
   fill: var(--text);
+}
+
+g.interconnects:focus {
+  outline: none;
+}
+
+g.interconnects:focus-within > rect {
+  stroke: var(--blue);
 }
 
 circle.focus {
@@ -112,5 +128,13 @@ circle.outer {
 
 circle.inner {
   fill: var(--background);
+}
+
+g.interconnect:focus {
+  outline: none;
+}
+
+g:focus circle {
+  fill: var(--blue);
 }
 

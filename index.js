@@ -6185,7 +6185,6 @@ var $author$project$Main$update = F2(
 		}
 	});
 var $elm$json$Json$Decode$value = _Json_decodeValue;
-var $author$project$Main$SetNoFocus = {$: 3};
 var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
@@ -6202,28 +6201,19 @@ var $author$project$Blocks$map = F2(
 			});
 		return A3($elm$core$Dict$foldr, fold, _List_Nil, dict);
 	});
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 0, a: a};
-};
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var $elm$svg$Svg$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
-};
 var $elm$svg$Svg$Attributes$preserveAspectRatio = _VirtualDom_attribute('preserveAspectRatio');
 var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$svg$Svg$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$svg$Svg$text_ = $elm$svg$Svg$trustedNode('text');
+var $elm$virtual_dom$VirtualDom$attribute = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_attribute,
+			_VirtualDom_noOnOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var $elm$html$Html$Attributes$attribute = $elm$virtual_dom$VirtualDom$attribute;
 var $author$project$InterconnectsIndex$join = F2(
 	function (block, t) {
 		return {aP: t, aU: block.aU, aV: block.aV};
@@ -6259,21 +6249,6 @@ var $author$project$Main$transformBlock = F2(
 					')'
 				]));
 	});
-var $author$project$Main$SetInterconnectsFocus = function (a) {
-	return {$: 2, a: a};
-};
-var $author$project$Interconnects$fold = F3(
-	function (_with, init, _v0) {
-		var set = _v0;
-		return A3(
-			$elm$core$Dict$foldl,
-			F3(
-				function (k, v, a) {
-					return A2(_with, v, a);
-				}),
-			init,
-			set);
-	});
 var $elm$core$Dict$isEmpty = function (dict) {
 	if (dict.$ === -2) {
 		return true;
@@ -6285,20 +6260,18 @@ var $author$project$Interconnects$isEmpty = function (_v0) {
 	var set = _v0;
 	return $elm$core$Dict$isEmpty(set);
 };
-var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 1, a: a};
-};
-var $elm$html$Html$Events$stopPropagationOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+var $author$project$Interconnects$map = F2(
+	function (_with, _v0) {
+		var set = _v0;
+		var f = F3(
+			function (k, v, acc) {
+				return A2(
+					$elm$core$List$cons,
+					_with(v),
+					acc);
+			});
+		return A3($elm$core$Dict$foldl, f, _List_Nil, set);
 	});
-var $elm$svg$Svg$Events$stopPropagationOn = $elm$html$Html$Events$stopPropagationOn;
-var $author$project$Main$SetInterconnectFocus = function (a) {
-	return {$: 1, a: a};
-};
 var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
 var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
@@ -6384,8 +6357,8 @@ var $author$project$Main$outerClass = F2(
 		}
 	});
 var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var $author$project$Main$viewInterconnect1 = F4(
-	function (at, focus, interconnect, acc) {
+var $author$project$Main$viewInterconnect1 = F3(
+	function (at, focus, interconnect) {
 		var y = $elm$core$String$fromInt(50 + (20 * interconnect.aG));
 		var self = A2($author$project$InterconnectIndex$join, at, interconnect.aG);
 		var outer = A2(
@@ -6396,14 +6369,7 @@ var $author$project$Main$viewInterconnect1 = F4(
 					$elm$svg$Svg$Attributes$cy(y),
 					$elm$svg$Svg$Attributes$r('10'),
 					$elm$svg$Svg$Attributes$class(
-					A2($author$project$Main$outerClass, focus, self)),
-					A2(
-					$elm$svg$Svg$Events$stopPropagationOn,
-					'click',
-					$elm$json$Json$Decode$succeed(
-						_Utils_Tuple2(
-							$author$project$Main$SetInterconnectFocus(self),
-							true)))
+					A2($author$project$Main$outerClass, focus, self))
 				]),
 			_List_Nil);
 		var inner = A2(
@@ -6414,20 +6380,18 @@ var $author$project$Main$viewInterconnect1 = F4(
 					$elm$svg$Svg$Attributes$cy(y),
 					$elm$svg$Svg$Attributes$r('6'),
 					$elm$svg$Svg$Attributes$class(
-					A2($author$project$Main$innerClass, focus, self)),
-					A2(
-					$elm$svg$Svg$Events$stopPropagationOn,
-					'click',
-					$elm$json$Json$Decode$succeed(
-						_Utils_Tuple2(
-							$author$project$Main$SetInterconnectFocus(self),
-							true)))
+					A2($author$project$Main$innerClass, focus, self))
 				]),
 			_List_Nil);
 		return A2(
-			$elm$core$List$cons,
-			outer,
-			A2($elm$core$List$cons, inner, acc));
+			$elm$svg$Svg$g,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$class('interconnect'),
+					A2($elm$html$Html$Attributes$attribute, 'tabindex', '0')
+				]),
+			_List_fromArray(
+				[outer, inner]));
 	});
 var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
@@ -6441,7 +6405,7 @@ var $author$project$Main$viewInterconnects1 = F6(
 				$elm$svg$Svg$text_,
 				_List_fromArray(
 					[
-						$elm$svg$Svg$Attributes$x('20'),
+						$elm$svg$Svg$Attributes$x('30'),
 						$elm$svg$Svg$Attributes$y('33')
 					]),
 				_List_fromArray(
@@ -6455,27 +6419,20 @@ var $author$project$Main$viewInterconnects1 = F6(
 						$elm$svg$Svg$Attributes$x('16'),
 						$elm$svg$Svg$Attributes$y('36'),
 						$elm$svg$Svg$Attributes$width('28'),
-						$elm$svg$Svg$Attributes$height(height),
-						A2(
-						$elm$svg$Svg$Events$stopPropagationOn,
-						'click',
-						$elm$json$Json$Decode$succeed(
-							_Utils_Tuple2(
-								$author$project$Main$SetInterconnectsFocus(at),
-								true)))
+						$elm$svg$Svg$Attributes$height(height)
 					]),
 				_List_Nil);
-			var circles = A3(
-				$author$project$Interconnects$fold,
+			var circles = A2(
+				$author$project$Interconnects$map,
 				A2($author$project$Main$viewInterconnect1, at, focus),
-				_List_Nil,
 				set);
 			return A2(
 				$elm$svg$Svg$g,
 				_List_fromArray(
 					[
 						$elm$svg$Svg$Attributes$transform(transform),
-						$elm$svg$Svg$Attributes$class('interconnects')
+						$elm$svg$Svg$Attributes$class('interconnects'),
+						A2($elm$html$Html$Attributes$attribute, 'tabindex', '0')
 					]),
 				A2(
 					$elm$core$List$cons,
@@ -6483,8 +6440,8 @@ var $author$project$Main$viewInterconnects1 = F6(
 					A2($elm$core$List$cons, text, circles)));
 		}
 	});
-var $author$project$Main$viewInterconnect2 = F4(
-	function (at, focus, interconnect, acc) {
+var $author$project$Main$viewInterconnect2 = F3(
+	function (at, focus, interconnect) {
 		var y = $elm$core$String$fromInt(50 + (20 * ((interconnect.aG / 2) | 0)));
 		var x = $elm$core$String$fromInt(
 			30 + (20 * A2($elm$core$Basics$modBy, 2, interconnect.aG)));
@@ -6497,14 +6454,7 @@ var $author$project$Main$viewInterconnect2 = F4(
 					$elm$svg$Svg$Attributes$cy(y),
 					$elm$svg$Svg$Attributes$r('10'),
 					$elm$svg$Svg$Attributes$class(
-					A2($author$project$Main$outerClass, focus, self)),
-					A2(
-					$elm$svg$Svg$Events$stopPropagationOn,
-					'click',
-					$elm$json$Json$Decode$succeed(
-						_Utils_Tuple2(
-							$author$project$Main$SetInterconnectFocus(self),
-							true)))
+					A2($author$project$Main$outerClass, focus, self))
 				]),
 			_List_Nil);
 		var inner = A2(
@@ -6515,20 +6465,18 @@ var $author$project$Main$viewInterconnect2 = F4(
 					$elm$svg$Svg$Attributes$cy(y),
 					$elm$svg$Svg$Attributes$r('6'),
 					$elm$svg$Svg$Attributes$class(
-					A2($author$project$Main$innerClass, focus, self)),
-					A2(
-					$elm$svg$Svg$Events$stopPropagationOn,
-					'click',
-					$elm$json$Json$Decode$succeed(
-						_Utils_Tuple2(
-							$author$project$Main$SetInterconnectFocus(self),
-							true)))
+					A2($author$project$Main$innerClass, focus, self))
 				]),
 			_List_Nil);
 		return A2(
-			$elm$core$List$cons,
-			outer,
-			A2($elm$core$List$cons, inner, acc));
+			$elm$svg$Svg$g,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$class('interconnect'),
+					A2($elm$html$Html$Attributes$attribute, 'tabindex', '0')
+				]),
+			_List_fromArray(
+				[outer, inner]));
 	});
 var $author$project$Main$viewInterconnects2 = F6(
 	function (focus, title, at, set, transform, height) {
@@ -6553,27 +6501,20 @@ var $author$project$Main$viewInterconnects2 = F6(
 						$elm$svg$Svg$Attributes$x('16'),
 						$elm$svg$Svg$Attributes$y('36'),
 						$elm$svg$Svg$Attributes$width('48'),
-						$elm$svg$Svg$Attributes$height(height),
-						A2(
-						$elm$svg$Svg$Events$stopPropagationOn,
-						'click',
-						$elm$json$Json$Decode$succeed(
-							_Utils_Tuple2(
-								$author$project$Main$SetInterconnectsFocus(at),
-								true)))
+						$elm$svg$Svg$Attributes$height(height)
 					]),
 				_List_Nil);
-			var circles = A3(
-				$author$project$Interconnects$fold,
+			var circles = A2(
+				$author$project$Interconnects$map,
 				A2($author$project$Main$viewInterconnect2, at, focus),
-				_List_Nil,
 				set);
 			return A2(
 				$elm$svg$Svg$g,
 				_List_fromArray(
 					[
 						$elm$svg$Svg$Attributes$transform(transform),
-						$elm$svg$Svg$Attributes$class('interconnects')
+						$elm$svg$Svg$Attributes$class('interconnects'),
+						A2($elm$html$Html$Attributes$attribute, 'tabindex', '0')
 					]),
 				A2(
 					$elm$core$List$cons,
@@ -6589,8 +6530,10 @@ var $author$project$Main$viewBlock = F3(
 				[
 					$elm$svg$Svg$Attributes$transform(
 					A2($author$project$Main$transformBlock, block, device)),
+					$elm$svg$Svg$Attributes$class('block'),
 					$elm$svg$Svg$Attributes$class(
-					$author$project$BlockType$toString(block.aP))
+					$author$project$BlockType$toString(block.aP)),
+					A2($elm$html$Html$Attributes$attribute, 'tabindex', '0')
 				]),
 			_List_fromArray(
 				[
@@ -6752,8 +6695,7 @@ var $author$project$Main$viewDevice = F2(
 					A2($author$project$Main$viewHeight, model, device)),
 					$elm$svg$Svg$Attributes$viewBox(
 					$author$project$Main$viewBox(device)),
-					$elm$svg$Svg$Attributes$preserveAspectRatio('xMidYMid meet'),
-					$elm$svg$Svg$Events$onClick($author$project$Main$SetNoFocus)
+					$elm$svg$Svg$Attributes$preserveAspectRatio('xMidYMid meet')
 				]),
 			_List_fromArray(
 				[
