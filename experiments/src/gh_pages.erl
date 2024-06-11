@@ -142,11 +142,11 @@ c4_from(X, Y, I, {r4, XX, YY, mux, II}, Acc0) ->
     Acc1 = blocks_from({X, Y}, c4, I, {XX, YY, r4, II}, Acc0),
     blocks_thru({XX, YY}, r4, II, {X, Y, c4, I}, Acc1);
 c4_from(X, Y, I, {io_data_in, XX, YY, II, 0}, Acc0) ->
-    Acc1 = blocks_from({X, Y}, c4, I, {XX, YY, io, II}, Acc0),
-    blocks_thru({XX, YY}, io, II, {X, Y, c4, I}, Acc1);
+    Acc1 = blocks_from({X, Y}, c4, I, {XX, YY, input, II}, Acc0),
+    blocks_thru({XX, YY}, input, II, {X, Y, c4, I}, Acc1);
 c4_from(X, Y, I, {le_buffer, XX, YY, 0, II}, Acc0) ->
-    Acc1 = blocks_from({X, Y}, c4, I, {XX, YY, lc, II}, Acc0),
-    blocks_thru({XX, YY}, lc, II, {X, Y, c4, I}, Acc1);
+    Acc1 = blocks_from({X, Y}, c4, I, {XX, YY, logic, II}, Acc0),
+    blocks_thru({XX, YY}, logic, II, {X, Y, c4, I}, Acc1);
 c4_from(_, _, _, {jtag_tdi_tap, _, _, _, 0}, Acc0) ->
     Acc0;
 c4_from(_, _, _, {jtag_tms_tap, _, _, _, 0}, Acc0) ->
@@ -179,13 +179,13 @@ iob_index(X, Y, I, Muxes, Acc0) ->
 %%--------------------------------------------------------------------
 
 iob_from(X, Y, I, {c4, XX, YY, mux, II}, Acc0) ->
-     blocks_from({X, Y}, ic, I, {XX, YY, c4, II}, Acc0);
+     blocks_from({X, Y}, local, I, {XX, YY, c4, II}, Acc0);
 iob_from(X, Y, I, {r4, XX, YY, mux, II}, Acc0) ->
-     blocks_from({X, Y}, ic, I, {XX, YY, r4, II}, Acc0);
+     blocks_from({X, Y}, local, I, {XX, YY, r4, II}, Acc0);
 iob_from(X, Y, I, {io_data_in, XX, YY, II, 0}, Acc0) ->
-     blocks_from({X, Y}, ic, I, {XX, YY, io, II}, Acc0);
+     blocks_from({X, Y}, local, I, {XX, YY, input, II}, Acc0);
 iob_from(X, Y, I, {le_buffer, XX, YY, 0, II}, Acc0) ->
-     blocks_from({X, Y}, ic, I, {XX, YY, lc, II}, Acc0);
+     blocks_from({X, Y}, local, I, {XX, YY, logic, II}, Acc0);
 iob_from(_, _, _, {jtag_tck_tap, _, _, _, 0}, Acc0) ->
     Acc0;
 iob_from(_, _, _, {jtag_tdi_tap, _, _, _, 0}, Acc0) ->
@@ -222,13 +222,13 @@ lab_index(X, Y, I, Muxes, Acc0) ->
 %%--------------------------------------------------------------------
 
 lab_from(X, Y, I, {c4, XX, YY, mux, II}, Acc0) ->
-     blocks_from({X, Y}, ic, I, {XX, YY, c4, II}, Acc0);
+     blocks_from({X, Y}, local, I, {XX, YY, c4, II}, Acc0);
 lab_from(X, Y, I, {r4, XX, YY, mux, II}, Acc0) ->
-     blocks_from({X, Y}, ic, I, {XX, YY, r4, II}, Acc0);
+     blocks_from({X, Y}, local, I, {XX, YY, r4, II}, Acc0);
 lab_from(X, Y, I, {io_data_in, XX, YY, II, 0}, Acc0) ->
-     blocks_from({X, Y}, ic, I, {XX, YY, io, II}, Acc0);
+     blocks_from({X, Y}, local, I, {XX, YY, input, II}, Acc0);
 lab_from(X, Y, I, {le_buffer, XX, YY, 0, II}, Acc0) ->
-     blocks_from({X, Y}, ic, I, {XX, YY, lc, II}, Acc0);
+     blocks_from({X, Y}, local, I, {XX, YY, logic, II}, Acc0);
 lab_from(_, _, _, {jtag_tdi_tap, _, _, _, 0}, Acc0) ->
     Acc0;
 lab_from(_, _, _, {jtag_tms_tap, _, _, _, 0}, Acc0) ->
@@ -269,11 +269,11 @@ r4_from(X, Y, I, {r4, XX, YY, mux, II}, Acc0) ->
     Acc1 = blocks_from({X, Y}, r4, I, {XX, YY, r4, II}, Acc0),
     blocks_thru({XX, YY}, r4, II, {X, Y, r4, I}, Acc1);
 r4_from(X, Y, I, {io_data_in, XX, YY, II, 0}, Acc0) ->
-    Acc1 = blocks_from({X, Y}, r4, I, {XX, YY, io, II}, Acc0),
-    blocks_thru({XX, YY}, io, II, {X, Y, r4, I}, Acc1);
+    Acc1 = blocks_from({X, Y}, r4, I, {XX, YY, input, II}, Acc0),
+    blocks_thru({XX, YY}, input, II, {X, Y, r4, I}, Acc1);
 r4_from(X, Y, I, {le_buffer, XX, YY, 0, II}, Acc0) ->
-    Acc1 = blocks_from({X, Y}, r4, I, {XX, YY, lc, II}, Acc0),
-    blocks_thru({XX, YY}, lc, II, {X, Y, r4, I}, Acc1);
+    Acc1 = blocks_from({X, Y}, r4, I, {XX, YY, logic, II}, Acc0),
+    blocks_thru({XX, YY}, logic, II, {X, Y, r4, I}, Acc1);
 r4_from(_, _, _, {jtag_tck_tap, _, _, _, 0}, Acc0) ->
     Acc0;
 r4_from(_, _, _, {jtag_tdi_tap, _, _, _, 0}, Acc0) ->
@@ -372,12 +372,12 @@ json_block({X, Y}, Block = #{type := Type}, Acc) ->
         <<", y: ">>, integer_to_binary(Y),
         <<", t: \"">>, atom_to_binary(Type), <<"\", c4s: [">>,
         json_c4s(maps:get(c4, Block, #{})),
-        <<"], ics: [">>,
-        json_c4s(maps:get(ic, Block, #{})),
-        <<"], ios: [">>,
-        json_c4s(maps:get(io, Block, #{})),
-        <<"], lcs: [">>,
-        json_c4s(maps:get(lc, Block, #{})),
+        <<"], inputs: [">>,
+        json_c4s(maps:get(input, Block, #{})),
+        <<"], locals: [">>,
+        json_c4s(maps:get(local, Block, #{})),
+        <<"], logics: [">>,
+        json_c4s(maps:get(logic, Block, #{})),
         <<"], r4s: [">>,
         json_c4s(maps:get(r4, Block, #{})),
         <<"]}">>
