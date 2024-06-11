@@ -77,7 +77,7 @@ function A9(fun, a, b, c, d, e, f, g, h, i) {
   return fun.a === 9 ? fun.f(a, b, c, d, e, f, g, h, i) : fun(a)(b)(c)(d)(e)(f)(g)(h)(i);
 }
 
-
+console.warn('Compiled in DEV mode. Follow the advice at https://elm-lang.org/0.19.1/optimize for better performance and smaller assets.');
 
 
 // EQUALITY
@@ -113,7 +113,7 @@ function _Utils_eqHelp(x, y, depth, stack)
 		return true;
 	}
 
-	/**_UNUSED/
+	/**/
 	if (x.$ === 'Set_elm_builtin')
 	{
 		x = $elm$core$Set$toList(x);
@@ -126,7 +126,7 @@ function _Utils_eqHelp(x, y, depth, stack)
 	}
 	//*/
 
-	/**/
+	/**_UNUSED/
 	if (x.$ < 0)
 	{
 		x = $elm$core$Dict$toList(x);
@@ -161,7 +161,7 @@ function _Utils_cmp(x, y, ord)
 		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
 	}
 
-	/**_UNUSED/
+	/**/
 	if (x instanceof String)
 	{
 		var a = x.valueOf();
@@ -170,10 +170,10 @@ function _Utils_cmp(x, y, ord)
 	}
 	//*/
 
-	/**/
+	/**_UNUSED/
 	if (typeof x.$ === 'undefined')
 	//*/
-	/**_UNUSED/
+	/**/
 	if (x.$[0] === '#')
 	//*/
 	{
@@ -203,17 +203,17 @@ var _Utils_compare = F2(function(x, y)
 
 // COMMON VALUES
 
-var _Utils_Tuple0 = 0;
-var _Utils_Tuple0_UNUSED = { $: '#0' };
+var _Utils_Tuple0_UNUSED = 0;
+var _Utils_Tuple0 = { $: '#0' };
 
-function _Utils_Tuple2(a, b) { return { a: a, b: b }; }
-function _Utils_Tuple2_UNUSED(a, b) { return { $: '#2', a: a, b: b }; }
+function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
+function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
 
-function _Utils_Tuple3(a, b, c) { return { a: a, b: b, c: c }; }
-function _Utils_Tuple3_UNUSED(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
+function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
+function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
 
-function _Utils_chr(c) { return c; }
-function _Utils_chr_UNUSED(c) { return new String(c); }
+function _Utils_chr_UNUSED(c) { return c; }
+function _Utils_chr(c) { return new String(c); }
 
 
 // RECORDS
@@ -264,11 +264,11 @@ function _Utils_ap(xs, ys)
 
 
 
-var _List_Nil = { $: 0 };
-var _List_Nil_UNUSED = { $: '[]' };
+var _List_Nil_UNUSED = { $: 0 };
+var _List_Nil = { $: '[]' };
 
-function _List_Cons(hd, tl) { return { $: 1, a: hd, b: tl }; }
-function _List_Cons_UNUSED(hd, tl) { return { $: '::', a: hd, b: tl }; }
+function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
+function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
 
 
 var _List_cons = F2(_List_Cons);
@@ -499,12 +499,12 @@ var _JsArray_appendN = F3(function(n, dest, source)
 
 // LOG
 
-var _Debug_log = F2(function(tag, value)
+var _Debug_log_UNUSED = F2(function(tag, value)
 {
 	return value;
 });
 
-var _Debug_log_UNUSED = F2(function(tag, value)
+var _Debug_log = F2(function(tag, value)
 {
 	console.log(tag + ': ' + _Debug_toString(value));
 	return value;
@@ -530,12 +530,12 @@ function _Debug_todoCase(moduleName, region, value)
 
 // TO STRING
 
-function _Debug_toString(value)
+function _Debug_toString_UNUSED(value)
 {
 	return '<internals>';
 }
 
-function _Debug_toString_UNUSED(value)
+function _Debug_toString(value)
 {
 	return _Debug_toAnsiString(false, value);
 }
@@ -720,13 +720,13 @@ function _Debug_toHexDigit(n)
 // CRASH
 
 
-function _Debug_crash(identifier)
+function _Debug_crash_UNUSED(identifier)
 {
 	throw new Error('https://github.com/elm/core/blob/1.0.0/hints/' + identifier + '.md');
 }
 
 
-function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
+function _Debug_crash(identifier, fact1, fact2, fact3, fact4)
 {
 	switch(identifier)
 	{
@@ -784,11 +784,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.N.C === region.U.C)
+	if (region.start.line === region.end.line)
 	{
-		return 'on line ' + region.N.C;
+		return 'on line ' + region.start.line;
 	}
-	return 'on lines ' + region.N.C + ' through ' + region.U.C;
+	return 'on lines ' + region.start.line + ' through ' + region.end.line;
 }
 
 
@@ -1212,7 +1212,7 @@ function _Char_toLocaleLower(char)
 
 
 
-/**_UNUSED/
+/**/
 function _Json_errorToString(error)
 {
 	return $elm$json$Json$Decode$errorToString(error);
@@ -1616,11 +1616,11 @@ var _Json_encode = F2(function(indentLevel, value)
 	return JSON.stringify(_Json_unwrap(value), null, indentLevel) + '';
 });
 
-function _Json_wrap_UNUSED(value) { return { $: 0, a: value }; }
-function _Json_unwrap_UNUSED(value) { return value.a; }
+function _Json_wrap(value) { return { $: 0, a: value }; }
+function _Json_unwrap(value) { return value.a; }
 
-function _Json_wrap(value) { return value; }
-function _Json_unwrap(value) { return value; }
+function _Json_wrap_UNUSED(value) { return value; }
+function _Json_unwrap_UNUSED(value) { return value; }
 
 function _Json_emptyArray() { return []; }
 function _Json_emptyObject() { return {}; }
@@ -1857,9 +1857,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aI,
-		impl.aR,
-		impl.aO,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
 		function() { return function() {} }
 	);
 });
@@ -1872,7 +1872,7 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 function _Platform_initialize(flagDecoder, args, init, update, subscriptions, stepperBuilder)
 {
 	var result = A2(_Json_run, flagDecoder, _Json_wrap(args ? args['flags'] : undefined));
-	$elm$core$Result$isOk(result) || _Debug_crash(2 /**_UNUSED/, _Json_errorToString(result.a) /**/);
+	$elm$core$Result$isOk(result) || _Debug_crash(2 /**/, _Json_errorToString(result.a) /**/);
 	var managers = {};
 	var initPair = init(result.a);
 	var model = initPair.a;
@@ -2316,7 +2316,7 @@ function _Platform_setupIncomingPort(name, sendToApp)
 //
 
 
-function _Platform_export(exports)
+function _Platform_export_UNUSED(exports)
 {
 	scope['Elm']
 		? _Platform_mergeExportsProd(scope['Elm'], exports)
@@ -2337,7 +2337,7 @@ function _Platform_mergeExportsProd(obj, exports)
 }
 
 
-function _Platform_export_UNUSED(exports)
+function _Platform_export(exports)
 {
 	scope['Elm']
 		? _Platform_mergeExportsDebug('Elm', scope['Elm'], exports)
@@ -2377,10 +2377,10 @@ var _VirtualDom_init = F4(function(virtualNode, flagDecoder, debugMetadata, args
 {
 	// NOTE: this function needs _Platform_export available to work
 
-	/**/
+	/**_UNUSED/
 	var node = args['node'];
 	//*/
-	/**_UNUSED/
+	/**/
 	var node = args && args['node'] ? args['node'] : _Debug_crash(0);
 	//*/
 
@@ -2655,14 +2655,14 @@ function _VirtualDom_noInnerHtmlOrFormAction(key)
 function _VirtualDom_noJavaScriptUri(value)
 {
 	return _VirtualDom_RE_js.test(value)
-		? /**/''//*//**_UNUSED/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
+		? /**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
 		: value;
 }
 
 function _VirtualDom_noJavaScriptOrHtmlUri(value)
 {
 	return _VirtualDom_RE_js_html.test(value)
-		? /**/''//*//**_UNUSED/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
+		? /**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
 		: value;
 }
 
@@ -2670,7 +2670,7 @@ function _VirtualDom_noJavaScriptOrHtmlJson(value)
 {
 	return (typeof _Json_unwrap(value) === 'string' && _VirtualDom_RE_js_html.test(_Json_unwrap(value)))
 		? _Json_wrap(
-			/**/''//*//**_UNUSED/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
+			/**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
 		) : value;
 }
 
@@ -2719,9 +2719,9 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		I: func(record.I),
-		O: record.O,
-		L: record.L
+		message: func(record.message),
+		stopPropagation: record.stopPropagation,
+		preventDefault: record.preventDefault
 	}
 });
 
@@ -2989,11 +2989,11 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.I;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.O;
+		var message = !tag ? value : tag < 3 ? value.a : value.message;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.stopPropagation;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.L) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.preventDefault) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3943,15 +3943,15 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aI,
-		impl.aR,
-		impl.aO,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
 		function(sendToApp, initialModel) {
-			var view = impl.aS;
-			/**/
+			var view = impl.view;
+			/**_UNUSED/
 			var domNode = args['node'];
 			//*/
-			/**_UNUSED/
+			/**/
 			var domNode = args && args['node'] ? args['node'] : _Debug_crash(0);
 			//*/
 			var currNode = _VirtualDom_virtualize(domNode);
@@ -3979,12 +3979,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aI,
-		impl.aR,
-		impl.aO,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.M && impl.M(sendToApp)
-			var view = impl.aS;
+			var divertHrefToApp = impl.setup && impl.setup(sendToApp)
+			var view = impl.view;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3992,12 +3992,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.az);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.body);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.at) && (_VirtualDom_doc.title = title = doc.at);
+				(title !== doc.title) && (_VirtualDom_doc.title = title = doc.title);
 			});
 		}
 	);
@@ -4053,12 +4053,12 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.aK;
-	var onUrlRequest = impl.aL;
+	var onUrlChange = impl.onUrlChange;
+	var onUrlRequest = impl.onUrlRequest;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		M: function(sendToApp)
+		setup: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -4074,9 +4074,9 @@ function _Browser_application(impl)
 					var next = $elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.al === next.al
-							&& curr.Z === next.Z
-							&& curr.ai.a === next.ai.a
+							&& curr.protocol === next.protocol
+							&& curr.host === next.host
+							&& curr.port_.a === next.port_.a
 						)
 							? $elm$browser$Browser$Internal(next)
 							: $elm$browser$Browser$External(href)
@@ -4084,13 +4084,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		aI: function(flags)
+		init: function(flags)
 		{
-			return A3(impl.aI, flags, _Browser_getUrl(), key);
+			return A3(impl.init, flags, _Browser_getUrl(), key);
 		},
-		aS: impl.aS,
-		aR: impl.aR,
-		aO: impl.aO
+		view: impl.view,
+		update: impl.update,
+		subscriptions: impl.subscriptions
 	});
 }
 
@@ -4156,17 +4156,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { aF: 'hidden', aA: 'visibilitychange' }
+		? { hidden: 'hidden', change: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { aF: 'mozHidden', aA: 'mozvisibilitychange' }
+		? { hidden: 'mozHidden', change: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { aF: 'msHidden', aA: 'msvisibilitychange' }
+		? { hidden: 'msHidden', change: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { aF: 'webkitHidden', aA: 'webkitvisibilitychange' }
-		: { aF: 'hidden', aA: 'visibilitychange' };
+		? { hidden: 'webkitHidden', change: 'webkitvisibilitychange' }
+		: { hidden: 'hidden', change: 'visibilitychange' };
 }
 
 
@@ -4247,12 +4247,12 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		aq: _Browser_getScene(),
-		av: {
-			aU: _Browser_window.pageXOffset,
-			aV: _Browser_window.pageYOffset,
-			aw: _Browser_doc.documentElement.clientWidth,
-			Y: _Browser_doc.documentElement.clientHeight
+		scene: _Browser_getScene(),
+		viewport: {
+			x: _Browser_window.pageXOffset,
+			y: _Browser_window.pageYOffset,
+			width: _Browser_doc.documentElement.clientWidth,
+			height: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4262,8 +4262,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		aw: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		Y: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		width: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		height: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4286,15 +4286,15 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			aq: {
-				aw: node.scrollWidth,
-				Y: node.scrollHeight
+			scene: {
+				width: node.scrollWidth,
+				height: node.scrollHeight
 			},
-			av: {
-				aU: node.scrollLeft,
-				aV: node.scrollTop,
-				aw: node.clientWidth,
-				Y: node.clientHeight
+			viewport: {
+				x: node.scrollLeft,
+				y: node.scrollTop,
+				width: node.clientWidth,
+				height: node.clientHeight
 			}
 		};
 	});
@@ -4324,18 +4324,18 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			aq: _Browser_getScene(),
-			av: {
-				aU: x,
-				aV: y,
-				aw: _Browser_doc.documentElement.clientWidth,
-				Y: _Browser_doc.documentElement.clientHeight
+			scene: _Browser_getScene(),
+			viewport: {
+				x: x,
+				y: y,
+				width: _Browser_doc.documentElement.clientWidth,
+				height: _Browser_doc.documentElement.clientHeight
 			},
-			aC: {
-				aU: x + rect.left,
-				aV: y + rect.top,
-				aw: rect.width,
-				Y: rect.height
+			element: {
+				x: x + rect.left,
+				y: y + rect.top,
+				width: rect.width,
+				height: rect.height
 			}
 		};
 	});
@@ -4370,15 +4370,15 @@ function _Browser_load(url)
 		}
 	}));
 }
-var $elm$core$Basics$EQ = 1;
-var $elm$core$Basics$GT = 2;
-var $elm$core$Basics$LT = 0;
+var $elm$core$Basics$EQ = {$: 'EQ'};
+var $elm$core$Basics$GT = {$: 'GT'};
+var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$List$cons = _List_cons;
 var $elm$core$Dict$foldr = F3(
 	function (func, acc, t) {
 		foldr:
 		while (true) {
-			if (t.$ === -2) {
+			if (t.$ === 'RBEmpty_elm_builtin') {
 				return acc;
 			} else {
 				var key = t.b;
@@ -4423,7 +4423,7 @@ var $elm$core$Dict$keys = function (dict) {
 		dict);
 };
 var $elm$core$Set$toList = function (_v0) {
-	var dict = _v0;
+	var dict = _v0.a;
 	return $elm$core$Dict$keys(dict);
 };
 var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
@@ -4433,7 +4433,7 @@ var $elm$core$Array$foldr = F3(
 		var tail = _v0.d;
 		var helper = F2(
 			function (node, acc) {
-				if (!node.$) {
+				if (node.$ === 'SubTree') {
 					var subTree = node.a;
 					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
 				} else {
@@ -4451,32 +4451,32 @@ var $elm$core$Array$toList = function (array) {
 	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
 };
 var $elm$core$Result$Err = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Err', a: a};
 };
 var $elm$json$Json$Decode$Failure = F2(
 	function (a, b) {
-		return {$: 3, a: a, b: b};
+		return {$: 'Failure', a: a, b: b};
 	});
 var $elm$json$Json$Decode$Field = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'Field', a: a, b: b};
 	});
 var $elm$json$Json$Decode$Index = F2(
 	function (a, b) {
-		return {$: 1, a: a, b: b};
+		return {$: 'Index', a: a, b: b};
 	});
 var $elm$core$Result$Ok = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Ok', a: a};
 };
 var $elm$json$Json$Decode$OneOf = function (a) {
-	return {$: 2, a: a};
+	return {$: 'OneOf', a: a};
 };
-var $elm$core$Basics$False = 1;
+var $elm$core$Basics$False = {$: 'False'};
 var $elm$core$Basics$add = _Basics_add;
 var $elm$core$Maybe$Just = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Just', a: a};
 };
-var $elm$core$Maybe$Nothing = {$: 1};
+var $elm$core$Maybe$Nothing = {$: 'Nothing'};
 var $elm$core$String$all = _String_all;
 var $elm$core$Basics$and = _Basics_and;
 var $elm$core$Basics$append = _Utils_append;
@@ -4601,12 +4601,12 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 		errorToStringHelp:
 		while (true) {
 			switch (error.$) {
-				case 0:
+				case 'Field':
 					var f = error.a;
 					var err = error.b;
 					var isSimple = function () {
 						var _v1 = $elm$core$String$uncons(f);
-						if (_v1.$ === 1) {
+						if (_v1.$ === 'Nothing') {
 							return false;
 						} else {
 							var _v2 = _v1.a;
@@ -4621,7 +4621,7 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 					error = $temp$error;
 					context = $temp$context;
 					continue errorToStringHelp;
-				case 1:
+				case 'Index':
 					var i = error.a;
 					var err = error.b;
 					var indexName = '[' + ($elm$core$String$fromInt(i) + ']');
@@ -4630,7 +4630,7 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 					error = $temp$error;
 					context = $temp$context;
 					continue errorToStringHelp;
-				case 2:
+				case 'OneOf':
 					var errors = error.a;
 					if (!errors.b) {
 						return 'Ran into a Json.Decode.oneOf with no possibilities' + function () {
@@ -4694,7 +4694,7 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 var $elm$core$Array$branchFactor = 32;
 var $elm$core$Array$Array_elm_builtin = F4(
 	function (a, b, c, d) {
-		return {$: 0, a: a, b: b, c: c, d: d};
+		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
 	});
 var $elm$core$Elm$JsArray$empty = _JsArray_empty;
 var $elm$core$Basics$ceiling = _Basics_ceiling;
@@ -4709,7 +4709,7 @@ var $elm$core$Array$shiftStep = $elm$core$Basics$ceiling(
 var $elm$core$Array$empty = A4($elm$core$Array$Array_elm_builtin, 0, $elm$core$Array$shiftStep, $elm$core$Elm$JsArray$empty, $elm$core$Elm$JsArray$empty);
 var $elm$core$Elm$JsArray$initialize = _JsArray_initialize;
 var $elm$core$Array$Leaf = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Leaf', a: a};
 };
 var $elm$core$Basics$apL = F2(
 	function (f, x) {
@@ -4729,7 +4729,7 @@ var $elm$core$Basics$max = F2(
 	});
 var $elm$core$Basics$mul = _Basics_mul;
 var $elm$core$Array$SubTree = function (a) {
-	return {$: 0, a: a};
+	return {$: 'SubTree', a: a};
 };
 var $elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
 var $elm$core$Array$compressNodes = F2(
@@ -4776,25 +4776,25 @@ var $elm$core$Array$treeFromBuilder = F2(
 	});
 var $elm$core$Array$builderToArray = F2(
 	function (reverseNodeList, builder) {
-		if (!builder.a) {
+		if (!builder.nodeListSize) {
 			return A4(
 				$elm$core$Array$Array_elm_builtin,
-				$elm$core$Elm$JsArray$length(builder.c),
+				$elm$core$Elm$JsArray$length(builder.tail),
 				$elm$core$Array$shiftStep,
 				$elm$core$Elm$JsArray$empty,
-				builder.c);
+				builder.tail);
 		} else {
-			var treeLen = builder.a * $elm$core$Array$branchFactor;
+			var treeLen = builder.nodeListSize * $elm$core$Array$branchFactor;
 			var depth = $elm$core$Basics$floor(
 				A2($elm$core$Basics$logBase, $elm$core$Array$branchFactor, treeLen - 1));
-			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.d) : builder.d;
-			var tree = A2($elm$core$Array$treeFromBuilder, correctNodeList, builder.a);
+			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.nodeList) : builder.nodeList;
+			var tree = A2($elm$core$Array$treeFromBuilder, correctNodeList, builder.nodeListSize);
 			return A4(
 				$elm$core$Array$Array_elm_builtin,
-				$elm$core$Elm$JsArray$length(builder.c) + treeLen,
+				$elm$core$Elm$JsArray$length(builder.tail) + treeLen,
 				A2($elm$core$Basics$max, 5, depth * $elm$core$Array$shiftStep),
 				tree,
-				builder.c);
+				builder.tail);
 		}
 	});
 var $elm$core$Basics$idiv = _Basics_idiv;
@@ -4807,7 +4807,7 @@ var $elm$core$Array$initializeHelp = F5(
 				return A2(
 					$elm$core$Array$builderToArray,
 					false,
-					{d: nodeList, a: (len / $elm$core$Array$branchFactor) | 0, c: tail});
+					{nodeList: nodeList, nodeListSize: (len / $elm$core$Array$branchFactor) | 0, tail: tail});
 			} else {
 				var leaf = $elm$core$Array$Leaf(
 					A3($elm$core$Elm$JsArray$initialize, $elm$core$Array$branchFactor, fromIndex, fn));
@@ -4837,9 +4837,9 @@ var $elm$core$Array$initialize = F2(
 			return A5($elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
 		}
 	});
-var $elm$core$Basics$True = 0;
+var $elm$core$Basics$True = {$: 'True'};
 var $elm$core$Result$isOk = function (result) {
-	if (!result.$) {
+	if (result.$ === 'Ok') {
 		return true;
 	} else {
 		return false;
@@ -4850,31 +4850,33 @@ var $elm$json$Json$Decode$map2 = _Json_map2;
 var $elm$json$Json$Decode$succeed = _Json_succeed;
 var $elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
-		case 0:
+		case 'Normal':
 			return 0;
-		case 1:
+		case 'MayStopPropagation':
 			return 1;
-		case 2:
+		case 'MayPreventDefault':
 			return 2;
 		default:
 			return 3;
 	}
 };
 var $elm$browser$Browser$External = function (a) {
-	return {$: 1, a: a};
+	return {$: 'External', a: a};
 };
 var $elm$browser$Browser$Internal = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Internal', a: a};
 };
 var $elm$core$Basics$identity = function (x) {
 	return x;
 };
-var $elm$browser$Browser$Dom$NotFound = $elm$core$Basics$identity;
-var $elm$url$Url$Http = 0;
-var $elm$url$Url$Https = 1;
+var $elm$browser$Browser$Dom$NotFound = function (a) {
+	return {$: 'NotFound', a: a};
+};
+var $elm$url$Url$Http = {$: 'Http'};
+var $elm$url$Url$Https = {$: 'Https'};
 var $elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {W: fragment, Z: host, ag: path, ai: port_, al: protocol, am: query};
+		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
 	});
 var $elm$core$String$contains = _String_contains;
 var $elm$core$String$length = _String_length;
@@ -4910,7 +4912,7 @@ var $elm$url$Url$chompBeforePath = F5(
 					var i = _v0.a;
 					var _v1 = $elm$core$String$toInt(
 						A2($elm$core$String$dropLeft, i + 1, str));
-					if (_v1.$ === 1) {
+					if (_v1.$ === 'Nothing') {
 						return $elm$core$Maybe$Nothing;
 					} else {
 						var port_ = _v1;
@@ -4993,24 +4995,26 @@ var $elm$core$String$startsWith = _String_startsWith;
 var $elm$url$Url$fromString = function (str) {
 	return A2($elm$core$String$startsWith, 'http://', str) ? A2(
 		$elm$url$Url$chompAfterProtocol,
-		0,
+		$elm$url$Url$Http,
 		A2($elm$core$String$dropLeft, 7, str)) : (A2($elm$core$String$startsWith, 'https://', str) ? A2(
 		$elm$url$Url$chompAfterProtocol,
-		1,
+		$elm$url$Url$Https,
 		A2($elm$core$String$dropLeft, 8, str)) : $elm$core$Maybe$Nothing);
 };
 var $elm$core$Basics$never = function (_v0) {
 	never:
 	while (true) {
-		var nvr = _v0;
+		var nvr = _v0.a;
 		var $temp$_v0 = nvr;
 		_v0 = $temp$_v0;
 		continue never;
 	}
 };
-var $elm$core$Task$Perform = $elm$core$Basics$identity;
+var $elm$core$Task$Perform = function (a) {
+	return {$: 'Perform', a: a};
+};
 var $elm$core$Task$succeed = _Scheduler_succeed;
-var $elm$core$Task$init = $elm$core$Task$succeed(0);
+var $elm$core$Task$init = $elm$core$Task$succeed(_Utils_Tuple0);
 var $elm$core$List$foldrHelper = F4(
 	function (fn, acc, ctr, ls) {
 		if (!ls.b) {
@@ -5116,7 +5120,7 @@ var $elm$core$Task$sequence = function (tasks) {
 var $elm$core$Platform$sendToApp = _Platform_sendToApp;
 var $elm$core$Task$spawnCmd = F2(
 	function (router, _v0) {
-		var task = _v0;
+		var task = _v0.a;
 		return _Scheduler_spawn(
 			A2(
 				$elm$core$Task$andThen,
@@ -5128,7 +5132,7 @@ var $elm$core$Task$onEffects = F3(
 		return A2(
 			$elm$core$Task$map,
 			function (_v0) {
-				return 0;
+				return _Utils_Tuple0;
 			},
 			$elm$core$Task$sequence(
 				A2(
@@ -5138,30 +5142,32 @@ var $elm$core$Task$onEffects = F3(
 	});
 var $elm$core$Task$onSelfMsg = F3(
 	function (_v0, _v1, _v2) {
-		return $elm$core$Task$succeed(0);
+		return $elm$core$Task$succeed(_Utils_Tuple0);
 	});
 var $elm$core$Task$cmdMap = F2(
 	function (tagger, _v0) {
-		var task = _v0;
-		return A2($elm$core$Task$map, tagger, task);
+		var task = _v0.a;
+		return $elm$core$Task$Perform(
+			A2($elm$core$Task$map, tagger, task));
 	});
 _Platform_effectManagers['Task'] = _Platform_createManager($elm$core$Task$init, $elm$core$Task$onEffects, $elm$core$Task$onSelfMsg, $elm$core$Task$cmdMap);
 var $elm$core$Task$command = _Platform_leaf('Task');
 var $elm$core$Task$perform = F2(
 	function (toMessage, task) {
 		return $elm$core$Task$command(
-			A2($elm$core$Task$map, toMessage, task));
+			$elm$core$Task$Perform(
+				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Main$ActualSize = 0;
-var $author$project$Main$NoFocus = {$: 2};
+var $author$project$Main$ActualSize = {$: 'ActualSize'};
+var $author$project$Main$NoFocus = {$: 'NoFocus'};
 var $author$project$Device$Device = F7(
 	function (width, height, top, left, title, global, blocks) {
-		return {Q: blocks, X: global, Y: height, ab: left, at: title, au: top, aw: width};
+		return {blocks: blocks, global: global, height: height, left: left, title: title, top: top, width: width};
 	});
 var $author$project$BlockIndex$BlockIndex = F2(
 	function (x, y) {
-		return {aU: x, aV: y};
+		return {x: x, y: y};
 	});
 var $elm$json$Json$Decode$index = _Json_decodeIndex;
 var $elm$json$Json$Decode$int = _Json_decodeInt;
@@ -5170,60 +5176,64 @@ var $author$project$BlockIndex$decode = A3(
 	$author$project$BlockIndex$BlockIndex,
 	A2($elm$json$Json$Decode$index, 0, $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$index, 1, $elm$json$Json$Decode$int));
-var $author$project$Blocks$Blocks = $elm$core$Basics$identity;
+var $author$project$Blocks$Blocks = function (a) {
+	return {$: 'Blocks', a: a};
+};
 var $author$project$Block$Block = F8(
 	function (x, y, t, c4s, inputs, locals, logics, r4s) {
-		return {R: c4s, _: inputs, ac: locals, ad: logics, an: r4s, aP: t, aU: x, aV: y};
+		return {c4s: c4s, inputs: inputs, locals: locals, logics: logics, r4s: r4s, t: t, x: x, y: y};
 	});
-var $author$project$BlockType$Column = 2;
-var $author$project$BlockType$Global = 3;
-var $author$project$BlockType$Logic = 0;
-var $author$project$BlockType$Other = 4;
-var $author$project$BlockType$Row = 1;
+var $author$project$BlockType$Column = {$: 'Column'};
+var $author$project$BlockType$Global = {$: 'Global'};
+var $author$project$BlockType$Logic = {$: 'Logic'};
+var $author$project$BlockType$Other = {$: 'Other'};
+var $author$project$BlockType$Row = {$: 'Row'};
 var $author$project$BlockType$fromString = function (s) {
 	switch (s) {
 		case 'logic':
-			return 0;
+			return $author$project$BlockType$Logic;
 		case 'row':
-			return 1;
+			return $author$project$BlockType$Row;
 		case 'column':
-			return 2;
+			return $author$project$BlockType$Column;
 		case 'global':
-			return 3;
+			return $author$project$BlockType$Global;
 		default:
-			return 4;
+			return $author$project$BlockType$Other;
 	}
 };
 var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$BlockType$decode = A2($elm$json$Json$Decode$map, $author$project$BlockType$fromString, $elm$json$Json$Decode$string);
-var $author$project$Interconnects$Interconnects = $elm$core$Basics$identity;
+var $author$project$Interconnects$Interconnects = function (a) {
+	return {$: 'Interconnects', a: a};
+};
 var $author$project$Interconnect$Interconnect = F3(
 	function (i, froms, thrus) {
-		return {aE: froms, aG: i, aQ: thrus};
+		return {froms: froms, i: i, thrus: thrus};
 	});
 var $author$project$InterconnectIndex$InterconnectIndex = F4(
 	function (x, y, t, i) {
-		return {aG: i, aP: t, aU: x, aV: y};
+		return {i: i, t: t, x: x, y: y};
 	});
 var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $author$project$InterconnectType$C4 = 0;
-var $author$project$InterconnectType$Input = 1;
-var $author$project$InterconnectType$Local = 2;
-var $author$project$InterconnectType$Logic = 3;
-var $author$project$InterconnectType$R4 = 4;
+var $author$project$InterconnectType$C4 = {$: 'C4'};
+var $author$project$InterconnectType$Input = {$: 'Input'};
+var $author$project$InterconnectType$Local = {$: 'Local'};
+var $author$project$InterconnectType$Logic = {$: 'Logic'};
+var $author$project$InterconnectType$R4 = {$: 'R4'};
 var $elm$json$Json$Decode$fail = _Json_fail;
 var $author$project$InterconnectType$decodeString = function (s) {
 	switch (s) {
 		case 'c4':
-			return $elm$json$Json$Decode$succeed(0);
+			return $elm$json$Json$Decode$succeed($author$project$InterconnectType$C4);
 		case 'input':
-			return $elm$json$Json$Decode$succeed(1);
+			return $elm$json$Json$Decode$succeed($author$project$InterconnectType$Input);
 		case 'local':
-			return $elm$json$Json$Decode$succeed(2);
+			return $elm$json$Json$Decode$succeed($author$project$InterconnectType$Local);
 		case 'logic':
-			return $elm$json$Json$Decode$succeed(3);
+			return $elm$json$Json$Decode$succeed($author$project$InterconnectType$Logic);
 		case 'r4':
-			return $elm$json$Json$Decode$succeed(4);
+			return $elm$json$Json$Decode$succeed($author$project$InterconnectType$R4);
 		default:
 			return $elm$json$Json$Decode$fail('Invalid interconnect type: ' + s);
 	}
@@ -5238,25 +5248,28 @@ var $author$project$InterconnectIndex$decode = A5(
 	A2($elm$json$Json$Decode$field, 'y', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 't', $author$project$InterconnectType$decode),
 	A2($elm$json$Json$Decode$field, 'i', $elm$json$Json$Decode$int));
-var $author$project$InterconnectIndexSet$InterconnectIndexSet = $elm$core$Basics$identity;
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: -2};
+var $author$project$InterconnectIndexSet$InterconnectIndexSet = function (a) {
+	return {$: 'InterconnectIndexSet', a: a};
+};
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $author$project$InterconnectIndexSet$empty = {R: $elm$core$Dict$empty, _: $elm$core$Dict$empty, ac: $elm$core$Dict$empty, ad: $elm$core$Dict$empty, an: $elm$core$Dict$empty};
-var $elm$core$Dict$Black = 1;
+var $author$project$InterconnectIndexSet$empty = $author$project$InterconnectIndexSet$InterconnectIndexSet(
+	{c4s: $elm$core$Dict$empty, inputs: $elm$core$Dict$empty, locals: $elm$core$Dict$empty, logics: $elm$core$Dict$empty, r4s: $elm$core$Dict$empty});
+var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
-		return {$: -1, a: a, b: b, c: c, d: d, e: e};
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
 	});
-var $elm$core$Dict$Red = 0;
+var $elm$core$Dict$Red = {$: 'Red'};
 var $elm$core$Dict$balance = F5(
 	function (color, key, value, left, right) {
-		if ((right.$ === -1) && (!right.a)) {
+		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
 			var _v1 = right.a;
 			var rK = right.b;
 			var rV = right.c;
 			var rLeft = right.d;
 			var rRight = right.e;
-			if ((left.$ === -1) && (!left.a)) {
+			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
 				var _v3 = left.a;
 				var lK = left.b;
 				var lV = left.c;
@@ -5264,22 +5277,22 @@ var $elm$core$Dict$balance = F5(
 				var lRight = left.e;
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					0,
+					$elm$core$Dict$Red,
 					key,
 					value,
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, rK, rV, rLeft, rRight));
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rLeft, rRight));
 			} else {
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
 					color,
 					rK,
 					rV,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, key, value, left, rLeft),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, left, rLeft),
 					rRight);
 			}
 		} else {
-			if ((((left.$ === -1) && (!left.a)) && (left.d.$ === -1)) && (!left.d.a)) {
+			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
 				var _v5 = left.a;
 				var lK = left.b;
 				var lV = left.c;
@@ -5292,11 +5305,11 @@ var $elm$core$Dict$balance = F5(
 				var lRight = left.e;
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					0,
+					$elm$core$Dict$Red,
 					lK,
 					lV,
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, llK, llV, llLeft, llRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, key, value, lRight, right));
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, lRight, right));
 			} else {
 				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
 			}
@@ -5305,8 +5318,8 @@ var $elm$core$Dict$balance = F5(
 var $elm$core$Basics$compare = _Utils_compare;
 var $elm$core$Dict$insertHelp = F3(
 	function (key, value, dict) {
-		if (dict.$ === -2) {
-			return A5($elm$core$Dict$RBNode_elm_builtin, 0, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
 		} else {
 			var nColor = dict.a;
 			var nKey = dict.b;
@@ -5314,8 +5327,8 @@ var $elm$core$Dict$insertHelp = F3(
 			var nLeft = dict.d;
 			var nRight = dict.e;
 			var _v1 = A2($elm$core$Basics$compare, key, nKey);
-			switch (_v1) {
-				case 0:
+			switch (_v1.$) {
+				case 'LT':
 					return A5(
 						$elm$core$Dict$balance,
 						nColor,
@@ -5323,7 +5336,7 @@ var $elm$core$Dict$insertHelp = F3(
 						nValue,
 						A3($elm$core$Dict$insertHelp, key, value, nLeft),
 						nRight);
-				case 1:
+				case 'EQ':
 					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
 				default:
 					return A5(
@@ -5339,76 +5352,81 @@ var $elm$core$Dict$insertHelp = F3(
 var $elm$core$Dict$insert = F3(
 	function (key, value, dict) {
 		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
-		if ((_v0.$ === -1) && (!_v0.a)) {
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
 			var _v1 = _v0.a;
 			var k = _v0.b;
 			var v = _v0.c;
 			var l = _v0.d;
 			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, 1, k, v, l, r);
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
 		} else {
 			var x = _v0;
 			return x;
 		}
 	});
 var $author$project$InterconnectIndexSet$key = function (index) {
-	return _Utils_Tuple3(index.aU, index.aV, index.aG);
+	return _Utils_Tuple3(index.x, index.y, index.i);
 };
 var $author$project$InterconnectIndexSet$insert = F2(
 	function (index, _v0) {
-		var set = _v0;
-		var _v1 = index.aP;
-		switch (_v1) {
-			case 0:
-				return _Utils_update(
-					set,
-					{
-						R: A3(
-							$elm$core$Dict$insert,
-							$author$project$InterconnectIndexSet$key(index),
-							index,
-							set.R)
-					});
-			case 1:
-				return _Utils_update(
-					set,
-					{
-						_: A3(
-							$elm$core$Dict$insert,
-							$author$project$InterconnectIndexSet$key(index),
-							index,
-							set._)
-					});
-			case 2:
-				return _Utils_update(
-					set,
-					{
-						ac: A3(
-							$elm$core$Dict$insert,
-							$author$project$InterconnectIndexSet$key(index),
-							index,
-							set.ac)
-					});
-			case 3:
-				return _Utils_update(
-					set,
-					{
-						ad: A3(
-							$elm$core$Dict$insert,
-							$author$project$InterconnectIndexSet$key(index),
-							index,
-							set.ad)
-					});
+		var set = _v0.a;
+		var _v1 = index.t;
+		switch (_v1.$) {
+			case 'C4':
+				return $author$project$InterconnectIndexSet$InterconnectIndexSet(
+					_Utils_update(
+						set,
+						{
+							c4s: A3(
+								$elm$core$Dict$insert,
+								$author$project$InterconnectIndexSet$key(index),
+								index,
+								set.c4s)
+						}));
+			case 'Input':
+				return $author$project$InterconnectIndexSet$InterconnectIndexSet(
+					_Utils_update(
+						set,
+						{
+							inputs: A3(
+								$elm$core$Dict$insert,
+								$author$project$InterconnectIndexSet$key(index),
+								index,
+								set.inputs)
+						}));
+			case 'Local':
+				return $author$project$InterconnectIndexSet$InterconnectIndexSet(
+					_Utils_update(
+						set,
+						{
+							locals: A3(
+								$elm$core$Dict$insert,
+								$author$project$InterconnectIndexSet$key(index),
+								index,
+								set.locals)
+						}));
+			case 'Logic':
+				return $author$project$InterconnectIndexSet$InterconnectIndexSet(
+					_Utils_update(
+						set,
+						{
+							logics: A3(
+								$elm$core$Dict$insert,
+								$author$project$InterconnectIndexSet$key(index),
+								index,
+								set.logics)
+						}));
 			default:
-				return _Utils_update(
-					set,
-					{
-						an: A3(
-							$elm$core$Dict$insert,
-							$author$project$InterconnectIndexSet$key(index),
-							index,
-							set.an)
-					});
+				return $author$project$InterconnectIndexSet$InterconnectIndexSet(
+					_Utils_update(
+						set,
+						{
+							r4s: A3(
+								$elm$core$Dict$insert,
+								$author$project$InterconnectIndexSet$key(index),
+								index,
+								set.r4s)
+						}));
 		}
 	});
 var $author$project$InterconnectIndexSet$fromList = function (list) {
@@ -5440,11 +5458,11 @@ var $elm$core$Dict$fromList = function (assocs) {
 };
 var $author$project$Interconnects$decode = function () {
 	var keyValue = function (mux) {
-		return _Utils_Tuple2(mux.aG, mux);
+		return _Utils_Tuple2(mux.i, mux);
 	};
 	return A2(
 		$elm$json$Json$Decode$map,
-		$elm$core$Basics$identity,
+		$author$project$Interconnects$Interconnects,
 		A2(
 			$elm$json$Json$Decode$map,
 			$elm$core$Dict$fromList,
@@ -5466,12 +5484,12 @@ var $author$project$Block$decode = A9(
 var $author$project$Blocks$decode = function () {
 	var keyValue = function (block) {
 		return _Utils_Tuple2(
-			_Utils_Tuple2(block.aU, block.aV),
+			_Utils_Tuple2(block.x, block.y),
 			block);
 	};
 	return A2(
 		$elm$json$Json$Decode$map,
-		$elm$core$Basics$identity,
+		$author$project$Blocks$Blocks,
 		A2(
 			$elm$json$Json$Decode$map,
 			$elm$core$Dict$fromList,
@@ -5490,16 +5508,16 @@ var $author$project$Device$decode = A8(
 	A2($elm$json$Json$Decode$field, 'global', $author$project$BlockIndex$decode),
 	A2($elm$json$Json$Decode$field, 'blocks', $author$project$Blocks$decode));
 var $elm$json$Json$Decode$decodeValue = _Json_run;
-var $author$project$Blocks$empty = $elm$core$Dict$empty;
+var $author$project$Blocks$empty = $author$project$Blocks$Blocks($elm$core$Dict$empty);
 var $author$project$Device$empty = function (title) {
 	return {
-		Q: $author$project$Blocks$empty,
-		X: {aU: 0, aV: 0},
-		Y: 1,
-		ab: 0,
-		at: title,
-		au: 0,
-		aw: 10
+		blocks: $author$project$Blocks$empty,
+		global: {x: 0, y: 0},
+		height: 1,
+		left: 0,
+		title: title,
+		top: 0,
+		width: 10
 	};
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -5508,7 +5526,7 @@ var $author$project$Main$init = function (flags) {
 	var decoder = $elm$json$Json$Decode$list($author$project$Device$decode);
 	var devices = function () {
 		var _v0 = A2($elm$json$Json$Decode$decodeValue, decoder, flags);
-		if (!_v0.$) {
+		if (_v0.$ === 'Ok') {
 			var blocks = _v0.a;
 			return blocks;
 		} else {
@@ -5521,29 +5539,41 @@ var $author$project$Main$init = function (flags) {
 		}
 	}();
 	return _Utils_Tuple2(
-		{B: 0, H: devices, j: $author$project$Main$NoFocus, I: '', z: 0},
+		{device: 0, devices: devices, focus: $author$project$Main$NoFocus, message: '', zoom: $author$project$Main$ActualSize},
 		$elm$core$Platform$Cmd$none);
 };
-var $author$project$Main$KeyPress = function (a) {
-	return {$: 0, a: a};
-};
-var $author$project$Main$keyPress = A2(
-	$elm$json$Json$Decode$map,
-	$author$project$Main$KeyPress,
-	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
-var $elm$browser$Browser$Events$Document = 0;
+var $author$project$Main$Ignore = {$: 'Ignore'};
+var $author$project$Main$NextDevice = {$: 'NextDevice'};
+var $author$project$Main$NextZoom = {$: 'NextZoom'};
+var $author$project$Main$keyPress = function () {
+	var decode = function (key) {
+		switch (key) {
+			case 'd':
+				return $author$project$Main$NextDevice;
+			case 'z':
+				return $author$project$Main$NextZoom;
+			default:
+				return $author$project$Main$Ignore;
+		}
+	};
+	return A2(
+		$elm$json$Json$Decode$map,
+		decode,
+		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+}();
+var $elm$browser$Browser$Events$Document = {$: 'Document'};
 var $elm$browser$Browser$Events$MySub = F3(
 	function (a, b, c) {
-		return {$: 0, a: a, b: b, c: c};
+		return {$: 'MySub', a: a, b: b, c: c};
 	});
 var $elm$browser$Browser$Events$State = F2(
 	function (subs, pids) {
-		return {ah: pids, ar: subs};
+		return {pids: pids, subs: subs};
 	});
 var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
 	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
 var $elm$browser$Browser$Events$nodeToKey = function (node) {
-	if (!node) {
+	if (node.$ === 'Document') {
 		return 'd_';
 	} else {
 		return 'w_';
@@ -5563,7 +5593,7 @@ var $elm$core$Dict$foldl = F3(
 	function (func, acc, dict) {
 		foldl:
 		while (true) {
-			if (dict.$ === -2) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
 				return acc;
 			} else {
 				var key = dict.b;
@@ -5647,7 +5677,7 @@ var $elm$core$Dict$merge = F6(
 	});
 var $elm$browser$Browser$Events$Event = F2(
 	function (key, event) {
-		return {V: event, aa: key};
+		return {event: event, key: key};
 	});
 var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
 var $elm$browser$Browser$Events$spawn = F3(
@@ -5655,7 +5685,7 @@ var $elm$browser$Browser$Events$spawn = F3(
 		var node = _v0.a;
 		var name = _v0.b;
 		var actualNode = function () {
-			if (!node) {
+			if (node.$ === 'Document') {
 				return _Browser_doc;
 			} else {
 				return _Browser_window;
@@ -5722,7 +5752,7 @@ var $elm$browser$Browser$Events$onEffects = F3(
 			stepLeft,
 			stepBoth,
 			stepRight,
-			state.ah,
+			state.pids,
 			$elm$core$Dict$fromList(newSubs),
 			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
 		var deadPids = _v0.a;
@@ -5751,7 +5781,7 @@ var $elm$browser$Browser$Events$onEffects = F3(
 var $elm$core$List$maybeCons = F3(
 	function (f, mx, xs) {
 		var _v0 = f(mx);
-		if (!_v0.$) {
+		if (_v0.$ === 'Just') {
 			var x = _v0.a;
 			return A2($elm$core$List$cons, x, xs);
 		} else {
@@ -5768,8 +5798,8 @@ var $elm$core$List$filterMap = F2(
 	});
 var $elm$browser$Browser$Events$onSelfMsg = F3(
 	function (router, _v0, state) {
-		var key = _v0.aa;
-		var event = _v0.V;
+		var key = _v0.key;
+		var event = _v0.event;
 		var toMessage = function (_v2) {
 			var subKey = _v2.a;
 			var _v3 = _v2.b;
@@ -5778,7 +5808,7 @@ var $elm$browser$Browser$Events$onSelfMsg = F3(
 			var decoder = _v3.c;
 			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
 		};
-		var messages = A2($elm$core$List$filterMap, toMessage, state.ar);
+		var messages = A2($elm$core$List$filterMap, toMessage, state.subs);
 		return A2(
 			$elm$core$Task$andThen,
 			function (_v1) {
@@ -5808,76 +5838,19 @@ var $elm$browser$Browser$Events$on = F3(
 		return $elm$browser$Browser$Events$subscription(
 			A3($elm$browser$Browser$Events$MySub, node, name, decoder));
 	});
-var $elm$browser$Browser$Events$onKeyPress = A2($elm$browser$Browser$Events$on, 0, 'keypress');
+var $elm$browser$Browser$Events$onKeyPress = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'keypress');
 var $author$project$Main$subscriptions = function (_v0) {
 	return $elm$browser$Browser$Events$onKeyPress($author$project$Main$keyPress);
 };
-var $author$project$Main$FitToPage = 1;
-var $author$project$Main$interconnectDown = function (_v0) {
-	var x = _v0.aU;
-	var y = _v0.aV;
-	var t = _v0.aP;
-	var i = _v0.aG;
-	return {aG: i + 2, aP: t, aU: x, aV: y};
+var $author$project$Main$FitToPage = {$: 'FitToPage'};
+var $author$project$Main$blockDown = function (block) {
+	return _Utils_update(
+		block,
+		{y: block.y - 1});
 };
-var $author$project$Main$interconnectLeft = function (_v0) {
-	var x = _v0.aU;
-	var y = _v0.aV;
-	var t = _v0.aP;
-	var i = _v0.aG;
-	return {aG: i - 1, aP: t, aU: x, aV: y};
+var $author$project$Main$BlockFocus = function (a) {
+	return {$: 'BlockFocus', a: a};
 };
-var $author$project$Main$interconnectRight = function (_v0) {
-	var x = _v0.aU;
-	var y = _v0.aV;
-	var t = _v0.aP;
-	var i = _v0.aG;
-	return {aG: i + 1, aP: t, aU: x, aV: y};
-};
-var $author$project$Main$interconnectUp = function (_v0) {
-	var x = _v0.aU;
-	var y = _v0.aV;
-	var t = _v0.aP;
-	var i = _v0.aG;
-	return {aG: i - 2, aP: t, aU: x, aV: y};
-};
-var $author$project$Main$interconnectsDown = function (_v0) {
-	var x = _v0.aU;
-	var y = _v0.aV;
-	var t = _v0.aP;
-	return {aP: t, aU: x, aV: y - 1};
-};
-var $author$project$Main$interconnectsLeft = function (_v0) {
-	var x = _v0.aU;
-	var y = _v0.aV;
-	var t = _v0.aP;
-	return {aP: t, aU: x - 1, aV: y};
-};
-var $author$project$Main$interconnectsRight = function (_v0) {
-	var x = _v0.aU;
-	var y = _v0.aV;
-	var t = _v0.aP;
-	return {aP: t, aU: x + 1, aV: y};
-};
-var $author$project$Main$interconnectsUp = function (_v0) {
-	var x = _v0.aU;
-	var y = _v0.aV;
-	var t = _v0.aP;
-	return {aP: t, aU: x, aV: y + 1};
-};
-var $elm$core$Basics$modBy = _Basics_modBy;
-var $author$project$Main$InterconnectFocus = function (a) {
-	return {$: 0, a: a};
-};
-var $elm$core$Maybe$andThen = F2(
-	function (callback, maybeValue) {
-		if (!maybeValue.$) {
-			var value = maybeValue.a;
-			return callback(value);
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
 var $elm$core$List$drop = F2(
 	function (n, list) {
 		drop:
@@ -5910,34 +5883,19 @@ var $elm$core$List$head = function (list) {
 };
 var $author$project$Main$currentDevice = function (model) {
 	var _v0 = $elm$core$List$head(
-		A2($elm$core$List$drop, model.B, model.H));
-	if (!_v0.$) {
+		A2($elm$core$List$drop, model.device, model.devices));
+	if (_v0.$ === 'Just') {
 		var device = _v0.a;
 		return device;
 	} else {
 		return $author$project$Device$empty('Device not found');
 	}
 };
-var $author$project$Block$get = F2(
-	function (t, block) {
-		switch (t) {
-			case 0:
-				return block.R;
-			case 1:
-				return block._;
-			case 2:
-				return block.ac;
-			case 3:
-				return block.ad;
-			default:
-				return block.an;
-		}
-	});
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
 		get:
 		while (true) {
-			if (dict.$ === -2) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
 				return $elm$core$Maybe$Nothing;
 			} else {
 				var key = dict.b;
@@ -5945,14 +5903,14 @@ var $elm$core$Dict$get = F2(
 				var left = dict.d;
 				var right = dict.e;
 				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
-				switch (_v1) {
-					case 0:
+				switch (_v1.$) {
+					case 'LT':
 						var $temp$targetKey = targetKey,
 							$temp$dict = left;
 						targetKey = $temp$targetKey;
 						dict = $temp$dict;
 						continue get;
-					case 1:
+					case 'EQ':
 						return $elm$core$Maybe$Just(value);
 					default:
 						var $temp$targetKey = targetKey,
@@ -5966,20 +5924,149 @@ var $elm$core$Dict$get = F2(
 	});
 var $author$project$Blocks$get = F2(
 	function (index, _v0) {
-		var dict = _v0;
+		var dict = _v0.a;
 		return A2(
 			$elm$core$Dict$get,
-			_Utils_Tuple2(index.aU, index.aV),
+			_Utils_Tuple2(index.x, index.y),
 			dict);
+	});
+var $author$project$Main$findBlock = F2(
+	function (at, model) {
+		var device = $author$project$Main$currentDevice(model);
+		return A2($author$project$Blocks$get, at, device.blocks);
+	});
+var $author$project$InterconnectIndexSet$union = F2(
+	function (_v0, _v1) {
+		var left = _v0.a;
+		var right = _v1.a;
+		return $author$project$InterconnectIndexSet$InterconnectIndexSet(
+			{
+				c4s: A2($elm$core$Dict$union, left.c4s, right.c4s),
+				inputs: A2($elm$core$Dict$union, left.inputs, right.inputs),
+				locals: A2($elm$core$Dict$union, left.locals, right.locals),
+				logics: A2($elm$core$Dict$union, left.logics, right.logics),
+				r4s: A2($elm$core$Dict$union, left.r4s, right.r4s)
+			});
+	});
+var $author$project$Interconnects$fromsUnion = F2(
+	function (_v0, m) {
+		return $author$project$InterconnectIndexSet$union(m.froms);
+	});
+var $author$project$Interconnects$froms = function (_v0) {
+	var set = _v0.a;
+	return A3($elm$core$Dict$foldl, $author$project$Interconnects$fromsUnion, $author$project$InterconnectIndexSet$empty, set);
+};
+var $author$project$InterconnectIndexSet$unions = function (list) {
+	if (!list.b) {
+		return $author$project$InterconnectIndexSet$empty;
+	} else {
+		var head = list.a;
+		var tail = list.b;
+		return A3($elm$core$List$foldl, $author$project$InterconnectIndexSet$union, head, tail);
+	}
+};
+var $author$project$Block$froms = function (block) {
+	return $author$project$InterconnectIndexSet$unions(
+		_List_fromArray(
+			[
+				$author$project$Interconnects$froms(block.c4s),
+				$author$project$Interconnects$froms(block.inputs),
+				$author$project$Interconnects$froms(block.locals),
+				$author$project$Interconnects$froms(block.logics),
+				$author$project$Interconnects$froms(block.r4s)
+			]));
+};
+var $author$project$Interconnects$thrusUnion = F2(
+	function (_v0, m) {
+		return $author$project$InterconnectIndexSet$union(m.thrus);
+	});
+var $author$project$Interconnects$thrus = function (_v0) {
+	var set = _v0.a;
+	return A3($elm$core$Dict$foldl, $author$project$Interconnects$thrusUnion, $author$project$InterconnectIndexSet$empty, set);
+};
+var $author$project$Block$thrus = function (block) {
+	return $author$project$InterconnectIndexSet$unions(
+		_List_fromArray(
+			[
+				$author$project$Interconnects$thrus(block.c4s),
+				$author$project$Interconnects$thrus(block.inputs),
+				$author$project$Interconnects$thrus(block.locals),
+				$author$project$Interconnects$thrus(block.logics),
+				$author$project$Interconnects$thrus(block.r4s)
+			]));
+};
+var $author$project$Main$blockFocus = F2(
+	function (at, model) {
+		var _v0 = A2($author$project$Main$findBlock, at, model);
+		if (_v0.$ === 'Nothing') {
+			return $author$project$Main$NoFocus;
+		} else {
+			var block = _v0.a;
+			return $author$project$Main$BlockFocus(
+				{
+					at: at,
+					froms: $author$project$Block$froms(block),
+					thrus: $author$project$Block$thrus(block)
+				});
+		}
+	});
+var $author$project$Main$blockLeft = function (block) {
+	return _Utils_update(
+		block,
+		{x: block.x - 1});
+};
+var $author$project$Main$blockRight = function (block) {
+	return _Utils_update(
+		block,
+		{x: block.x + 1});
+};
+var $author$project$Main$blockUp = function (block) {
+	return _Utils_update(
+		block,
+		{y: block.y + 1});
+};
+var $author$project$Main$interconnectDown = function (_v0) {
+	var x = _v0.x;
+	var y = _v0.y;
+	var t = _v0.t;
+	var i = _v0.i;
+	return {i: i + 2, t: t, x: x, y: y};
+};
+var $author$project$Main$InterconnectFocus = function (a) {
+	return {$: 'InterconnectFocus', a: a};
+};
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$Block$get = F2(
+	function (t, block) {
+		switch (t.$) {
+			case 'C4':
+				return block.c4s;
+			case 'Input':
+				return block.inputs;
+			case 'Local':
+				return block.locals;
+			case 'Logic':
+				return block.logics;
+			default:
+				return block.r4s;
+		}
 	});
 var $author$project$Interconnects$get = F2(
 	function (i, _v0) {
-		var set = _v0;
+		var set = _v0.a;
 		return A2($elm$core$Dict$get, i, set);
 	});
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
-		if (!maybe.$) {
+		if (maybe.$ === 'Just') {
 			var value = maybe.a;
 			return $elm$core$Maybe$Just(
 				f(value));
@@ -5987,124 +6074,202 @@ var $elm$core$Maybe$map = F2(
 			return $elm$core$Maybe$Nothing;
 		}
 	});
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (!maybe.$) {
-			var value = maybe.a;
-			return value;
+var $author$project$Main$findInterconnect = F2(
+	function (at, model) {
+		var device = $author$project$Main$currentDevice(model);
+		return A2(
+			$elm$core$Maybe$andThen,
+			$author$project$Interconnects$get(at.i),
+			A2(
+				$elm$core$Maybe$map,
+				$author$project$Block$get(at.t),
+				A2($author$project$Blocks$get, at, device.blocks)));
+	});
+var $author$project$Main$interconnectFocus = F2(
+	function (at, model) {
+		var _v0 = A2($author$project$Main$findInterconnect, at, model);
+		if (_v0.$ === 'Nothing') {
+			return $author$project$Main$NoFocus;
 		} else {
-			return _default;
+			var interconnect = _v0.a;
+			return $author$project$Main$InterconnectFocus(
+				{at: at, froms: interconnect.froms, thrus: interconnect.thrus});
 		}
 	});
-var $author$project$Main$setInterconnectFocus = F2(
+var $author$project$Main$interconnectLeft = function (_v0) {
+	var x = _v0.x;
+	var y = _v0.y;
+	var t = _v0.t;
+	var i = _v0.i;
+	return {i: i - 1, t: t, x: x, y: y};
+};
+var $author$project$Main$interconnectRight = function (_v0) {
+	var x = _v0.x;
+	var y = _v0.y;
+	var t = _v0.t;
+	var i = _v0.i;
+	return {i: i + 1, t: t, x: x, y: y};
+};
+var $author$project$Main$interconnectUp = function (_v0) {
+	var x = _v0.x;
+	var y = _v0.y;
+	var t = _v0.t;
+	var i = _v0.i;
+	return {i: i - 2, t: t, x: x, y: y};
+};
+var $author$project$Main$InterconnectsFocus = function (a) {
+	return {$: 'InterconnectsFocus', a: a};
+};
+var $author$project$Main$findInterconnects = F2(
 	function (at, model) {
-		var focus = function (interconnect) {
-			return $author$project$Main$InterconnectFocus(
-				{p: at, aE: interconnect.aE, aQ: interconnect.aQ});
-		};
 		var device = $author$project$Main$currentDevice(model);
 		return A2(
-			$elm$core$Maybe$withDefault,
-			$author$project$Main$NoFocus,
-			A2(
-				$elm$core$Maybe$map,
-				focus,
-				A2(
-					$elm$core$Maybe$andThen,
-					$author$project$Interconnects$get(at.aG),
-					A2(
-						$elm$core$Maybe$map,
-						$author$project$Block$get(at.aP),
-						A2($author$project$Blocks$get, at, device.Q)))));
+			$elm$core$Maybe$map,
+			$author$project$Block$get(at.t),
+			A2($author$project$Blocks$get, at, device.blocks));
 	});
-var $author$project$Main$InterconnectsFocus = function (a) {
-	return {$: 1, a: a};
-};
-var $author$project$InterconnectIndexSet$union = F2(
-	function (_v0, _v1) {
-		var left = _v0;
-		var right = _v1;
-		return {
-			R: A2($elm$core$Dict$union, left.R, right.R),
-			_: A2($elm$core$Dict$union, left._, right._),
-			ac: A2($elm$core$Dict$union, left.ac, right.ac),
-			ad: A2($elm$core$Dict$union, left.ad, right.ad),
-			an: A2($elm$core$Dict$union, left.an, right.an)
-		};
-	});
-var $author$project$Interconnects$fromsUnion = F2(
-	function (_v0, m) {
-		return $author$project$InterconnectIndexSet$union(m.aE);
-	});
-var $author$project$Interconnects$froms = function (_v0) {
-	var set = _v0;
-	return A3($elm$core$Dict$foldl, $author$project$Interconnects$fromsUnion, $author$project$InterconnectIndexSet$empty, set);
-};
-var $author$project$Interconnects$thrusUnion = F2(
-	function (_v0, m) {
-		return $author$project$InterconnectIndexSet$union(m.aQ);
-	});
-var $author$project$Interconnects$thrus = function (_v0) {
-	var set = _v0;
-	return A3($elm$core$Dict$foldl, $author$project$Interconnects$thrusUnion, $author$project$InterconnectIndexSet$empty, set);
-};
-var $author$project$Main$setInterconnectsFocus = F2(
+var $author$project$Main$interconnectsFocus = F2(
 	function (at, model) {
-		var focus = function (muxes) {
+		var _v0 = A2($author$project$Main$findInterconnects, at, model);
+		if (_v0.$ === 'Nothing') {
+			return $author$project$Main$NoFocus;
+		} else {
+			var interconnects = _v0.a;
 			return $author$project$Main$InterconnectsFocus(
 				{
-					p: at,
-					aE: $author$project$Interconnects$froms(muxes),
-					aQ: $author$project$Interconnects$thrus(muxes)
+					at: at,
+					froms: $author$project$Interconnects$froms(interconnects),
+					thrus: $author$project$Interconnects$thrus(interconnects)
 				});
-		};
-		var device = $author$project$Main$currentDevice(model);
-		return A2(
-			$elm$core$Maybe$withDefault,
-			$author$project$Main$NoFocus,
-			A2(
-				$elm$core$Maybe$map,
-				focus,
-				A2(
-					$elm$core$Maybe$map,
-					$author$project$Block$get(at.aP),
-					A2($author$project$Blocks$get, at, device.Q))));
+		}
 	});
-var $author$project$Main$move = F3(
-	function (moveInterconnect, moveInterconnects, model) {
-		var _v0 = model.j;
+var $elm$core$Basics$modBy = _Basics_modBy;
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $author$project$BlockIndex$id = function (block) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				'block-',
+				$elm$core$String$fromInt(block.x),
+				'-',
+				$elm$core$String$fromInt(block.y)
+			]));
+};
+var $author$project$InterconnectType$id = function (t) {
+	switch (t.$) {
+		case 'C4':
+			return 'c4';
+		case 'Input':
+			return 'input';
+		case 'Local':
+			return 'local';
+		case 'Logic':
+			return 'logic';
+		default:
+			return 'r4';
+	}
+};
+var $author$project$InterconnectIndex$id = function (interconnect) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				$author$project$InterconnectType$id(interconnect.t),
+				'-',
+				$elm$core$String$fromInt(interconnect.x),
+				'-',
+				$elm$core$String$fromInt(interconnect.y),
+				'-',
+				$elm$core$String$fromInt(interconnect.i)
+			]));
+};
+var $author$project$InterconnectsIndex$id = function (interconnects) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				$author$project$InterconnectType$id(interconnects.t),
+				'-',
+				$elm$core$String$fromInt(interconnects.x),
+				'-',
+				$elm$core$String$fromInt(interconnects.y)
+			]));
+};
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $elm$core$Task$onError = _Scheduler_onError;
+var $elm$core$Task$attempt = F2(
+	function (resultToMessage, task) {
+		return $elm$core$Task$command(
+			$elm$core$Task$Perform(
+				A2(
+					$elm$core$Task$onError,
+					A2(
+						$elm$core$Basics$composeL,
+						A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+						$elm$core$Result$Err),
+					A2(
+						$elm$core$Task$andThen,
+						A2(
+							$elm$core$Basics$composeL,
+							A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+							$elm$core$Result$Ok),
+						task))));
+	});
+var $elm$browser$Browser$Dom$focus = _Browser_call('focus');
+var $author$project$Main$moveTo = F2(
+	function (id, model) {
+		return _Utils_Tuple2(
+			model,
+			A2(
+				$elm$core$Task$attempt,
+				function (_v0) {
+					return $author$project$Main$Ignore;
+				},
+				$elm$browser$Browser$Dom$focus(id)));
+	});
+var $author$project$Main$move = F4(
+	function (nextBlock, nextInterconnects, nextInterconnect, model) {
+		var _v0 = model.focus;
 		switch (_v0.$) {
-			case 0:
-				var at = _v0.a.p;
-				var _v1 = A2(
-					$author$project$Main$setInterconnectFocus,
-					moveInterconnect(at),
-					model);
-				if (_v1.$ === 2) {
+			case 'BlockFocus':
+				var at = _v0.a.at;
+				var next = nextBlock(at);
+				var _v1 = A2($author$project$Main$findBlock, next, model);
+				if (_v1.$ === 'Nothing') {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				} else {
-					var focus = _v1;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{j: focus}),
-						$elm$core$Platform$Cmd$none);
+					return A2(
+						$author$project$Main$moveTo,
+						$author$project$BlockIndex$id(next),
+						model);
 				}
-			case 1:
-				var at = _v0.a.p;
-				var _v2 = A2(
-					$author$project$Main$setInterconnectsFocus,
-					moveInterconnects(at),
-					model);
-				if (_v2.$ === 2) {
+			case 'InterconnectsFocus':
+				var at = _v0.a.at;
+				var next = nextInterconnects(at);
+				var _v2 = A2($author$project$Main$findInterconnects, next, model);
+				if (_v2.$ === 'Nothing') {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				} else {
-					var focus = _v2;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{j: focus}),
-						$elm$core$Platform$Cmd$none);
+					return A2(
+						$author$project$Main$moveTo,
+						$author$project$InterconnectsIndex$id(next),
+						model);
+				}
+			case 'InterconnectFocus':
+				var at = _v0.a.at;
+				var next = nextInterconnect(at);
+				var _v3 = A2($author$project$Main$findInterconnect, next, model);
+				if (_v3.$ === 'Nothing') {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				} else {
+					return A2(
+						$author$project$Main$moveTo,
+						$author$project$InterconnectIndex$id(next),
+						model);
 				}
 			default:
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -6113,85 +6278,114 @@ var $author$project$Main$move = F3(
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 0:
-				switch (msg.a) {
-					case 'd':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									B: A2(
-										$elm$core$Basics$modBy,
-										$elm$core$List$length(model.H),
-										model.B + 1),
-									j: $author$project$Main$NoFocus
-								}),
-							$elm$core$Platform$Cmd$none);
-					case 'z':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									z: function () {
-										var _v1 = model.z;
-										if (_v1 === 1) {
-											return 0;
-										} else {
-											return 1;
-										}
-									}()
-								}),
-							$elm$core$Platform$Cmd$none);
-					case '8':
-						return A3($author$project$Main$move, $author$project$Main$interconnectUp, $author$project$Main$interconnectsUp, model);
-					case '2':
-						return A3($author$project$Main$move, $author$project$Main$interconnectDown, $author$project$Main$interconnectsDown, model);
-					case '4':
-						return A3($author$project$Main$move, $author$project$Main$interconnectLeft, $author$project$Main$interconnectsLeft, model);
-					case '6':
-						return A3($author$project$Main$move, $author$project$Main$interconnectRight, $author$project$Main$interconnectsRight, model);
-					default:
-						var key = msg.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{I: key}),
-							$elm$core$Platform$Cmd$none);
-				}
-			case 1:
-				var at = msg.a;
+			case 'Ignore':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'NextDevice':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							j: A2($author$project$Main$setInterconnectFocus, at, model)
+							device: A2(
+								$elm$core$Basics$modBy,
+								$elm$core$List$length(model.devices),
+								model.device + 1),
+							focus: $author$project$Main$NoFocus
 						}),
 					$elm$core$Platform$Cmd$none);
-			case 2:
+			case 'NextZoom':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							zoom: function () {
+								var _v1 = model.zoom;
+								if (_v1.$ === 'FitToPage') {
+									return $author$project$Main$ActualSize;
+								} else {
+									return $author$project$Main$FitToPage;
+								}
+							}()
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'Move':
+				switch (msg.b.$) {
+					case 'Up':
+						if (msg.a) {
+							var _v2 = msg.b;
+							return A4($author$project$Main$move, $author$project$Main$blockUp, $author$project$Main$blockUp, $author$project$Main$blockUp, model);
+						} else {
+							var _v6 = msg.b;
+							return A4($author$project$Main$move, $author$project$Main$blockUp, $author$project$Main$blockUp, $author$project$Main$interconnectUp, model);
+						}
+					case 'Down':
+						if (msg.a) {
+							var _v3 = msg.b;
+							return A4($author$project$Main$move, $author$project$Main$blockDown, $author$project$Main$blockDown, $author$project$Main$blockDown, model);
+						} else {
+							var _v7 = msg.b;
+							return A4($author$project$Main$move, $author$project$Main$blockDown, $author$project$Main$blockDown, $author$project$Main$interconnectDown, model);
+						}
+					case 'Left':
+						if (msg.a) {
+							var _v4 = msg.b;
+							return A4($author$project$Main$move, $author$project$Main$blockLeft, $author$project$Main$blockLeft, $author$project$Main$blockLeft, model);
+						} else {
+							var _v8 = msg.b;
+							return A4($author$project$Main$move, $author$project$Main$blockLeft, $author$project$Main$blockLeft, $author$project$Main$interconnectLeft, model);
+						}
+					default:
+						if (msg.a) {
+							var _v5 = msg.b;
+							return A4($author$project$Main$move, $author$project$Main$blockRight, $author$project$Main$blockRight, $author$project$Main$blockRight, model);
+						} else {
+							var _v9 = msg.b;
+							return A4($author$project$Main$move, $author$project$Main$blockRight, $author$project$Main$blockRight, $author$project$Main$interconnectRight, model);
+						}
+				}
+			case 'SetBlockFocus':
 				var at = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							j: A2($author$project$Main$setInterconnectsFocus, at, model)
+							focus: A2($author$project$Main$blockFocus, at, model)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'SetInterconnectsFocus':
+				var at = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							focus: A2($author$project$Main$interconnectsFocus, at, model)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'SetInterconnectFocus':
+				var at = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							focus: A2($author$project$Main$interconnectFocus, at, model)
 						}),
 					$elm$core$Platform$Cmd$none);
 			default:
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{j: $author$project$Main$NoFocus}),
+						{focus: $author$project$Main$NoFocus}),
 					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$Main$SetNoFocus = {$: 'SetNoFocus'};
 var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
 var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
 var $author$project$Blocks$map = F2(
 	function (f, _v0) {
-		var dict = _v0;
+		var dict = _v0.a;
 		var fold = F3(
 			function (_v1, block, acc) {
 				return A2(
@@ -6201,11 +6395,31 @@ var $author$project$Blocks$map = F2(
 			});
 		return A3($elm$core$Dict$foldr, fold, _List_Nil, dict);
 	});
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onBlur = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'blur',
+		$elm$json$Json$Decode$succeed(msg));
+};
 var $elm$svg$Svg$Attributes$preserveAspectRatio = _VirtualDom_attribute('preserveAspectRatio');
 var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$svg$Svg$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$svg$Svg$text_ = $elm$svg$Svg$trustedNode('text');
+var $author$project$Main$SetBlockFocus = function (a) {
+	return {$: 'SetBlockFocus', a: a};
+};
 var $elm$virtual_dom$VirtualDom$attribute = F2(
 	function (key, value) {
 		return A2(
@@ -6214,55 +6428,122 @@ var $elm$virtual_dom$VirtualDom$attribute = F2(
 			_VirtualDom_noJavaScriptOrHtmlUri(value));
 	});
 var $elm$html$Html$Attributes$attribute = $elm$virtual_dom$VirtualDom$attribute;
+var $author$project$BlockIndex$from = function (block) {
+	return {x: block.x, y: block.y};
+};
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $author$project$InterconnectsIndex$join = F2(
 	function (block, t) {
-		return {aP: t, aU: block.aU, aV: block.aV};
+		return {t: t, x: block.x, y: block.y};
+	});
+var $author$project$Main$Down = {$: 'Down'};
+var $author$project$Main$Left = {$: 'Left'};
+var $author$project$Main$Move = F2(
+	function (a, b) {
+		return {$: 'Move', a: a, b: b};
+	});
+var $author$project$Main$Right = {$: 'Right'};
+var $author$project$Main$Up = {$: 'Up'};
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $author$project$Main$keyDown = function () {
+	var decode = F2(
+		function (ctrl, key) {
+			switch (key) {
+				case 'ArrowLeft':
+					return _Utils_Tuple2(
+						A2($author$project$Main$Move, ctrl, $author$project$Main$Left),
+						true);
+				case 'ArrowRight':
+					return _Utils_Tuple2(
+						A2($author$project$Main$Move, ctrl, $author$project$Main$Right),
+						true);
+				case 'ArrowUp':
+					return _Utils_Tuple2(
+						A2($author$project$Main$Move, ctrl, $author$project$Main$Up),
+						true);
+				case 'ArrowDown':
+					return _Utils_Tuple2(
+						A2($author$project$Main$Move, ctrl, $author$project$Main$Down),
+						true);
+				default:
+					return _Utils_Tuple2($author$project$Main$Ignore, false);
+			}
+		});
+	return A3(
+		$elm$json$Json$Decode$map2,
+		decode,
+		A2($elm$json$Json$Decode$field, 'ctrlKey', $elm$json$Json$Decode$bool),
+		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+}();
+var $elm$html$Html$Events$onFocus = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'focus',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
 	});
 var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
 var $author$project$BlockType$toString = function (t) {
-	switch (t) {
-		case 0:
+	switch (t.$) {
+		case 'Logic':
 			return 'logic';
-		case 1:
+		case 'Row':
 			return 'row';
-		case 2:
+		case 'Column':
 			return 'column';
-		case 3:
+		case 'Global':
 			return 'global';
 		default:
 			return 'other';
 	}
 };
 var $elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
-var $elm$core$String$concat = function (strings) {
-	return A2($elm$core$String$join, '', strings);
-};
 var $author$project$Main$transformBlock = F2(
 	function (block, device) {
 		return $elm$core$String$concat(
 			_List_fromArray(
 				[
 					'translate(',
-					$elm$core$String$fromInt(340 * (block.aU - device.ab)),
+					$elm$core$String$fromInt(340 * (block.x - device.left)),
 					',',
-					$elm$core$String$fromInt(100 + (340 * (device.au - block.aV))),
+					$elm$core$String$fromInt(100 + (340 * (device.top - block.y))),
 					')'
 				]));
 	});
+var $author$project$Main$SetInterconnectsFocus = function (a) {
+	return {$: 'SetInterconnectsFocus', a: a};
+};
 var $elm$core$Dict$isEmpty = function (dict) {
-	if (dict.$ === -2) {
+	if (dict.$ === 'RBEmpty_elm_builtin') {
 		return true;
 	} else {
 		return false;
 	}
 };
 var $author$project$Interconnects$isEmpty = function (_v0) {
-	var set = _v0;
+	var set = _v0.a;
 	return $elm$core$Dict$isEmpty(set);
 };
 var $author$project$Interconnects$map = F2(
 	function (_with, _v0) {
-		var set = _v0;
+		var set = _v0.a;
 		var f = F3(
 			function (k, v, acc) {
 				return A2(
@@ -6272,13 +6553,16 @@ var $author$project$Interconnects$map = F2(
 			});
 		return A3($elm$core$Dict$foldl, f, _List_Nil, set);
 	});
+var $author$project$Main$SetInterconnectFocus = function (a) {
+	return {$: 'SetInterconnectFocus', a: a};
+};
 var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
 var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
 var $elm$core$Dict$member = F2(
 	function (key, dict) {
 		var _v0 = A2($elm$core$Dict$get, key, dict);
-		if (!_v0.$) {
+		if (_v0.$ === 'Just') {
 			return true;
 		} else {
 			return false;
@@ -6286,72 +6570,72 @@ var $elm$core$Dict$member = F2(
 	});
 var $author$project$InterconnectIndexSet$member = F2(
 	function (index, _v0) {
-		var set = _v0;
-		var _v1 = index.aP;
-		switch (_v1) {
-			case 0:
+		var set = _v0.a;
+		var _v1 = index.t;
+		switch (_v1.$) {
+			case 'C4':
 				return A2(
 					$elm$core$Dict$member,
 					$author$project$InterconnectIndexSet$key(index),
-					set.R);
-			case 1:
+					set.c4s);
+			case 'Input':
 				return A2(
 					$elm$core$Dict$member,
 					$author$project$InterconnectIndexSet$key(index),
-					set._);
-			case 2:
+					set.inputs);
+			case 'Local':
 				return A2(
 					$elm$core$Dict$member,
 					$author$project$InterconnectIndexSet$key(index),
-					set.ac);
-			case 3:
+					set.locals);
+			case 'Logic':
 				return A2(
 					$elm$core$Dict$member,
 					$author$project$InterconnectIndexSet$key(index),
-					set.ad);
+					set.logics);
 			default:
 				return A2(
 					$elm$core$Dict$member,
 					$author$project$InterconnectIndexSet$key(index),
-					set.an);
+					set.r4s);
 		}
-	});
-var $author$project$InterconnectsIndex$member = F2(
-	function (p, ps) {
-		return _Utils_eq(p.aU, ps.aU) && (_Utils_eq(p.aV, ps.aV) && _Utils_eq(p.aP, ps.aP));
 	});
 var $author$project$Main$innerClass = F2(
 	function (focus, self) {
 		switch (focus.$) {
-			case 0:
-				var at = focus.a.p;
-				var thrus = focus.a.aQ;
-				return _Utils_eq(at, self) ? 'focus' : (A2($author$project$InterconnectIndexSet$member, self, thrus) ? 'thru' : 'inner');
-			case 1:
-				var at = focus.a.p;
-				var thrus = focus.a.aQ;
-				return A2($author$project$InterconnectsIndex$member, self, at) ? 'focus' : (A2($author$project$InterconnectIndexSet$member, self, thrus) ? 'thru' : 'inner');
+			case 'BlockFocus':
+				var thrus = focus.a.thrus;
+				return A2($author$project$InterconnectIndexSet$member, self, thrus) ? 'thru' : 'inner';
+			case 'InterconnectsFocus':
+				var thrus = focus.a.thrus;
+				return A2($author$project$InterconnectIndexSet$member, self, thrus) ? 'thru' : 'inner';
+			case 'InterconnectFocus':
+				var at = focus.a.at;
+				var thrus = focus.a.thrus;
+				return A2($author$project$InterconnectIndexSet$member, self, thrus) ? 'thru' : 'inner';
 			default:
 				return 'inner';
 		}
 	});
 var $author$project$InterconnectIndex$join = F2(
 	function (interconnects, i) {
-		return {aG: i, aP: interconnects.aP, aU: interconnects.aU, aV: interconnects.aV};
+		return {i: i, t: interconnects.t, x: interconnects.x, y: interconnects.y};
 	});
 var $author$project$Main$outerClass = F2(
 	function (focus, self) {
 		switch (focus.$) {
-			case 0:
-				var at = focus.a.p;
-				var froms = focus.a.aE;
-				var thrus = focus.a.aQ;
-				return _Utils_eq(at, self) ? 'focus' : (A2($author$project$InterconnectIndexSet$member, self, froms) ? 'from' : (A2($author$project$InterconnectIndexSet$member, self, thrus) ? 'clear' : 'outer'));
-			case 1:
-				var at = focus.a.p;
-				var froms = focus.a.aE;
-				var thrus = focus.a.aQ;
-				return A2($author$project$InterconnectsIndex$member, self, at) ? 'focus' : (A2($author$project$InterconnectIndexSet$member, self, froms) ? 'from' : (A2($author$project$InterconnectIndexSet$member, self, thrus) ? 'clear' : 'outer'));
+			case 'BlockFocus':
+				var froms = focus.a.froms;
+				var thrus = focus.a.thrus;
+				return A2($author$project$InterconnectIndexSet$member, self, froms) ? 'from' : (A2($author$project$InterconnectIndexSet$member, self, thrus) ? 'clear' : 'outer');
+			case 'InterconnectsFocus':
+				var froms = focus.a.froms;
+				var thrus = focus.a.thrus;
+				return A2($author$project$InterconnectIndexSet$member, self, froms) ? 'from' : (A2($author$project$InterconnectIndexSet$member, self, thrus) ? 'clear' : 'outer');
+			case 'InterconnectFocus':
+				var froms = focus.a.froms;
+				var thrus = focus.a.thrus;
+				return A2($author$project$InterconnectIndexSet$member, self, froms) ? 'from' : (A2($author$project$InterconnectIndexSet$member, self, thrus) ? 'clear' : 'outer');
 			default:
 				return 'outer';
 		}
@@ -6359,8 +6643,8 @@ var $author$project$Main$outerClass = F2(
 var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
 var $author$project$Main$viewInterconnect1 = F3(
 	function (at, focus, interconnect) {
-		var y = $elm$core$String$fromInt(50 + (20 * interconnect.aG));
-		var self = A2($author$project$InterconnectIndex$join, at, interconnect.aG);
+		var y = $elm$core$String$fromInt(50 + (20 * interconnect.i));
+		var self = A2($author$project$InterconnectIndex$join, at, interconnect.i);
 		var outer = A2(
 			$elm$svg$Svg$circle,
 			_List_fromArray(
@@ -6388,7 +6672,11 @@ var $author$project$Main$viewInterconnect1 = F3(
 			_List_fromArray(
 				[
 					$elm$svg$Svg$Attributes$class('interconnect'),
-					A2($elm$html$Html$Attributes$attribute, 'tabindex', '0')
+					$elm$html$Html$Attributes$id(
+					$author$project$InterconnectIndex$id(self)),
+					A2($elm$html$Html$Attributes$attribute, 'tabindex', '0'),
+					$elm$html$Html$Events$onFocus(
+					$author$project$Main$SetInterconnectFocus(self))
 				]),
 			_List_fromArray(
 				[outer, inner]));
@@ -6432,7 +6720,11 @@ var $author$project$Main$viewInterconnects1 = F6(
 					[
 						$elm$svg$Svg$Attributes$transform(transform),
 						$elm$svg$Svg$Attributes$class('interconnects'),
-						A2($elm$html$Html$Attributes$attribute, 'tabindex', '0')
+						$elm$html$Html$Attributes$id(
+						$author$project$InterconnectsIndex$id(at)),
+						A2($elm$html$Html$Attributes$attribute, 'tabindex', '0'),
+						$elm$html$Html$Events$onFocus(
+						$author$project$Main$SetInterconnectsFocus(at))
 					]),
 				A2(
 					$elm$core$List$cons,
@@ -6442,10 +6734,10 @@ var $author$project$Main$viewInterconnects1 = F6(
 	});
 var $author$project$Main$viewInterconnect2 = F3(
 	function (at, focus, interconnect) {
-		var y = $elm$core$String$fromInt(50 + (20 * ((interconnect.aG / 2) | 0)));
+		var y = $elm$core$String$fromInt(50 + (20 * ((interconnect.i / 2) | 0)));
 		var x = $elm$core$String$fromInt(
-			30 + (20 * A2($elm$core$Basics$modBy, 2, interconnect.aG)));
-		var self = A2($author$project$InterconnectIndex$join, at, interconnect.aG);
+			30 + (20 * A2($elm$core$Basics$modBy, 2, interconnect.i)));
+		var self = A2($author$project$InterconnectIndex$join, at, interconnect.i);
 		var outer = A2(
 			$elm$svg$Svg$circle,
 			_List_fromArray(
@@ -6473,7 +6765,11 @@ var $author$project$Main$viewInterconnect2 = F3(
 			_List_fromArray(
 				[
 					$elm$svg$Svg$Attributes$class('interconnect'),
-					A2($elm$html$Html$Attributes$attribute, 'tabindex', '0')
+					$elm$html$Html$Attributes$id(
+					$author$project$InterconnectIndex$id(self)),
+					A2($elm$html$Html$Attributes$attribute, 'tabindex', '0'),
+					$elm$html$Html$Events$onFocus(
+					$author$project$Main$SetInterconnectFocus(self))
 				]),
 			_List_fromArray(
 				[outer, inner]));
@@ -6514,7 +6810,11 @@ var $author$project$Main$viewInterconnects2 = F6(
 					[
 						$elm$svg$Svg$Attributes$transform(transform),
 						$elm$svg$Svg$Attributes$class('interconnects'),
-						A2($elm$html$Html$Attributes$attribute, 'tabindex', '0')
+						$elm$html$Html$Attributes$id(
+						$author$project$InterconnectsIndex$id(at)),
+						A2($elm$html$Html$Attributes$attribute, 'tabindex', '0'),
+						$elm$html$Html$Events$onFocus(
+						$author$project$Main$SetInterconnectsFocus(at))
 					]),
 				A2(
 					$elm$core$List$cons,
@@ -6524,6 +6824,114 @@ var $author$project$Main$viewInterconnects2 = F6(
 	});
 var $author$project$Main$viewBlock = F3(
 	function (device, focus, block) {
+		var row = A2(
+			$elm$svg$Svg$g,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$transform('translate(17, 180)')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$svg$Svg$text_,
+					_List_fromArray(
+						[
+							$elm$svg$Svg$Attributes$class('row')
+						]),
+					_List_fromArray(
+						[
+							$elm$svg$Svg$text(
+							$elm$core$String$fromInt(block.y))
+						]))
+				]));
+		var rect = A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('20'),
+					$elm$svg$Svg$Attributes$y('20'),
+					$elm$svg$Svg$Attributes$width('320'),
+					$elm$svg$Svg$Attributes$height('320')
+				]),
+			_List_Nil);
+		var r4 = A6(
+			$author$project$Main$viewInterconnects2,
+			focus,
+			'R4',
+			A2($author$project$InterconnectsIndex$join, block, $author$project$InterconnectType$R4),
+			block.r4s,
+			'translate(20, 20)',
+			'168');
+		var logic = A6(
+			$author$project$Main$viewInterconnects2,
+			focus,
+			'Logic',
+			A2($author$project$InterconnectsIndex$join, block, $author$project$InterconnectType$Logic),
+			block.logics,
+			'translate(180, 20)',
+			'208');
+		var local = function () {
+			var _v0 = block.t;
+			switch (_v0.$) {
+				case 'Logic':
+					return A6(
+						$author$project$Main$viewInterconnects2,
+						focus,
+						'Local',
+						A2($author$project$InterconnectsIndex$join, block, $author$project$InterconnectType$Local),
+						block.locals,
+						'translate(100, 20)',
+						'268');
+				case 'Row':
+					return A6(
+						$author$project$Main$viewInterconnects2,
+						focus,
+						'Local',
+						A2($author$project$InterconnectsIndex$join, block, $author$project$InterconnectType$Local),
+						block.locals,
+						'translate(100, 20)',
+						'188');
+				default:
+					return A6(
+						$author$project$Main$viewInterconnects2,
+						focus,
+						'Local',
+						A2($author$project$InterconnectsIndex$join, block, $author$project$InterconnectType$Local),
+						block.locals,
+						'translate(100, 20)',
+						'108');
+			}
+		}();
+		var input = A6(
+			$author$project$Main$viewInterconnects1,
+			focus,
+			'Input',
+			A2($author$project$InterconnectsIndex$join, block, $author$project$InterconnectType$Input),
+			block.inputs,
+			'translate(190, 20)',
+			'148');
+		var column = A2(
+			$elm$svg$Svg$text_,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('180'),
+					$elm$svg$Svg$Attributes$y('17'),
+					$elm$svg$Svg$Attributes$class('col')
+				]),
+			_List_fromArray(
+				[
+					$elm$svg$Svg$text(
+					$elm$core$String$fromInt(block.x))
+				]));
+		var c4 = A6(
+			$author$project$Main$viewInterconnects2,
+			focus,
+			'C4',
+			A2($author$project$InterconnectsIndex$join, block, $author$project$InterconnectType$C4),
+			block.c4s,
+			'translate(260, 20)',
+			'148');
+		var at = $author$project$BlockIndex$from(block);
 		return A2(
 			$elm$svg$Svg$g,
 			_List_fromArray(
@@ -6532,128 +6940,25 @@ var $author$project$Main$viewBlock = F3(
 					A2($author$project$Main$transformBlock, block, device)),
 					$elm$svg$Svg$Attributes$class('block'),
 					$elm$svg$Svg$Attributes$class(
-					$author$project$BlockType$toString(block.aP)),
-					A2($elm$html$Html$Attributes$attribute, 'tabindex', '0')
+					$author$project$BlockType$toString(block.t)),
+					$elm$html$Html$Attributes$id(
+					$author$project$BlockIndex$id(at)),
+					A2($elm$html$Html$Attributes$attribute, 'tabindex', '0'),
+					$elm$html$Html$Events$onFocus(
+					$author$project$Main$SetBlockFocus(at)),
+					A2($elm$html$Html$Events$preventDefaultOn, 'keydown', $author$project$Main$keyDown)
 				]),
 			_List_fromArray(
-				[
-					A2(
-					$elm$svg$Svg$rect,
-					_List_fromArray(
-						[
-							$elm$svg$Svg$Attributes$x('20'),
-							$elm$svg$Svg$Attributes$y('20'),
-							$elm$svg$Svg$Attributes$width('320'),
-							$elm$svg$Svg$Attributes$height('320')
-						]),
-					_List_Nil),
-					A6(
-					$author$project$Main$viewInterconnects2,
-					focus,
-					'C4',
-					A2($author$project$InterconnectsIndex$join, block, 0),
-					block.R,
-					'translate(260, 20)',
-					'148'),
-					function () {
-					var _v0 = block.aP;
-					switch (_v0) {
-						case 0:
-							return A6(
-								$author$project$Main$viewInterconnects2,
-								focus,
-								'Local',
-								A2($author$project$InterconnectsIndex$join, block, 2),
-								block.ac,
-								'translate(100, 20)',
-								'268');
-						case 1:
-							return A6(
-								$author$project$Main$viewInterconnects2,
-								focus,
-								'Local',
-								A2($author$project$InterconnectsIndex$join, block, 2),
-								block.ac,
-								'translate(100, 20)',
-								'188');
-						default:
-							return A6(
-								$author$project$Main$viewInterconnects2,
-								focus,
-								'Local',
-								A2($author$project$InterconnectsIndex$join, block, 2),
-								block.ac,
-								'translate(100, 20)',
-								'108');
-					}
-				}(),
-					A6(
-					$author$project$Main$viewInterconnects2,
-					focus,
-					'Logic',
-					A2($author$project$InterconnectsIndex$join, block, 3),
-					block.ad,
-					'translate(180, 20)',
-					'208'),
-					A6(
-					$author$project$Main$viewInterconnects1,
-					focus,
-					'Input',
-					A2($author$project$InterconnectsIndex$join, block, 1),
-					block._,
-					'translate(190, 20)',
-					'148'),
-					A6(
-					$author$project$Main$viewInterconnects2,
-					focus,
-					'R4',
-					A2($author$project$InterconnectsIndex$join, block, 4),
-					block.an,
-					'translate(20, 20)',
-					'168'),
-					A2(
-					$elm$svg$Svg$text_,
-					_List_fromArray(
-						[
-							$elm$svg$Svg$Attributes$x('180'),
-							$elm$svg$Svg$Attributes$y('17'),
-							$elm$svg$Svg$Attributes$class('col')
-						]),
-					_List_fromArray(
-						[
-							$elm$svg$Svg$text(
-							$elm$core$String$fromInt(block.aU))
-						])),
-					A2(
-					$elm$svg$Svg$g,
-					_List_fromArray(
-						[
-							$elm$svg$Svg$Attributes$transform('translate(17, 180)')
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$elm$svg$Svg$text_,
-							_List_fromArray(
-								[
-									$elm$svg$Svg$Attributes$class('row')
-								]),
-							_List_fromArray(
-								[
-									$elm$svg$Svg$text(
-									$elm$core$String$fromInt(block.aV))
-								]))
-						]))
-				]));
+				[rect, r4, local, logic, input, c4, column, row]));
 	});
 var $author$project$Main$viewBox = function (device) {
 	return $elm$core$String$concat(
 		_List_fromArray(
 			[
 				'0 0 ',
-				$elm$core$String$fromInt((device.aw * 340) + 20),
+				$elm$core$String$fromInt((device.width * 340) + 20),
 				' ',
-				$elm$core$String$fromInt((100 + (device.Y * 340)) + 20)
+				$elm$core$String$fromInt((100 + (device.height * 340)) + 20)
 			]));
 };
 var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
@@ -6661,11 +6966,11 @@ var $elm$core$String$append = _String_append;
 var $elm$core$String$fromFloat = _String_fromNumber;
 var $author$project$Main$viewHeight = F2(
 	function (model, device) {
-		var _v0 = model.z;
-		if (!_v0) {
+		var _v0 = model.zoom;
+		if (_v0.$ === 'ActualSize') {
 			return A2(
 				$elm$core$String$append,
-				$elm$core$String$fromFloat((2.5 + (8.5 * device.Y)) + 0.5),
+				$elm$core$String$fromFloat((2.5 + (8.5 * device.height)) + 0.5),
 				'cm');
 		} else {
 			return 'calc(100vh - 4px)';
@@ -6673,11 +6978,11 @@ var $author$project$Main$viewHeight = F2(
 	});
 var $author$project$Main$viewWidth = F2(
 	function (model, device) {
-		var _v0 = model.z;
-		if (!_v0) {
+		var _v0 = model.zoom;
+		if (_v0.$ === 'ActualSize') {
 			return A2(
 				$elm$core$String$append,
-				$elm$core$String$fromFloat((8.5 * device.aw) + 0.5),
+				$elm$core$String$fromFloat((8.5 * device.width) + 0.5),
 				'cm');
 		} else {
 			return '100vw';
@@ -6695,7 +7000,8 @@ var $author$project$Main$viewDevice = F2(
 					A2($author$project$Main$viewHeight, model, device)),
 					$elm$svg$Svg$Attributes$viewBox(
 					$author$project$Main$viewBox(device)),
-					$elm$svg$Svg$Attributes$preserveAspectRatio('xMidYMid meet')
+					$elm$svg$Svg$Attributes$preserveAspectRatio('xMidYMid meet'),
+					$elm$html$Html$Events$onBlur($author$project$Main$SetNoFocus)
 				]),
 			_List_fromArray(
 				[
@@ -6704,8 +7010,8 @@ var $author$project$Main$viewDevice = F2(
 					_List_Nil,
 					A2(
 						$author$project$Blocks$map,
-						A2($author$project$Main$viewBlock, device, model.j),
-						device.Q)),
+						A2($author$project$Main$viewBlock, device, model.focus),
+						device.blocks)),
 					A2(
 					$elm$svg$Svg$text_,
 					_List_fromArray(
@@ -6716,7 +7022,7 @@ var $author$project$Main$viewDevice = F2(
 						]),
 					_List_fromArray(
 						[
-							$elm$svg$Svg$text(device.at)
+							$elm$svg$Svg$text(device.title)
 						])),
 					A2(
 					$elm$svg$Svg$text_,
@@ -6727,7 +7033,7 @@ var $author$project$Main$viewDevice = F2(
 						]),
 					_List_fromArray(
 						[
-							$elm$svg$Svg$text(model.I)
+							$elm$svg$Svg$text(model.message)
 						]))
 				]));
 	});
@@ -6738,5 +7044,5 @@ var $author$project$Main$view = function (model) {
 		$author$project$Main$currentDevice(model));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
-	{aI: $author$project$Main$init, aO: $author$project$Main$subscriptions, aR: $author$project$Main$update, aS: $author$project$Main$view});
+	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$value)(0)}});}(this));
