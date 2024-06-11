@@ -1,0 +1,116 @@
+@import url("https://fonts.googleapis.com/css?family=Montserrat:400,700|Source+Code+Pro:400");
+
+:root {
+  --base03:     #002b36;
+  --base02:     #073642;
+  --base01:     #586e75;
+  --base00:     #657b83;
+  --base0:      #839496;
+  --base1:      #93a1a1;
+  --base2:      #eee8d5;
+  --base3:      #fdf6e3;
+  --yellow:     #b58900;
+  --orange:     #cb4b16;
+  --red:        #dc322f;
+  --magenta:    #d33682;
+  --violet:     #6c71c4;
+  --blue:       #268bd2;
+  --cyan:       #2aa198;
+  --green:      #859900;
+  /* light */
+  --emphasis:   var(--base01);
+  --text:       var(--base00);
+  --comment:    var(--base1);
+  --highlight:  var(--base2);
+  --background: var(--base3);
+  /* dark */
+  /*
+  --emphasis:   var(--base1);
+  --text:       var(--base0);
+  --comment:    var(--base01);
+  --highlight:  var(--base02);
+  --background: var(--base03);
+  */
+}
+
+/* normalize */
+body {
+  background-color: var(--background);
+  font-family: "Montserrat", sans-serif;
+  margin: 0;
+}
+
+text.device {
+  font-size: 80px;
+  font-weight: bold;
+  fill: var(--text);
+}
+
+text.col {
+  font-size: 20px;
+  text-anchor: middle;
+  fill: var(--comment);
+}
+
+text.row {
+  font-size: 20px;
+  text-anchor: middle;
+  transform: rotate(-90deg);
+  fill: var(--comment);
+}
+
+g.global > rect {
+  fill: var(--highlight);
+  stroke: var(--violet);
+}
+
+g.row > rect,
+g.column > rect {
+  fill: var(--highlight);
+  stroke: var(--magenta);
+}
+
+g.logic > rect {
+  fill: var(--highlight);
+  stroke: var(--yellow);
+}
+
+g.other > rect {
+  fill: var(--highlight);
+  stroke: var(--comment);
+}
+
+g.mux-set > rect {
+  fill: var(--background);
+}
+
+g.mux-set > text {
+  font-size: 20px;
+  text-anchor: middle;
+  fill: var(--text);
+}
+
+circle.focus {
+  fill: var(--blue);
+}
+
+circle.from {
+  fill: var(--magenta);
+}
+
+circle.thru {
+  fill: var(--magenta);
+}
+
+circle.clear {
+  fill: var(--background);
+}
+
+circle.outer {
+  fill: var(--comment);
+}
+
+circle.inner {
+  fill: var(--background);
+}
+
