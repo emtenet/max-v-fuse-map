@@ -6,6 +6,7 @@ module Interconnects exposing
     , froms
     , get
     , isEmpty
+    , map
     , member
     , thrus
     )
@@ -57,6 +58,15 @@ get i (Interconnects set) =
 fold : (Interconnect -> a -> a) -> a -> Interconnects -> a
 fold with init (Interconnects set) =
     Dict.foldl (\k v a -> with v a) init set
+
+
+map : (Interconnect -> t) -> Interconnects -> List t
+map with (Interconnects set) =
+    let
+        f k v acc =
+            with v :: acc
+    in
+    Dict.foldl f [] set
 
 
 froms : Interconnects -> InterconnectIndexSet

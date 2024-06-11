@@ -9,6 +9,7 @@ import Browser.Events
 import Device exposing (Device)
 import Dict
 import Html exposing (Html)
+import Html.Attributes
 import Interconnect exposing (Interconnect)
 import InterconnectIndex exposing (InterconnectIndex)
 import InterconnectIndexSet exposing (InterconnectIndexSet)
@@ -280,7 +281,8 @@ viewDevice model device =
         , Svg.Attributes.height (viewHeight model device)
         , Svg.Attributes.viewBox (viewBox device)
         , Svg.Attributes.preserveAspectRatio "xMidYMid meet"
-        , Svg.Events.onClick SetNoFocus
+
+        --, Svg.Events.onClick SetNoFocus
         ]
         [ Svg.g [] (Blocks.map (viewBlock device model.focus) device.blocks)
         , Svg.text_
@@ -342,7 +344,9 @@ viewBlock : Device -> Focus -> Block -> Html Msg
 viewBlock device focus block =
     Svg.g
         [ Svg.Attributes.transform (transformBlock block device)
+        , Svg.Attributes.class "block"
         , Svg.Attributes.class (BlockType.toString block.t)
+        , Html.Attributes.attribute "tabindex" "0"
         ]
         [ Svg.rect
             [ Svg.Attributes.x "20"
@@ -447,9 +451,10 @@ viewInterconnects2 focus title at set transform height =
                     , Svg.Attributes.y "36"
                     , Svg.Attributes.width "48"
                     , Svg.Attributes.height height
-                    , ( SetInterconnectsFocus at, True )
-                        |> Json.Decode.succeed
-                        |> Svg.Events.stopPropagationOn "click"
+
+                    --, ( SetInterconnectsFocus at, True )
+                    --    |> Json.Decode.succeed
+                    --    |> Svg.Events.stopPropagationOn "click"
                     ]
                     []
 
@@ -461,11 +466,12 @@ viewInterconnects2 focus title at set transform height =
                     [ Svg.text title ]
 
             circles =
-                Interconnects.fold (viewInterconnect2 at focus) [] set
+                Interconnects.map (viewInterconnect2 at focus) set
         in
         Svg.g
             [ Svg.Attributes.transform transform
             , Svg.Attributes.class "interconnects"
+            , Html.Attributes.attribute "tabindex" "0"
             ]
             (rect :: text :: circles)
 
@@ -474,9 +480,8 @@ viewInterconnect2 :
     InterconnectsIndex
     -> Focus
     -> Interconnect
-    -> List (Html Msg)
-    -> List (Html Msg)
-viewInterconnect2 at focus interconnect acc =
+    -> Html Msg
+viewInterconnect2 at focus interconnect =
     let
         self =
             InterconnectIndex.join at interconnect.i
@@ -500,9 +505,10 @@ viewInterconnect2 at focus interconnect acc =
                 , Svg.Attributes.cy y
                 , Svg.Attributes.r "10"
                 , Svg.Attributes.class (outerClass focus self)
-                , ( SetInterconnectFocus self, True )
-                    |> Json.Decode.succeed
-                    |> Svg.Events.stopPropagationOn "click"
+
+                --, ( SetInterconnectFocus self, True )
+                --    |> Json.Decode.succeed
+                --    |> Svg.Events.stopPropagationOn "click"
                 ]
                 []
 
@@ -512,13 +518,18 @@ viewInterconnect2 at focus interconnect acc =
                 , Svg.Attributes.cy y
                 , Svg.Attributes.r "6"
                 , Svg.Attributes.class (innerClass focus self)
-                , ( SetInterconnectFocus self, True )
-                    |> Json.Decode.succeed
-                    |> Svg.Events.stopPropagationOn "click"
+
+                --, ( SetInterconnectFocus self, True )
+                --    |> Json.Decode.succeed
+                --    |> Svg.Events.stopPropagationOn "click"
                 ]
                 []
     in
-    outer :: inner :: acc
+    Svg.g
+        [ Svg.Attributes.class "interconnect"
+        , Html.Attributes.attribute "tabindex" "0"
+        ]
+        [ outer, inner ]
 
 
 viewInterconnects1 :
@@ -541,25 +552,27 @@ viewInterconnects1 focus title at set transform height =
                     , Svg.Attributes.y "36"
                     , Svg.Attributes.width "28"
                     , Svg.Attributes.height height
-                    , ( SetInterconnectsFocus at, True )
-                        |> Json.Decode.succeed
-                        |> Svg.Events.stopPropagationOn "click"
+
+                    --, ( SetInterconnectsFocus at, True )
+                    --    |> Json.Decode.succeed
+                    --    |> Svg.Events.stopPropagationOn "click"
                     ]
                     []
 
             text =
                 Svg.text_
-                    [ Svg.Attributes.x "20"
+                    [ Svg.Attributes.x "30"
                     , Svg.Attributes.y "33"
                     ]
                     [ Svg.text title ]
 
             circles =
-                Interconnects.fold (viewInterconnect1 at focus) [] set
+                Interconnects.map (viewInterconnect1 at focus) set
         in
         Svg.g
             [ Svg.Attributes.transform transform
             , Svg.Attributes.class "interconnects"
+            , Html.Attributes.attribute "tabindex" "0"
             ]
             (rect :: text :: circles)
 
@@ -568,9 +581,8 @@ viewInterconnect1 :
     InterconnectsIndex
     -> Focus
     -> Interconnect
-    -> List (Html Msg)
-    -> List (Html Msg)
-viewInterconnect1 at focus interconnect acc =
+    -> Html Msg
+viewInterconnect1 at focus interconnect =
     let
         self =
             InterconnectIndex.join at interconnect.i
@@ -587,9 +599,10 @@ viewInterconnect1 at focus interconnect acc =
                 , Svg.Attributes.cy y
                 , Svg.Attributes.r "10"
                 , Svg.Attributes.class (outerClass focus self)
-                , ( SetInterconnectFocus self, True )
-                    |> Json.Decode.succeed
-                    |> Svg.Events.stopPropagationOn "click"
+
+                --, ( SetInterconnectFocus self, True )
+                --    |> Json.Decode.succeed
+                --    |> Svg.Events.stopPropagationOn "click"
                 ]
                 []
 
@@ -599,13 +612,18 @@ viewInterconnect1 at focus interconnect acc =
                 , Svg.Attributes.cy y
                 , Svg.Attributes.r "6"
                 , Svg.Attributes.class (innerClass focus self)
-                , ( SetInterconnectFocus self, True )
-                    |> Json.Decode.succeed
-                    |> Svg.Events.stopPropagationOn "click"
+
+                --, ( SetInterconnectFocus self, True )
+                --    |> Json.Decode.succeed
+                --    |> Svg.Events.stopPropagationOn "click"
                 ]
                 []
     in
-    outer :: inner :: acc
+    Svg.g
+        [ Svg.Attributes.class "interconnect"
+        , Html.Attributes.attribute "tabindex" "0"
+        ]
+        [ outer, inner ]
 
 
 outerClass : Focus -> InterconnectIndex -> String
