@@ -1,6 +1,7 @@
 -module(device).
 
 -export([list/0]).
+-export([title/1]).
 -export([name/1]).
 -export([from_name/1]).
 -export([density/1]).
@@ -91,6 +92,36 @@ list() ->
      max_v_2210z_f256,
      max_v_2210z_f324
     ].
+
+%%====================================================================
+%% title
+%%====================================================================
+
+-spec title(device()) -> binary().
+
+title(max_v_40z_e64) -> <<"MAX-V 40Z (E64)">>;
+title(max_v_40z_m64) -> <<"MAX-V 40Z (M64)">>;
+title(max_v_80z_e64) -> <<"MAX-V 80Z (E64)">>;
+title(max_v_80z_m64) -> <<"MAX-V 80Z (M64)">>;
+title(max_v_80z_m68) -> <<"MAX-V 80Z (M68)">>;
+title(max_v_80z_t100) -> <<"MAX-V 80Z (T100)">>;
+title(max_v_160z_e64) -> <<"MAX-V 160Z (E64)">>;
+title(max_v_160z_m68) -> <<"MAX-V 160Z (M68)">>;
+title(max_v_160z_m100) -> <<"MAX-V 160Z (M100)">>;
+title(max_v_160z_t100) -> <<"MAX-V 160Z (T100)">>;
+title(max_v_240z_m68) -> <<"MAX-V 240Z (M68)">>;
+title(max_v_240z_m100) -> <<"MAX-V 240Z (M100)">>;
+title(max_v_240z_t100) -> <<"MAX-V 240Z (T100)">>;
+title(max_v_240z_t144) -> <<"MAX-V 240Z (T144)">>;
+title(max_v_570z_m100) -> <<"MAX-V 570Z (M100)">>;
+title(max_v_570z_t100) -> <<"MAX-V 570Z (T100)">>;
+title(max_v_570z_t144) -> <<"MAX-V 570Z (T144)">>;
+title(max_v_570z_f256) -> <<"MAX-V 570Z (F256)">>;
+title(max_v_1270z_t144) -> <<"MAX-V 1270Z (T144)">>;
+title(max_v_1270z_f256) -> <<"MAX-V 1270Z (F256)">>;
+title(max_v_1270z_f324) -> <<"MAX-V 1270Z (F324)">>;
+title(max_v_2210z_f256) -> <<"MAX-V 2210Z (F256)">>;
+title(max_v_2210z_f324) -> <<"MAX-V 2210Z (F324)">>.
 
 %%====================================================================
 %% name
