@@ -859,7 +859,8 @@ routing_jtag(At, #jtag{name = Name, ports = Ports}) ->
 
 %%--------------------------------------------------------------------
 
-routing_lut(_, #lc{lut_name = undefined, carry_out = false}) ->
+routing_lut(_, #lc{lut_name = undefined, carry_out = false, lut_ports = Ports})
+        when map_size(Ports) =:= 0 ->
     ok;
 routing_lut(At, LC = #lc{lut_name = Name}) ->
     io:format("LUT ~w ~s~n", [At, Name]),
