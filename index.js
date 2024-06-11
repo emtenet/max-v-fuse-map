@@ -784,11 +784,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.Q.F === region.V.F)
+	if (region.N.C === region.U.C)
 	{
-		return 'on line ' + region.Q.F;
+		return 'on line ' + region.N.C;
 	}
-	return 'on lines ' + region.Q.F + ' through ' + region.V.F;
+	return 'on lines ' + region.N.C + ' through ' + region.U.C;
 }
 
 
@@ -1857,8 +1857,8 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aE,
-		impl.aS,
+		impl.aI,
+		impl.aR,
 		impl.aO,
 		function() { return function() {} }
 	);
@@ -2719,9 +2719,9 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		L: func(record.L),
-		R: record.R,
-		O: record.O
+		I: func(record.I),
+		O: record.O,
+		L: record.L
 	}
 });
 
@@ -2989,11 +2989,11 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.L;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.R;
+		var message = !tag ? value : tag < 3 ? value.a : value.I;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.O;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.O) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.L) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3943,11 +3943,11 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aE,
-		impl.aS,
+		impl.aI,
+		impl.aR,
 		impl.aO,
 		function(sendToApp, initialModel) {
-			var view = impl.aT;
+			var view = impl.aS;
 			/**/
 			var domNode = args['node'];
 			//*/
@@ -3979,12 +3979,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.aE,
-		impl.aS,
+		impl.aI,
+		impl.aR,
 		impl.aO,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.P && impl.P(sendToApp)
-			var view = impl.aT;
+			var divertHrefToApp = impl.M && impl.M(sendToApp)
+			var view = impl.aS;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3992,12 +3992,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.at);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.az);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.aQ) && (_VirtualDom_doc.title = title = doc.aQ);
+				(title !== doc.at) && (_VirtualDom_doc.title = title = doc.at);
 			});
 		}
 	);
@@ -4053,12 +4053,12 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.aJ;
-	var onUrlRequest = impl.aK;
+	var onUrlChange = impl.aK;
+	var onUrlRequest = impl.aL;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		P: function(sendToApp)
+		M: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -4074,9 +4074,9 @@ function _Browser_application(impl)
 					var next = $elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.ag === next.ag
-							&& curr.Y === next.Y
-							&& curr.ad.a === next.ad.a
+							&& curr.al === next.al
+							&& curr.Z === next.Z
+							&& curr.ai.a === next.ai.a
 						)
 							? $elm$browser$Browser$Internal(next)
 							: $elm$browser$Browser$External(href)
@@ -4084,12 +4084,12 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		aE: function(flags)
+		aI: function(flags)
 		{
-			return A3(impl.aE, flags, _Browser_getUrl(), key);
+			return A3(impl.aI, flags, _Browser_getUrl(), key);
 		},
-		aT: impl.aT,
 		aS: impl.aS,
+		aR: impl.aR,
 		aO: impl.aO
 	});
 }
@@ -4156,17 +4156,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { aB: 'hidden', av: 'visibilitychange' }
+		? { aF: 'hidden', aA: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { aB: 'mozHidden', av: 'mozvisibilitychange' }
+		? { aF: 'mozHidden', aA: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { aB: 'msHidden', av: 'msvisibilitychange' }
+		? { aF: 'msHidden', aA: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { aB: 'webkitHidden', av: 'webkitvisibilitychange' }
-		: { aB: 'hidden', av: 'visibilitychange' };
+		? { aF: 'webkitHidden', aA: 'webkitvisibilitychange' }
+		: { aF: 'hidden', aA: 'visibilitychange' };
 }
 
 
@@ -4247,12 +4247,12 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		ak: _Browser_getScene(),
-		an: {
-			ao: _Browser_window.pageXOffset,
-			ap: _Browser_window.pageYOffset,
-			aU: _Browser_doc.documentElement.clientWidth,
-			aA: _Browser_doc.documentElement.clientHeight
+		aq: _Browser_getScene(),
+		av: {
+			aU: _Browser_window.pageXOffset,
+			aV: _Browser_window.pageYOffset,
+			aw: _Browser_doc.documentElement.clientWidth,
+			Y: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4262,8 +4262,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		aU: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		aA: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		aw: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		Y: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4286,15 +4286,15 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			ak: {
-				aU: node.scrollWidth,
-				aA: node.scrollHeight
+			aq: {
+				aw: node.scrollWidth,
+				Y: node.scrollHeight
 			},
-			an: {
-				ao: node.scrollLeft,
-				ap: node.scrollTop,
-				aU: node.clientWidth,
-				aA: node.clientHeight
+			av: {
+				aU: node.scrollLeft,
+				aV: node.scrollTop,
+				aw: node.clientWidth,
+				Y: node.clientHeight
 			}
 		};
 	});
@@ -4324,18 +4324,18 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			ak: _Browser_getScene(),
-			an: {
-				ao: x,
-				ap: y,
-				aU: _Browser_doc.documentElement.clientWidth,
-				aA: _Browser_doc.documentElement.clientHeight
+			aq: _Browser_getScene(),
+			av: {
+				aU: x,
+				aV: y,
+				aw: _Browser_doc.documentElement.clientWidth,
+				Y: _Browser_doc.documentElement.clientHeight
 			},
-			ax: {
-				ao: x + rect.left,
-				ap: y + rect.top,
-				aU: rect.width,
-				aA: rect.height
+			aC: {
+				aU: x + rect.left,
+				aV: y + rect.top,
+				aw: rect.width,
+				Y: rect.height
 			}
 		};
 	});
@@ -4874,7 +4874,7 @@ var $elm$url$Url$Http = 0;
 var $elm$url$Url$Https = 1;
 var $elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {X: fragment, Y: host, ab: path, ad: port_, ag: protocol, ah: query};
+		return {W: fragment, Z: host, ag: path, ai: port_, al: protocol, am: query};
 	});
 var $elm$core$String$contains = _String_contains;
 var $elm$core$String$length = _String_length;
@@ -5157,67 +5157,91 @@ var $author$project$Main$ActualSize = 0;
 var $author$project$Main$NoFocus = {$: 2};
 var $author$project$Device$Device = F7(
 	function (width, height, top, left, title, global, blocks) {
-		return {as: blocks, az: global, aA: height, aH: left, aQ: title, aR: top, aU: width};
+		return {Q: blocks, X: global, Y: height, ab: left, at: title, au: top, aw: width};
+	});
+var $author$project$BlockIndex$BlockIndex = F2(
+	function (x, y) {
+		return {aU: x, aV: y};
 	});
 var $elm$json$Json$Decode$index = _Json_decodeIndex;
 var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $author$project$Block$decodeCoord = A3(
+var $author$project$BlockIndex$decode = A3(
 	$elm$json$Json$Decode$map2,
-	F2(
-		function (x, y) {
-			return _Utils_Tuple2(x, y);
-		}),
+	$author$project$BlockIndex$BlockIndex,
 	A2($elm$json$Json$Decode$index, 0, $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$index, 1, $elm$json$Json$Decode$int));
+var $author$project$Blocks$Blocks = $elm$core$Basics$identity;
 var $author$project$Block$Block = F8(
-	function (x, y, t, c4s, ics, ios, lcs, r4s) {
-		return {au: c4s, aC: ics, aF: ios, aG: lcs, aM: r4s, aP: t, ao: x, ap: y};
+	function (x, y, t, c4s, inputs, locals, logics, r4s) {
+		return {R: c4s, _: inputs, ac: locals, ad: logics, an: r4s, aP: t, aU: x, aV: y};
 	});
-var $author$project$Mux$Mux = F3(
+var $author$project$BlockType$Column = 2;
+var $author$project$BlockType$Global = 3;
+var $author$project$BlockType$Logic = 0;
+var $author$project$BlockType$Other = 4;
+var $author$project$BlockType$Row = 1;
+var $author$project$BlockType$fromString = function (s) {
+	switch (s) {
+		case 'logic':
+			return 0;
+		case 'row':
+			return 1;
+		case 'column':
+			return 2;
+		case 'global':
+			return 3;
+		default:
+			return 4;
+	}
+};
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$BlockType$decode = A2($elm$json$Json$Decode$map, $author$project$BlockType$fromString, $elm$json$Json$Decode$string);
+var $author$project$Interconnects$Interconnects = $elm$core$Basics$identity;
+var $author$project$Interconnect$Interconnect = F3(
 	function (i, froms, thrus) {
-		return {E: froms, f: i, w: thrus};
+		return {aE: froms, aG: i, aQ: thrus};
 	});
-var $author$project$Port$Port = F4(
+var $author$project$InterconnectIndex$InterconnectIndex = F4(
 	function (x, y, t, i) {
-		return {f: i, aP: t, ao: x, ap: y};
+		return {aG: i, aP: t, aU: x, aV: y};
 	});
 var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $author$project$Port$C4 = 0;
-var $author$project$Port$IC = 1;
-var $author$project$Port$IO = 2;
-var $author$project$Port$LC = 3;
-var $author$project$Port$R4 = 4;
+var $author$project$InterconnectType$C4 = 0;
+var $author$project$InterconnectType$Input = 1;
+var $author$project$InterconnectType$Local = 2;
+var $author$project$InterconnectType$Logic = 3;
+var $author$project$InterconnectType$R4 = 4;
 var $elm$json$Json$Decode$fail = _Json_fail;
-var $author$project$Port$decodeTypeString = function (s) {
+var $author$project$InterconnectType$decodeString = function (s) {
 	switch (s) {
 		case 'c4':
 			return $elm$json$Json$Decode$succeed(0);
-		case 'ic':
+		case 'input':
 			return $elm$json$Json$Decode$succeed(1);
-		case 'io':
+		case 'local':
 			return $elm$json$Json$Decode$succeed(2);
-		case 'lc':
+		case 'logic':
 			return $elm$json$Json$Decode$succeed(3);
 		case 'r4':
 			return $elm$json$Json$Decode$succeed(4);
 		default:
-			return $elm$json$Json$Decode$fail('Invalid Port type: ' + s);
+			return $elm$json$Json$Decode$fail('Invalid interconnect type: ' + s);
 	}
 };
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Port$decodeType = A2($elm$json$Json$Decode$andThen, $author$project$Port$decodeTypeString, $elm$json$Json$Decode$string);
+var $author$project$InterconnectType$decode = A2($elm$json$Json$Decode$andThen, $author$project$InterconnectType$decodeString, $elm$json$Json$Decode$string);
 var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$map4 = _Json_map4;
-var $author$project$Port$decode = A5(
+var $author$project$InterconnectIndex$decode = A5(
 	$elm$json$Json$Decode$map4,
-	$author$project$Port$Port,
+	$author$project$InterconnectIndex$InterconnectIndex,
 	A2($elm$json$Json$Decode$field, 'x', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 'y', $elm$json$Json$Decode$int),
-	A2($elm$json$Json$Decode$field, 't', $author$project$Port$decodeType),
+	A2($elm$json$Json$Decode$field, 't', $author$project$InterconnectType$decode),
 	A2($elm$json$Json$Decode$field, 'i', $elm$json$Json$Decode$int));
+var $author$project$InterconnectIndexSet$InterconnectIndexSet = $elm$core$Basics$identity;
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: -2};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $author$project$PortSet$empty = {au: $elm$core$Dict$empty, aC: $elm$core$Dict$empty, aF: $elm$core$Dict$empty, aG: $elm$core$Dict$empty, aM: $elm$core$Dict$empty};
+var $author$project$InterconnectIndexSet$empty = {R: $elm$core$Dict$empty, _: $elm$core$Dict$empty, ac: $elm$core$Dict$empty, ad: $elm$core$Dict$empty, an: $elm$core$Dict$empty};
 var $elm$core$Dict$Black = 1;
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
@@ -5327,80 +5351,81 @@ var $elm$core$Dict$insert = F3(
 			return x;
 		}
 	});
-var $author$project$PortSet$key = function (p) {
-	return _Utils_Tuple3(p.ao, p.ap, p.f);
+var $author$project$InterconnectIndexSet$key = function (index) {
+	return _Utils_Tuple3(index.aU, index.aV, index.aG);
 };
-var $author$project$PortSet$insert = F2(
-	function (p, ps) {
-		var _v0 = p.aP;
-		switch (_v0) {
+var $author$project$InterconnectIndexSet$insert = F2(
+	function (index, _v0) {
+		var set = _v0;
+		var _v1 = index.aP;
+		switch (_v1) {
 			case 0:
 				return _Utils_update(
-					ps,
+					set,
 					{
-						au: A3(
+						R: A3(
 							$elm$core$Dict$insert,
-							$author$project$PortSet$key(p),
-							p,
-							ps.au)
+							$author$project$InterconnectIndexSet$key(index),
+							index,
+							set.R)
 					});
 			case 1:
 				return _Utils_update(
-					ps,
+					set,
 					{
-						aC: A3(
+						_: A3(
 							$elm$core$Dict$insert,
-							$author$project$PortSet$key(p),
-							p,
-							ps.aC)
+							$author$project$InterconnectIndexSet$key(index),
+							index,
+							set._)
 					});
 			case 2:
 				return _Utils_update(
-					ps,
+					set,
 					{
-						aF: A3(
+						ac: A3(
 							$elm$core$Dict$insert,
-							$author$project$PortSet$key(p),
-							p,
-							ps.aF)
+							$author$project$InterconnectIndexSet$key(index),
+							index,
+							set.ac)
 					});
 			case 3:
 				return _Utils_update(
-					ps,
+					set,
 					{
-						aG: A3(
+						ad: A3(
 							$elm$core$Dict$insert,
-							$author$project$PortSet$key(p),
-							p,
-							ps.aG)
+							$author$project$InterconnectIndexSet$key(index),
+							index,
+							set.ad)
 					});
 			default:
 				return _Utils_update(
-					ps,
+					set,
 					{
-						aM: A3(
+						an: A3(
 							$elm$core$Dict$insert,
-							$author$project$PortSet$key(p),
-							p,
-							ps.aM)
+							$author$project$InterconnectIndexSet$key(index),
+							index,
+							set.an)
 					});
 		}
 	});
-var $author$project$PortSet$fromList = function (ps) {
-	return A3($elm$core$List$foldl, $author$project$PortSet$insert, $author$project$PortSet$empty, ps);
+var $author$project$InterconnectIndexSet$fromList = function (list) {
+	return A3($elm$core$List$foldl, $author$project$InterconnectIndexSet$insert, $author$project$InterconnectIndexSet$empty, list);
 };
 var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$PortSet$decode = A2(
+var $author$project$InterconnectIndexSet$decode = A2(
 	$elm$json$Json$Decode$map,
-	$author$project$PortSet$fromList,
-	$elm$json$Json$Decode$list($author$project$Port$decode));
+	$author$project$InterconnectIndexSet$fromList,
+	$elm$json$Json$Decode$list($author$project$InterconnectIndex$decode));
 var $elm$json$Json$Decode$map3 = _Json_map3;
-var $author$project$Mux$decode = A4(
+var $author$project$Interconnect$decode = A4(
 	$elm$json$Json$Decode$map3,
-	$author$project$Mux$Mux,
+	$author$project$Interconnect$Interconnect,
 	A2($elm$json$Json$Decode$field, 'i', $elm$json$Json$Decode$int),
-	A2($elm$json$Json$Decode$field, 'froms', $author$project$PortSet$decode),
-	A2($elm$json$Json$Decode$field, 'thrus', $author$project$PortSet$decode));
+	A2($elm$json$Json$Decode$field, 'froms', $author$project$InterconnectIndexSet$decode),
+	A2($elm$json$Json$Decode$field, 'thrus', $author$project$InterconnectIndexSet$decode));
 var $elm$core$Dict$fromList = function (assocs) {
 	return A3(
 		$elm$core$List$foldl,
@@ -5413,60 +5438,46 @@ var $elm$core$Dict$fromList = function (assocs) {
 		$elm$core$Dict$empty,
 		assocs);
 };
-var $author$project$MuxSet$decode = function () {
+var $author$project$Interconnects$decode = function () {
 	var keyValue = function (mux) {
-		return _Utils_Tuple2(mux.f, mux);
+		return _Utils_Tuple2(mux.aG, mux);
 	};
 	return A2(
 		$elm$json$Json$Decode$map,
-		$elm$core$Dict$fromList,
-		$elm$json$Json$Decode$list(
-			A2($elm$json$Json$Decode$map, keyValue, $author$project$Mux$decode)));
+		$elm$core$Basics$identity,
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$core$Dict$fromList,
+			$elm$json$Json$Decode$list(
+				A2($elm$json$Json$Decode$map, keyValue, $author$project$Interconnect$decode))));
 }();
-var $author$project$Block$Column = 2;
-var $author$project$Block$Global = 3;
-var $author$project$Block$Logic = 0;
-var $author$project$Block$Other = 4;
-var $author$project$Block$Row = 1;
-var $author$project$Block$stringToType = function (s) {
-	switch (s) {
-		case 'logic':
-			return 0;
-		case 'row':
-			return 1;
-		case 'column':
-			return 2;
-		case 'global':
-			return 3;
-		default:
-			return 4;
-	}
-};
-var $author$project$Block$decodeType = A2($elm$json$Json$Decode$map, $author$project$Block$stringToType, $elm$json$Json$Decode$string);
-var $author$project$Block$keyValue = function (block) {
-	return _Utils_Tuple2(
-		_Utils_Tuple2(block.ao, block.ap),
-		block);
-};
 var $elm$json$Json$Decode$map8 = _Json_map8;
-var $author$project$Block$decodeKeyValue = A2(
-	$elm$json$Json$Decode$map,
-	$author$project$Block$keyValue,
-	A9(
-		$elm$json$Json$Decode$map8,
-		$author$project$Block$Block,
-		A2($elm$json$Json$Decode$field, 'x', $elm$json$Json$Decode$int),
-		A2($elm$json$Json$Decode$field, 'y', $elm$json$Json$Decode$int),
-		A2($elm$json$Json$Decode$field, 't', $author$project$Block$decodeType),
-		A2($elm$json$Json$Decode$field, 'c4s', $author$project$MuxSet$decode),
-		A2($elm$json$Json$Decode$field, 'ics', $author$project$MuxSet$decode),
-		A2($elm$json$Json$Decode$field, 'ios', $author$project$MuxSet$decode),
-		A2($elm$json$Json$Decode$field, 'lcs', $author$project$MuxSet$decode),
-		A2($elm$json$Json$Decode$field, 'r4s', $author$project$MuxSet$decode)));
-var $author$project$Block$decodeDict = A2(
-	$elm$json$Json$Decode$map,
-	$elm$core$Dict$fromList,
-	$elm$json$Json$Decode$list($author$project$Block$decodeKeyValue));
+var $author$project$Block$decode = A9(
+	$elm$json$Json$Decode$map8,
+	$author$project$Block$Block,
+	A2($elm$json$Json$Decode$field, 'x', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'y', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 't', $author$project$BlockType$decode),
+	A2($elm$json$Json$Decode$field, 'c4s', $author$project$Interconnects$decode),
+	A2($elm$json$Json$Decode$field, 'inputs', $author$project$Interconnects$decode),
+	A2($elm$json$Json$Decode$field, 'locals', $author$project$Interconnects$decode),
+	A2($elm$json$Json$Decode$field, 'logics', $author$project$Interconnects$decode),
+	A2($elm$json$Json$Decode$field, 'r4s', $author$project$Interconnects$decode));
+var $author$project$Blocks$decode = function () {
+	var keyValue = function (block) {
+		return _Utils_Tuple2(
+			_Utils_Tuple2(block.aU, block.aV),
+			block);
+	};
+	return A2(
+		$elm$json$Json$Decode$map,
+		$elm$core$Basics$identity,
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$core$Dict$fromList,
+			$elm$json$Json$Decode$list(
+				A2($elm$json$Json$Decode$map, keyValue, $author$project$Block$decode))));
+}();
 var $elm$json$Json$Decode$map7 = _Json_map7;
 var $author$project$Device$decode = A8(
 	$elm$json$Json$Decode$map7,
@@ -5476,9 +5487,21 @@ var $author$project$Device$decode = A8(
 	A2($elm$json$Json$Decode$field, 'top', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 'left', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 'title', $elm$json$Json$Decode$string),
-	A2($elm$json$Json$Decode$field, 'global', $author$project$Block$decodeCoord),
-	A2($elm$json$Json$Decode$field, 'blocks', $author$project$Block$decodeDict));
+	A2($elm$json$Json$Decode$field, 'global', $author$project$BlockIndex$decode),
+	A2($elm$json$Json$Decode$field, 'blocks', $author$project$Blocks$decode));
 var $elm$json$Json$Decode$decodeValue = _Json_run;
+var $author$project$Blocks$empty = $elm$core$Dict$empty;
+var $author$project$Device$empty = function (title) {
+	return {
+		Q: $author$project$Blocks$empty,
+		X: {aU: 0, aV: 0},
+		Y: 1,
+		ab: 0,
+		at: title,
+		au: 0,
+		aw: 10
+	};
+};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (flags) {
@@ -5492,20 +5515,13 @@ var $author$project$Main$init = function (flags) {
 			var error = _v0.a;
 			return _List_fromArray(
 				[
-					{
-					as: $elm$core$Dict$empty,
-					az: _Utils_Tuple2(0, 0),
-					aA: 1,
-					aH: 0,
-					aQ: $elm$json$Json$Decode$errorToString(error),
-					aR: 0,
-					aU: 10
-				}
+					$author$project$Device$empty(
+					$elm$json$Json$Decode$errorToString(error))
 				]);
 		}
 	}();
 	return _Utils_Tuple2(
-		{D: 0, K: devices, k: $author$project$Main$NoFocus, L: '', B: 0},
+		{B: 0, H: devices, j: $author$project$Main$NoFocus, I: '', z: 0},
 		$elm$core$Platform$Cmd$none);
 };
 var $author$project$Main$KeyPress = function (a) {
@@ -5522,7 +5538,7 @@ var $elm$browser$Browser$Events$MySub = F3(
 	});
 var $elm$browser$Browser$Events$State = F2(
 	function (subs, pids) {
-		return {ac: pids, al: subs};
+		return {ah: pids, ar: subs};
 	});
 var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
 	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
@@ -5631,7 +5647,7 @@ var $elm$core$Dict$merge = F6(
 	});
 var $elm$browser$Browser$Events$Event = F2(
 	function (key, event) {
-		return {W: event, Z: key};
+		return {V: event, aa: key};
 	});
 var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
 var $elm$browser$Browser$Events$spawn = F3(
@@ -5706,7 +5722,7 @@ var $elm$browser$Browser$Events$onEffects = F3(
 			stepLeft,
 			stepBoth,
 			stepRight,
-			state.ac,
+			state.ah,
 			$elm$core$Dict$fromList(newSubs),
 			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
 		var deadPids = _v0.a;
@@ -5752,8 +5768,8 @@ var $elm$core$List$filterMap = F2(
 	});
 var $elm$browser$Browser$Events$onSelfMsg = F3(
 	function (router, _v0, state) {
-		var key = _v0.Z;
-		var event = _v0.W;
+		var key = _v0.aa;
+		var event = _v0.V;
 		var toMessage = function (_v2) {
 			var subKey = _v2.a;
 			var _v3 = _v2.b;
@@ -5762,7 +5778,7 @@ var $elm$browser$Browser$Events$onSelfMsg = F3(
 			var decoder = _v3.c;
 			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
 		};
-		var messages = A2($elm$core$List$filterMap, toMessage, state.al);
+		var messages = A2($elm$core$List$filterMap, toMessage, state.ar);
 		return A2(
 			$elm$core$Task$andThen,
 			function (_v1) {
@@ -5797,8 +5813,60 @@ var $author$project$Main$subscriptions = function (_v0) {
 	return $elm$browser$Browser$Events$onKeyPress($author$project$Main$keyPress);
 };
 var $author$project$Main$FitToPage = 1;
+var $author$project$Main$interconnectDown = function (_v0) {
+	var x = _v0.aU;
+	var y = _v0.aV;
+	var t = _v0.aP;
+	var i = _v0.aG;
+	return {aG: i + 2, aP: t, aU: x, aV: y};
+};
+var $author$project$Main$interconnectLeft = function (_v0) {
+	var x = _v0.aU;
+	var y = _v0.aV;
+	var t = _v0.aP;
+	var i = _v0.aG;
+	return {aG: i - 1, aP: t, aU: x, aV: y};
+};
+var $author$project$Main$interconnectRight = function (_v0) {
+	var x = _v0.aU;
+	var y = _v0.aV;
+	var t = _v0.aP;
+	var i = _v0.aG;
+	return {aG: i + 1, aP: t, aU: x, aV: y};
+};
+var $author$project$Main$interconnectUp = function (_v0) {
+	var x = _v0.aU;
+	var y = _v0.aV;
+	var t = _v0.aP;
+	var i = _v0.aG;
+	return {aG: i - 2, aP: t, aU: x, aV: y};
+};
+var $author$project$Main$interconnectsDown = function (_v0) {
+	var x = _v0.aU;
+	var y = _v0.aV;
+	var t = _v0.aP;
+	return {aP: t, aU: x, aV: y - 1};
+};
+var $author$project$Main$interconnectsLeft = function (_v0) {
+	var x = _v0.aU;
+	var y = _v0.aV;
+	var t = _v0.aP;
+	return {aP: t, aU: x - 1, aV: y};
+};
+var $author$project$Main$interconnectsRight = function (_v0) {
+	var x = _v0.aU;
+	var y = _v0.aV;
+	var t = _v0.aP;
+	return {aP: t, aU: x + 1, aV: y};
+};
+var $author$project$Main$interconnectsUp = function (_v0) {
+	var x = _v0.aU;
+	var y = _v0.aV;
+	var t = _v0.aP;
+	return {aP: t, aU: x, aV: y + 1};
+};
 var $elm$core$Basics$modBy = _Basics_modBy;
-var $author$project$Main$PortFocus = function (a) {
+var $author$project$Main$InterconnectFocus = function (a) {
 	return {$: 0, a: a};
 };
 var $elm$core$Maybe$andThen = F2(
@@ -5842,22 +5910,29 @@ var $elm$core$List$head = function (list) {
 };
 var $author$project$Main$currentDevice = function (model) {
 	var _v0 = $elm$core$List$head(
-		A2($elm$core$List$drop, model.D, model.K));
+		A2($elm$core$List$drop, model.B, model.H));
 	if (!_v0.$) {
 		var device = _v0.a;
 		return device;
 	} else {
-		return {
-			as: $elm$core$Dict$empty,
-			az: _Utils_Tuple2(0, 0),
-			aA: 1,
-			aH: 0,
-			aQ: 'Device not found',
-			aR: 0,
-			aU: 10
-		};
+		return $author$project$Device$empty('Device not found');
 	}
 };
+var $author$project$Block$get = F2(
+	function (t, block) {
+		switch (t) {
+			case 0:
+				return block.R;
+			case 1:
+				return block._;
+			case 2:
+				return block.ac;
+			case 3:
+				return block.ad;
+			default:
+				return block.an;
+		}
+	});
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
 		get:
@@ -5889,9 +5964,18 @@ var $elm$core$Dict$get = F2(
 			}
 		}
 	});
-var $author$project$MuxSet$get = F2(
-	function (i, ms) {
-		return A2($elm$core$Dict$get, i, ms);
+var $author$project$Blocks$get = F2(
+	function (index, _v0) {
+		var dict = _v0;
+		return A2(
+			$elm$core$Dict$get,
+			_Utils_Tuple2(index.aU, index.aV),
+			dict);
+	});
+var $author$project$Interconnects$get = F2(
+	function (i, _v0) {
+		var set = _v0;
+		return A2($elm$core$Dict$get, i, set);
 	});
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
@@ -5912,29 +5996,11 @@ var $elm$core$Maybe$withDefault = F2(
 			return _default;
 		}
 	});
-var $author$project$Main$setPortFocus = F2(
+var $author$project$Main$setInterconnectFocus = F2(
 	function (at, model) {
-		var typeOf = function (block) {
-			var _v0 = at.aP;
-			switch (_v0) {
-				case 0:
-					return $elm$core$Maybe$Just(block.au);
-				case 1:
-					return $elm$core$Maybe$Just(block.aC);
-				case 2:
-					return $elm$core$Maybe$Just(block.aF);
-				case 3:
-					return $elm$core$Maybe$Just(block.aG);
-				default:
-					return $elm$core$Maybe$Just(block.aM);
-			}
-		};
-		var indexOf = function (muxes) {
-			return A2($author$project$MuxSet$get, at.f, muxes);
-		};
-		var focus = function (mux) {
-			return $author$project$Main$PortFocus(
-				{q: at, E: mux.E, w: mux.w});
+		var focus = function (interconnect) {
+			return $author$project$Main$InterconnectFocus(
+				{p: at, aE: interconnect.aE, aQ: interconnect.aQ});
 		};
 		var device = $author$project$Main$currentDevice(model);
 		return A2(
@@ -5945,65 +6011,51 @@ var $author$project$Main$setPortFocus = F2(
 				focus,
 				A2(
 					$elm$core$Maybe$andThen,
-					indexOf,
+					$author$project$Interconnects$get(at.aG),
 					A2(
-						$elm$core$Maybe$andThen,
-						typeOf,
-						A2(
-							$elm$core$Dict$get,
-							_Utils_Tuple2(at.ao, at.ap),
-							device.as)))));
+						$elm$core$Maybe$map,
+						$author$project$Block$get(at.aP),
+						A2($author$project$Blocks$get, at, device.Q)))));
 	});
-var $author$project$Main$PortsFocus = function (a) {
+var $author$project$Main$InterconnectsFocus = function (a) {
 	return {$: 1, a: a};
 };
-var $author$project$PortSet$union = F2(
-	function (l, r) {
+var $author$project$InterconnectIndexSet$union = F2(
+	function (_v0, _v1) {
+		var left = _v0;
+		var right = _v1;
 		return {
-			au: A2($elm$core$Dict$union, l.au, r.au),
-			aC: A2($elm$core$Dict$union, l.aC, r.aC),
-			aF: A2($elm$core$Dict$union, l.aF, r.aF),
-			aG: A2($elm$core$Dict$union, l.aG, r.aG),
-			aM: A2($elm$core$Dict$union, l.aM, r.aM)
+			R: A2($elm$core$Dict$union, left.R, right.R),
+			_: A2($elm$core$Dict$union, left._, right._),
+			ac: A2($elm$core$Dict$union, left.ac, right.ac),
+			ad: A2($elm$core$Dict$union, left.ad, right.ad),
+			an: A2($elm$core$Dict$union, left.an, right.an)
 		};
 	});
-var $author$project$MuxSet$fromsUnion = F2(
+var $author$project$Interconnects$fromsUnion = F2(
 	function (_v0, m) {
-		return $author$project$PortSet$union(m.E);
+		return $author$project$InterconnectIndexSet$union(m.aE);
 	});
-var $author$project$MuxSet$froms = function (ms) {
-	return A3($elm$core$Dict$foldl, $author$project$MuxSet$fromsUnion, $author$project$PortSet$empty, ms);
+var $author$project$Interconnects$froms = function (_v0) {
+	var set = _v0;
+	return A3($elm$core$Dict$foldl, $author$project$Interconnects$fromsUnion, $author$project$InterconnectIndexSet$empty, set);
 };
-var $author$project$MuxSet$thrusUnion = F2(
+var $author$project$Interconnects$thrusUnion = F2(
 	function (_v0, m) {
-		return $author$project$PortSet$union(m.w);
+		return $author$project$InterconnectIndexSet$union(m.aQ);
 	});
-var $author$project$MuxSet$thrus = function (ms) {
-	return A3($elm$core$Dict$foldl, $author$project$MuxSet$thrusUnion, $author$project$PortSet$empty, ms);
+var $author$project$Interconnects$thrus = function (_v0) {
+	var set = _v0;
+	return A3($elm$core$Dict$foldl, $author$project$Interconnects$thrusUnion, $author$project$InterconnectIndexSet$empty, set);
 };
-var $author$project$Main$setPortsFocus = F2(
+var $author$project$Main$setInterconnectsFocus = F2(
 	function (at, model) {
-		var typeOf = function (block) {
-			var _v0 = at.aP;
-			switch (_v0) {
-				case 0:
-					return $elm$core$Maybe$Just(block.au);
-				case 1:
-					return $elm$core$Maybe$Just(block.aC);
-				case 2:
-					return $elm$core$Maybe$Just(block.aF);
-				case 3:
-					return $elm$core$Maybe$Just(block.aG);
-				default:
-					return $elm$core$Maybe$Just(block.aM);
-			}
-		};
 		var focus = function (muxes) {
-			return $author$project$Main$PortsFocus(
+			return $author$project$Main$InterconnectsFocus(
 				{
-					q: at,
-					E: $author$project$MuxSet$froms(muxes),
-					w: $author$project$MuxSet$thrus(muxes)
+					p: at,
+					aE: $author$project$Interconnects$froms(muxes),
+					aQ: $author$project$Interconnects$thrus(muxes)
 				});
 		};
 		var device = $author$project$Main$currentDevice(model);
@@ -6014,22 +6066,19 @@ var $author$project$Main$setPortsFocus = F2(
 				$elm$core$Maybe$map,
 				focus,
 				A2(
-					$elm$core$Maybe$andThen,
-					typeOf,
-					A2(
-						$elm$core$Dict$get,
-						_Utils_Tuple2(at.ao, at.ap),
-						device.as))));
+					$elm$core$Maybe$map,
+					$author$project$Block$get(at.aP),
+					A2($author$project$Blocks$get, at, device.Q))));
 	});
 var $author$project$Main$move = F3(
-	function (movePort, movePorts, model) {
-		var _v0 = model.k;
+	function (moveInterconnect, moveInterconnects, model) {
+		var _v0 = model.j;
 		switch (_v0.$) {
 			case 0:
-				var at = _v0.a.q;
+				var at = _v0.a.p;
 				var _v1 = A2(
-					$author$project$Main$setPortFocus,
-					movePort(at),
+					$author$project$Main$setInterconnectFocus,
+					moveInterconnect(at),
 					model);
 				if (_v1.$ === 2) {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -6038,14 +6087,14 @@ var $author$project$Main$move = F3(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{k: focus}),
+							{j: focus}),
 						$elm$core$Platform$Cmd$none);
 				}
 			case 1:
-				var at = _v0.a.q;
+				var at = _v0.a.p;
 				var _v2 = A2(
-					$author$project$Main$setPortsFocus,
-					movePorts(at),
+					$author$project$Main$setInterconnectsFocus,
+					moveInterconnects(at),
 					model);
 				if (_v2.$ === 2) {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -6054,65 +6103,13 @@ var $author$project$Main$move = F3(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{k: focus}),
+							{j: focus}),
 						$elm$core$Platform$Cmd$none);
 				}
 			default:
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Main$portDown = function (_v0) {
-	var x = _v0.ao;
-	var y = _v0.ap;
-	var t = _v0.aP;
-	var i = _v0.f;
-	return {f: i + 2, aP: t, ao: x, ap: y};
-};
-var $author$project$Main$portLeft = function (_v0) {
-	var x = _v0.ao;
-	var y = _v0.ap;
-	var t = _v0.aP;
-	var i = _v0.f;
-	return {f: i - 1, aP: t, ao: x, ap: y};
-};
-var $author$project$Main$portRight = function (_v0) {
-	var x = _v0.ao;
-	var y = _v0.ap;
-	var t = _v0.aP;
-	var i = _v0.f;
-	return {f: i + 1, aP: t, ao: x, ap: y};
-};
-var $author$project$Main$portUp = function (_v0) {
-	var x = _v0.ao;
-	var y = _v0.ap;
-	var t = _v0.aP;
-	var i = _v0.f;
-	return {f: i - 2, aP: t, ao: x, ap: y};
-};
-var $author$project$Main$portsDown = function (_v0) {
-	var x = _v0.ao;
-	var y = _v0.ap;
-	var t = _v0.aP;
-	return {aP: t, ao: x, ap: y - 1};
-};
-var $author$project$Main$portsLeft = function (_v0) {
-	var x = _v0.ao;
-	var y = _v0.ap;
-	var t = _v0.aP;
-	return {aP: t, ao: x - 1, ap: y};
-};
-var $author$project$Main$portsRight = function (_v0) {
-	var x = _v0.ao;
-	var y = _v0.ap;
-	var t = _v0.aP;
-	return {aP: t, ao: x + 1, ap: y};
-};
-var $author$project$Main$portsUp = function (_v0) {
-	var x = _v0.ao;
-	var y = _v0.ap;
-	var t = _v0.aP;
-	return {aP: t, ao: x, ap: y + 1};
-};
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -6123,11 +6120,11 @@ var $author$project$Main$update = F2(
 							_Utils_update(
 								model,
 								{
-									D: A2(
+									B: A2(
 										$elm$core$Basics$modBy,
-										$elm$core$List$length(model.K),
-										model.D + 1),
-									k: $author$project$Main$NoFocus
+										$elm$core$List$length(model.H),
+										model.B + 1),
+									j: $author$project$Main$NoFocus
 								}),
 							$elm$core$Platform$Cmd$none);
 					case 'z':
@@ -6135,8 +6132,8 @@ var $author$project$Main$update = F2(
 							_Utils_update(
 								model,
 								{
-									B: function () {
-										var _v1 = model.B;
+									z: function () {
+										var _v1 = model.z;
 										if (_v1 === 1) {
 											return 0;
 										} else {
@@ -6146,19 +6143,19 @@ var $author$project$Main$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 					case '8':
-						return A3($author$project$Main$move, $author$project$Main$portUp, $author$project$Main$portsUp, model);
+						return A3($author$project$Main$move, $author$project$Main$interconnectUp, $author$project$Main$interconnectsUp, model);
 					case '2':
-						return A3($author$project$Main$move, $author$project$Main$portDown, $author$project$Main$portsDown, model);
+						return A3($author$project$Main$move, $author$project$Main$interconnectDown, $author$project$Main$interconnectsDown, model);
 					case '4':
-						return A3($author$project$Main$move, $author$project$Main$portLeft, $author$project$Main$portsLeft, model);
+						return A3($author$project$Main$move, $author$project$Main$interconnectLeft, $author$project$Main$interconnectsLeft, model);
 					case '6':
-						return A3($author$project$Main$move, $author$project$Main$portRight, $author$project$Main$portsRight, model);
+						return A3($author$project$Main$move, $author$project$Main$interconnectRight, $author$project$Main$interconnectsRight, model);
 					default:
 						var key = msg.a;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{L: key}),
+								{I: key}),
 							$elm$core$Platform$Cmd$none);
 				}
 			case 1:
@@ -6167,7 +6164,7 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							k: A2($author$project$Main$setPortFocus, at, model)
+							j: A2($author$project$Main$setInterconnectFocus, at, model)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 2:
@@ -6176,14 +6173,14 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							k: A2($author$project$Main$setPortsFocus, at, model)
+							j: A2($author$project$Main$setInterconnectsFocus, at, model)
 						}),
 					$elm$core$Platform$Cmd$none);
 			default:
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{k: $author$project$Main$NoFocus}),
+						{j: $author$project$Main$NoFocus}),
 					$elm$core$Platform$Cmd$none);
 		}
 	});
@@ -6193,6 +6190,18 @@ var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
 var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var $author$project$Blocks$map = F2(
+	function (f, _v0) {
+		var dict = _v0;
+		var fold = F3(
+			function (_v1, block, acc) {
+				return A2(
+					$elm$core$List$cons,
+					f(block),
+					acc);
+			});
+		return A3($elm$core$Dict$foldr, fold, _List_Nil, dict);
+	});
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 0, a: a};
 };
@@ -6215,24 +6224,12 @@ var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$svg$Svg$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$svg$Svg$text_ = $elm$svg$Svg$trustedNode('text');
-var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
-var $elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
-var $elm$core$String$concat = function (strings) {
-	return A2($elm$core$String$join, '', strings);
-};
-var $author$project$Main$transformBlock = F2(
-	function (block, device) {
-		return $elm$core$String$concat(
-			_List_fromArray(
-				[
-					'translate(',
-					$elm$core$String$fromInt(340 * (block.ao - device.aH)),
-					',',
-					$elm$core$String$fromInt(100 + (340 * (device.aR - block.ap))),
-					')'
-				]));
+var $author$project$InterconnectsIndex$join = F2(
+	function (block, t) {
+		return {aP: t, aU: block.aU, aV: block.aV};
 	});
-var $author$project$Block$typeToString = function (t) {
+var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
+var $author$project$BlockType$toString = function (t) {
 	switch (t) {
 		case 0:
 			return 'logic';
@@ -6246,11 +6243,28 @@ var $author$project$Block$typeToString = function (t) {
 			return 'other';
 	}
 };
-var $author$project$Main$SetPortsFocus = function (a) {
+var $elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $author$project$Main$transformBlock = F2(
+	function (block, device) {
+		return $elm$core$String$concat(
+			_List_fromArray(
+				[
+					'translate(',
+					$elm$core$String$fromInt(340 * (block.aU - device.ab)),
+					',',
+					$elm$core$String$fromInt(100 + (340 * (device.au - block.aV))),
+					')'
+				]));
+	});
+var $author$project$Main$SetInterconnectsFocus = function (a) {
 	return {$: 2, a: a};
 };
-var $author$project$MuxSet$fold = F3(
-	function (_with, init, ms) {
+var $author$project$Interconnects$fold = F3(
+	function (_with, init, _v0) {
+		var set = _v0;
 		return A3(
 			$elm$core$Dict$foldl,
 			F3(
@@ -6258,11 +6272,8 @@ var $author$project$MuxSet$fold = F3(
 					return A2(_with, v, a);
 				}),
 			init,
-			ms);
+			set);
 	});
-var $author$project$Ports$from = function (p) {
-	return {aP: p.aP, ao: p.ao, ap: p.ap};
-};
 var $elm$core$Dict$isEmpty = function (dict) {
 	if (dict.$ === -2) {
 		return true;
@@ -6270,8 +6281,9 @@ var $elm$core$Dict$isEmpty = function (dict) {
 		return false;
 	}
 };
-var $author$project$MuxSet$isEmpty = function (ms) {
-	return $elm$core$Dict$isEmpty(ms);
+var $author$project$Interconnects$isEmpty = function (_v0) {
+	var set = _v0;
+	return $elm$core$Dict$isEmpty(set);
 };
 var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
 	return {$: 1, a: a};
@@ -6284,7 +6296,7 @@ var $elm$html$Html$Events$stopPropagationOn = F2(
 			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
 	});
 var $elm$svg$Svg$Events$stopPropagationOn = $elm$html$Html$Events$stopPropagationOn;
-var $author$project$Main$SetPortFocus = function (a) {
+var $author$project$Main$SetInterconnectFocus = function (a) {
 	return {$: 1, a: a};
 };
 var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
@@ -6299,78 +6311,83 @@ var $elm$core$Dict$member = F2(
 			return false;
 		}
 	});
-var $author$project$PortSet$member = F2(
-	function (p, ps) {
-		var _v0 = p.aP;
-		switch (_v0) {
+var $author$project$InterconnectIndexSet$member = F2(
+	function (index, _v0) {
+		var set = _v0;
+		var _v1 = index.aP;
+		switch (_v1) {
 			case 0:
 				return A2(
 					$elm$core$Dict$member,
-					$author$project$PortSet$key(p),
-					ps.au);
+					$author$project$InterconnectIndexSet$key(index),
+					set.R);
 			case 1:
 				return A2(
 					$elm$core$Dict$member,
-					$author$project$PortSet$key(p),
-					ps.aC);
+					$author$project$InterconnectIndexSet$key(index),
+					set._);
 			case 2:
 				return A2(
 					$elm$core$Dict$member,
-					$author$project$PortSet$key(p),
-					ps.aF);
+					$author$project$InterconnectIndexSet$key(index),
+					set.ac);
 			case 3:
 				return A2(
 					$elm$core$Dict$member,
-					$author$project$PortSet$key(p),
-					ps.aG);
+					$author$project$InterconnectIndexSet$key(index),
+					set.ad);
 			default:
 				return A2(
 					$elm$core$Dict$member,
-					$author$project$PortSet$key(p),
-					ps.aM);
+					$author$project$InterconnectIndexSet$key(index),
+					set.an);
 		}
 	});
-var $author$project$Ports$member = F2(
+var $author$project$InterconnectsIndex$member = F2(
 	function (p, ps) {
-		return _Utils_eq(p.ao, ps.ao) && (_Utils_eq(p.ap, ps.ap) && _Utils_eq(p.aP, ps.aP));
+		return _Utils_eq(p.aU, ps.aU) && (_Utils_eq(p.aV, ps.aV) && _Utils_eq(p.aP, ps.aP));
 	});
 var $author$project$Main$innerClass = F2(
 	function (focus, self) {
 		switch (focus.$) {
 			case 0:
-				var at = focus.a.q;
-				var thrus = focus.a.w;
-				return _Utils_eq(at, self) ? 'focus' : (A2($author$project$PortSet$member, self, thrus) ? 'thru' : 'inner');
+				var at = focus.a.p;
+				var thrus = focus.a.aQ;
+				return _Utils_eq(at, self) ? 'focus' : (A2($author$project$InterconnectIndexSet$member, self, thrus) ? 'thru' : 'inner');
 			case 1:
-				var at = focus.a.q;
-				var thrus = focus.a.w;
-				return A2($author$project$Ports$member, self, at) ? 'focus' : (A2($author$project$PortSet$member, self, thrus) ? 'thru' : 'inner');
+				var at = focus.a.p;
+				var thrus = focus.a.aQ;
+				return A2($author$project$InterconnectsIndex$member, self, at) ? 'focus' : (A2($author$project$InterconnectIndexSet$member, self, thrus) ? 'thru' : 'inner');
 			default:
 				return 'inner';
 		}
+	});
+var $author$project$InterconnectIndex$join = F2(
+	function (interconnects, i) {
+		return {aG: i, aP: interconnects.aP, aU: interconnects.aU, aV: interconnects.aV};
 	});
 var $author$project$Main$outerClass = F2(
 	function (focus, self) {
 		switch (focus.$) {
 			case 0:
-				var at = focus.a.q;
-				var froms = focus.a.E;
-				var thrus = focus.a.w;
-				return _Utils_eq(at, self) ? 'focus' : (A2($author$project$PortSet$member, self, froms) ? 'from' : (A2($author$project$PortSet$member, self, thrus) ? 'clear' : 'outer'));
+				var at = focus.a.p;
+				var froms = focus.a.aE;
+				var thrus = focus.a.aQ;
+				return _Utils_eq(at, self) ? 'focus' : (A2($author$project$InterconnectIndexSet$member, self, froms) ? 'from' : (A2($author$project$InterconnectIndexSet$member, self, thrus) ? 'clear' : 'outer'));
 			case 1:
-				var at = focus.a.q;
-				var froms = focus.a.E;
-				var thrus = focus.a.w;
-				return A2($author$project$Ports$member, self, at) ? 'focus' : (A2($author$project$PortSet$member, self, froms) ? 'from' : (A2($author$project$PortSet$member, self, thrus) ? 'clear' : 'outer'));
+				var at = focus.a.p;
+				var froms = focus.a.aE;
+				var thrus = focus.a.aQ;
+				return A2($author$project$InterconnectsIndex$member, self, at) ? 'focus' : (A2($author$project$InterconnectIndexSet$member, self, froms) ? 'from' : (A2($author$project$InterconnectIndexSet$member, self, thrus) ? 'clear' : 'outer'));
 			default:
 				return 'outer';
 		}
 	});
 var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var $author$project$Main$viewMux1 = F4(
-	function (at, focus, mux, acc) {
-		var y = $elm$core$String$fromInt(50 + (20 * mux.f));
-		var self = at(mux.f);
+var $author$project$Main$viewInterconnect1 = F4(
+	function (at, focus, interconnect, acc) {
+		var y = $elm$core$String$fromInt(50 + (20 * interconnect.aG));
+		var self = A2($author$project$InterconnectIndex$join, at, interconnect.aG);
 		var outer = A2(
 			$elm$svg$Svg$circle,
 			_List_fromArray(
@@ -6385,7 +6402,7 @@ var $author$project$Main$viewMux1 = F4(
 					'click',
 					$elm$json$Json$Decode$succeed(
 						_Utils_Tuple2(
-							$author$project$Main$SetPortFocus(self),
+							$author$project$Main$SetInterconnectFocus(self),
 							true)))
 				]),
 			_List_Nil);
@@ -6403,7 +6420,7 @@ var $author$project$Main$viewMux1 = F4(
 					'click',
 					$elm$json$Json$Decode$succeed(
 						_Utils_Tuple2(
-							$author$project$Main$SetPortFocus(self),
+							$author$project$Main$SetInterconnectFocus(self),
 							true)))
 				]),
 			_List_Nil);
@@ -6415,9 +6432,9 @@ var $author$project$Main$viewMux1 = F4(
 var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
 var $elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
-var $author$project$Main$viewMuxSet1 = F6(
+var $author$project$Main$viewInterconnects1 = F6(
 	function (focus, title, at, set, transform, height) {
-		if ($author$project$MuxSet$isEmpty(set)) {
+		if ($author$project$Interconnects$isEmpty(set)) {
 			return A2($elm$svg$Svg$g, _List_Nil, _List_Nil);
 		} else {
 			var text = A2(
@@ -6444,15 +6461,13 @@ var $author$project$Main$viewMuxSet1 = F6(
 						'click',
 						$elm$json$Json$Decode$succeed(
 							_Utils_Tuple2(
-								$author$project$Main$SetPortsFocus(
-									$author$project$Ports$from(
-										at(0))),
+								$author$project$Main$SetInterconnectsFocus(at),
 								true)))
 					]),
 				_List_Nil);
 			var circles = A3(
-				$author$project$MuxSet$fold,
-				A2($author$project$Main$viewMux1, at, focus),
+				$author$project$Interconnects$fold,
+				A2($author$project$Main$viewInterconnect1, at, focus),
 				_List_Nil,
 				set);
 			return A2(
@@ -6460,7 +6475,7 @@ var $author$project$Main$viewMuxSet1 = F6(
 				_List_fromArray(
 					[
 						$elm$svg$Svg$Attributes$transform(transform),
-						$elm$svg$Svg$Attributes$class('mux-set')
+						$elm$svg$Svg$Attributes$class('interconnects')
 					]),
 				A2(
 					$elm$core$List$cons,
@@ -6468,12 +6483,12 @@ var $author$project$Main$viewMuxSet1 = F6(
 					A2($elm$core$List$cons, text, circles)));
 		}
 	});
-var $author$project$Main$viewMux2 = F4(
-	function (at, focus, mux, acc) {
-		var y = $elm$core$String$fromInt(50 + (20 * ((mux.f / 2) | 0)));
+var $author$project$Main$viewInterconnect2 = F4(
+	function (at, focus, interconnect, acc) {
+		var y = $elm$core$String$fromInt(50 + (20 * ((interconnect.aG / 2) | 0)));
 		var x = $elm$core$String$fromInt(
-			30 + (20 * A2($elm$core$Basics$modBy, 2, mux.f)));
-		var self = at(mux.f);
+			30 + (20 * A2($elm$core$Basics$modBy, 2, interconnect.aG)));
+		var self = A2($author$project$InterconnectIndex$join, at, interconnect.aG);
 		var outer = A2(
 			$elm$svg$Svg$circle,
 			_List_fromArray(
@@ -6488,7 +6503,7 @@ var $author$project$Main$viewMux2 = F4(
 					'click',
 					$elm$json$Json$Decode$succeed(
 						_Utils_Tuple2(
-							$author$project$Main$SetPortFocus(self),
+							$author$project$Main$SetInterconnectFocus(self),
 							true)))
 				]),
 			_List_Nil);
@@ -6506,7 +6521,7 @@ var $author$project$Main$viewMux2 = F4(
 					'click',
 					$elm$json$Json$Decode$succeed(
 						_Utils_Tuple2(
-							$author$project$Main$SetPortFocus(self),
+							$author$project$Main$SetInterconnectFocus(self),
 							true)))
 				]),
 			_List_Nil);
@@ -6515,9 +6530,9 @@ var $author$project$Main$viewMux2 = F4(
 			outer,
 			A2($elm$core$List$cons, inner, acc));
 	});
-var $author$project$Main$viewMuxSet2 = F6(
+var $author$project$Main$viewInterconnects2 = F6(
 	function (focus, title, at, set, transform, height) {
-		if ($author$project$MuxSet$isEmpty(set)) {
+		if ($author$project$Interconnects$isEmpty(set)) {
 			return A2($elm$svg$Svg$g, _List_Nil, _List_Nil);
 		} else {
 			var text = A2(
@@ -6544,15 +6559,13 @@ var $author$project$Main$viewMuxSet2 = F6(
 						'click',
 						$elm$json$Json$Decode$succeed(
 							_Utils_Tuple2(
-								$author$project$Main$SetPortsFocus(
-									$author$project$Ports$from(
-										at(0))),
+								$author$project$Main$SetInterconnectsFocus(at),
 								true)))
 					]),
 				_List_Nil);
 			var circles = A3(
-				$author$project$MuxSet$fold,
-				A2($author$project$Main$viewMux2, at, focus),
+				$author$project$Interconnects$fold,
+				A2($author$project$Main$viewInterconnect2, at, focus),
 				_List_Nil,
 				set);
 			return A2(
@@ -6560,7 +6573,7 @@ var $author$project$Main$viewMuxSet2 = F6(
 				_List_fromArray(
 					[
 						$elm$svg$Svg$Attributes$transform(transform),
-						$elm$svg$Svg$Attributes$class('mux-set')
+						$elm$svg$Svg$Attributes$class('interconnects')
 					]),
 				A2(
 					$elm$core$List$cons,
@@ -6577,7 +6590,7 @@ var $author$project$Main$viewBlock = F3(
 					$elm$svg$Svg$Attributes$transform(
 					A2($author$project$Main$transformBlock, block, device)),
 					$elm$svg$Svg$Attributes$class(
-					$author$project$Block$typeToString(block.aP))
+					$author$project$BlockType$toString(block.aP))
 				]),
 			_List_fromArray(
 				[
@@ -6592,11 +6605,11 @@ var $author$project$Main$viewBlock = F3(
 						]),
 					_List_Nil),
 					A6(
-					$author$project$Main$viewMuxSet2,
+					$author$project$Main$viewInterconnects2,
 					focus,
 					'C4',
-					A3($author$project$Port$Port, block.ao, block.ap, 0),
-					block.au,
+					A2($author$project$InterconnectsIndex$join, block, 0),
+					block.R,
 					'translate(260, 20)',
 					'148'),
 					function () {
@@ -6604,55 +6617,55 @@ var $author$project$Main$viewBlock = F3(
 					switch (_v0) {
 						case 0:
 							return A6(
-								$author$project$Main$viewMuxSet2,
+								$author$project$Main$viewInterconnects2,
 								focus,
-								'IC',
-								A3($author$project$Port$Port, block.ao, block.ap, 1),
-								block.aC,
+								'Local',
+								A2($author$project$InterconnectsIndex$join, block, 2),
+								block.ac,
 								'translate(100, 20)',
 								'268');
 						case 1:
 							return A6(
-								$author$project$Main$viewMuxSet2,
+								$author$project$Main$viewInterconnects2,
 								focus,
-								'IC',
-								A3($author$project$Port$Port, block.ao, block.ap, 1),
-								block.aC,
+								'Local',
+								A2($author$project$InterconnectsIndex$join, block, 2),
+								block.ac,
 								'translate(100, 20)',
 								'188');
 						default:
 							return A6(
-								$author$project$Main$viewMuxSet2,
+								$author$project$Main$viewInterconnects2,
 								focus,
-								'IC',
-								A3($author$project$Port$Port, block.ao, block.ap, 1),
-								block.aC,
+								'Local',
+								A2($author$project$InterconnectsIndex$join, block, 2),
+								block.ac,
 								'translate(100, 20)',
 								'108');
 					}
 				}(),
 					A6(
-					$author$project$Main$viewMuxSet2,
+					$author$project$Main$viewInterconnects2,
 					focus,
-					'LC',
-					A3($author$project$Port$Port, block.ao, block.ap, 3),
-					block.aG,
+					'Logic',
+					A2($author$project$InterconnectsIndex$join, block, 3),
+					block.ad,
 					'translate(180, 20)',
 					'208'),
 					A6(
-					$author$project$Main$viewMuxSet1,
+					$author$project$Main$viewInterconnects1,
 					focus,
-					'IO',
-					A3($author$project$Port$Port, block.ao, block.ap, 2),
-					block.aF,
+					'Input',
+					A2($author$project$InterconnectsIndex$join, block, 1),
+					block._,
 					'translate(190, 20)',
 					'148'),
 					A6(
-					$author$project$Main$viewMuxSet2,
+					$author$project$Main$viewInterconnects2,
 					focus,
 					'R4',
-					A3($author$project$Port$Port, block.ao, block.ap, 4),
-					block.aM,
+					A2($author$project$InterconnectsIndex$join, block, 4),
+					block.an,
 					'translate(20, 20)',
 					'168'),
 					A2(
@@ -6666,7 +6679,7 @@ var $author$project$Main$viewBlock = F3(
 					_List_fromArray(
 						[
 							$elm$svg$Svg$text(
-							$elm$core$String$fromInt(block.ao))
+							$elm$core$String$fromInt(block.aU))
 						])),
 					A2(
 					$elm$svg$Svg$g,
@@ -6685,26 +6698,19 @@ var $author$project$Main$viewBlock = F3(
 							_List_fromArray(
 								[
 									$elm$svg$Svg$text(
-									$elm$core$String$fromInt(block.ap))
+									$elm$core$String$fromInt(block.aV))
 								]))
 						]))
 				]));
-	});
-var $author$project$Main$viewBlocks = F5(
-	function (device, focus, _v0, block, acc) {
-		return A2(
-			$elm$core$List$cons,
-			A3($author$project$Main$viewBlock, device, focus, block),
-			acc);
 	});
 var $author$project$Main$viewBox = function (device) {
 	return $elm$core$String$concat(
 		_List_fromArray(
 			[
 				'0 0 ',
-				$elm$core$String$fromInt((device.aU * 340) + 20),
+				$elm$core$String$fromInt((device.aw * 340) + 20),
 				' ',
-				$elm$core$String$fromInt((100 + (device.aA * 340)) + 20)
+				$elm$core$String$fromInt((100 + (device.Y * 340)) + 20)
 			]));
 };
 var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
@@ -6712,11 +6718,11 @@ var $elm$core$String$append = _String_append;
 var $elm$core$String$fromFloat = _String_fromNumber;
 var $author$project$Main$viewHeight = F2(
 	function (model, device) {
-		var _v0 = model.B;
+		var _v0 = model.z;
 		if (!_v0) {
 			return A2(
 				$elm$core$String$append,
-				$elm$core$String$fromFloat((2.5 + (8.5 * device.aA)) + 0.5),
+				$elm$core$String$fromFloat((2.5 + (8.5 * device.Y)) + 0.5),
 				'cm');
 		} else {
 			return 'calc(100vh - 4px)';
@@ -6724,11 +6730,11 @@ var $author$project$Main$viewHeight = F2(
 	});
 var $author$project$Main$viewWidth = F2(
 	function (model, device) {
-		var _v0 = model.B;
+		var _v0 = model.z;
 		if (!_v0) {
 			return A2(
 				$elm$core$String$append,
-				$elm$core$String$fromFloat((8.5 * device.aU) + 0.5),
+				$elm$core$String$fromFloat((8.5 * device.aw) + 0.5),
 				'cm');
 		} else {
 			return '100vw';
@@ -6754,11 +6760,10 @@ var $author$project$Main$viewDevice = F2(
 					A2(
 					$elm$svg$Svg$g,
 					_List_Nil,
-					A3(
-						$elm$core$Dict$foldr,
-						A2($author$project$Main$viewBlocks, device, model.k),
-						_List_Nil,
-						device.as)),
+					A2(
+						$author$project$Blocks$map,
+						A2($author$project$Main$viewBlock, device, model.j),
+						device.Q)),
 					A2(
 					$elm$svg$Svg$text_,
 					_List_fromArray(
@@ -6769,7 +6774,7 @@ var $author$project$Main$viewDevice = F2(
 						]),
 					_List_fromArray(
 						[
-							$elm$svg$Svg$text(device.aQ)
+							$elm$svg$Svg$text(device.at)
 						])),
 					A2(
 					$elm$svg$Svg$text_,
@@ -6780,7 +6785,7 @@ var $author$project$Main$viewDevice = F2(
 						]),
 					_List_fromArray(
 						[
-							$elm$svg$Svg$text(model.L)
+							$elm$svg$Svg$text(model.I)
 						]))
 				]));
 	});
@@ -6791,5 +6796,5 @@ var $author$project$Main$view = function (model) {
 		$author$project$Main$currentDevice(model));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
-	{aE: $author$project$Main$init, aO: $author$project$Main$subscriptions, aS: $author$project$Main$update, aT: $author$project$Main$view});
+	{aI: $author$project$Main$init, aO: $author$project$Main$subscriptions, aR: $author$project$Main$update, aS: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$value)(0)}});}(this));

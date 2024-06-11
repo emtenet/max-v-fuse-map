@@ -80,7 +80,7 @@ g.other > rect {
   stroke: var(--comment);
 }
 
-g.mux-set > rect {
+g.interconnects > rect {
   fill: var(--background);
 }
 
