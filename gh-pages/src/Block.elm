@@ -1,12 +1,15 @@
 module Block exposing
     ( Block
     , decode
+    , froms
     , get
+    , thrus
     )
 
 import BlockIndex exposing (BlockIndex)
 import BlockType exposing (BlockType)
 import Dict exposing (Dict)
+import InterconnectIndexSet exposing (InterconnectIndexSet)
 import InterconnectType exposing (InterconnectType)
 import Interconnects exposing (Interconnects)
 import Json.Decode exposing (Decoder, Value)
@@ -54,3 +57,25 @@ get t block =
 
         InterconnectType.R4 ->
             block.r4s
+
+
+froms : Block -> InterconnectIndexSet
+froms block =
+    InterconnectIndexSet.unions
+        [ Interconnects.froms block.c4s
+        , Interconnects.froms block.inputs
+        , Interconnects.froms block.locals
+        , Interconnects.froms block.logics
+        , Interconnects.froms block.r4s
+        ]
+
+
+thrus : Block -> InterconnectIndexSet
+thrus block =
+    InterconnectIndexSet.unions
+        [ Interconnects.thrus block.c4s
+        , Interconnects.thrus block.inputs
+        , Interconnects.thrus block.locals
+        , Interconnects.thrus block.logics
+        , Interconnects.thrus block.r4s
+        ]

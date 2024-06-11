@@ -6,6 +6,7 @@ module InterconnectIndexSet exposing
     , isEmpty
     , member
     , union
+    , unions
     )
 
 import Dict exposing (Dict)
@@ -116,3 +117,13 @@ union (InterconnectIndexSet left) (InterconnectIndexSet right) =
         , logics = Dict.union left.logics right.logics
         , r4s = Dict.union left.r4s right.r4s
         }
+
+
+unions : List InterconnectIndexSet -> InterconnectIndexSet
+unions list =
+    case list of
+        [] ->
+            empty
+
+        head :: tail ->
+            List.foldl union head tail

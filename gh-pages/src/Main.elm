@@ -1,15 +1,17 @@
 module Main exposing (main)
 
 import Block exposing (Block)
-import BlockIndex
+import BlockIndex exposing (BlockIndex)
 import BlockType
 import Blocks
 import Browser
+import Browser.Dom
 import Browser.Events
 import Device exposing (Device)
 import Dict
 import Html exposing (Html)
 import Html.Attributes
+import Html.Events
 import Interconnect exposing (Interconnect)
 import InterconnectIndex exposing (InterconnectIndex)
 import InterconnectIndexSet exposing (InterconnectIndexSet)
@@ -20,6 +22,7 @@ import Json.Decode
 import Svg
 import Svg.Attributes
 import Svg.Events
+import Task
 
 
 main =
@@ -37,8 +40,8 @@ type Zoom
 
 
 type Focus
-    = InterconnectFocus
-        { at : InterconnectIndex
+    = BlockFocus
+        { at : BlockIndex
         , froms : InterconnectIndexSet
         , thrus : InterconnectIndexSet
         }
@@ -47,7 +50,19 @@ type Focus
         , froms : InterconnectIndexSet
         , thrus : InterconnectIndexSet
         }
+    | InterconnectFocus
+        { at : InterconnectIndex
+        , froms : InterconnectIndexSet
+        , thrus : InterconnectIndexSet
+        }
     | NoFocus
+
+
+type Direction
+    = Left
+    | Right
+    | Up
+    | Down
 
 
 type alias Model =
@@ -60,9 +75,13 @@ type alias Model =
 
 
 type Msg
-    = KeyPress String
-    | SetInterconnectFocus InterconnectIndex
+    = Ignore
+    | NextDevice
+    | NextZoom
+    | Move Bool Direction
+    | SetBlockFocus BlockIndex
     | SetInterconnectsFocus InterconnectsIndex
+    | SetInterconnectFocus InterconnectIndex
     | SetNoFocus
 
 
@@ -93,7 +112,10 @@ init flags =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        KeyPress "d" ->
+        Ignore ->
+            ( model, Cmd.none )
+
+        NextDevice ->
             ( { model
                 | device = modBy (List.length model.devices) (model.device + 1)
                 , focus = NoFocus
@@ -101,7 +123,7 @@ update msg model =
             , Cmd.none
             )
 
-        KeyPress "z" ->
+        NextZoom ->
             ( { model
                 | zoom =
                     case model.zoom of
@@ -114,60 +136,120 @@ update msg model =
             , Cmd.none
             )
 
-        KeyPress "8" ->
-            -- up
-            move interconnectUp interconnectsUp model
+        Move True Up ->
+            move blockUp blockUp blockUp model
 
-        KeyPress "2" ->
-            -- down
-            move interconnectDown interconnectsDown model
+        Move True Down ->
+            move blockDown blockDown blockDown model
 
-        KeyPress "4" ->
-            -- left
-            move interconnectLeft interconnectsLeft model
+        Move True Left ->
+            move blockLeft blockLeft blockLeft model
 
-        KeyPress "6" ->
-            -- right
-            move interconnectRight interconnectsRight model
+        Move True Right ->
+            move blockRight blockRight blockRight model
 
-        KeyPress key ->
-            ( { model | message = key }, Cmd.none )
+        Move _ Up ->
+            move blockUp blockUp interconnectUp model
 
-        SetInterconnectFocus at ->
-            ( { model | focus = setInterconnectFocus at model }, Cmd.none )
+        Move _ Down ->
+            move blockDown blockDown interconnectDown model
+
+        Move _ Left ->
+            move blockLeft blockLeft interconnectLeft model
+
+        Move _ Right ->
+            move blockRight blockRight interconnectRight model
+
+        SetBlockFocus at ->
+            ( { model | focus = blockFocus at model }, Cmd.none )
 
         SetInterconnectsFocus at ->
-            ( { model | focus = setInterconnectsFocus at model }, Cmd.none )
+            ( { model | focus = interconnectsFocus at model }, Cmd.none )
+
+        SetInterconnectFocus at ->
+            ( { model | focus = interconnectFocus at model }, Cmd.none )
 
         SetNoFocus ->
             ( { model | focus = NoFocus }, Cmd.none )
 
 
+moveTo : String -> Model -> ( Model, Cmd Msg )
+moveTo id model =
+    ( model
+    , Task.attempt (\_ -> Ignore) (Browser.Dom.focus id)
+    )
+
+
 move :
-    (InterconnectIndex -> InterconnectIndex)
+    (BlockIndex -> BlockIndex)
     -> (InterconnectsIndex -> InterconnectsIndex)
+    -> (InterconnectIndex -> InterconnectIndex)
     -> Model
     -> ( Model, Cmd Msg )
-move moveInterconnect moveInterconnects model =
+move nextBlock nextInterconnects nextInterconnect model =
     case model.focus of
-        InterconnectFocus { at } ->
-            case setInterconnectFocus (moveInterconnect at) model of
-                NoFocus ->
+        BlockFocus { at } ->
+            let
+                next =
+                    nextBlock at
+            in
+            case findBlock next model of
+                Nothing ->
                     ( model, Cmd.none )
 
-                focus ->
-                    ( { model | focus = focus }, Cmd.none )
+                Just _ ->
+                    moveTo (BlockIndex.id next) model
 
         InterconnectsFocus { at } ->
-            case setInterconnectsFocus (moveInterconnects at) model of
-                NoFocus ->
+            let
+                next =
+                    nextInterconnects at
+            in
+            case findInterconnects next model of
+                Nothing ->
                     ( model, Cmd.none )
 
-                focus ->
-                    ( { model | focus = focus }, Cmd.none )
+                Just _ ->
+                    moveTo (InterconnectsIndex.id next) model
+
+        InterconnectFocus { at } ->
+            let
+                next =
+                    nextInterconnect at
+            in
+            case findInterconnect next model of
+                Nothing ->
+                    ( model, Cmd.none )
+
+                Just _ ->
+                    moveTo (InterconnectIndex.id next) model
 
         _ ->
             ( model, Cmd.none )
+
+
+type alias BlockIndexed a =
+    { a | x : Int, y : Int }
+
+
+blockUp : BlockIndexed a -> BlockIndexed a
+blockUp block =
+    { block | y = block.y + 1 }
+
+
+blockDown : BlockIndexed a -> BlockIndexed a
+blockDown block =
+    { block | y = block.y - 1 }
+
+
+blockLeft : BlockIndexed a -> BlockIndexed a
+blockLeft block =
+    { block | x = block.x - 1 }
+
+
+blockRight : BlockIndexed a -> BlockIndexed a
+blockRight block =
+    { block | x = block.x + 1 }
 
 
 interconnectUp : InterconnectIndex -> InterconnectIndex
@@ -175,19 +257,9 @@ interconnectUp { x, y, t, i } =
     { x = x, y = y, t = t, i = i - 2 }
 
 
-interconnectsUp : InterconnectsIndex -> InterconnectsIndex
-interconnectsUp { x, y, t } =
-    { x = x, y = y + 1, t = t }
-
-
 interconnectDown : InterconnectIndex -> InterconnectIndex
 interconnectDown { x, y, t, i } =
     { x = x, y = y, t = t, i = i + 2 }
-
-
-interconnectsDown : InterconnectsIndex -> InterconnectsIndex
-interconnectsDown { x, y, t } =
-    { x = x, y = y - 1, t = t }
 
 
 interconnectLeft : InterconnectIndex -> InterconnectIndex
@@ -195,19 +267,9 @@ interconnectLeft { x, y, t, i } =
     { x = x, y = y, t = t, i = i - 1 }
 
 
-interconnectsLeft : InterconnectsIndex -> InterconnectsIndex
-interconnectsLeft { x, y, t } =
-    { x = x - 1, y = y, t = t }
-
-
 interconnectRight : InterconnectIndex -> InterconnectIndex
 interconnectRight { x, y, t, i } =
     { x = x, y = y, t = t, i = i + 1 }
-
-
-interconnectsRight : InterconnectsIndex -> InterconnectsIndex
-interconnectsRight { x, y, t } =
-    { x = x + 1, y = y, t = t }
 
 
 subscriptions : Model -> Sub Msg
@@ -217,46 +279,117 @@ subscriptions _ =
 
 keyPress : Json.Decode.Decoder Msg
 keyPress =
-    Json.Decode.map KeyPress (Json.Decode.field "key" Json.Decode.string)
+    let
+        decode key =
+            case key of
+                "d" ->
+                    NextDevice
+
+                "z" ->
+                    NextZoom
+
+                _ ->
+                    Ignore
+    in
+    Json.Decode.map decode (Json.Decode.field "key" Json.Decode.string)
 
 
-setInterconnectFocus : InterconnectIndex -> Model -> Focus
-setInterconnectFocus at model =
+keyDown : Json.Decode.Decoder ( Msg, Bool )
+keyDown =
+    let
+        decode ctrl key =
+            --case Debug.log "KeyDown" key of
+            case key of
+                "ArrowLeft" ->
+                    ( Move ctrl Left, True )
+
+                "ArrowRight" ->
+                    ( Move ctrl Right, True )
+
+                "ArrowUp" ->
+                    ( Move ctrl Up, True )
+
+                "ArrowDown" ->
+                    ( Move ctrl Down, True )
+
+                _ ->
+                    ( Ignore, False )
+    in
+    Json.Decode.map2 decode
+        (Json.Decode.field "ctrlKey" Json.Decode.bool)
+        (Json.Decode.field "key" Json.Decode.string)
+
+
+findBlock : BlockIndex -> Model -> Maybe Block
+findBlock at model =
     let
         device =
             currentDevice model
+    in
+    Blocks.get at device.blocks
 
-        focus interconnect =
+
+findInterconnects : InterconnectsIndex -> Model -> Maybe Interconnects
+findInterconnects at model =
+    let
+        device =
+            currentDevice model
+    in
+    Blocks.get at device.blocks
+        |> Maybe.map (Block.get at.t)
+
+
+findInterconnect : InterconnectIndex -> Model -> Maybe Interconnect
+findInterconnect at model =
+    let
+        device =
+            currentDevice model
+    in
+    Blocks.get at device.blocks
+        |> Maybe.map (Block.get at.t)
+        |> Maybe.andThen (Interconnects.get at.i)
+
+
+blockFocus : BlockIndex -> Model -> Focus
+blockFocus at model =
+    case findBlock at model of
+        Nothing ->
+            NoFocus
+
+        Just block ->
+            BlockFocus
+                { at = at
+                , froms = Block.froms block
+                , thrus = Block.thrus block
+                }
+
+
+interconnectsFocus : InterconnectsIndex -> Model -> Focus
+interconnectsFocus at model =
+    case findInterconnects at model of
+        Nothing ->
+            NoFocus
+
+        Just interconnects ->
+            InterconnectsFocus
+                { at = at
+                , froms = Interconnects.froms interconnects
+                , thrus = Interconnects.thrus interconnects
+                }
+
+
+interconnectFocus : InterconnectIndex -> Model -> Focus
+interconnectFocus at model =
+    case findInterconnect at model of
+        Nothing ->
+            NoFocus
+
+        Just interconnect ->
             InterconnectFocus
                 { at = at
                 , froms = interconnect.froms
                 , thrus = interconnect.thrus
                 }
-    in
-    Blocks.get at device.blocks
-        |> Maybe.map (Block.get at.t)
-        |> Maybe.andThen (Interconnects.get at.i)
-        |> Maybe.map focus
-        |> Maybe.withDefault NoFocus
-
-
-setInterconnectsFocus : InterconnectsIndex -> Model -> Focus
-setInterconnectsFocus at model =
-    let
-        device =
-            currentDevice model
-
-        focus muxes =
-            InterconnectsFocus
-                { at = at
-                , froms = Interconnects.froms muxes
-                , thrus = Interconnects.thrus muxes
-                }
-    in
-    Blocks.get at device.blocks
-        |> Maybe.map (Block.get at.t)
-        |> Maybe.map focus
-        |> Maybe.withDefault NoFocus
 
 
 currentDevice : Model -> Device
@@ -281,8 +414,7 @@ viewDevice model device =
         , Svg.Attributes.height (viewHeight model device)
         , Svg.Attributes.viewBox (viewBox device)
         , Svg.Attributes.preserveAspectRatio "xMidYMid meet"
-
-        --, Svg.Events.onClick SetNoFocus
+        , Html.Events.onBlur SetNoFocus
         ]
         [ Svg.g [] (Blocks.map (viewBlock device model.focus) device.blocks)
         , Svg.text_
@@ -342,81 +474,113 @@ viewBox device =
 
 viewBlock : Device -> Focus -> Block -> Html Msg
 viewBlock device focus block =
+    let
+        at =
+            BlockIndex.from block
+
+        rect =
+            Svg.rect
+                [ Svg.Attributes.x "20"
+                , Svg.Attributes.y "20"
+                , Svg.Attributes.width "320"
+                , Svg.Attributes.height "320"
+                ]
+                []
+
+        r4 =
+            viewInterconnects2 focus
+                "R4"
+                (InterconnectsIndex.join block InterconnectType.R4)
+                block.r4s
+                "translate(20, 20)"
+                "168"
+
+        local =
+            case block.t of
+                BlockType.Logic ->
+                    viewInterconnects2 focus
+                        "Local"
+                        (InterconnectsIndex.join block InterconnectType.Local)
+                        block.locals
+                        "translate(100, 20)"
+                        "268"
+
+                BlockType.Row ->
+                    viewInterconnects2 focus
+                        "Local"
+                        (InterconnectsIndex.join block InterconnectType.Local)
+                        block.locals
+                        "translate(100, 20)"
+                        "188"
+
+                _ ->
+                    viewInterconnects2 focus
+                        "Local"
+                        (InterconnectsIndex.join block InterconnectType.Local)
+                        block.locals
+                        "translate(100, 20)"
+                        "108"
+
+        logic =
+            viewInterconnects2 focus
+                "Logic"
+                (InterconnectsIndex.join block InterconnectType.Logic)
+                block.logics
+                "translate(180, 20)"
+                "208"
+
+        input =
+            viewInterconnects1 focus
+                "Input"
+                (InterconnectsIndex.join block InterconnectType.Input)
+                block.inputs
+                "translate(190, 20)"
+                "148"
+
+        c4 =
+            viewInterconnects2 focus
+                "C4"
+                (InterconnectsIndex.join block InterconnectType.C4)
+                block.c4s
+                "translate(260, 20)"
+                "148"
+
+        column =
+            Svg.text_
+                [ Svg.Attributes.x "180"
+                , Svg.Attributes.y "17"
+                , Svg.Attributes.class "col"
+                ]
+                [ block.x |> String.fromInt |> Svg.text ]
+
+        row =
+            Svg.g
+                [ Svg.Attributes.transform "translate(17, 180)"
+                ]
+                [ Svg.text_
+                    [ Svg.Attributes.class "row"
+                    ]
+                    [ block.y |> String.fromInt |> Svg.text ]
+                ]
+    in
     Svg.g
         [ Svg.Attributes.transform (transformBlock block device)
         , Svg.Attributes.class "block"
         , Svg.Attributes.class (BlockType.toString block.t)
+        , BlockIndex.id at
+            |> Html.Attributes.id
         , Html.Attributes.attribute "tabindex" "0"
+        , Html.Events.onFocus (SetBlockFocus at)
+        , Html.Events.preventDefaultOn "keydown" keyDown
         ]
-        [ Svg.rect
-            [ Svg.Attributes.x "20"
-            , Svg.Attributes.y "20"
-            , Svg.Attributes.width "320"
-            , Svg.Attributes.height "320"
-            ]
-            []
-        , viewInterconnects2 focus
-            "C4"
-            (InterconnectsIndex.join block InterconnectType.C4)
-            block.c4s
-            "translate(260, 20)"
-            "148"
-        , case block.t of
-            BlockType.Logic ->
-                viewInterconnects2 focus
-                    "Local"
-                    (InterconnectsIndex.join block InterconnectType.Local)
-                    block.locals
-                    "translate(100, 20)"
-                    "268"
-
-            BlockType.Row ->
-                viewInterconnects2 focus
-                    "Local"
-                    (InterconnectsIndex.join block InterconnectType.Local)
-                    block.locals
-                    "translate(100, 20)"
-                    "188"
-
-            _ ->
-                viewInterconnects2 focus
-                    "Local"
-                    (InterconnectsIndex.join block InterconnectType.Local)
-                    block.locals
-                    "translate(100, 20)"
-                    "108"
-        , viewInterconnects2 focus
-            "Logic"
-            (InterconnectsIndex.join block InterconnectType.Logic)
-            block.logics
-            "translate(180, 20)"
-            "208"
-        , viewInterconnects1 focus
-            "Input"
-            (InterconnectsIndex.join block InterconnectType.Input)
-            block.inputs
-            "translate(190, 20)"
-            "148"
-        , viewInterconnects2 focus
-            "R4"
-            (InterconnectsIndex.join block InterconnectType.R4)
-            block.r4s
-            "translate(20, 20)"
-            "168"
-        , Svg.text_
-            [ Svg.Attributes.x "180"
-            , Svg.Attributes.y "17"
-            , Svg.Attributes.class "col"
-            ]
-            [ block.x |> String.fromInt |> Svg.text ]
-        , Svg.g
-            [ Svg.Attributes.transform "translate(17, 180)"
-            ]
-            [ Svg.text_
-                [ Svg.Attributes.class "row"
-                ]
-                [ block.y |> String.fromInt |> Svg.text ]
-            ]
+        [ rect
+        , r4
+        , local
+        , logic
+        , input
+        , c4
+        , column
+        , row
         ]
 
 
@@ -451,10 +615,6 @@ viewInterconnects2 focus title at set transform height =
                     , Svg.Attributes.y "36"
                     , Svg.Attributes.width "48"
                     , Svg.Attributes.height height
-
-                    --, ( SetInterconnectsFocus at, True )
-                    --    |> Json.Decode.succeed
-                    --    |> Svg.Events.stopPropagationOn "click"
                     ]
                     []
 
@@ -471,7 +631,10 @@ viewInterconnects2 focus title at set transform height =
         Svg.g
             [ Svg.Attributes.transform transform
             , Svg.Attributes.class "interconnects"
+            , InterconnectsIndex.id at
+                |> Html.Attributes.id
             , Html.Attributes.attribute "tabindex" "0"
+            , Html.Events.onFocus (SetInterconnectsFocus at)
             ]
             (rect :: text :: circles)
 
@@ -505,10 +668,6 @@ viewInterconnect2 at focus interconnect =
                 , Svg.Attributes.cy y
                 , Svg.Attributes.r "10"
                 , Svg.Attributes.class (outerClass focus self)
-
-                --, ( SetInterconnectFocus self, True )
-                --    |> Json.Decode.succeed
-                --    |> Svg.Events.stopPropagationOn "click"
                 ]
                 []
 
@@ -518,16 +677,15 @@ viewInterconnect2 at focus interconnect =
                 , Svg.Attributes.cy y
                 , Svg.Attributes.r "6"
                 , Svg.Attributes.class (innerClass focus self)
-
-                --, ( SetInterconnectFocus self, True )
-                --    |> Json.Decode.succeed
-                --    |> Svg.Events.stopPropagationOn "click"
                 ]
                 []
     in
     Svg.g
         [ Svg.Attributes.class "interconnect"
+        , InterconnectIndex.id self
+            |> Html.Attributes.id
         , Html.Attributes.attribute "tabindex" "0"
+        , Html.Events.onFocus (SetInterconnectFocus self)
         ]
         [ outer, inner ]
 
@@ -552,10 +710,6 @@ viewInterconnects1 focus title at set transform height =
                     , Svg.Attributes.y "36"
                     , Svg.Attributes.width "28"
                     , Svg.Attributes.height height
-
-                    --, ( SetInterconnectsFocus at, True )
-                    --    |> Json.Decode.succeed
-                    --    |> Svg.Events.stopPropagationOn "click"
                     ]
                     []
 
@@ -572,7 +726,10 @@ viewInterconnects1 focus title at set transform height =
         Svg.g
             [ Svg.Attributes.transform transform
             , Svg.Attributes.class "interconnects"
+            , InterconnectsIndex.id at
+                |> Html.Attributes.id
             , Html.Attributes.attribute "tabindex" "0"
+            , Html.Events.onFocus (SetInterconnectsFocus at)
             ]
             (rect :: text :: circles)
 
@@ -599,10 +756,6 @@ viewInterconnect1 at focus interconnect =
                 , Svg.Attributes.cy y
                 , Svg.Attributes.r "10"
                 , Svg.Attributes.class (outerClass focus self)
-
-                --, ( SetInterconnectFocus self, True )
-                --    |> Json.Decode.succeed
-                --    |> Svg.Events.stopPropagationOn "click"
                 ]
                 []
 
@@ -612,16 +765,15 @@ viewInterconnect1 at focus interconnect =
                 , Svg.Attributes.cy y
                 , Svg.Attributes.r "6"
                 , Svg.Attributes.class (innerClass focus self)
-
-                --, ( SetInterconnectFocus self, True )
-                --    |> Json.Decode.succeed
-                --    |> Svg.Events.stopPropagationOn "click"
                 ]
                 []
     in
     Svg.g
         [ Svg.Attributes.class "interconnect"
+        , InterconnectIndex.id self
+            |> Html.Attributes.id
         , Html.Attributes.attribute "tabindex" "0"
+        , Html.Events.onFocus (SetInterconnectFocus self)
         ]
         [ outer, inner ]
 
@@ -629,11 +781,8 @@ viewInterconnect1 at focus interconnect =
 outerClass : Focus -> InterconnectIndex -> String
 outerClass focus self =
     case focus of
-        InterconnectFocus { at, froms, thrus } ->
-            if at == self then
-                "focus"
-
-            else if InterconnectIndexSet.member self froms then
+        BlockFocus { froms, thrus } ->
+            if InterconnectIndexSet.member self froms then
                 "from"
 
             else if InterconnectIndexSet.member self thrus then
@@ -642,11 +791,18 @@ outerClass focus self =
             else
                 "outer"
 
-        InterconnectsFocus { at, froms, thrus } ->
-            if InterconnectsIndex.member self at then
-                "focus"
+        InterconnectsFocus { froms, thrus } ->
+            if InterconnectIndexSet.member self froms then
+                "from"
 
-            else if InterconnectIndexSet.member self froms then
+            else if InterconnectIndexSet.member self thrus then
+                "clear"
+
+            else
+                "outer"
+
+        InterconnectFocus { froms, thrus } ->
+            if InterconnectIndexSet.member self froms then
                 "from"
 
             else if InterconnectIndexSet.member self thrus then
@@ -662,21 +818,22 @@ outerClass focus self =
 innerClass : Focus -> InterconnectIndex -> String
 innerClass focus self =
     case focus of
-        InterconnectFocus { at, thrus } ->
-            if at == self then
-                "focus"
-
-            else if InterconnectIndexSet.member self thrus then
+        BlockFocus { thrus } ->
+            if InterconnectIndexSet.member self thrus then
                 "thru"
 
             else
                 "inner"
 
-        InterconnectsFocus { at, thrus } ->
-            if InterconnectsIndex.member self at then
-                "focus"
+        InterconnectsFocus { thrus } ->
+            if InterconnectIndexSet.member self thrus then
+                "thru"
 
-            else if InterconnectIndexSet.member self thrus then
+            else
+                "inner"
+
+        InterconnectFocus { at, thrus } ->
+            if InterconnectIndexSet.member self thrus then
                 "thru"
 
             else

@@ -1,4 +1,8 @@
-module InterconnectType exposing (InterconnectType(..), decode)
+module InterconnectType exposing
+    ( InterconnectType(..)
+    , decode
+    , id
+    )
 
 import Json.Decode exposing (Decoder, Value)
 
@@ -37,3 +41,22 @@ decodeString s =
 
         _ ->
             Json.Decode.fail ("Invalid interconnect type: " ++ s)
+
+
+id : InterconnectType -> String
+id t =
+    case t of
+        C4 ->
+            "c4"
+
+        Input ->
+            "input"
+
+        Local ->
+            "local"
+
+        Logic ->
+            "logic"
+
+        R4 ->
+            "r4"

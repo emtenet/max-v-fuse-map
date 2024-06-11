@@ -1,6 +1,7 @@
 module InterconnectIndex exposing
     ( InterconnectIndex
     , decode
+    , id
     , join
     )
 
@@ -35,3 +36,16 @@ join interconnects i =
     , t = interconnects.t
     , i = i
     }
+
+
+id : InterconnectIndex -> String
+id interconnect =
+    String.concat
+        [ interconnect.t |> InterconnectType.id
+        , "-"
+        , interconnect.x |> String.fromInt
+        , "-"
+        , interconnect.y |> String.fromInt
+        , "-"
+        , interconnect.i |> String.fromInt
+        ]
