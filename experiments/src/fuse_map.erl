@@ -837,6 +837,7 @@
     ?LAB_LINE(15, 20, {clk1, control});
     ?LAB_LINE(15, 21, {clk1, invert});
     ?LAB_LINE(15, 22, {clk2_a_load, control_3_not_2});
+    ?LAB_LINE(15, 23, {invert_a, control_4_not_3});
     ?LAB_LINE(15, 24, {s_clr, control_5_not_4});
     ?LAB_LINE(15, 25, {a_clr2, global});
     ?LAB_LINE(16, 20, {clk1, control_0_not_1});
@@ -851,6 +852,7 @@
     ?LAB_LINE(19, 25, {a_load, invert});
     ?LAB_LINE(20, 20, {s_load, not_always});
     ?LAB_LINE(20, 21, {a_clr1, global});
+    ?LAB_LINE(20, 22, invert_a);
     %?LAB_LINE(20, 23, minimum_20_23);
     ?LAB_LINE(20, 24, {ena2_s_load, invert});
     ?LAB_LINE(20, 25, {a_clr1, off});
@@ -860,6 +862,7 @@
     ?LAB_LINE(21, 23, {a_clr1, invert});
     ?LAB_LINE(21, 24, {a_clr2, invert});
     ?LAB_LINE(21, 25, {a_clr2, off});
+    ?LAB_LINE(22, 24, {carry_in, invert_a});
 ).
 
 -define(LC_CELLS(),

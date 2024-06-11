@@ -446,6 +446,26 @@ It has a bit `0` when the s-load is disconnected or connected to a signal.
 
 It has a bit `1` when the s-load line is a constant `1`.
 
+## `{lab(), invert_a}`
+
+The LAB's invert-a line (addnsub) is enabled.
+
+## `{lab(), invert_a, control_4_not_3}`
+
+When the LAB's invert-a line is selected from a control line.
+
+The specific control line selected is:
+
+ * a `0` bit selects 3,
+ * a `1` bit selects 4.
+
+## `{lab(), carry_in, invert_a}`
+
+The LAB's carry-in is selected from:
+
+ * a `0` bit selects from the previous LAB`s carry-out signal,
+ * a `1` bit selects from the LAB's invert-a control line.
+
 ## LC Fuses
 
 ### `{lc(), clk2}`
