@@ -6,8 +6,12 @@
 -export([source_sub/1]).
 -export([source_add_sub/1]).
 -export([source_cin_add/1]).
+-export([source_cin_0_add/1]).
+-export([source_cin_1_add/1]).
 -export([source_cin_sub/1]).
 -export([source_cin_add_sub/1]).
+-export([source_cin_0_add_sub/1]).
+-export([source_cin_1_add_sub/1]).
 -export([source_accumulator/1]).
 -export([source_accumulator2/1]).
 -export([source_mux_2/1]).
@@ -69,9 +73,9 @@ density(Density) ->
         %  9082 |*| | | | {2,3,line,24,cell,22}
         % 15736 |*| | | | {3,3,line,22,cell,20}
         % 22904 |*| | | | {4,3,line,22,cell,20}
-        source_add_sub(Device, <<"23">>, <<"24">>, 1),
-        source_add_sub(Device, <<"23">>, <<"24">>, 2),
-        source_add_sub(Device, <<"23">>, <<"24">>, 3)
+        %source_add_sub(Device, <<"23">>, <<"24">>, 1),
+        %source_add_sub(Device, <<"23">>, <<"24">>, 2),
+        %source_add_sub(Device, <<"23">>, <<"24">>, 3)
         %
         %source_add(Device),
         %source_sub(Device),
@@ -83,6 +87,10 @@ density(Density) ->
         %source_cin_add_sub(Device),
         %source_cin_0_add_sub(Device),
         %source_cin_1_add_sub(Device)
+        %
+        source_add(Device, <<"23">>, <<"24">>, 1),
+        source_add_sub(Device, <<"23">>, <<"24">>, 1),
+        source_cin_add_sub(Device)
         %
         %source_accumulator(Device),
         %source_accumulator2(Device)
@@ -143,17 +151,23 @@ density(Density) ->
 %%--------------------------------------------------------------------
 
 source_add(Device) ->
+    source_add(Device, <<"3">>, <<"4">>, 1).
+
+%%--------------------------------------------------------------------
+
+source_add(Device, Top, Width, Seed) ->
     #{
         title => add,
         device => Device,
         settings => [
+            {seed, Seed},
             {location, <<"lpm_add_sub:mega|addcore:adder|a_csnbuffer:result_node|cs_buffer[0]~0">>, {lc, 5, 2, 0}}
         ],
         verilog => <<
             "module experiment (\n"
-            "  input wire [3:0] a,\n"
-            "  input wire [3:0] b,\n"
-            "  output wire [3:0] s\n"
+            "  input wire [", Top/binary, ":0] a,\n"
+            "  input wire [", Top/binary, ":0] b,\n"
+            "  output wire [", Top/binary, ":0] s\n"
             ");\n"
             "  lpm_add_sub mega (\n"
             "    .dataa(a),\n"
@@ -165,7 +179,7 @@ source_add(Device) ->
             "    mega.lpm_hint = \"ONE_INPUT_IS_CONSTANT=NO,CIN_USED=NO\",\n"
             "    mega.lpm_representation = \"UNSIGNED\",\n"
             "    mega.lpm_type = \"LPM_ADD_SUB\",\n"
-            "    mega.lpm_width = 4;\n"
+            "    mega.lpm_width = ", Width/binary, ";\n"
             "endmodule\n"
         >>
     }.
@@ -213,7 +227,7 @@ source_add_sub(Device, Top, Width, Seed) ->
         device => Device,
         settings => [
             {seed, Seed},
-            {location, <<"lpm_add_sub:mega|alt_stratix_add_sub:stratix_adder|add_sub_cell[0]">>, {lc, 2, 3, 0}}
+            {location, <<"lpm_add_sub:mega|alt_stratix_add_sub:stratix_adder|add_sub_cell[0]">>, {lc, 5, 2, 0}}
         ],
         verilog => <<
             "module experiment (\n"
@@ -371,15 +385,16 @@ source_cin_add_sub(Device) ->
         title => cin_add_sub,
         device => Device,
         settings => [
-            {location, <<"lpm_add_sub:mega|alt_stratix_add_sub:stratix_adder|add_sub_cell[0]~0">>, {lc, 5, 2, 0}}
+            %{location, <<"lpm_add_sub:mega|alt_stratix_add_sub:stratix_adder|add_sub_cell[0]~0">>, {lc, 5, 2, 0}}
+            {location, <<"lpm_add_sub:mega|alt_stratix_add_sub:stratix_adder|result[0]">>, {lc, 5, 2, 0}}
         ],
         verilog => <<
             "module experiment (\n"
             "  input wire cin,\n"
-            "  input wire [13:0] a,\n"
-            "  input wire [13:0] b,\n"
+            "  input wire [23:0] a,\n"
+            "  input wire [23:0] b,\n"
             "  input wire add_sub,\n"
-            "  output wire [13:0] s\n"
+            "  output wire [23:0] s\n"
             ");\n"
             "  lpm_add_sub mega (\n"
             "    .cin(cin),\n"
@@ -395,7 +410,7 @@ source_cin_add_sub(Device) ->
             "    mega.lpm_hint = \"ONE_INPUT_IS_CONSTANT=NO,CIN_USED=YES\",\n"
             "    mega.lpm_representation = \"UNSIGNED\",\n"
             "    mega.lpm_type = \"LPM_ADD_SUB\",\n"
-            "    mega.lpm_width = 14;\n"
+            "    mega.lpm_width = 24;\n"
             "endmodule\n"
         >>
     }.
