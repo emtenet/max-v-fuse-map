@@ -96,6 +96,8 @@ My experiments are being run in the following
    ([4](experiments/src/lc_carry_chain_4_experiment.erl)
    , [5](experiments/src/lc_carry_chain_5_experiment.erl)
    , [9](experiments/src/lc_carry_chain_9_experiment.erl))
+ * Global interconnect MUX
+   [database](experiments/src/global_interconnect_mux_database.erl)
 
 ## Maps
 
@@ -120,6 +122,8 @@ Some MUX databases have been collected:
    `database/*.lab-interconnect`
  * [IOB interconnect MUX](experiments/src/iob_interconnect_mux_database.erl)
    `database/*.iob-interconnect`
+ * [Global interconnect MUX](experiments/src/global_interconnect_mux_database.erl)
+   `database/*.global-interconnect`
  * [C4 interconnect MUX](experiments/src/c4_interconnect_mux_database.erl)
    `database/*.c4-interconnect`
  * [R4 interconnect MUX](experiments/src/r4_interconnect_mux_database.erl)
