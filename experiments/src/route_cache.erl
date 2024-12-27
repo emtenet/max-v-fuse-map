@@ -242,7 +242,15 @@ collect_dest(Dest = #{route := Route}, Key, Blocks0) ->
         #{jtag := {jtag, X, Y, N}, port := Type, route := [From | _]} ->
             Block = {Type, X, Y},
             Index = N,
-            collect_block(Block, Index, From, Key, Blocks)
+            collect_block(Block, Index, From, Key, Blocks);
+
+        #{ufm := {ufm, X, Y, N}, port := Type, route := [From | _]} ->
+            Block = {Type, X, Y},
+            Index = N,
+            collect_block(Block, Index, From, Key, Blocks);
+
+        _ ->
+            throw({Dest, Key})
     end.
 
 %%--------------------------------------------------------------------

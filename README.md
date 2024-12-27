@@ -98,6 +98,7 @@ My experiments are being run in the following
    , [9](experiments/src/lc_carry_chain_9_experiment.erl))
  * Global interconnect MUX
    [database](experiments/src/global_interconnect_mux_database.erl)
+ * [UFM](experiments/src/ufm_experiment.erl)
 
 ## Maps
 

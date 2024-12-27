@@ -112,6 +112,14 @@ decode(<<"signal_name = ", Line/binary>>, _) ->
                 name => decode_name(Signal),
                 jtag => JTAG,
                 dests => []
+            }};
+
+        <<"UFM_", _/binary>> ->
+            {ok, UFM, <<>>} = ufm:parse(Comment),
+            {signal, #{
+                name => decode_name(Signal),
+                ufm => UFM,
+                dests => []
             }}
     end.
 
@@ -284,6 +292,20 @@ decode_signal(<<"LUT_CHAIN:", Line/binary>>) ->
 decode_signal(<<"R4:", Line/binary>>) ->
     {X, Y, S, I} = decode_coord(Line),
     {push, {r4, X, Y, S, I}};
+decode_signal(<<"UFM_OUT:", Line/binary>>) ->
+    case decode_coord(Line) of
+        {X, Y, S, 0} ->
+            {push, {ufm_dr_out, X, Y, S}};
+
+        {X, Y, S, 1} ->
+            {push, {ufm_busy, X, Y, S}};
+
+        {X, Y, S, 2} ->
+            {push, {ufm_osc, X, Y, S}};
+
+        {X, Y, S, 3} ->
+            {push, {ufm_bgp_busy, X, Y, S}}
+    end;
 decode_signal(<<"dest = ( ", Line/binary>>) ->
     [Name, Rest] = binary:split(Line, <<", ">>),
     decode_dest(decode_name(Name), Rest).
@@ -294,6 +316,10 @@ decode_dest(Name, <<"ACLR )", Line/binary>>) ->
     decode_dest_lc(Name, a_clr, Line);
 decode_dest(Name, <<"ALOAD )", Line/binary>>) ->
     decode_dest_lc(Name, a_load, Line);
+decode_dest(Name, <<"ARCLK )", Line/binary>>) ->
+    decode_dest_ufm(Name, ar_clk, Line);
+decode_dest(Name, <<"ARDIN )", Line/binary>>) ->
+    decode_dest_ufm(Name, ar_in, Line);
 decode_dest(Name, <<"CLK )", Line/binary>>) ->
     decode_dest_lc(Name, clk, Line);
 decode_dest(Name, <<"DATAA ), route_port = ", Line/binary>>) ->
@@ -306,12 +332,24 @@ decode_dest(Name, <<"DATAD ), route_port = ", Line/binary>>) ->
     decode_dest_route(Name, data_d, Line);
 decode_dest(Name, <<"DATAIN )", Line/binary>>) ->
     decode_dest_ioc(Name, data_in, Line);
+decode_dest(Name, <<"DRCLK )", Line/binary>>) ->
+    decode_dest_ufm(Name, dr_clk, Line);
+decode_dest(Name, <<"DRSHFT )", Line/binary>>) ->
+    decode_dest_ufm(Name, dr_shift, Line);
+decode_dest(Name, <<"DRDIN )", Line/binary>>) ->
+    decode_dest_ufm(Name, dr_in, Line);
 decode_dest(Name, <<"ENA )", Line/binary>>) ->
     decode_dest_lc(Name, ena, Line);
+decode_dest(Name, <<"ERASE )", Line/binary>>) ->
+    decode_dest_ufm(Name, erase, Line);
 decode_dest(Name, <<"INVERTA )", Line/binary>>) ->
     decode_dest_lc(Name, invert_a, Line);
 decode_dest(Name, <<"OE )", Line/binary>>) ->
     decode_dest_ioc(Name, oe, Line);
+decode_dest(Name, <<"OSCENA )", Line/binary>>) ->
+    decode_dest_ufm(Name, osc_ena, Line);
+decode_dest(Name, <<"PROGRAM )", Line/binary>>) ->
+    decode_dest_ufm(Name, program, Line);
 decode_dest(Name, <<"SCLR )", Line/binary>>) ->
     decode_dest_lc(Name, s_clr, Line);
 decode_dest(Name, <<"SLOAD )", Line/binary>>) ->
@@ -357,6 +395,16 @@ decode_dest_lc(Name, Port, <<";\t#", LC0/binary>>) ->
         name => Name,
         port => Port,
         lc => LC
+    }}.
+
+%%--------------------------------------------------------------------
+
+decode_dest_ufm(Name, Port, <<";\t#", UFM0/binary>>) ->
+    {ok, UFM, <<>>} = ufm:parse(UFM0),
+    {dest, #{
+        name => Name,
+        port => Port,
+        ufm => UFM
     }}.
 
 %%--------------------------------------------------------------------

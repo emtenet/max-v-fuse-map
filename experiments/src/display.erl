@@ -43,6 +43,11 @@
     ports = #{} :: #{}
 }).
 
+-record(ufm, {
+    name :: binary() | undefined,
+    ports = #{} :: #{}
+}).
+
 -type logic() :: #{
     lc() => #lc{},
     ioc() => #ioc{},
@@ -215,6 +220,12 @@ collect_dest(Signal, Dest, Cells0) ->
             Route = collect_route(Route0, Cells0),
             collect_jtag(At, fun(JTAG) ->
                 collect_jtag_port(JTAG, Name, Port, Route, Signal)
+            end, collect_source(Signal, Route0, Cells0));
+
+        #{name := Name, ufm := At, route := Route0, port := Port} ->
+            Route = collect_route(Route0, Cells0),
+            collect_ufm(At, fun(UFM) ->
+                collect_ufm_port(UFM, Name, Port, Route, Signal)
             end, collect_source(Signal, Route0, Cells0))
     end.
 
@@ -265,7 +276,19 @@ collect_route(Local, [Direct], Cells) ->
 
         {local_line, X, Y, 0, N} ->
             LC = {lc, X, Y, N},
-            {Local, LC, collect_route_local(LC, Cells)}
+            {Local, LC, collect_route_local(LC, Cells)};
+
+        {ufm_dr_out, X, Y, N} ->
+            {Local, {ufm, X, Y, N}, dr_out};
+
+        {ufm_busy, X, Y, N} ->
+            {Local, {ufm, X, Y, N}, busy};
+
+        {ufm_osc, X, Y, N} ->
+            {Local, {ufm, X, Y, N}, osc};
+
+        {ufm_bgp_busy, X, Y, N} ->
+            {Local, {ufm, X, Y, N}, bgp_busy}
     end;
 collect_route(Local, [_ | Route], Cells) ->
     collect_route_inner(Local, Route, Cells).
@@ -295,7 +318,19 @@ collect_route_inner(Local, [Source], Cells) ->
 
         {le_buffer, X, Y, 0, I} when I rem 2 =:= 1 ->
             LC = {lc, X, Y, I div 2},
-            {Local, '...', LC, collect_route_right(LC, Cells)}
+            {Local, '...', LC, collect_route_right(LC, Cells)};
+
+        {ufm_dr_out, X, Y, N} ->
+            {Local, '...', {ufm, X, Y, N}, dr_out};
+
+        {ufm_busy, X, Y, N} ->
+            {Local, '...', {ufm, X, Y, N}, busy};
+
+        {ufm_osc, X, Y, N} ->
+            {Local, '...', {ufm, X, Y, N}, osc};
+
+        {ufm_bgp_busy, X, Y, N} ->
+            {Local, '...', {ufm, X, Y, N}, bgp_busy}
     end;
 collect_route_inner(Local, [_ | Route], Cells) ->
     collect_route_inner(Local, Route, Cells).
@@ -367,6 +402,30 @@ collect_source(Signal, [Source], Cells) ->
             At = {lc, X, Y, N},
             collect_lc(At, fun (LC) ->
                 collect_lut_name(LC, Signal)
+            end, Cells);
+
+        {ufm_dr_out, X, Y, N} ->
+            At = {ufm, X, Y, N},
+            collect_ufm(At, fun (UFM) ->
+                collect_ufm_name(UFM, Signal)
+            end, Cells);
+
+        {ufm_busy, X, Y, N} ->
+            At = {ufm, X, Y, N},
+            collect_ufm(At, fun (UFM) ->
+                collect_ufm_name(UFM, Signal)
+            end, Cells);
+
+        {ufm_osc, X, Y, N} ->
+            At = {ufm, X, Y, N},
+            collect_ufm(At, fun (UFM) ->
+                collect_ufm_name(UFM, Signal)
+            end, Cells);
+
+        {ufm_bgp_busy, X, Y, N} ->
+            At = {ufm, X, Y, N},
+            collect_ufm(At, fun (UFM) ->
+                collect_ufm_name(UFM, Signal)
             end, Cells)
     end;
 collect_source(Signal, [_ | Route], Cells) ->
@@ -532,6 +591,34 @@ collect_reg_port(LC0 = #lc{reg_ports = Ports0}, Name, Port, Route, Signal) ->
     LC = collect_reg_name(LC0, Name),
     Ports = Ports0#{Port => {Signal, Route}},
     LC#lc{reg_ports = Ports}.
+
+%%--------------------------------------------------------------------
+
+collect_ufm(At = {ufm, _, _, _}, Collect, Cells) ->
+    case Cells of
+        #{At := LC} ->
+            Cells#{At => Collect(LC)};
+
+        _ ->
+            Cells#{At => Collect(#ufm{})}
+    end.
+
+%%--------------------------------------------------------------------
+
+collect_ufm_name(UFM = #ufm{name = Name}, Name) ->
+    UFM;
+collect_ufm_name(UFM = #ufm{name = undefined}, Name) ->
+    UFM#ufm{name = Name};
+collect_ufm_name(UFM, Name) ->
+    io:format("UFM NAME ~p ~s~n", [UFM, Name]),
+    UFM.
+
+%%--------------------------------------------------------------------
+
+collect_ufm_port(UFM0 = #ufm{ports = Ports0}, Name, Port, Route, Signal) ->
+    UFM = collect_ufm_name(UFM0, Name),
+    Ports = Ports0#{Port => {Signal, Route}},
+    UFM#ufm{ports = Ports}.
 
 %%====================================================================
 %% control_routing
@@ -801,7 +888,9 @@ routing_cell(At = {lc, _, _, _}, LC, Cells) ->
 routing_cell(At = {ioc, _, _, _}, IOC = #ioc{}, _) ->
     routing_ioc(At, IOC);
 routing_cell(At = {jtag, _, _, _}, JTAG = #jtag{}, _) ->
-    routing_jtag(At, JTAG).
+    routing_jtag(At, JTAG);
+routing_cell(At = {ufm, _, _, _}, UFM = #ufm{}, _) ->
+    routing_ufm(At, UFM).
 
 %%--------------------------------------------------------------------
 
@@ -949,4 +1038,15 @@ routing_port_inverted(Port, {From0, Route0}) ->
         _ ->
             io:format(" ~9s <- ! ~s ~s~n", [Port, From, Route])
     end.
+
+%%--------------------------------------------------------------------
+
+routing_ufm(_, #ufm{name = undefined}) ->
+    ok;
+routing_ufm(At, #ufm{name = Name, ports = Ports}) ->
+    io:format("UFM ~w ~s~n", [At, Name]),
+    lists:foreach(fun ({Port, Routing}) ->
+        routing_port(Port, Routing)
+    end, lists:sort(maps:to_list(Ports))),
+    io:format("~n", []).
 
