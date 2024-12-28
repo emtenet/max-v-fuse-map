@@ -56,7 +56,7 @@
 
 -type experiment() :: {experiment:title(), experiment:fuses(), rcf_file:rcf()}.
 
-%-define(INCREMENTAL, true).
+-define(INCREMENTAL, true).
 
 %%====================================================================
 %% run
