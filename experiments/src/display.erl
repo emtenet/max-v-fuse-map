@@ -233,8 +233,8 @@ collect_dest(Signal, Dest, Cells0) ->
 
 collect_route([], _) ->
     {};
-collect_route([{jtag_tdo_user, X, Y, N, 0} | Route], Cells) ->
-    collect_route({jtag_tdo, X, Y, N}, Route, Cells);
+collect_route([{jtag, X, Y, tdo} | Route], Cells) ->
+    collect_route({jtag, X, Y, tdo}, Route, Cells);
 collect_route([{lab_clk, X, Y, 0, I} | Route], Cells) ->
     collect_route({clk, X, Y, I}, Route, Cells);
 collect_route([{lab_control_mux, _, _, 0, I} | Route], Cells) ->
@@ -257,14 +257,8 @@ collect_route(Local, [Direct], Cells) ->
         {io_data_in, X, Y, N, 0} ->
             {Local, {ioc, X, Y, N}};
 
-        {jtag_tck_tap, X, Y, N, 0} ->
-            {Local, {jtag, X, Y, N}, tck};
-
-        {jtag_tdi_tap, X, Y, N, 0} ->
-            {Local, {jtag, X, Y, N}, tdi};
-
-        {jtag_tms_tap, X, Y, N, 0} ->
-            {Local, {jtag, X, Y, N}, tms};
+        {jtag, X, Y, Port} ->
+            {Local, {jtag, X, Y}, Port};
 
         {le_buffer, X, Y, 0, I} when I rem 2 =:= 0 ->
             LC = {lc, X, Y, I div 2},
@@ -278,8 +272,8 @@ collect_route(Local, [Direct], Cells) ->
             LC = {lc, X, Y, N},
             {Local, LC, collect_route_local(LC, Cells)};
 
-        {ufm, X, Y, Signal} ->
-            {Local, {ufm, X, Y}, Signal}
+        {ufm, X, Y, Port} ->
+            {Local, {ufm, X, Y}, Port}
     end;
 collect_route(Local, [_ | Route], Cells) ->
     collect_route_inner(Local, Route, Cells).
@@ -294,14 +288,8 @@ collect_route_inner(Local, [Source], Cells) ->
         {io_data_in, X, Y, N, 0} ->
             {Local, '...', {ioc, X, Y, N}};
 
-        {jtag_tck_tap, X, Y, N, 0} ->
-            {Local, '...', {jtag, X, Y, N}, tck};
-
-        {jtag_tdi_tap, X, Y, N, 0} ->
-            {Local, '...', {jtag, X, Y, N}, tdi};
-
-        {jtag_tms_tap, X, Y, N, 0} ->
-            {Local, '...', {jtag, X, Y, N}, tms};
+        {jtag, X, Y, Port} ->
+            {Local, '...', {jtag, X, Y}, Port};
 
         {le_buffer, X, Y, 0, I} when I rem 2 =:= 0 ->
             LC = {lc, X, Y, I div 2},
@@ -311,8 +299,8 @@ collect_route_inner(Local, [Source], Cells) ->
             LC = {lc, X, Y, I div 2},
             {Local, '...', LC, collect_route_right(LC, Cells)};
 
-        {ufm, X, Y, Signal} ->
-            {Local, '...', {ufm, X, Y}, Signal}
+        {ufm, X, Y, Port} ->
+            {Local, '...', {ufm, X, Y}, Port}
     end;
 collect_route_inner(Local, [_ | Route], Cells) ->
     collect_route_inner(Local, Route, Cells).
@@ -350,17 +338,11 @@ collect_source(Signal, [Source], Cells) ->
                 collect_ioc_input_name(IOC, Signal)
             end, Cells);
 
-        {jtag_tck_tap, _, _, _, 0} ->
-            Cells;
-
-        {jtag_tdi_tap, X, Y, N, 0} ->
-            At = {jtag, X, Y, N},
+        {jtag, X, Y, _} ->
+            At = {jtag, X, Y},
             collect_jtag(At, fun (JTAG) ->
                 collect_jtag_name(JTAG, Signal)
             end, Cells);
-
-        {jtag_tms_tap, _, _, _, 0} ->
-            Cells;
 
         {le_buffer, X, Y, 0, I} when I rem 2 =:= 0 ->
             At = {lc, X, Y, I div 2},
@@ -397,7 +379,7 @@ collect_source(Signal, [_ | Route], Cells) ->
 
 %%--------------------------------------------------------------------
 
-collect_jtag(At = {jtag, _, _, _}, Collect, Cells) ->
+collect_jtag(At = {jtag, _, _}, Collect, Cells) ->
     case Cells of
         #{At := LC} ->
             Cells#{At => Collect(LC)};
@@ -412,8 +394,8 @@ collect_jtag_name(JTAG = #jtag{name = Name}, Name) ->
     JTAG;
 collect_jtag_name(JTAG = #jtag{name = undefined}, Name) ->
     JTAG#jtag{name = Name};
-collect_jtag_name(JTAG, Name) ->
-    io:format("JTAG NAME ~p ~s~n", [JTAG, Name]),
+collect_jtag_name(JTAG, _Name) ->
+    %io:format("JTAG NAME ~p ~s~n", [JTAG, _Name]),
     JTAG.
 
 %%--------------------------------------------------------------------
@@ -851,7 +833,7 @@ routing_cell(At = {lc, _, _, _}, LC, Cells) ->
     routing_reg(At, LC, Cells);
 routing_cell(At = {ioc, _, _, _}, IOC = #ioc{}, _) ->
     routing_ioc(At, IOC);
-routing_cell(At = {jtag, _, _, _}, JTAG = #jtag{}, _) ->
+routing_cell(At = {jtag, _, _}, JTAG = #jtag{}, _) ->
     routing_jtag(At, JTAG);
 routing_cell(At = {ufm, _, _}, UFM = #ufm{}, _) ->
     routing_ufm(At, UFM).

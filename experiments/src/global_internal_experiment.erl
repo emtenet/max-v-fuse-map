@@ -33,7 +33,7 @@ device(Device) ->
 
 experiment(Device, LAB, [A, B, C | Pins], Gclks = [G0, G1, G2, G3]) ->
     io:format(" ==> ~p ~s ~s ~s~n", [Device, A, B, C]),
-    {ok, _Experiments} = experiment:compile_to_fuses([
+    {ok, Experiments} = experiment:compile_to_fuses_and_rcf([
         source(Device, LAB, G0, G1, G2, gclk3, A, B, C),
         source(Device, LAB, G0, G1, G2, gclk3, B, C, A),
         source(Device, LAB, G0, G1, G2, gclk3, C, A, B),
@@ -47,9 +47,28 @@ experiment(Device, LAB, [A, B, C | Pins], Gclks = [G0, G1, G2, G3]) ->
         source(Device, LAB, G1, G2, G3, gclk0, B, C, A),
         source(Device, LAB, G1, G2, G3, gclk0, C, A, B)
     ]),
+    _ = Experiments,
     %
-    %Matrix = matrix:build(Device, Experiments),
+    %Matrix0 = matrix:build(Device, Experiments),
+    %Matrix = matrix:remove_fuses(Matrix0, fun
+    %    ({{c4, _, _}, _, _}) -> true;
+    %    ({{c4, _, _}, _, _, _}) -> true;
+    %    ({{global, _}, _, _}) -> true;
+    %    ({{iob, _, _}, _, _, _}) -> true;
+    %    ({{iob, _, _}, _, _}) -> true;
+    %    ({{ioc, _, _, _}, _}) -> true;
+    %    ({{ioc, _, _, _}, _, _}) -> true;
+    %    ({{lab, _, _}, _}) -> true;
+    %    ({{lab, _, _}, _, _}) -> true;
+    %    ({{lab, _, _}, _, _, _}) -> true;
+    %    ({{lc, _, _, _}, _}) -> true;
+    %    ({{lc, _, _, _}, _, _}) -> true;
+    %    ({{r4, _, _}, _, _, _}) -> true;
+    %    ({{r4, _, _}, _, _}) -> true;
+    %    (_) -> false
+    %end),
     %matrix:print(Matrix),
+    %display:routing(Experiments, device:density(Device)),
     %
     experiment(Device, LAB, Pins, Gclks);
 experiment(_, _, _, _) ->

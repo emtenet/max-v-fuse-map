@@ -195,9 +195,15 @@ decode_coord(<<I, ";">>, X, Y, S)
 
 decode_signal_lines([<<"}">> | Lines], RCF, Signal, Stack, _) ->
     [] = Stack,
-    #{name := Name} = Signal,
-    #{signals := Signals} = RCF,
-    decode_lines(Lines, RCF#{signals => Signals#{Name => Signal}});
+    case Signal of
+        #{jtag := _, dests := []} ->
+            % altera_internal_jtag
+            decode_lines(Lines, RCF);
+
+        #{name := Name} ->
+            #{signals := Signals} = RCF,
+            decode_lines(Lines, RCF#{signals => Signals#{Name => Signal}})
+    end;
 decode_signal_lines([<<>> | Lines], RCF, Signal, [], Labels) ->
     decode_signal_lines(Lines, RCF, Signal, [], Labels);
 decode_signal_lines([Line0 | Lines], RCF, Signal0, Stack0, Labels0) ->
@@ -209,38 +215,48 @@ decode_signal_lines([Line0 | Lines], RCF, Signal0, Stack0, Labels0) ->
             decode_signal_lines(Lines, RCF, Signal0, Stack, Labels0);
 
         {push, Top} ->
-            Signal = rename_ufm_signal(Signal0, Top),
+            Signal = rename_signal(Signal0, Top),
             Stack = [Top | Stack0],
             decode_signal_lines(Lines, RCF, Signal, Stack, Labels0);
 
         {push, Label, Top} ->
-            Signal = rename_ufm_signal(Signal0, Top),
+            Signal = rename_signal(Signal0, Top),
             Stack = [Top | Stack0],
             Labels = Labels0#{Label => Stack},
             decode_signal_lines(Lines, RCF, Signal, Stack, Labels);
 
+        {dest, #{jtag := _}} when Stack0 =:= [] ->
+            % altera_internal_jtag
+            decode_signal_lines(Lines, RCF, Signal0, [], Labels0);
+
         {dest, Dest0} ->
-            Dest = rename_ufm_dest(Dest0, Stack0),
+            {Dest, Stack} = rename_dest(Dest0, Stack0),
             #{dests := Dests} = Signal0,
             Signal = Signal0#{
-                dests => [Dest#{route => Stack0} | Dests]
+                dests => [Dest#{route => Stack} | Dests]
             },
             decode_signal_lines(Lines, RCF, Signal, [], Labels0)
     end.
 
 %%--------------------------------------------------------------------
 
-rename_ufm_dest(Dest = #{ufm := _}, Stack) ->
+rename_dest(Dest = #{jtag := _}, Stack0) ->
+    #{port := tdo_user} = Dest,
+    [{jtag, X, Y, tdo} | Stack] = Stack0,
+    {Dest#{jtag => {jtag, X, Y}, port => tdo}, Stack};
+rename_dest(Dest = #{ufm := _}, Stack) ->
     [{local_interconnect, X, Y, 0, _} | _] = Stack,
-    Dest#{ufm => {ufm, X, Y}};
-rename_ufm_dest(Dest, _) ->
-    Dest.
+    {Dest#{ufm => {ufm, X, Y}}, Stack};
+rename_dest(Dest, Stack) ->
+    {Dest, Stack}.
 
 %%--------------------------------------------------------------------
 
-rename_ufm_signal(Signal, {ufm, X, Y, _}) ->
+rename_signal(Signal = #{jtag := _}, {jtag, X, Y, _}) ->
+    Signal#{jtag => {jtag, X, Y}};
+rename_signal(Signal = #{ufm := _}, {ufm, X, Y, _}) ->
     Signal#{ufm => {ufm, X, Y}};
-rename_ufm_signal(Signal, _) ->
+rename_signal(Signal, _) ->
     Signal.
 
 %%--------------------------------------------------------------------
@@ -278,17 +294,17 @@ decode_signal(<<"IO_OE_PIN:", Line/binary>>) ->
     {X, Y, S, I} = decode_coord(Line),
     {push, {io_oe, X, Y, S, I}};
 decode_signal(<<"JTAG_TCKUTAP_PIN:", Line/binary>>) ->
-    {X, Y, S, I} = decode_coord(Line),
-    {push, {jtag_tck_tap, X, Y, S, I}};
+    {X, Y, _, _} = decode_coord(Line),
+    {push, {jtag, X, Y, tck}};
 decode_signal(<<"JTAG_TDIUTAP_PIN:", Line/binary>>) ->
-    {X, Y, S, I} = decode_coord(Line),
-    {push, {jtag_tdi_tap, X, Y, S, I}};
+    {X, Y, _, _} = decode_coord(Line),
+    {push, {jtag, X, Y, tdi}};
 decode_signal(<<"JTAG_TDOUSER_PIN:", Line/binary>>) ->
-    {X, Y, S, I} = decode_coord(Line),
-    {push, {jtag_tdo_user, X, Y, S, I}};
+    {X, Y, _, _} = decode_coord(Line),
+    {push, {jtag, X, Y, tdo}};
 decode_signal(<<"JTAG_TMSUTAP_PIN:", Line/binary>>) ->
-    {X, Y, S, I} = decode_coord(Line),
-    {push, {jtag_tms_tap, X, Y, S, I}};
+    {X, Y, _, _} = decode_coord(Line),
+    {push, {jtag, X, Y, tms}};
 decode_signal(<<"LAB_CLK:", Line/binary>>) ->
     {X, Y, S, I} = decode_coord(Line),
     {push, {lab_clk, X, Y, S, I}};

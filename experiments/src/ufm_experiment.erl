@@ -9,9 +9,9 @@
 %%====================================================================
 
 run() ->
-    %density(max_v_240z),
+    density(max_v_240z),
     %density(max_v_570z),
-    lists:foreach(fun density/1, density:list()),
+    %lists:foreach(fun density/1, density:list()),
     ok.
 
 %%--------------------------------------------------------------------
@@ -35,30 +35,26 @@ density(Density) ->
     ]),
     _ = Experiments,
     %
-    Matrix0 = matrix:build(Device, Experiments),
-    Matrix = matrix:remove_fuses(Matrix0, fun
-        ({{c4, _, _}, _, _}) -> true;
-        ({{c4, _, _}, _, _, _}) -> true;
-        ({{global, _}, _, _}) -> true;
-        ({{iob, _, _}, _, _, _}) -> true;
-        ({{iob, _, _}, _, _}) -> true;
-        ({{ioc, 1, 1, N}, _}) when N > 3 -> false;
-        ({{ioc, 1, 1, N}, _, _}) when N > 3 -> false;
-        ({{ioc, 1, 2, N}, _}) when N > 3 -> false;
-        ({{ioc, 1, 2, N}, _, _}) when N > 3 -> false;
-        ({{ioc, _, _, _}, _}) -> true;
-        ({{ioc, _, _, _}, _, _}) -> true;
-        ({{lab, _, _}, _}) -> true;
-        ({{lab, _, _}, _, _}) -> true;
-        ({{lab, _, _}, _, _, _}) -> true;
-        ({{lc, _, _, _}, _}) -> true;
-        ({{lc, _, _, _}, _, _}) -> true;
-        ({{r4, _, _}, _, _, _}) -> true;
-        ({{r4, _, _}, _, _}) -> true;
-        (_) -> false
-    end),
-    matrix:print(Matrix),
-    display:routing(Experiments, Density),
+    %Matrix0 = matrix:build(Device, Experiments),
+    %Matrix = matrix:remove_fuses(Matrix0, fun
+    %    ({{c4, _, _}, _, _}) -> true;
+    %    ({{c4, _, _}, _, _, _}) -> true;
+    %    ({{global, _}, _, _}) -> true;
+    %    ({{iob, _, _}, _, _, _}) -> true;
+    %    ({{iob, _, _}, _, _}) -> true;
+    %    ({{ioc, _, _, _}, _}) -> true;
+    %    ({{ioc, _, _, _}, _, _}) -> true;
+    %    ({{lab, _, _}, _}) -> true;
+    %    ({{lab, _, _}, _, _}) -> true;
+    %    ({{lab, _, _}, _, _, _}) -> true;
+    %    ({{lc, _, _, _}, _}) -> true;
+    %    ({{lc, _, _, _}, _, _}) -> true;
+    %    ({{r4, _, _}, _, _, _}) -> true;
+    %    ({{r4, _, _}, _, _}) -> true;
+    %    (_) -> false
+    %end),
+    %matrix:print(Matrix),
+    %display:routing(Experiments, Density),
     %
     ok.
 

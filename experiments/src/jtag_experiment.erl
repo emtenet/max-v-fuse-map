@@ -39,12 +39,12 @@ density(Density) ->
     %    ({{c4, _, _}, _, _}) -> true;
     %    ({{c4, _, _}, _, _, _}) -> true;
     %    ({{global, _}, _, _}) -> true;
-    %    ({{iob, X, Y}, _, _, _}) when X =/= 9 orelse Y =/= 2 -> true;
-    %    ({{iob, X, Y}, _, _}) when X =/= 9 orelse Y =/= 2 -> true;
-    %    ({{ioc, 1, 4, 6}, _}) -> false;
-    %    ({{ioc, 1, 4, 6}, _, _}) -> false;
-    %    ({{ioc, X, Y, _}, _}) when X =/= 9 orelse Y =/= 2 -> true;
-    %    ({{ioc, X, Y, _}, _, _}) when X =/= 9 orelse Y =/= 2 -> true;
+    %    ({{iob, _, _}, _, _, _}) -> true;
+    %    ({{iob, _, _}, _, _}) -> true;
+    %    ({{ioc, 1, _, N}, _}) when N > 3 -> false;
+    %    ({{ioc, 1, _, N}, _, _}) when N > 3 -> false;
+    %    ({{ioc, _, _, _}, _}) -> true;
+    %    ({{ioc, _, _, _}, _, _}) -> true;
     %    ({{lab, _, _}, _}) -> true;
     %    ({{lab, _, _}, _, _}) -> true;
     %    ({{lab, _, _}, _, _, _}) -> true;
