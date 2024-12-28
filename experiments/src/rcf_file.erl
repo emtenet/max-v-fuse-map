@@ -209,21 +209,39 @@ decode_signal_lines([Line0 | Lines], RCF, Signal0, Stack0, Labels0) ->
             decode_signal_lines(Lines, RCF, Signal0, Stack, Labels0);
 
         {push, Top} ->
+            Signal = rename_ufm_signal(Signal0, Top),
             Stack = [Top | Stack0],
-            decode_signal_lines(Lines, RCF, Signal0, Stack, Labels0);
+            decode_signal_lines(Lines, RCF, Signal, Stack, Labels0);
 
         {push, Label, Top} ->
+            Signal = rename_ufm_signal(Signal0, Top),
             Stack = [Top | Stack0],
             Labels = Labels0#{Label => Stack},
-            decode_signal_lines(Lines, RCF, Signal0, Stack, Labels);
+            decode_signal_lines(Lines, RCF, Signal, Stack, Labels);
 
-        {dest, Dest} ->
+        {dest, Dest0} ->
+            Dest = rename_ufm_dest(Dest0, Stack0),
             #{dests := Dests} = Signal0,
             Signal = Signal0#{
                 dests => [Dest#{route => Stack0} | Dests]
             },
             decode_signal_lines(Lines, RCF, Signal, [], Labels0)
     end.
+
+%%--------------------------------------------------------------------
+
+rename_ufm_dest(Dest = #{ufm := _}, Stack) ->
+    [{local_interconnect, X, Y, 0, _} | _] = Stack,
+    Dest#{ufm => {ufm, X, Y}};
+rename_ufm_dest(Dest, _) ->
+    Dest.
+
+%%--------------------------------------------------------------------
+
+rename_ufm_signal(Signal, {ufm, X, Y, _}) ->
+    Signal#{ufm => {ufm, X, Y}};
+rename_ufm_signal(Signal, _) ->
+    Signal.
 
 %%--------------------------------------------------------------------
 
@@ -294,17 +312,17 @@ decode_signal(<<"R4:", Line/binary>>) ->
     {push, {r4, X, Y, S, I}};
 decode_signal(<<"UFM_OUT:", Line/binary>>) ->
     case decode_coord(Line) of
-        {X, Y, S, 0} ->
-            {push, {ufm_dr_out, X, Y, S}};
+        {X, Y, _, 0} ->
+            {push, {ufm, X, Y, dr_out}};
 
-        {X, Y, S, 1} ->
-            {push, {ufm_busy, X, Y, S}};
+        {X, Y, _, 1} ->
+            {push, {ufm, X, Y, busy}};
 
-        {X, Y, S, 2} ->
-            {push, {ufm_osc, X, Y, S}};
+        {X, Y, _, 2} ->
+            {push, {ufm, X, Y, osc}};
 
-        {X, Y, S, 3} ->
-            {push, {ufm_bgp_busy, X, Y, S}}
+        {X, Y, _, 3} ->
+            {push, {ufm, X, Y, isp_busy}}
     end;
 decode_signal(<<"dest = ( ", Line/binary>>) ->
     [Name, Rest] = binary:split(Line, <<", ">>),
@@ -320,6 +338,8 @@ decode_dest(Name, <<"ARCLK )", Line/binary>>) ->
     decode_dest_ufm(Name, ar_clk, Line);
 decode_dest(Name, <<"ARDIN )", Line/binary>>) ->
     decode_dest_ufm(Name, ar_in, Line);
+decode_dest(Name, <<"ARSHFT )", Line/binary>>) ->
+    decode_dest_ufm(Name, ar_shift, Line);
 decode_dest(Name, <<"CLK )", Line/binary>>) ->
     decode_dest_lc(Name, clk, Line);
 decode_dest(Name, <<"DATAA ), route_port = ", Line/binary>>) ->
@@ -334,10 +354,10 @@ decode_dest(Name, <<"DATAIN )", Line/binary>>) ->
     decode_dest_ioc(Name, data_in, Line);
 decode_dest(Name, <<"DRCLK )", Line/binary>>) ->
     decode_dest_ufm(Name, dr_clk, Line);
-decode_dest(Name, <<"DRSHFT )", Line/binary>>) ->
-    decode_dest_ufm(Name, dr_shift, Line);
 decode_dest(Name, <<"DRDIN )", Line/binary>>) ->
     decode_dest_ufm(Name, dr_in, Line);
+decode_dest(Name, <<"DRSHFT )", Line/binary>>) ->
+    decode_dest_ufm(Name, dr_shift, Line);
 decode_dest(Name, <<"ENA )", Line/binary>>) ->
     decode_dest_lc(Name, ena, Line);
 decode_dest(Name, <<"ERASE )", Line/binary>>) ->
