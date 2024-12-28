@@ -2,7 +2,7 @@
 
 -export([run/0]).
 
-% This is a theory of how GLobal interconnects are muxed into the
+% This is a theory of how Global interconnects are muxed into the
 % Global clock lines.
 %
 % The theory is based on the data produced by `global_mux_playground`.
@@ -100,40 +100,42 @@ contradiction(Density, Fuse) ->
 %%====================================================================
 
 fuses(Density, Fuses) ->
-    lists:foldl(fun (Fuse, GLobals) -> fuse(Density, Fuse, GLobals) end, #{}, Fuses).
+    lists:foldl(fun (Fuse, Globals) ->
+       fuse(Density, Fuse, Globals)
+    end, #{}, Fuses).
 
 %%--------------------------------------------------------------------
 
-fuse(Density, Fuse, GLobals) ->
+fuse(Density, Fuse, Globals) ->
     case fuse_map:to_name(Fuse, Density) of
-        {ok, {GLobal, Key = from3, Value}} ->
-            fuse_mux(GLobal, Key, Value, GLobals);
+        {ok, {{global, _, _}, Global, Key = from3, Value}} ->
+            fuse_mux(Global, Key, Value, Globals);
 
-        {ok, {GLobal, Key = from4, Value}} ->
-            fuse_mux(GLobal, Key, Value, GLobals);
+        {ok, {{global, _, _}, Global, Key = from4, Value}} ->
+            fuse_mux(Global, Key, Value, Globals);
 
-        {ok, {GLobal, Key = from6, Value}} ->
-            fuse_mux(GLobal, Key, Value, GLobals);
+        {ok, {{global, _, _}, Global, Key = from6, Value}} ->
+            fuse_mux(Global, Key, Value, Globals);
 
         _ ->
-            GLobals
+            Globals
     end.
 
 %%--------------------------------------------------------------------
 
-fuse_mux(GLobal, Key, Value, GLobals) ->
-    case GLobals of
-        #{GLobal := #{Key := Existing}} when Existing =:= Value ->
-            GLobals;
+fuse_mux(Global, Key, Value, Globals) ->
+    case Globals of
+        #{Global := #{Key := Existing}} when Existing =:= Value ->
+            Globals;
 
-        #{GLobal := #{Key := Existing}} ->
-            throw({GLobal, Key, Value, existing, Existing});
+        #{Global := #{Key := Existing}} ->
+            throw({Global, Key, Value, existing, Existing});
 
-        #{GLobal := Muxes} ->
-            GLobals#{GLobal => Muxes#{Key => Value}};
+        #{Global := Muxes} ->
+            Globals#{Global => Muxes#{Key => Value}};
 
         _ ->
-            GLobals#{GLobal => #{Key => Value}}
+            Globals#{Global => #{Key => Value}}
     end.
 
 %%====================================================================
@@ -170,7 +172,7 @@ signal_dest(#{route := Route0}, Model) ->
 signal_route([]) ->
     false;
 signal_route([{global_clk_mux, X, Y, 0, N}, Interconnect | _]) ->
-    {ok, X, Y, {global, N}, Interconnect};
+    {ok, X, Y, N, Interconnect};
 signal_route([_ | Route]) ->
     signal_route(Route).
 

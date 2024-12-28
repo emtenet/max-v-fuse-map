@@ -115,53 +115,25 @@
     ?GLOBAL_INTERNAL_CELL_L(22, 3); % others
 ).
 
--define(GLOBAL_SIDES(),
-    ?GLOBAL_SMALL_SELECT( 2, 6, 0, 0, {from3, mux1});
-    ?GLOBAL_SMALL_SELECT( 2, 6, 3, 1, {from3, mux1});
-    ?GLOBAL_SMALL_SELECT( 2, 7, 0, 2, {from3, mux1});
-    ?GLOBAL_SMALL_SELECT( 2, 7, 3, 3, {from3, mux1});
-    ?GLOBAL_SMALL_SELECT( 3, 6, 0, 0, {from3, mux0});
-    ?GLOBAL_SMALL_SELECT( 3, 6, 1, 0, {from3, mux2});
-    ?GLOBAL_SMALL_SELECT( 3, 6, 2, 1, {from3, mux2});
-    ?GLOBAL_SMALL_SELECT( 3, 6, 3, 1, {from3, mux0});
-    ?GLOBAL_SMALL_SELECT( 3, 7, 0, 2, {from3, mux0});
-    ?GLOBAL_SMALL_SELECT( 3, 7, 1, 2, {from3, mux2});
-    ?GLOBAL_SMALL_SELECT( 3, 7, 2, 3, {from3, mux2});
-    ?GLOBAL_SMALL_SELECT( 3, 7, 3, 3, {from3, mux0});
-    ?GLOBAL_SMALL_SELECT( 4, 6, 0, 0, {from6, mux0});
-    ?GLOBAL_SMALL_SELECT( 4, 6, 1, 0, {from6, mux1});
-    ?GLOBAL_SMALL_SELECT( 4, 6, 2, 1, {from6, mux1});
-    ?GLOBAL_SMALL_SELECT( 4, 6, 3, 1, {from6, mux0});
-    ?GLOBAL_SMALL_SELECT( 4, 7, 0, 2, {from6, mux0});
-    ?GLOBAL_SMALL_SELECT( 4, 7, 1, 2, {from6, mux1});
-    ?GLOBAL_SMALL_SELECT( 4, 7, 2, 3, {from6, mux1});
-    ?GLOBAL_SMALL_SELECT( 4, 7, 3, 3, {from6, mux0});
-    ?GLOBAL_SMALL_SELECT( 5, 6, 0, 0, {from6, mux2});
-    ?GLOBAL_SMALL_SELECT( 5, 6, 1, 0, {from6, mux3});
-    ?GLOBAL_SMALL_SELECT( 5, 6, 2, 1, {from6, mux3});
-    ?GLOBAL_SMALL_SELECT( 5, 6, 3, 1, {from6, mux2});
-    ?GLOBAL_SMALL_SELECT( 5, 7, 0, 2, {from6, mux2});
-    ?GLOBAL_SMALL_SELECT( 5, 7, 1, 2, {from6, mux3});
-    ?GLOBAL_SMALL_SELECT( 5, 7, 2, 3, {from6, mux3});
-    ?GLOBAL_SMALL_SELECT( 5, 7, 3, 3, {from6, mux2});
-    ?GLOBAL_SMALL_SELECT( 6, 6, 0, 0, {from6, mux4});
-    ?GLOBAL_SMALL_SELECT( 6, 6, 1, 0, {from6, mux5});
-    ?GLOBAL_SMALL_SELECT( 6, 6, 2, 1, {from6, mux5});
-    ?GLOBAL_SMALL_SELECT( 6, 6, 3, 1, {from6, mux4});
-    ?GLOBAL_SMALL_SELECT( 6, 7, 0, 2, {from6, mux4});
-    ?GLOBAL_SMALL_SELECT( 6, 7, 1, 2, {from6, mux5});
-    ?GLOBAL_SMALL_SELECT( 6, 7, 2, 3, {from6, mux5});
-    ?GLOBAL_SMALL_SELECT( 6, 7, 3, 3, {from6, mux4});
+-define(GLOBAL_SMALL_SELECTS(),
+    ?GLOBAL_SMALL_SELECT(0, from3, 4, output3);
+    ?GLOBAL_SMALL_SELECT(0, from6, 4, output6);
+    ?GLOBAL_SMALL_SELECT(1, from3, 4, enable3);
+    ?GLOBAL_SMALL_SELECT(1, from6, 4, enable6);
+    ?GLOBAL_SMALL_SELECT(2, from3, 5, output3);
+    ?GLOBAL_SMALL_SELECT(2, from6, 5, output6);
+    ?GLOBAL_SMALL_SELECT(3, from3, 5, enable3);
+    ?GLOBAL_SMALL_SELECT(3, from6, 5, enable6);
 ).
 
--define(GLOBAL_SELECTS(),
-    ?GLOBAL_LARGE_SELECT(20, 0, from3, mux1);
-    ?GLOBAL_LARGE_SELECT(20, 1, from3, mux0);
-    ?GLOBAL_LARGE_SELECT(20, 2, from4, mux0);
-    ?GLOBAL_LARGE_SELECT(20, 3, from4, mux1);
-    ?GLOBAL_LARGE_SELECT(21, 0, from3, mux2);
-    ?GLOBAL_LARGE_SELECT(21, 2, from4, mux2);
-    ?GLOBAL_LARGE_SELECT(21, 3, from4, mux3);
+-define(UFM_SELECTS(),
+    ?UFM_SELECT(20, 0, from3, mux1);
+    ?UFM_SELECT(20, 1, from3, mux0);
+    ?UFM_SELECT(20, 2, from4, mux0);
+    ?UFM_SELECT(20, 3, from4, mux1);
+    ?UFM_SELECT(21, 0, from3, mux2);
+    ?UFM_SELECT(21, 2, from4, mux2);
+    ?UFM_SELECT(21, 3, from4, mux3);
 ).
 
 -define(UFM_INTERCONNECTS(),
@@ -2486,6 +2458,14 @@ from_density({{global, G}, Name, Value}, With = #with{}) ->
         error ->
             {error, {{invalid_global, G}, Name}}
     end;
+from_density({{global, X, Y}, N, Name, Value}, With = #with{}) ->
+    case from_density_global(X, Y, N, With) of
+        ok ->
+            from_global_select(N, {Name, Value}, With);
+
+        error ->
+            {error, {{invalid_global, X, Y, N}, Name}}
+    end;
 from_density({{iob, X, Y}, Name}, With = #with{}) ->
     case from_density_iob(X, Y, With) of
         side ->
@@ -2625,6 +2605,15 @@ from_density_global(_) ->
 
 %%--------------------------------------------------------------------
 
+from_density_global(1, 3, N, #with{density = max_v_240z}) ->
+    from_density_global(N);
+from_density_global(X, Y, N, #with{grow_x = X, short_y = Y}) ->
+    from_density_global(N);
+from_density_global(_, _, _, _) ->
+    error.
+
+%%--------------------------------------------------------------------
+
 from_density_iob(X, Y, With = #with{})
         when X =:= With#with.left_x andalso
              Y > With#with.short_y andalso
@@ -2757,18 +2746,8 @@ from_device(Name, _With) ->
     from_global(G, internal, With = #with{grow_x = X}) ->
         from_skip(X + 1, Sector, With)
 ).
--define(GLOBAL_SMALL_SELECT(Sector, N, Index, G, Name),
-    from_global(G, Name, With = #with{density = max_v_240z}) ->
-        from_side(1, Sector, 3, N, Index, With)
-).
--define(GLOBAL_LARGE_SELECT(Sector, Index, From, Mux),
-    from_global(G, {From, Mux}, With = #with{grow_x = X, short_y = Y}) ->
-        from_cell(X, Sector, Y, G, Index, With)
-).
 
 ?GLOBAL_SKIPS()
-?GLOBAL_SIDES()
-?GLOBAL_SELECTS()
 from_global(G, Name, _With) ->
     {error, {{global, G}, Name}}.
 
@@ -2783,8 +2762,25 @@ from_global(G, Name, _With) ->
 -undef(GLOBAL_INTERNAL_SIDE_L).
 -undef(GLOBAL_INTERNAL_CELL_L).
 -undef(GLOBAL_INTERNAL_CELL_R).
+
+%%--------------------------------------------------------------------
+
+-define(GLOBAL_SMALL_SELECT(G, From, N, Name),
+    from_global_select(G, {From, Mux}, With = #with{density = max_v_240z}) ->
+        from_ioc_side(1, 3, N, {Name, Mux}, With)
+).
+-define(UFM_SELECT(Sector, Index, From, Mux),
+    from_global_select(N, {From, Mux}, With = #with{grow_x = X, short_y = Y}) ->
+        from_cell(X, Sector, Y, N, Index, With)
+).
+
+?GLOBAL_SMALL_SELECTS()
+?UFM_SELECTS()
+from_global_select(G, Name, _With) ->
+    {error, {{global, G}, Name}}.
+
 -undef(GLOBAL_SMALL_SELECT).
--undef(GLOBAL_LARGE_SELECT).
+-undef(UFM_SELECT).
 
 %%--------------------------------------------------------------------
 
@@ -3864,13 +3860,9 @@ to_side_line(X, Y, Index, Sector, _) ->
     to_side(X, Y, U, V, Sector, With) when X =:= With#with.right_x ->
         to_ioc(X, Y, N, Name)
 ).
--define(GLOBAL_SMALL_SELECT(Sector, N, Index, G, Name),
-    to_side(1, 3, N, Index, Sector, #with{density = max_v_240z}) ->
-        to_global(G, Name)
-).
 -define(IOC_SIDE(Sector, Index, Name),
-    to_side(X, Y, N, Index, Sector, _) when N >= 2 andalso N =< 8 ->
-        to_ioc(X, Y, N - 2, Name);
+    to_side(X, Y, N, Index, Sector, With) when N >= 2 andalso N =< 8 ->
+        to_ioc_side(X, Y, N - 2, Name, With);
     to_side(X, Y, N, Index, Sector, _) ->
         {error, {X, Y, N, Index, side, Sector}}
 ).
@@ -3880,7 +3872,6 @@ to_side_line(X, Y, Index, Sector, _) ->
 ?IOB_SIDES()
 ?IOC_LEFTS()
 ?IOC_RIGHTS()
-?GLOBAL_SIDES()
 ?IOC_SIDES()
 to_side(X, Y, N, Index, Sector, _) ->
     {error, {X, Y, N, Index, side, Sector}}.
@@ -3892,7 +3883,6 @@ to_side(X, Y, N, Index, Sector, _) ->
 -undef(IOB_SIDE).
 -undef(IOC_LEFT).
 -undef(IOC_RIGHT).
--undef(GLOBAL_SMALL_SELECT).
 -undef(IOC_SIDE).
 
 %%--------------------------------------------------------------------
@@ -3947,9 +3937,9 @@ to_cell_line(X, Y, Index, Sector, _) ->
             when Y =:= 2 orelse Y =:= 3 ->
         to_ufm(X, Y, {{interconnect, N}, From, Mux})
 ).
--define(GLOBAL_LARGE_SELECT(Sector, Index, From, Mux),
-    to_cell(X, Y, G, Index, Sector, #with{grow_x = X, short_y = Y}) when G < 4 ->
-        to_global(G, {From, Mux})
+-define(UFM_SELECT(Sector, Index, From, Mux),
+    to_cell(X, Y, N, Index, Sector, #with{grow_x = X, short_y = Y}) ->
+        to_ufm_select(X, Y, N, {From, Mux})
 ).
 -define(LAB_CELL(Sector, N, I, Name),
     to_cell(X, Y, N, I, Sector, _) ->
@@ -3963,7 +3953,7 @@ to_cell_line(X, Y, Index, Sector, _) ->
 ?C4_CELLS()
 ?R4_CELLS()
 ?UFM_INTERCONNECTS()
-?GLOBAL_SELECTS()
+?UFM_SELECTS()
 to_cell(X, Y, N, I, Sector, With = #with{})
         when X =< With#with.grow_x andalso
              Y =< With#with.short_y ->
@@ -3981,7 +3971,7 @@ to_cell(X, Y, N, I, Sector, _) ->
 -undef(R4_CELL_L).
 -undef(R4_CELL_R).
 -undef(UFM_INTERCONNECT).
--undef(GLOBAL_LARGE_SELECT).
+-undef(UFM_SELECT).
 -undef(LAB_CELL).
 -undef(LC_CELL).
 
@@ -4050,6 +4040,19 @@ to_skip(X, Cell, Sector, #with{skip = Skip}) ->
 
 %%--------------------------------------------------------------------
 
+-define(GLOBAL_SMALL_SELECT(G, From, N, Name),
+    to_ioc_side(1, 3, N, {Name, Mux}, _) ->
+        {ok, {{global, 1, 3}, G, From, Mux}}
+).
+
+?GLOBAL_SMALL_SELECTS()
+to_ioc_side(X, Y, N, Name, _) ->
+    to_ioc(X, Y, N, Name).
+
+-undef(GLOBAL_SMALL_SELECT).
+
+%%--------------------------------------------------------------------
+
 to_global(G, {Name, Value}) ->
     {ok, {{global, G}, Name, Value}};
 to_global(G, Name) ->
@@ -4103,6 +4106,13 @@ to_r4(X, Y, {Index, Key, Value}) ->
 
 to_ufm(X, Y, {Name, Key, Value}) ->
     {ok, {{ufm, X, Y}, Name, Key, Value}}.
+
+%%--------------------------------------------------------------------
+
+to_ufm_select(X, Y, N, {Key, Value}) when Y =:= 3 andalso N < 4 ->
+    {ok, {{global, X, Y}, N, Key, Value}};
+to_ufm_select(X, Y, N, {Key, Value}) ->
+    {error, {{ufm, X, Y}, N, Key, Value}}.
 
 %%====================================================================
 %% density

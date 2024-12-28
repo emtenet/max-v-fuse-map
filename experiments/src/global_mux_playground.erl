@@ -32,17 +32,19 @@ run() ->
 %%--------------------------------------------------------------------
 
 expect_small(Density, N) ->
-    G = {global, N},
+    X = 1,
+    Y = 3,
+    G = {global, X, Y},
     {I, A, B} = expect_small(N),
-    expect(Density, {G, from3, mux0}, {1, 3, I, A, side, 3}),
-    expect(Density, {G, from3, mux1}, {1, 3, I, A, side, 2}),
-    expect(Density, {G, from3, mux2}, {1, 3, I, B, side, 3}),
-    expect(Density, {G, from6, mux0}, {1, 3, I, A, side, 4}),
-    expect(Density, {G, from6, mux1}, {1, 3, I, B, side, 4}),
-    expect(Density, {G, from6, mux2}, {1, 3, I, A, side, 5}),
-    expect(Density, {G, from6, mux3}, {1, 3, I, B, side, 5}),
-    expect(Density, {G, from6, mux4}, {1, 3, I, A, side, 6}),
-    expect(Density, {G, from6, mux5}, {1, 3, I, B, side, 6}),
+    expect(Density, {G, N, from3, mux0}, {X, Y, I, A, side, 3}),
+    expect(Density, {G, N, from3, mux1}, {X, Y, I, A, side, 2}),
+    expect(Density, {G, N, from3, mux2}, {X, Y, I, B, side, 3}),
+    expect(Density, {G, N, from6, mux0}, {X, Y, I, A, side, 4}),
+    expect(Density, {G, N, from6, mux1}, {X, Y, I, B, side, 4}),
+    expect(Density, {G, N, from6, mux2}, {X, Y, I, A, side, 5}),
+    expect(Density, {G, N, from6, mux3}, {X, Y, I, B, side, 5}),
+    expect(Density, {G, N, from6, mux4}, {X, Y, I, A, side, 6}),
+    expect(Density, {G, N, from6, mux5}, {X, Y, I, B, side, 6}),
     ok.
 
 %%--------------------------------------------------------------------
@@ -55,15 +57,15 @@ expect_small(3) -> {7, 3, 2}.
 %%--------------------------------------------------------------------
 
 expect_large(Density, N) ->
-    G = {global, N},
     {X, Y} = density:global_block(Density),
-    expect(Density, {G, from3, mux1}, {X, Y, N, 0, cell, 20}),
-    expect(Density, {G, from3, mux0}, {X, Y, N, 1, cell, 20}),
-    expect(Density, {G, from3, mux2}, {X, Y, N, 0, cell, 21}),
-    expect(Density, {G, from4, mux0}, {X, Y, N, 2, cell, 20}),
-    expect(Density, {G, from4, mux1}, {X, Y, N, 3, cell, 20}),
-    expect(Density, {G, from4, mux2}, {X, Y, N, 2, cell, 21}),
-    expect(Density, {G, from4, mux3}, {X, Y, N, 3, cell, 21}),
+    G = {global, X, Y},
+    expect(Density, {G, N, from3, mux1}, {X, Y, N, 0, cell, 20}),
+    expect(Density, {G, N, from3, mux0}, {X, Y, N, 1, cell, 20}),
+    expect(Density, {G, N, from3, mux2}, {X, Y, N, 0, cell, 21}),
+    expect(Density, {G, N, from4, mux0}, {X, Y, N, 2, cell, 20}),
+    expect(Density, {G, N, from4, mux1}, {X, Y, N, 3, cell, 20}),
+    expect(Density, {G, N, from4, mux2}, {X, Y, N, 2, cell, 21}),
+    expect(Density, {G, N, from4, mux3}, {X, Y, N, 3, cell, 21}),
     ok.
 
 %%--------------------------------------------------------------------
@@ -129,7 +131,7 @@ density(Density, Acc0) ->
 %%--------------------------------------------------------------------
 
 block(Density, {global_clk_mux, _, _}, Indexes, Acc0) ->
-    %io:format(" ==> ~s~n", [Density]),
+    io:format(" ==> ~s~n", [Density]),
     route_cache:fold_indexes(
         fun (Index, Froms, Acc) ->
             interconnect(Density, Index, Froms, Acc)
@@ -188,13 +190,13 @@ remove_fuse(max_v_240z, {1, 3, 7, _, side, Sector}) ->
     Sector < 2 orelse Sector > 6;
 remove_fuse(Density, Location) ->
     case fuse_map:to_name(Location, Density) of
-        {ok, {{global, _}, from3, _}} ->
+        {ok, {{global, _, _}, _, from3, _}} ->
             false;
 
-        {ok, {{global, _}, from4, _}} ->
+        {ok, {{global, _, _}, _, from4, _}} ->
             false;
 
-        {ok, {{global, _}, from6, _}} ->
+        {ok, {{global, _, _}, _, from6, _}} ->
             false;
 
         {ok, _} ->

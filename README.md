@@ -159,7 +159,7 @@ Each of the global clock networks can be driven from either:
 
 This fuse selects the internal interconnects.
 
-### `{global(), from3, mux#}` and `{global(), from4 / from6, mux#}`
+### `{{global, X, Y}, N, from3, mux#}` and `{{global, X, Y}, N, from4 / from6, mux#}`
 
 Selects an interconnect into each of the four global networks.
 
@@ -170,17 +170,7 @@ selecting from 18 interconnects at `{ioc,1,3}`.
 For other densities,
 each global network has a two dimentional mux of size 4 x 3
 selecting from 10 interconnects
-at `{iob,9,3}`, `{iob,11,3}` & `{iob,13,3}` respectively.
-
-### `{global(), {interconnect, #}, from4, mux#}` and `{global(), {interconnect, #}, from3, mux#}`
-
-Selects a direct-link, C4 or R4 onto the Global interconnect.
-
-Each interconnect has a two dimentional mux of size 4 x 3
-selecting from 12 alternative sources.
-
-This does not exist on the 5M240Z,
-it's global interconnect shares the interconnect of `{iob, 1, 3}`.
+at `{ufm,9,3}`, `{ufm,11,3}` & `{ufm,13,3}` respectively.
 
 ### `{user_code, bit()}`
 
@@ -567,4 +557,15 @@ The first LC in a LAB has this fuse, but not sure where that input comes from.
 ## `{lc(), s_clr_load}`
 
 The LC's s-clr & s-load lines are enabled.
+
+## UFM Fuses
+
+### `{ufm(), {interconnect, #}, from4, mux#}` and `{ufm(), {interconnect, #}, from3, mux#}`
+
+Selects a direct-link, C4 or R4 onto the UFM interconnects.
+
+Each interconnect has a two dimentional mux of size 4 x 3
+selecting from 12 alternative sources.
+
+This does not exist on the 5M240Z.
 
