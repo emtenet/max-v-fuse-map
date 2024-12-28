@@ -115,15 +115,64 @@
     ?GLOBAL_INTERNAL_CELL_L(22, 3); % others
 ).
 
+-define(GLOBAL_LARGE_SELECTS(),
+    ?GLOBAL_LARGE_SELECT(3, 0, 0);
+    ?GLOBAL_LARGE_SELECT(3, 1, 1);
+    ?GLOBAL_LARGE_SELECT(3, 2, 2);
+    ?GLOBAL_LARGE_SELECT(3, 3, 3);
+).
+
 -define(GLOBAL_SMALL_SELECTS(),
-    ?GLOBAL_SMALL_SELECT(0, from3, 4, output3);
-    ?GLOBAL_SMALL_SELECT(0, from6, 4, output6);
-    ?GLOBAL_SMALL_SELECT(1, from3, 4, enable3);
-    ?GLOBAL_SMALL_SELECT(1, from6, 4, enable6);
-    ?GLOBAL_SMALL_SELECT(2, from3, 5, output3);
-    ?GLOBAL_SMALL_SELECT(2, from6, 5, output6);
-    ?GLOBAL_SMALL_SELECT(3, from3, 5, enable3);
-    ?GLOBAL_SMALL_SELECT(3, from6, 5, enable6);
+    ?GLOBAL_SMALL_SELECT(3, 4, output3, from3, 0);
+    ?GLOBAL_SMALL_SELECT(3, 4, output6, from6, 0);
+    ?GLOBAL_SMALL_SELECT(3, 4, enable3, from3, 1);
+    ?GLOBAL_SMALL_SELECT(3, 4, enable6, from6, 1);
+    ?GLOBAL_SMALL_SELECT(3, 5, output3, from3, 2);
+    ?GLOBAL_SMALL_SELECT(3, 5, output6, from6, 2);
+    ?GLOBAL_SMALL_SELECT(3, 5, enable3, from3, 3);
+    ?GLOBAL_SMALL_SELECT(3, 5, enable6, from6, 3);
+).
+
+-define(JTAG_SMALL_SELECTS(),
+    ?JTAG_SMALL_SELECT(4, 6, enable3, from3, tdo);
+    ?JTAG_SMALL_SELECT(4, 6, enable6, from6, tdo);
+).
+
+-define(JTAG_LARGE_SELECTS(),
+    ?JTAG_LARGE_SELECT(2, 7, tdo);
+).
+
+-define(UFM_SMALL_SELECTS(),
+    ?UFM_SMALL_SELECT(1, 4, output3, from3, dr_in);
+    ?UFM_SMALL_SELECT(1, 4, output6, from6, dr_in);
+    ?UFM_SMALL_SELECT(1, 4, enable3, from3, dr_shift);
+    ?UFM_SMALL_SELECT(1, 4, enable6, from6, dr_shift);
+    ?UFM_SMALL_SELECT(1, 5, output3, from3, dr_clk);
+    ?UFM_SMALL_SELECT(1, 5, output6, from6, dr_clk);
+    ?UFM_SMALL_SELECT(1, 5, enable3, from3, ar_in);
+    ?UFM_SMALL_SELECT(1, 5, enable6, from6, ar_in);
+    ?UFM_SMALL_SELECT(1, 6, output3, from3, ar_shift);
+    ?UFM_SMALL_SELECT(1, 6, output6, from6, ar_shift);
+    ?UFM_SMALL_SELECT(1, 6, enable3, from3, ar_clk);
+    ?UFM_SMALL_SELECT(1, 6, enable6, from6, ar_clk);
+    ?UFM_SMALL_SELECT(2, 4, output3, from3, program);
+    ?UFM_SMALL_SELECT(2, 4, output6, from6, program);
+    ?UFM_SMALL_SELECT(2, 4, enable3, from3, erase);
+    ?UFM_SMALL_SELECT(2, 4, enable6, from6, erase);
+    ?UFM_SMALL_SELECT(2, 5, output3, from3, osc_ena);
+    ?UFM_SMALL_SELECT(2, 5, output6, from6, osc_ena);
+).
+
+-define(UFM_LARGE_SELECTS(),
+    ?UFM_LARGE_SELECT(2, 1, ar_shift);
+    ?UFM_LARGE_SELECT(2, 2, ar_clk);
+    ?UFM_LARGE_SELECT(2, 3, program);
+    ?UFM_LARGE_SELECT(2, 4, erase);
+    ?UFM_LARGE_SELECT(3, 5, ar_in);
+    ?UFM_LARGE_SELECT(3, 6, dr_clk);
+    ?UFM_LARGE_SELECT(3, 7, dr_shift);
+    ?UFM_LARGE_SELECT(3, 8, dr_in);
+    ?UFM_LARGE_SELECT(2, 9, osc_ena);
 ).
 
 -define(UFM_SELECTS(),
@@ -2521,6 +2570,8 @@ from_density({{ioc, X, Y, N}, Name, Value}, With = #with{}) ->
         error ->
             {error, {{invalid_ioc, X, Y, N}, Name}}
     end;
+from_density({{jtag, X, Y}, Name, Key, Value}, With = #with{}) ->
+    from_jtag(X, Y, {Name, Key, Value}, With);
 from_density({{lab, X, Y}, Name}, With = #with{}) ->
     case from_density_lab(X, Y, With) of
         ok ->
@@ -2593,6 +2644,8 @@ from_density({{r4, X, Y}, {mux, Index}, Key, Value}, With = #with{}) ->
         error ->
             {error, {{invalid_r4, X, Y}, {mux, Index}, Key, Value}}
     end;
+from_density({{ufm, X, Y}, Name, Key, Value}, With = #with{}) ->
+    from_ufm(X, Y, {Name, Key, Value}, With);
 from_density(_Name, _With = #with{}) ->
     {error, density}.
 
@@ -2765,22 +2818,22 @@ from_global(G, Name, _With) ->
 
 %%--------------------------------------------------------------------
 
--define(GLOBAL_SMALL_SELECT(G, From, N, Name),
-    from_global_select(G, {From, Mux}, With = #with{density = max_v_240z}) ->
-        from_ioc_side(1, 3, N, {Name, Mux}, With)
+-define(GLOBAL_SMALL_SELECT(Y, N, FromN, FromG, G),
+    from_global_select(G, {FromG, Mux}, With = #with{density = max_v_240z}) ->
+        from_ioc_side(1, Y, N, {FromN, Mux}, With)
 ).
--define(UFM_SELECT(Sector, Index, From, Mux),
-    from_global_select(N, {From, Mux}, With = #with{grow_x = X, short_y = Y}) ->
-        from_cell(X, Sector, Y, N, Index, With)
+-define(GLOBAL_LARGE_SELECT(Y, N, G),
+    from_global_select(G, Name, With = #with{grow_x = X}) ->
+        from_ufm_select(X, Y, N, Name, With)
 ).
 
 ?GLOBAL_SMALL_SELECTS()
-?UFM_SELECTS()
+?GLOBAL_LARGE_SELECTS()
 from_global_select(G, Name, _With) ->
     {error, {{global, G}, Name}}.
 
 -undef(GLOBAL_SMALL_SELECT).
--undef(UFM_SELECT).
+-undef(GLOBAL_LARGE_SELECT).
 
 %%--------------------------------------------------------------------
 
@@ -3070,6 +3123,64 @@ from_ioc_strip(X, Y, N, R, C, With = #with{density = max_v_1270z}) ->
     from_max_v_1270z_strip(X, Y, N, R, C, With);
 from_ioc_strip(X, Y, N, R, C, With = #with{density = max_v_2210z}) ->
     from_max_v_2210z_strip(X, Y, N, R, C, With).
+
+%%--------------------------------------------------------------------
+
+-define(JTAG_SMALL_SELECT(Y, N, FromN, FromU, U),
+    from_jtag(X, Y, {U, FromU, Mux}, With = #with{density = max_v_240z}) ->
+        from_ioc_side(X, Y, N, {FromN, Mux}, With)
+).
+-define(JTAG_LARGE_SELECT(Y, N, U),
+    from_jtag(X, Y, {U, Key, Value}, With = #with{grow_x = X}) ->
+        from_ufm_select(X, Y, N, {Key, Value}, With)
+).
+
+?JTAG_SMALL_SELECTS()
+?JTAG_LARGE_SELECTS()
+from_jtag(X, Y, {Name, Key, Value}, _With) ->
+    {error, {{invalid_jtag, X, Y}, Name, Key, Value}}.
+
+-undef(JTAG_SMALL_SELECT).
+-undef(JTAG_LARGE_SELECT).
+
+%%--------------------------------------------------------------------
+
+-define(UFM_INTERCONNECT(Sector, Index, From, Mux),
+    from_ufm(X, Y, {{interconnect, N}, From, Mux}, With = #with{grow_x = X})
+            when Y =:= 2 orelse Y =:= 3 ->
+        from_cell(X, Sector, Y, N, Index, With)
+).
+-define(UFM_SMALL_SELECT(Y, N, FromN, FromU, U),
+    from_ufm(X, Y, {U, FromU, Mux}, With = #with{density = max_v_240z}) ->
+        from_ioc_side(X, Y, N, {FromN, Mux}, With)
+).
+-define(UFM_LARGE_SELECT(Y, N, U),
+    from_ufm(X, Y, {U, Key, Value}, With = #with{grow_x = X}) ->
+        from_ufm_select(X, Y, N, {Key, Value}, With)
+).
+
+?UFM_INTERCONNECTS()
+?UFM_SMALL_SELECTS()
+?UFM_LARGE_SELECTS()
+from_ufm(X, Y, {Name, Key, Value}, _With) ->
+    {error, {{invalid_ufm, X, Y}, Name, Key, Value}}.
+
+-undef(UFM_INTERCONNECT).
+-undef(UFM_SMALL_SELECT).
+-undef(UFM_LARGE_SELECT).
+
+%%--------------------------------------------------------------------
+
+-define(UFM_SELECT(Sector, Index, From, Mux),
+    from_ufm_select(X, Y, N, {From, Mux}, With) ->
+        from_cell(X, Sector, Y, N, Index, With)
+).
+
+?UFM_SELECTS()
+from_ufm_select(X, Y, N, {Key, Value}, _With) ->
+    {error, {{invalid_ufm_select, X, Y}, N, Key, Value}}.
+
+-undef(UFM_SELECT).
 
 %%--------------------------------------------------------------------
 
@@ -3938,7 +4049,8 @@ to_cell_line(X, Y, Index, Sector, _) ->
         to_ufm(X, Y, {{interconnect, N}, From, Mux})
 ).
 -define(UFM_SELECT(Sector, Index, From, Mux),
-    to_cell(X, Y, N, Index, Sector, #with{grow_x = X, short_y = Y}) ->
+    to_cell(X, Y, N, Index, Sector, #with{grow_x = X, short_y = 3})
+            when Y =:= 2 orelse Y =:= 3 ->
         to_ufm_select(X, Y, N, {From, Mux})
 ).
 -define(LAB_CELL(Sector, N, I, Name),
@@ -4040,16 +4152,28 @@ to_skip(X, Cell, Sector, #with{skip = Skip}) ->
 
 %%--------------------------------------------------------------------
 
--define(GLOBAL_SMALL_SELECT(G, From, N, Name),
-    to_ioc_side(1, 3, N, {Name, Mux}, _) ->
-        {ok, {{global, 1, 3}, G, From, Mux}}
+-define(GLOBAL_SMALL_SELECT(Y, N, FromN, FromG, G),
+    to_ioc_side(1, Y, N, {FromN, Mux}, _) ->
+        {ok, {{global, 1, Y}, G, FromG, Mux}}
+).
+-define(JTAG_SMALL_SELECT(Y, N, FromN, FromU, U),
+    to_ioc_side(1, Y, N, {FromN, Mux}, _) ->
+        {ok, {{jtag, 1, Y}, U, FromU, Mux}}
+).
+-define(UFM_SMALL_SELECT(Y, N, FromN, FromU, U),
+    to_ioc_side(1, Y, N, {FromN, Mux}, _) ->
+        {ok, {{ufm, 1, Y}, U, FromU, Mux}}
 ).
 
 ?GLOBAL_SMALL_SELECTS()
+?JTAG_SMALL_SELECTS()
+?UFM_SMALL_SELECTS()
 to_ioc_side(X, Y, N, Name, _) ->
     to_ioc(X, Y, N, Name).
 
 -undef(GLOBAL_SMALL_SELECT).
+-undef(JTAG_SMALL_SELECT).
+-undef(UFM_SMALL_SELECT).
 
 %%--------------------------------------------------------------------
 
@@ -4109,10 +4233,28 @@ to_ufm(X, Y, {Name, Key, Value}) ->
 
 %%--------------------------------------------------------------------
 
-to_ufm_select(X, Y, N, {Key, Value}) when Y =:= 3 andalso N < 4 ->
-    {ok, {{global, X, Y}, N, Key, Value}};
+-define(GLOBAL_LARGE_SELECT(Y, N, G),
+    to_ufm_select(X, Y, N, {Key, Value}) ->
+        {ok, {{global, X, Y}, G, Key, Value}}
+).
+-define(JTAG_LARGE_SELECT(Y, N, J),
+    to_ufm_select(X, Y, N, {Key, Value}) ->
+        {ok, {{jtag, X, Y}, J, Key, Value}}
+).
+-define(UFM_LARGE_SELECT(Y, N, U),
+    to_ufm_select(X, Y, N, {Key, Value}) ->
+        {ok, {{ufm, X, Y}, U, Key, Value}}
+).
+
+?GLOBAL_LARGE_SELECTS()
+?JTAG_LARGE_SELECTS()
+?UFM_LARGE_SELECTS()
 to_ufm_select(X, Y, N, {Key, Value}) ->
     {error, {{ufm, X, Y}, N, Key, Value}}.
+
+-undef(GLOBAL_LARGE_SELECT).
+-undef(JTAG_LARGE_SELECT).
+-undef(UFM_LARGE_SELECT).
 
 %%====================================================================
 %% density

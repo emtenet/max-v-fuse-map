@@ -159,18 +159,15 @@ Each of the global clock networks can be driven from either:
 
 This fuse selects the internal interconnects.
 
-### `{{global, X, Y}, N, from3, mux#}` and `{{global, X, Y}, N, from4 / from6, mux#}`
+### `{{global, X, Y}, N, from3, mux#}` and `{{global, X, Y}, N, from4/6, mux#}`
 
 Selects an interconnect into each of the four global networks.
 
-For the 5M240Z,
-each global network has a two dimentional mux of size 6 x 3
-selecting from 18 interconnects at `{ioc,1,3}`.
+For the 5M240Z, 6 x 3 muxes are repurposed from unused IOC output
+and enable muxes.
 
-For other densities,
-each global network has a two dimentional mux of size 4 x 3
-selecting from 10 interconnects
-at `{ufm,9,3}`, `{ufm,11,3}` & `{ufm,13,3}` respectively.
+For other densities, 4 x 3 muxes selecting from 10 interconnects
+are located in the special UFM blocks.
 
 ### `{user_code, bit()}`
 
@@ -210,7 +207,7 @@ The IOC input is turned off when the POF but is `0`.
 
 This could also be called *output only*.
 
-### `{ioc(), output3, mux#}`, `{ioc(), output4, mux#}` and `{ioc(), output6, mux#}`
+### `{ioc(), output3, mux#}` and `{ioc(), output4/6, mux#}`
 
 The IOC outputs are selected from local interconnects
 via two dimentional muxes.
@@ -236,7 +233,7 @@ instead of via the output muxes.
 
 The IOC output is inverted when the POF but is `0`.
 
-### `{ioc(), enable3, mux#}`, `{ioc(), enable4, mux#}` and `{ioc(), enable6, mux#}`
+### `{ioc(), enable3, mux#}` and `{ioc(), enable4/6, mux#}`
 
 The IOC output enables are selected from local interconnects.
 
@@ -558,6 +555,18 @@ The first LC in a LAB has this fuse, but not sure where that input comes from.
 
 The LC's s-clr & s-load lines are enabled.
 
+## JTAG Fuses
+
+### `{jtag(), tdo, from3, mux#}` and `{jtag(), tdo, from4/6, mux#}`
+
+Selects a direct-link, C4 or R4 onto the JTAG user TDO port.
+
+For the 5M240Z, 6 x 3 muxes are repurposed from unused IOC output
+and enable muxes.
+
+For other densities, 4 x 3 muxes selecting from 10 interconnects
+are located in the special UFM blocks.
+
 ## UFM Fuses
 
 ### `{ufm(), {interconnect, #}, from4, mux#}` and `{ufm(), {interconnect, #}, from3, mux#}`
@@ -568,4 +577,23 @@ Each interconnect has a two dimentional mux of size 4 x 3
 selecting from 12 alternative sources.
 
 This does not exist on the 5M240Z.
+
+### `{ufm(), ufm_input(), from3, mux#}` and `{ufm(), ufm_input(), from4/6, mux#}`
+
+Selects a local interconnect into the UFM inputs:
+ * `dr_in`,
+ * `dr_shift`,
+ * `dr_clk`,
+ * `ar_in`,
+ * `ar_shift`,
+ * `ar_clk`,
+ * `program`,
+ * `erase` &
+ * `osc_ena`.
+
+For the 5M240Z, 6 x 3 muxes are repurposed from unused IOC output
+and enable muxes.
+
+For other densities, 4 x 3 muxes selecting from 10 interconnects
+are located in the special UFM blocks.
 
