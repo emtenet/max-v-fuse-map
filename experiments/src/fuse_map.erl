@@ -164,15 +164,14 @@
     ?GLOBAL_LARGE_SELECT(21, 3, from4, mux3);
 ).
 
--define(GLOBAL_INTERCONNECTS(),
-    ?GLOBAL_INTERCONNECT_F(22, 2, from3, mux1);
-    ?GLOBAL_INTERCONNECT_F(22, 3, from3, mux2);
-    ?GLOBAL_INTERCONNECT_F(23, 2, from3, mux0);
-    %?GLOBAL_INTERCONNECT_D(23, 3, direct_link);
-    ?GLOBAL_INTERCONNECT_F(24, 2, from4, mux2);
-    ?GLOBAL_INTERCONNECT_F(24, 3, from4, mux3);
-    ?GLOBAL_INTERCONNECT_F(25, 2, from4, mux0);
-    ?GLOBAL_INTERCONNECT_F(25, 3, from4, mux1);
+-define(UFM_INTERCONNECTS(),
+    ?UFM_INTERCONNECT(22, 2, from3, mux1);
+    ?UFM_INTERCONNECT(22, 3, from3, mux2);
+    ?UFM_INTERCONNECT(23, 2, from3, mux0);
+    ?UFM_INTERCONNECT(24, 2, from4, mux2);
+    ?UFM_INTERCONNECT(24, 3, from4, mux3);
+    ?UFM_INTERCONNECT(25, 2, from4, mux0);
+    ?UFM_INTERCONNECT(25, 3, from4, mux1);
 ).
 
 -define(IOB_SIDES(),
@@ -2824,23 +2823,19 @@ from_iob_side(X, Y, Name, _With) ->
             when X > With#with.grow_x ->
         from_tail(X, Sector, Index, With, With#with.long_lines)
 ).
--define(GLOBAL_INTERCONNECT_D(Sector, Index, Direct),
-    from_iob(X, Y, {{interconnect, N}, Direct}, With = #with{grow_x = X, short_y = Y}) ->
-        from_cell(X, Sector, Y, N, Index, With)
-).
--define(GLOBAL_INTERCONNECT_F(Sector, Index, From, Mux),
-    from_iob(X, Y, {{interconnect, N}, From, Mux}, With = #with{grow_x = X, short_y = Y}) ->
+-define(UFM_INTERCONNECT(Sector, Index, From, Mux),
+    from_iob(X, Y, {{interconnect, N}, From, Mux}, With = #with{grow_x = X, short_y = 3})
+            when Y =:= 2 orelse Y =:= 3 ->
         from_cell(X, Sector, Y, N, Index, With)
 ).
 
 ?IOB_HEADS()
-?GLOBAL_INTERCONNECTS()
+?UFM_INTERCONNECTS()
 from_iob(X, Y, Name, _With) ->
     {error, {iob, X, Y, Name}}.
 
 -undef(IOB_HEAD).
--undef(GLOBAL_INTERCONNECT_D).
--undef(GLOBAL_INTERCONNECT_F).
+-undef(UFM_INTERCONNECT).
 
 %%--------------------------------------------------------------------
 
@@ -3947,13 +3942,10 @@ to_cell_line(X, Y, Index, Sector, _) ->
     to_cell(X, Y, N, I, Sector, _) ->
         to_r4(X, Y, Name)
  ).
--define(GLOBAL_INTERCONNECT_D(Sector, Index, Direct),
-    to_cell(X, Y, N, Index, Sector, #with{grow_x = X, short_y = Y}) ->
-        to_iob(X, Y, {{interconnect, N}, Direct})
-).
--define(GLOBAL_INTERCONNECT_F(Sector, Index, From, Mux),
-    to_cell(X, Y, N, Index, Sector, #with{grow_x = X, short_y = Y}) ->
-        to_iob(X, Y, {{interconnect, N}, From, Mux})
+-define(UFM_INTERCONNECT(Sector, Index, From, Mux),
+    to_cell(X, Y, N, Index, Sector, #with{grow_x = X, short_y = 3})
+            when Y =:= 2 orelse Y =:= 3 ->
+        to_ufm(X, Y, {{interconnect, N}, From, Mux})
 ).
 -define(GLOBAL_LARGE_SELECT(Sector, Index, From, Mux),
     to_cell(X, Y, G, Index, Sector, #with{grow_x = X, short_y = Y}) when G < 4 ->
@@ -3970,7 +3962,7 @@ to_cell_line(X, Y, Index, Sector, _) ->
 
 ?C4_CELLS()
 ?R4_CELLS()
-?GLOBAL_INTERCONNECTS()
+?UFM_INTERCONNECTS()
 ?GLOBAL_SELECTS()
 to_cell(X, Y, N, I, Sector, With = #with{})
         when X =< With#with.grow_x andalso
@@ -3988,8 +3980,7 @@ to_cell(X, Y, N, I, Sector, _) ->
 -undef(R4_CELL_E).
 -undef(R4_CELL_L).
 -undef(R4_CELL_R).
--undef(GLOBAL_INTERCONNECTS_D).
--undef(GLOBAL_INTERCONNECTS_F).
+-undef(UFM_INTERCONNECT).
 -undef(GLOBAL_LARGE_SELECT).
 -undef(LAB_CELL).
 -undef(LC_CELL).
@@ -4107,6 +4098,11 @@ to_r4(X, Y, {Index, Value}) ->
     {ok, {{r4, X, Y}, {mux, Index}, Value}};
 to_r4(X, Y, {Index, Key, Value}) ->
     {ok, {{r4, X, Y}, {mux, Index}, Key, Value}}.
+
+%%--------------------------------------------------------------------
+
+to_ufm(X, Y, {Name, Key, Value}) ->
+    {ok, {{ufm, X, Y}, Name, Key, Value}}.
 
 %%====================================================================
 %% density

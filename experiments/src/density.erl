@@ -43,6 +43,7 @@
 -export([is_bottom_iob/3]).
 -export([is_pci_iob/2]).
 -export([is_pci_iob/3]).
+-export([is_ufm/3]).
 
 -export_type([density/0]).
 
@@ -1027,4 +1028,25 @@ is_pci_iob(X, Y, Density) ->
         _ ->
             false
     end.
+
+%%====================================================================
+%% is_ufm
+%%====================================================================
+
+-spec is_ufm(max_v:x(), max_v:y(), density()) -> boolean().
+
+is_ufm(9, 2, max_v_570z) ->
+    true;
+is_ufm(9, 3, max_v_570z) ->
+    true;
+is_ufm(11, 2, max_v_1270z) ->
+    true;
+is_ufm(11, 3, max_v_1270z) ->
+    true;
+is_ufm(13, 2, max_v_2210z) ->
+    true;
+is_ufm(13, 3, max_v_2210z) ->
+    true;
+is_ufm(_, _, _) ->
+    false.
 

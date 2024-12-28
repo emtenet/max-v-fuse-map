@@ -1,4 +1,4 @@
--module(global_interconnect_mux_database).
+-module(ufm_interconnect_mux_database).
 
 -export([run/0]).
 
@@ -60,9 +60,9 @@ fold(Density) ->
 %%--------------------------------------------------------------------
 
 fold_block(Density, {local_interconnect, X, Y}, Indexes, Db0) ->
-    case density:is_global(X, Y, Density) of
+    case density:is_ufm(X, Y, Density) of
         true ->
-            Block = {iob, X, Y},
+            Block = {ufm, X, Y},
             io:format(" ==> ~s ~p~n", [Density, Block]),
             route_cache:fold_indexes(
                 fun (Index, Froms, Acc) ->
@@ -226,7 +226,7 @@ open(Density) ->
         {ok, []} ->
             {ok, #{}};
 
-        {ok, [{Block = {global, _, _}, {interconnect, Index}} | Lines]} ->
+        {ok, [{Block = {ufm, _, _}, {interconnect, Index}} | Lines]} ->
             Blocks = open(Lines, #{}, Block, Index, #{}),
             {ok, Blocks};
 
@@ -244,7 +244,7 @@ open([], Blocks, Block, Index, Mux) ->
         _ ->
             Blocks#{Block => #{Index => Mux}}
     end;
-open([{NextBlock = {global, _, _}, {interconnect, NextIndex}} | Lines],
+open([{NextBlock = {ufm, _, _}, {interconnect, NextIndex}} | Lines],
      Blocks, Block, Index, Mux) ->
     case Blocks of
         #{Block := Indexes} ->
@@ -317,7 +317,7 @@ add(Block, Index, Key, From, Blocks) ->
 
         #{Block := #{Index := #{Key := Existing}}} ->
             throw({
-                global_interconnect, Block, Index, Key,
+                ufm_interconnect, Block, Index, Key,
                 add, From, existing, Existing
             });
 
@@ -361,5 +361,5 @@ find_key(From, {_, _, Iterator}) ->
 %%====================================================================
 
 database_file(Density) ->
-    lists:flatten(io_lib:format("../database/~s.global-interconnect", [Density])).
+    lists:flatten(io_lib:format("../database/~s.ufm-interconnect", [Density])).
 

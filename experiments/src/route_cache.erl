@@ -56,7 +56,7 @@
 
 -type experiment() :: {experiment:title(), experiment:fuses(), rcf_file:rcf()}.
 
--define(INCREMENTAL, true).
+%-define(INCREMENTAL, true).
 
 %%====================================================================
 %% run
@@ -239,14 +239,14 @@ collect_dest(Dest = #{route := Route}, Key, Blocks0) ->
             From = internal,
             collect_block(Block, Index, From, Key, Blocks);
 
-        #{jtag := {jtag, X, Y, N}, port := Type, route := [From | _]} ->
+        #{jtag := {jtag, X, Y}, port := Type, route := [From | _]} ->
             Block = {Type, X, Y},
-            Index = N,
+            Index = 0,
             collect_block(Block, Index, From, Key, Blocks);
 
-        #{ufm := {ufm, X, Y, N}, port := Type, route := [From | _]} ->
+        #{ufm := {ufm, X, Y}, port := Type, route := [From | _]} ->
             Block = {Type, X, Y},
-            Index = N,
+            Index = 0,
             collect_block(Block, Index, From, Key, Blocks);
 
         _ ->
