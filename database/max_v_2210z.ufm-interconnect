@@ -7,6 +7,7 @@
 {{mux1,mux2},{c4,13,6,mux,8}}.
 {{mux3,mux0},{c4,13,3,mux,8}}.
 {{ufm,13,2},{interconnect,2}}.
+{direct_link,{le_buffer,14,2,0,4}}.
 {{mux2,mux1},{c4,13,4,mux,9}}.
 {{mux2,mux2},{r4,14,2,mux,11}}.
 {{mux3,mux0},{r4,16,2,mux,9}}.
@@ -17,17 +18,22 @@
 {{mux2,mux0},{c4,13,6,mux,9}}.
 {{mux3,mux2},{r4,16,2,mux,9}}.
 {{ufm,13,2},{interconnect,4}}.
+{direct_link,{le_buffer,14,2,0,8}}.
 {{mux0,mux2},{r4,15,2,mux,9}}.
 {{mux3,mux2},{r4,14,2,mux,9}}.
 {{ufm,13,2},{interconnect,5}}.
+{direct_link,{le_buffer,14,2,0,10}}.
 {{mux1,mux1},{c4,13,4,mux,10}}.
 {{mux2,mux0},{c4,13,4,mux,11}}.
 {{mux3,mux0},{c4,13,5,mux,11}}.
 {{ufm,13,2},{interconnect,6}}.
+{direct_link,{le_buffer,14,2,0,12}}.
 {{mux1,mux1},{c4,13,6,mux,11}}.
 {{ufm,13,2},{interconnect,7}}.
 {{mux0,mux0},{c4,13,5,mux,12}}.
 {{mux0,mux2},{r4,14,2,mux,15}}.
+{{ufm,13,2},{interconnect,8}}.
+{direct_link,{le_buffer,14,2,0,16}}.
 {{ufm,13,2},{interconnect,9}}.
 {{mux1,mux1},{c4,13,5,mux,13}}.
 {{mux2,mux1},{c4,13,4,mux,13}}.
@@ -46,6 +52,7 @@
 {{mux2,mux2},{r4,14,3,mux,10}}.
 {{mux3,mux0},{c4,13,4,mux,8}}.
 {{ufm,13,3},{interconnect,2}}.
+{direct_link,{le_buffer,14,3,0,4}}.
 {{mux0,mux2},{r4,16,3,mux,11}}.
 {{mux2,mux1},{c4,13,5,mux,9}}.
 {{mux2,mux2},{r4,14,3,mux,8}}.
@@ -58,6 +65,7 @@
 {{mux3,mux1},{r4,14,3,mux,11}}.
 {{mux3,mux2},{r4,16,3,mux,10}}.
 {{ufm,13,3},{interconnect,4}}.
+{direct_link,{le_buffer,14,3,0,8}}.
 {{mux0,mux1},{c4,13,2,mux,3}}.
 {{mux0,mux2},{r4,15,3,mux,10}}.
 {{mux2,mux0},{c4,13,1,mux,3}}.
@@ -69,6 +77,7 @@
 {{mux2,mux0},{c4,13,5,mux,11}}.
 {{mux3,mux0},{c4,13,6,mux,11}}.
 {{ufm,13,3},{interconnect,6}}.
+{direct_link,{le_buffer,14,3,0,12}}.
 {{mux0,mux0},{c4,13,0,mux,12}}.
 {{mux0,mux2},{r4,14,3,mux,14}}.
 {{mux1,mux0},{c4,13,2,mux,5}}.
@@ -77,6 +86,7 @@
 {{mux2,mux2},{r4,16,3,mux,12}}.
 {{mux3,mux1},{r4,15,3,mux,12}}.
 {{ufm,13,3},{interconnect,7}}.
+{direct_link,{le_buffer,14,3,0,14}}.
 {{mux0,mux0},{c4,13,6,mux,12}}.
 {{mux0,mux1},{c4,13,1,mux,6}}.
 {{mux0,mux2},{r4,14,3,mux,12}}.
@@ -86,6 +96,7 @@
 {{mux3,mux0},{c4,13,7,mux,12}}.
 {{mux3,mux2},{r4,15,3,mux,15}}.
 {{ufm,13,3},{interconnect,8}}.
+{direct_link,{le_buffer,14,3,0,16}}.
 {{mux0,mux2},{r4,17,3,mux,15}}.
 {{mux1,mux1},{r4,14,3,mux,15}}.
 {{mux1,mux2},{r4,16,3,mux,14}}.
