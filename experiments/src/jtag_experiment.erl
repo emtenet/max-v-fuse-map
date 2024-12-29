@@ -25,12 +25,13 @@ density(Density) ->
     {Settings2, Pins3} = pin_settings(Pins2),
     {Settings3, _} = pin_settings(Pins3),
     {ok, Experiments} = experiment:compile_to_fuses_and_rcf([
-        source(Device, 0, []),
-        source(Device, 1, []),
-        source(Device, 0, Settings0),
-        source(Device, 1, Settings1),
-        source(Device, 2, Settings2),
-        source(Device, 3, Settings3)
+        source(Device, 0, <<>>, []),
+        source(Device, 1, <<>>, []),
+        source(Device, 0, <<>>, Settings0),
+        source(Device, 1, <<>>, Settings1),
+        source(Device, 2, <<>>, Settings2),
+        source(Device, 3, <<>>, Settings3),
+        source(Device, 3, <<"!">>, Settings3)
     ]),
     _ = Experiments,
     %
@@ -72,7 +73,7 @@ pin_settings([Tck, Tdi, Tdo, Tms | Pins]) ->
 
 %%--------------------------------------------------------------------
 
-source(Device, Index, Settings) ->
+source(Device, Index, Not, Settings) ->
     IndexBin = integer_to_binary(Index),
     #{
         title => {sld_virtual_jtag, Index},
@@ -114,7 +115,7 @@ source(Device, Index, Settings) ->
             "  sld_virtual_jtag mega (\n"
             "    .tck(tck),\n"
             "    .tdi(tdi),\n"
-            "    .tdo(tdo),\n"
+            "    .tdo(", Not/binary, "tdo),\n"
             "    .tms(tms),\n"
             "    .ir_out(ir_out),\n"
             "    .ir_in(ir_in),\n"

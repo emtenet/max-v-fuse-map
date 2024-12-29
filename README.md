@@ -159,7 +159,7 @@ Each of the global clock networks can be driven from either:
 
 This fuse selects the internal interconnects.
 
-### `{{global, X, Y}, N, from3, mux#}` and `{{global, X, Y}, N, from4/6, mux#}`
+### `{{global, X, Y}, N, from3, mux#}`, `{{global, X, Y}, N, from4/6, mux#}` and `{{global, X, Y}, N, invert}`
 
 Selects an interconnect into each of the four global networks.
 
@@ -557,7 +557,7 @@ The LC's s-clr & s-load lines are enabled.
 
 ## JTAG Fuses
 
-### `{jtag(), tdo, from3, mux#}` and `{jtag(), tdo, from4/6, mux#}`
+### `{jtag(), tdo, from3, mux#}`, `{jtag(), tdo, from4/6, mux#}` and `{jtag(), tdo, invert}`
 
 Selects a direct-link, C4 or R4 onto the JTAG user TDO port.
 
@@ -569,7 +569,7 @@ are located in the special UFM blocks.
 
 ## UFM Fuses
 
-### `{ufm(), {interconnect, #}, from4, mux#}` and `{ufm(), {interconnect, #}, from3, mux#}`
+### `{ufm(), {interconnect, #}, from4, mux#}`, `{ufm(), {interconnect, #}, from3, mux#}` and `{ufm(), {interconnect, #}, direct_link}`
 
 Selects a direct-link, C4 or R4 onto the UFM interconnects.
 
@@ -578,7 +578,7 @@ selecting from 12 alternative sources.
 
 This does not exist on the 5M240Z.
 
-### `{ufm(), ufm_input(), from3, mux#}` and `{ufm(), ufm_input(), from4/6, mux#}`
+### `{ufm(), ufm_input(), from3, mux#}`, `{ufm(), ufm_input(), from4/6, mux#}` and `{ufm(), ufm_input(), invert}`
 
 Selects a local interconnect into the UFM inputs:
  * `dr_in`,

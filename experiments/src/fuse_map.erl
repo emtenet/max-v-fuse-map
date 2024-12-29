@@ -145,22 +145,31 @@
 -define(UFM_SMALL_SELECTS(),
     ?UFM_SMALL_SELECT(1, 4, output3, from3, dr_in);
     ?UFM_SMALL_SELECT(1, 4, output6, from6, dr_in);
+    ?UFM_SMALL_INVERT(1, 4, output_invert, dr_in);
     ?UFM_SMALL_SELECT(1, 4, enable3, from3, dr_shift);
     ?UFM_SMALL_SELECT(1, 4, enable6, from6, dr_shift);
+    ?UFM_SMALL_INVERT(1, 4, enable_invert, dr_shift);
     ?UFM_SMALL_SELECT(1, 5, output3, from3, dr_clk);
     ?UFM_SMALL_SELECT(1, 5, output6, from6, dr_clk);
+    ?UFM_SMALL_INVERT(1, 5, output_invert, dr_clk);
     ?UFM_SMALL_SELECT(1, 5, enable3, from3, ar_in);
     ?UFM_SMALL_SELECT(1, 5, enable6, from6, ar_in);
+    ?UFM_SMALL_INVERT(1, 5, enable_invert, ar_in);
     ?UFM_SMALL_SELECT(1, 6, output3, from3, ar_shift);
     ?UFM_SMALL_SELECT(1, 6, output6, from6, ar_shift);
+    ?UFM_SMALL_INVERT(1, 6, output_invert, ar_shift);
     ?UFM_SMALL_SELECT(1, 6, enable3, from3, ar_clk);
     ?UFM_SMALL_SELECT(1, 6, enable6, from6, ar_clk);
+    ?UFM_SMALL_INVERT(1, 6, enable_invert, ar_clk);
     ?UFM_SMALL_SELECT(2, 4, output3, from3, program);
     ?UFM_SMALL_SELECT(2, 4, output6, from6, program);
+    ?UFM_SMALL_INVERT(2, 4, output_invert, program);
     ?UFM_SMALL_SELECT(2, 4, enable3, from3, erase);
     ?UFM_SMALL_SELECT(2, 4, enable6, from6, erase);
+    ?UFM_SMALL_INVERT(2, 4, enable_invert, erase);
     ?UFM_SMALL_SELECT(2, 5, output3, from3, osc_ena);
     ?UFM_SMALL_SELECT(2, 5, output6, from6, osc_ena);
+    ?UFM_SMALL_INVERT(2, 5, output_invert, osc_ena);
 ).
 
 -define(UFM_LARGE_SELECTS(),
@@ -176,253 +185,255 @@
 ).
 
 -define(UFM_SELECTS(),
-    ?UFM_SELECT(20, 0, from3, mux1);
-    ?UFM_SELECT(20, 1, from3, mux0);
-    ?UFM_SELECT(20, 2, from4, mux0);
-    ?UFM_SELECT(20, 3, from4, mux1);
-    ?UFM_SELECT(21, 0, from3, mux2);
-    ?UFM_SELECT(21, 2, from4, mux2);
-    ?UFM_SELECT(21, 3, from4, mux3);
+    ?UFM_SELECT(20, 0, {from3, mux1});
+    ?UFM_SELECT(20, 1, {from3, mux0});
+    ?UFM_SELECT(20, 2, {from4, mux0});
+    ?UFM_SELECT(20, 3, {from4, mux1});
+    ?UFM_SELECT(21, 0, {from3, mux2});
+    ?UFM_SELECT(21, 1, invert);
+    ?UFM_SELECT(21, 2, {from4, mux2});
+    ?UFM_SELECT(21, 3, {from4, mux3});
 ).
 
 -define(UFM_INTERCONNECTS(),
-    ?UFM_INTERCONNECT(22, 2, from3, mux1);
-    ?UFM_INTERCONNECT(22, 3, from3, mux2);
-    ?UFM_INTERCONNECT(23, 2, from3, mux0);
-    ?UFM_INTERCONNECT(24, 2, from4, mux2);
-    ?UFM_INTERCONNECT(24, 3, from4, mux3);
-    ?UFM_INTERCONNECT(25, 2, from4, mux0);
-    ?UFM_INTERCONNECT(25, 3, from4, mux1);
+    ?UFM_INTERCONNECT(22, 2, {from3, mux1});
+    ?UFM_INTERCONNECT(22, 3, {from3, mux2});
+    ?UFM_INTERCONNECT(23, 2, {from3, mux0});
+    ?UFM_INTERCONNECT(23, 3, direct_link);
+    ?UFM_INTERCONNECT(24, 2, {from4, mux2});
+    ?UFM_INTERCONNECT(24, 3, {from4, mux3});
+    ?UFM_INTERCONNECT(25, 2, {from4, mux0});
+    ?UFM_INTERCONNECT(25, 3, {from4, mux1});
 ).
 
 -define(IOB_SIDES(),
-    ?IOB_SIDE( 7, 0, 2, {{interconnect, 0}, from3, mux0});
-    ?IOB_SIDE( 7, 0, 3, {{interconnect, 0}, from3, mux1});
-    ?IOB_SIDE( 7, 1, 0, {{interconnect, 1}, from3, mux0});
-    ?IOB_SIDE( 7, 1, 1, {{interconnect, 1}, from3, mux1});
-    ?IOB_SIDE( 7, 1, 2, {{interconnect, 2}, from3, mux0});
-    ?IOB_SIDE( 7, 1, 3, {{interconnect, 2}, from3, mux1});
-    ?IOB_SIDE( 7, 2, 0, {{interconnect, 3}, from3, mux0});
-    ?IOB_SIDE( 7, 2, 1, {{interconnect, 3}, from3, mux1});
-    ?IOB_SIDE( 7, 2, 2, {{interconnect, 4}, from3, mux0});
-    ?IOB_SIDE( 7, 2, 3, {{interconnect, 4}, from3, mux1});
-    ?IOB_SIDE( 7, 3, 0, {{interconnect, 5}, from3, mux0});
-    ?IOB_SIDE( 7, 3, 1, {{interconnect, 5}, from3, mux1});
-    ?IOB_SIDE( 7, 3, 2, {{interconnect, 6}, from3, mux0});
-    ?IOB_SIDE( 7, 3, 3, {{interconnect, 6}, from3, mux1});
-    ?IOB_SIDE( 7, 4, 0, {{interconnect, 7}, from3, mux0});
-    ?IOB_SIDE( 7, 4, 1, {{interconnect, 7}, from3, mux1});
-    ?IOB_SIDE( 7, 4, 2, {{interconnect, 8}, from3, mux0});
-    ?IOB_SIDE( 7, 4, 3, {{interconnect, 8}, from3, mux1});
-    ?IOB_SIDE( 7, 5, 0, {{interconnect,16}, from3, mux0});
-    ?IOB_SIDE( 7, 5, 1, {{interconnect,16}, from3, mux1});
-    ?IOB_SIDE( 7, 5, 2, {{interconnect,17}, from3, mux0});
-    ?IOB_SIDE( 7, 5, 3, {{interconnect,17}, from3, mux1});
-    ?IOB_SIDE( 7, 6, 0, {{interconnect,14}, from3, mux0});
-    ?IOB_SIDE( 7, 6, 1, {{interconnect,14}, from3, mux1});
-    ?IOB_SIDE( 7, 6, 2, {{interconnect,15}, from3, mux0});
-    ?IOB_SIDE( 7, 6, 3, {{interconnect,15}, from3, mux1});
-    ?IOB_SIDE( 7, 7, 0, {{interconnect,12}, from3, mux0});
-    ?IOB_SIDE( 7, 7, 1, {{interconnect,12}, from3, mux1});
-    ?IOB_SIDE( 7, 7, 2, {{interconnect,13}, from3, mux0});
-    ?IOB_SIDE( 7, 7, 3, {{interconnect,13}, from3, mux1});
-    ?IOB_SIDE( 7, 8, 0, {{interconnect,10}, from3, mux0});
-    ?IOB_SIDE( 7, 8, 1, {{interconnect,10}, from3, mux1});
-    ?IOB_SIDE( 7, 8, 2, {{interconnect,11}, from3, mux0});
-    ?IOB_SIDE( 7, 8, 3, {{interconnect,11}, from3, mux1});
-    ?IOB_SIDE( 7, 9, 2, {{interconnect, 9}, from3, mux0});
-    ?IOB_SIDE( 7, 9, 3, {{interconnect, 9}, from3, mux1});
-    ?IOB_SIDE( 8, 0, 2, {{interconnect, 0}, from3, mux2});
-    ?IOB_SIDE( 8, 0, 3, {{interconnect, 0}, direct_link});
-    ?IOB_SIDE( 8, 1, 0, {{interconnect, 1}, from3, mux2});
-    ?IOB_SIDE( 8, 1, 1, {{interconnect, 1}, direct_link});
-    ?IOB_SIDE( 8, 1, 2, {{interconnect, 2}, from3, mux2});
-    ?IOB_SIDE( 8, 1, 3, {{interconnect, 2}, direct_link});
-    ?IOB_SIDE( 8, 2, 0, {{interconnect, 3}, from3, mux2});
-    ?IOB_SIDE( 8, 2, 1, {{interconnect, 3}, direct_link});
-    ?IOB_SIDE( 8, 2, 2, {{interconnect, 4}, from3, mux2});
-    ?IOB_SIDE( 8, 2, 3, {{interconnect, 4}, direct_link});
-    ?IOB_SIDE( 8, 3, 0, {{interconnect, 5}, from3, mux2});
-    ?IOB_SIDE( 8, 3, 1, {{interconnect, 5}, direct_link});
-    ?IOB_SIDE( 8, 3, 2, {{interconnect, 6}, from3, mux2});
-    ?IOB_SIDE( 8, 3, 3, {{interconnect, 6}, direct_link});
-    ?IOB_SIDE( 8, 4, 0, {{interconnect, 7}, from3, mux2});
-    ?IOB_SIDE( 8, 4, 1, {{interconnect, 7}, direct_link});
-    ?IOB_SIDE( 8, 4, 2, {{interconnect, 8}, from3, mux2});
-    ?IOB_SIDE( 8, 4, 3, {{interconnect, 8}, direct_link});
-    ?IOB_SIDE( 8, 5, 0, {{interconnect,16}, from3, mux2});
-    ?IOB_SIDE( 8, 5, 1, {{interconnect,16}, direct_link});
-    ?IOB_SIDE( 8, 5, 2, {{interconnect,17}, from3, mux2});
-    ?IOB_SIDE( 8, 5, 3, {{interconnect,17}, direct_link});
-    ?IOB_SIDE( 8, 6, 0, {{interconnect,14}, from3, mux2});
-    ?IOB_SIDE( 8, 6, 1, {{interconnect,14}, direct_link});
-    ?IOB_SIDE( 8, 6, 2, {{interconnect,15}, from3, mux2});
-    ?IOB_SIDE( 8, 6, 3, {{interconnect,15}, direct_link});
-    ?IOB_SIDE( 8, 7, 0, {{interconnect,12}, from3, mux2});
-    ?IOB_SIDE( 8, 7, 1, {{interconnect,12}, direct_link});
-    ?IOB_SIDE( 8, 7, 2, {{interconnect,13}, from3, mux2});
-    ?IOB_SIDE( 8, 7, 3, {{interconnect,13}, direct_link});
-    ?IOB_SIDE( 8, 8, 0, {{interconnect,10}, from3, mux2});
-    ?IOB_SIDE( 8, 8, 1, {{interconnect,10}, direct_link});
-    ?IOB_SIDE( 8, 8, 2, {{interconnect,11}, from3, mux2});
-    ?IOB_SIDE( 8, 8, 3, {{interconnect,11}, direct_link});
-    ?IOB_SIDE( 8, 9, 2, {{interconnect, 9}, from3, mux2});
-    ?IOB_SIDE( 8, 9, 3, {{interconnect, 9}, direct_link});
-    ?IOB_SIDE( 9, 0, 2, {{interconnect, 0}, from4, mux0});
-    ?IOB_SIDE( 9, 0, 3, {{interconnect, 0}, from4, mux1});
-    ?IOB_SIDE( 9, 1, 0, {{interconnect, 1}, from4, mux0});
-    ?IOB_SIDE( 9, 1, 1, {{interconnect, 1}, from4, mux1});
-    ?IOB_SIDE( 9, 1, 2, {{interconnect, 2}, from4, mux0});
-    ?IOB_SIDE( 9, 1, 3, {{interconnect, 2}, from4, mux1});
-    ?IOB_SIDE( 9, 2, 0, {{interconnect, 3}, from4, mux0});
-    ?IOB_SIDE( 9, 2, 1, {{interconnect, 3}, from4, mux1});
-    ?IOB_SIDE( 9, 2, 2, {{interconnect, 4}, from4, mux0});
-    ?IOB_SIDE( 9, 2, 3, {{interconnect, 4}, from4, mux1});
-    ?IOB_SIDE( 9, 3, 0, {{interconnect, 5}, from4, mux0});
-    ?IOB_SIDE( 9, 3, 1, {{interconnect, 5}, from4, mux1});
-    ?IOB_SIDE( 9, 3, 2, {{interconnect, 6}, from4, mux0});
-    ?IOB_SIDE( 9, 3, 3, {{interconnect, 6}, from4, mux1});
-    ?IOB_SIDE( 9, 4, 0, {{interconnect, 7}, from4, mux0});
-    ?IOB_SIDE( 9, 4, 1, {{interconnect, 7}, from4, mux1});
-    ?IOB_SIDE( 9, 4, 2, {{interconnect, 8}, from4, mux0});
-    ?IOB_SIDE( 9, 4, 3, {{interconnect, 8}, from4, mux1});
-    ?IOB_SIDE( 9, 5, 0, {{interconnect,16}, from4, mux0});
-    ?IOB_SIDE( 9, 5, 1, {{interconnect,16}, from4, mux1});
-    ?IOB_SIDE( 9, 5, 2, {{interconnect,17}, from4, mux0});
-    ?IOB_SIDE( 9, 5, 3, {{interconnect,17}, from4, mux1});
-    ?IOB_SIDE( 9, 6, 0, {{interconnect,14}, from4, mux0});
-    ?IOB_SIDE( 9, 6, 1, {{interconnect,14}, from4, mux1});
-    ?IOB_SIDE( 9, 6, 2, {{interconnect,15}, from4, mux0});
-    ?IOB_SIDE( 9, 6, 3, {{interconnect,15}, from4, mux1});
-    ?IOB_SIDE( 9, 7, 0, {{interconnect,12}, from4, mux0});
-    ?IOB_SIDE( 9, 7, 1, {{interconnect,12}, from4, mux1});
-    ?IOB_SIDE( 9, 7, 2, {{interconnect,13}, from4, mux0});
-    ?IOB_SIDE( 9, 7, 3, {{interconnect,13}, from4, mux1});
-    ?IOB_SIDE( 9, 8, 0, {{interconnect,10}, from4, mux0});
-    ?IOB_SIDE( 9, 8, 1, {{interconnect,10}, from4, mux1});
-    ?IOB_SIDE( 9, 8, 2, {{interconnect,11}, from4, mux0});
-    ?IOB_SIDE( 9, 8, 3, {{interconnect,11}, from4, mux1});
-    ?IOB_SIDE( 9, 9, 2, {{interconnect, 9}, from4, mux0});
-    ?IOB_SIDE( 9, 9, 3, {{interconnect, 9}, from4, mux1});
-    ?IOB_SIDE(10, 0, 2, {{interconnect, 0}, from4, mux2});
-    ?IOB_SIDE(10, 0, 3, {{interconnect, 0}, from4, mux3});
-    ?IOB_SIDE(10, 1, 0, {{interconnect, 1}, from4, mux2});
-    ?IOB_SIDE(10, 1, 1, {{interconnect, 1}, from4, mux3});
-    ?IOB_SIDE(10, 1, 2, {{interconnect, 2}, from4, mux2});
-    ?IOB_SIDE(10, 1, 3, {{interconnect, 2}, from4, mux3});
-    ?IOB_SIDE(10, 2, 0, {{interconnect, 3}, from4, mux2});
-    ?IOB_SIDE(10, 2, 1, {{interconnect, 3}, from4, mux3});
-    ?IOB_SIDE(10, 2, 2, {{interconnect, 4}, from4, mux2});
-    ?IOB_SIDE(10, 2, 3, {{interconnect, 4}, from4, mux3});
-    ?IOB_SIDE(10, 3, 0, {{interconnect, 5}, from4, mux2});
-    ?IOB_SIDE(10, 3, 1, {{interconnect, 5}, from4, mux3});
-    ?IOB_SIDE(10, 3, 2, {{interconnect, 6}, from4, mux2});
-    ?IOB_SIDE(10, 3, 3, {{interconnect, 6}, from4, mux3});
-    ?IOB_SIDE(10, 4, 0, {{interconnect, 7}, from4, mux2});
-    ?IOB_SIDE(10, 4, 1, {{interconnect, 7}, from4, mux3});
-    ?IOB_SIDE(10, 4, 2, {{interconnect, 8}, from4, mux2});
-    ?IOB_SIDE(10, 4, 3, {{interconnect, 8}, from4, mux3});
-    ?IOB_SIDE(10, 5, 0, {{interconnect,16}, from4, mux2});
-    ?IOB_SIDE(10, 5, 1, {{interconnect,16}, from4, mux3});
-    ?IOB_SIDE(10, 5, 2, {{interconnect,17}, from4, mux2});
-    ?IOB_SIDE(10, 5, 3, {{interconnect,17}, from4, mux3});
-    ?IOB_SIDE(10, 6, 0, {{interconnect,14}, from4, mux2});
-    ?IOB_SIDE(10, 6, 1, {{interconnect,14}, from4, mux3});
-    ?IOB_SIDE(10, 6, 2, {{interconnect,15}, from4, mux2});
-    ?IOB_SIDE(10, 6, 3, {{interconnect,15}, from4, mux3});
-    ?IOB_SIDE(10, 7, 0, {{interconnect,12}, from4, mux2});
-    ?IOB_SIDE(10, 7, 1, {{interconnect,12}, from4, mux3});
-    ?IOB_SIDE(10, 7, 2, {{interconnect,13}, from4, mux2});
-    ?IOB_SIDE(10, 7, 3, {{interconnect,13}, from4, mux3});
-    ?IOB_SIDE(10, 8, 0, {{interconnect,10}, from4, mux2});
-    ?IOB_SIDE(10, 8, 1, {{interconnect,10}, from4, mux3});
-    ?IOB_SIDE(10, 8, 2, {{interconnect,11}, from4, mux2});
-    ?IOB_SIDE(10, 8, 3, {{interconnect,11}, from4, mux3});
-    ?IOB_SIDE(10, 9, 2, {{interconnect, 9}, from4, mux2});
-    ?IOB_SIDE(10, 9, 3, {{interconnect, 9}, from4, mux3});
+    ?IOB_SIDE( 7, 0, 2, {interconnect, 0}, {from3, mux0});
+    ?IOB_SIDE( 7, 0, 3, {interconnect, 0}, {from3, mux1});
+    ?IOB_SIDE( 7, 1, 0, {interconnect, 1}, {from3, mux0});
+    ?IOB_SIDE( 7, 1, 1, {interconnect, 1}, {from3, mux1});
+    ?IOB_SIDE( 7, 1, 2, {interconnect, 2}, {from3, mux0});
+    ?IOB_SIDE( 7, 1, 3, {interconnect, 2}, {from3, mux1});
+    ?IOB_SIDE( 7, 2, 0, {interconnect, 3}, {from3, mux0});
+    ?IOB_SIDE( 7, 2, 1, {interconnect, 3}, {from3, mux1});
+    ?IOB_SIDE( 7, 2, 2, {interconnect, 4}, {from3, mux0});
+    ?IOB_SIDE( 7, 2, 3, {interconnect, 4}, {from3, mux1});
+    ?IOB_SIDE( 7, 3, 0, {interconnect, 5}, {from3, mux0});
+    ?IOB_SIDE( 7, 3, 1, {interconnect, 5}, {from3, mux1});
+    ?IOB_SIDE( 7, 3, 2, {interconnect, 6}, {from3, mux0});
+    ?IOB_SIDE( 7, 3, 3, {interconnect, 6}, {from3, mux1});
+    ?IOB_SIDE( 7, 4, 0, {interconnect, 7}, {from3, mux0});
+    ?IOB_SIDE( 7, 4, 1, {interconnect, 7}, {from3, mux1});
+    ?IOB_SIDE( 7, 4, 2, {interconnect, 8}, {from3, mux0});
+    ?IOB_SIDE( 7, 4, 3, {interconnect, 8}, {from3, mux1});
+    ?IOB_SIDE( 7, 5, 0, {interconnect,16}, {from3, mux0});
+    ?IOB_SIDE( 7, 5, 1, {interconnect,16}, {from3, mux1});
+    ?IOB_SIDE( 7, 5, 2, {interconnect,17}, {from3, mux0});
+    ?IOB_SIDE( 7, 5, 3, {interconnect,17}, {from3, mux1});
+    ?IOB_SIDE( 7, 6, 0, {interconnect,14}, {from3, mux0});
+    ?IOB_SIDE( 7, 6, 1, {interconnect,14}, {from3, mux1});
+    ?IOB_SIDE( 7, 6, 2, {interconnect,15}, {from3, mux0});
+    ?IOB_SIDE( 7, 6, 3, {interconnect,15}, {from3, mux1});
+    ?IOB_SIDE( 7, 7, 0, {interconnect,12}, {from3, mux0});
+    ?IOB_SIDE( 7, 7, 1, {interconnect,12}, {from3, mux1});
+    ?IOB_SIDE( 7, 7, 2, {interconnect,13}, {from3, mux0});
+    ?IOB_SIDE( 7, 7, 3, {interconnect,13}, {from3, mux1});
+    ?IOB_SIDE( 7, 8, 0, {interconnect,10}, {from3, mux0});
+    ?IOB_SIDE( 7, 8, 1, {interconnect,10}, {from3, mux1});
+    ?IOB_SIDE( 7, 8, 2, {interconnect,11}, {from3, mux0});
+    ?IOB_SIDE( 7, 8, 3, {interconnect,11}, {from3, mux1});
+    ?IOB_SIDE( 7, 9, 2, {interconnect, 9}, {from3, mux0});
+    ?IOB_SIDE( 7, 9, 3, {interconnect, 9}, {from3, mux1});
+    ?IOB_SIDE( 8, 0, 2, {interconnect, 0}, {from3, mux2});
+    ?IOB_SIDE( 8, 0, 3, {interconnect, 0}, {direct_link});
+    ?IOB_SIDE( 8, 1, 0, {interconnect, 1}, {from3, mux2});
+    ?IOB_SIDE( 8, 1, 1, {interconnect, 1}, {direct_link});
+    ?IOB_SIDE( 8, 1, 2, {interconnect, 2}, {from3, mux2});
+    ?IOB_SIDE( 8, 1, 3, {interconnect, 2}, {direct_link});
+    ?IOB_SIDE( 8, 2, 0, {interconnect, 3}, {from3, mux2});
+    ?IOB_SIDE( 8, 2, 1, {interconnect, 3}, {direct_link});
+    ?IOB_SIDE( 8, 2, 2, {interconnect, 4}, {from3, mux2});
+    ?IOB_SIDE( 8, 2, 3, {interconnect, 4}, {direct_link});
+    ?IOB_SIDE( 8, 3, 0, {interconnect, 5}, {from3, mux2});
+    ?IOB_SIDE( 8, 3, 1, {interconnect, 5}, {direct_link});
+    ?IOB_SIDE( 8, 3, 2, {interconnect, 6}, {from3, mux2});
+    ?IOB_SIDE( 8, 3, 3, {interconnect, 6}, {direct_link});
+    ?IOB_SIDE( 8, 4, 0, {interconnect, 7}, {from3, mux2});
+    ?IOB_SIDE( 8, 4, 1, {interconnect, 7}, {direct_link});
+    ?IOB_SIDE( 8, 4, 2, {interconnect, 8}, {from3, mux2});
+    ?IOB_SIDE( 8, 4, 3, {interconnect, 8}, {direct_link});
+    ?IOB_SIDE( 8, 5, 0, {interconnect,16}, {from3, mux2});
+    ?IOB_SIDE( 8, 5, 1, {interconnect,16}, {direct_link});
+    ?IOB_SIDE( 8, 5, 2, {interconnect,17}, {from3, mux2});
+    ?IOB_SIDE( 8, 5, 3, {interconnect,17}, {direct_link});
+    ?IOB_SIDE( 8, 6, 0, {interconnect,14}, {from3, mux2});
+    ?IOB_SIDE( 8, 6, 1, {interconnect,14}, {direct_link});
+    ?IOB_SIDE( 8, 6, 2, {interconnect,15}, {from3, mux2});
+    ?IOB_SIDE( 8, 6, 3, {interconnect,15}, {direct_link});
+    ?IOB_SIDE( 8, 7, 0, {interconnect,12}, {from3, mux2});
+    ?IOB_SIDE( 8, 7, 1, {interconnect,12}, {direct_link});
+    ?IOB_SIDE( 8, 7, 2, {interconnect,13}, {from3, mux2});
+    ?IOB_SIDE( 8, 7, 3, {interconnect,13}, {direct_link});
+    ?IOB_SIDE( 8, 8, 0, {interconnect,10}, {from3, mux2});
+    ?IOB_SIDE( 8, 8, 1, {interconnect,10}, {direct_link});
+    ?IOB_SIDE( 8, 8, 2, {interconnect,11}, {from3, mux2});
+    ?IOB_SIDE( 8, 8, 3, {interconnect,11}, {direct_link});
+    ?IOB_SIDE( 8, 9, 2, {interconnect, 9}, {from3, mux2});
+    ?IOB_SIDE( 8, 9, 3, {interconnect, 9}, {direct_link});
+    ?IOB_SIDE( 9, 0, 2, {interconnect, 0}, {from4, mux0});
+    ?IOB_SIDE( 9, 0, 3, {interconnect, 0}, {from4, mux1});
+    ?IOB_SIDE( 9, 1, 0, {interconnect, 1}, {from4, mux0});
+    ?IOB_SIDE( 9, 1, 1, {interconnect, 1}, {from4, mux1});
+    ?IOB_SIDE( 9, 1, 2, {interconnect, 2}, {from4, mux0});
+    ?IOB_SIDE( 9, 1, 3, {interconnect, 2}, {from4, mux1});
+    ?IOB_SIDE( 9, 2, 0, {interconnect, 3}, {from4, mux0});
+    ?IOB_SIDE( 9, 2, 1, {interconnect, 3}, {from4, mux1});
+    ?IOB_SIDE( 9, 2, 2, {interconnect, 4}, {from4, mux0});
+    ?IOB_SIDE( 9, 2, 3, {interconnect, 4}, {from4, mux1});
+    ?IOB_SIDE( 9, 3, 0, {interconnect, 5}, {from4, mux0});
+    ?IOB_SIDE( 9, 3, 1, {interconnect, 5}, {from4, mux1});
+    ?IOB_SIDE( 9, 3, 2, {interconnect, 6}, {from4, mux0});
+    ?IOB_SIDE( 9, 3, 3, {interconnect, 6}, {from4, mux1});
+    ?IOB_SIDE( 9, 4, 0, {interconnect, 7}, {from4, mux0});
+    ?IOB_SIDE( 9, 4, 1, {interconnect, 7}, {from4, mux1});
+    ?IOB_SIDE( 9, 4, 2, {interconnect, 8}, {from4, mux0});
+    ?IOB_SIDE( 9, 4, 3, {interconnect, 8}, {from4, mux1});
+    ?IOB_SIDE( 9, 5, 0, {interconnect,16}, {from4, mux0});
+    ?IOB_SIDE( 9, 5, 1, {interconnect,16}, {from4, mux1});
+    ?IOB_SIDE( 9, 5, 2, {interconnect,17}, {from4, mux0});
+    ?IOB_SIDE( 9, 5, 3, {interconnect,17}, {from4, mux1});
+    ?IOB_SIDE( 9, 6, 0, {interconnect,14}, {from4, mux0});
+    ?IOB_SIDE( 9, 6, 1, {interconnect,14}, {from4, mux1});
+    ?IOB_SIDE( 9, 6, 2, {interconnect,15}, {from4, mux0});
+    ?IOB_SIDE( 9, 6, 3, {interconnect,15}, {from4, mux1});
+    ?IOB_SIDE( 9, 7, 0, {interconnect,12}, {from4, mux0});
+    ?IOB_SIDE( 9, 7, 1, {interconnect,12}, {from4, mux1});
+    ?IOB_SIDE( 9, 7, 2, {interconnect,13}, {from4, mux0});
+    ?IOB_SIDE( 9, 7, 3, {interconnect,13}, {from4, mux1});
+    ?IOB_SIDE( 9, 8, 0, {interconnect,10}, {from4, mux0});
+    ?IOB_SIDE( 9, 8, 1, {interconnect,10}, {from4, mux1});
+    ?IOB_SIDE( 9, 8, 2, {interconnect,11}, {from4, mux0});
+    ?IOB_SIDE( 9, 8, 3, {interconnect,11}, {from4, mux1});
+    ?IOB_SIDE( 9, 9, 2, {interconnect, 9}, {from4, mux0});
+    ?IOB_SIDE( 9, 9, 3, {interconnect, 9}, {from4, mux1});
+    ?IOB_SIDE(10, 0, 2, {interconnect, 0}, {from4, mux2});
+    ?IOB_SIDE(10, 0, 3, {interconnect, 0}, {from4, mux3});
+    ?IOB_SIDE(10, 1, 0, {interconnect, 1}, {from4, mux2});
+    ?IOB_SIDE(10, 1, 1, {interconnect, 1}, {from4, mux3});
+    ?IOB_SIDE(10, 1, 2, {interconnect, 2}, {from4, mux2});
+    ?IOB_SIDE(10, 1, 3, {interconnect, 2}, {from4, mux3});
+    ?IOB_SIDE(10, 2, 0, {interconnect, 3}, {from4, mux2});
+    ?IOB_SIDE(10, 2, 1, {interconnect, 3}, {from4, mux3});
+    ?IOB_SIDE(10, 2, 2, {interconnect, 4}, {from4, mux2});
+    ?IOB_SIDE(10, 2, 3, {interconnect, 4}, {from4, mux3});
+    ?IOB_SIDE(10, 3, 0, {interconnect, 5}, {from4, mux2});
+    ?IOB_SIDE(10, 3, 1, {interconnect, 5}, {from4, mux3});
+    ?IOB_SIDE(10, 3, 2, {interconnect, 6}, {from4, mux2});
+    ?IOB_SIDE(10, 3, 3, {interconnect, 6}, {from4, mux3});
+    ?IOB_SIDE(10, 4, 0, {interconnect, 7}, {from4, mux2});
+    ?IOB_SIDE(10, 4, 1, {interconnect, 7}, {from4, mux3});
+    ?IOB_SIDE(10, 4, 2, {interconnect, 8}, {from4, mux2});
+    ?IOB_SIDE(10, 4, 3, {interconnect, 8}, {from4, mux3});
+    ?IOB_SIDE(10, 5, 0, {interconnect,16}, {from4, mux2});
+    ?IOB_SIDE(10, 5, 1, {interconnect,16}, {from4, mux3});
+    ?IOB_SIDE(10, 5, 2, {interconnect,17}, {from4, mux2});
+    ?IOB_SIDE(10, 5, 3, {interconnect,17}, {from4, mux3});
+    ?IOB_SIDE(10, 6, 0, {interconnect,14}, {from4, mux2});
+    ?IOB_SIDE(10, 6, 1, {interconnect,14}, {from4, mux3});
+    ?IOB_SIDE(10, 6, 2, {interconnect,15}, {from4, mux2});
+    ?IOB_SIDE(10, 6, 3, {interconnect,15}, {from4, mux3});
+    ?IOB_SIDE(10, 7, 0, {interconnect,12}, {from4, mux2});
+    ?IOB_SIDE(10, 7, 1, {interconnect,12}, {from4, mux3});
+    ?IOB_SIDE(10, 7, 2, {interconnect,13}, {from4, mux2});
+    ?IOB_SIDE(10, 7, 3, {interconnect,13}, {from4, mux3});
+    ?IOB_SIDE(10, 8, 0, {interconnect,10}, {from4, mux2});
+    ?IOB_SIDE(10, 8, 1, {interconnect,10}, {from4, mux3});
+    ?IOB_SIDE(10, 8, 2, {interconnect,11}, {from4, mux2});
+    ?IOB_SIDE(10, 8, 3, {interconnect,11}, {from4, mux3});
+    ?IOB_SIDE(10, 9, 2, {interconnect, 9}, {from4, mux2});
+    ?IOB_SIDE(10, 9, 3, {interconnect, 9}, {from4, mux3});
 ).
 
 -define(IOB_LEFT_LINES(),
-    ?IOB_LEFT_LINE(10, 20, {{interconnect,  8}, from4, gclk});
-    ?IOB_LEFT_LINE(10, 25, {{interconnect, 17}, from4, gclk});
+    ?IOB_LEFT_LINE(10, 20, {interconnect,  8}, {from4, gclk});
+    ?IOB_LEFT_LINE(10, 25, {interconnect, 17}, {from4, gclk});
 ).
 
 -define(IOB_RIGHT_LINES(),
-    ?IOB_RIGHT_LINE(7, 20, {{interconnect,  8}, from4, gclk});
-    ?IOB_RIGHT_LINE(7, 25, {{interconnect, 17}, from4, gclk});
+    ?IOB_RIGHT_LINE(7, 20, {interconnect,  8}, {from4, gclk});
+    ?IOB_RIGHT_LINE(7, 25, {interconnect, 17}, {from4, gclk});
 ).
 
 -define(IOB_HEADS(),
-    ?IOB_HEAD( 2,  1, {{interconnect, 5}, from4, mux0});
-    ?IOB_HEAD( 2,  2, {{interconnect, 5}, from4, mux1});
-    ?IOB_HEAD( 2,  3, {{interconnect, 6}, from4, mux0});
-    ?IOB_HEAD( 2,  4, {{interconnect, 6}, from4, mux1});
-    ?IOB_HEAD( 2,  5, {{interconnect, 7}, from4, mux0});
-    ?IOB_HEAD( 2,  6, {{interconnect, 7}, from4, mux1});
-    ?IOB_HEAD( 2,  7, {{interconnect, 8}, from4, mux0});
-    ?IOB_HEAD( 2,  8, {{interconnect, 8}, from4, mux1});
-    ?IOB_HEAD( 2,  9, {{interconnect, 9}, from4, mux0});
-    ?IOB_HEAD( 2, 10, {{interconnect, 9}, from4, mux1});
-    ?IOB_HEAD( 3,  1, {{interconnect, 5}, from4, mux2});
-    ?IOB_HEAD( 3,  2, {{interconnect, 5}, from4, mux3});
-    ?IOB_HEAD( 3,  3, {{interconnect, 6}, from4, mux2});
-    ?IOB_HEAD( 3,  4, {{interconnect, 6}, from4, mux3});
-    ?IOB_HEAD( 3,  5, {{interconnect, 7}, from4, mux2});
-    ?IOB_HEAD( 3,  6, {{interconnect, 7}, from4, mux3});
-    ?IOB_HEAD( 3,  7, {{interconnect, 8}, from4, mux2});
-    ?IOB_HEAD( 3,  8, {{interconnect, 8}, from4, mux3});
-    ?IOB_HEAD( 3,  9, {{interconnect, 9}, from4, mux2});
-    ?IOB_HEAD( 3, 10, {{interconnect, 9}, from4, mux3});
-    ?IOB_HEAD( 4,  1, {{interconnect, 5}, from3, mux0});
-    ?IOB_HEAD( 4,  3, {{interconnect, 6}, from3, mux0});
-    ?IOB_HEAD( 4,  5, {{interconnect, 7}, from3, mux0});
-    ?IOB_HEAD( 4,  7, {{interconnect, 8}, from3, mux0});
-    ?IOB_HEAD( 4,  9, {{interconnect, 9}, from3, mux0});
-    ?IOB_HEAD( 5,  1, {{interconnect, 5}, from3, mux1});
-    ?IOB_HEAD( 5,  2, {{interconnect, 5}, from3, mux2});
-    ?IOB_HEAD( 5,  3, {{interconnect, 6}, from3, mux1});
-    ?IOB_HEAD( 5,  4, {{interconnect, 6}, from3, mux2});
-    ?IOB_HEAD( 5,  5, {{interconnect, 7}, from3, mux1});
-    ?IOB_HEAD( 5,  6, {{interconnect, 7}, from3, mux2});
-    ?IOB_HEAD( 5,  7, {{interconnect, 8}, from3, mux1});
-    ?IOB_HEAD( 5,  8, {{interconnect, 8}, from3, mux2});
-    ?IOB_HEAD( 5,  9, {{interconnect, 9}, from3, mux1});
-    ?IOB_HEAD( 5, 10, {{interconnect, 9}, from3, mux2});
-    ?IOB_HEAD(18,  1, {{interconnect, 0}, from3, mux1});
-    ?IOB_HEAD(18,  2, {{interconnect, 0}, from3, mux2});
-    ?IOB_HEAD(18,  3, {{interconnect, 1}, from3, mux1});
-    ?IOB_HEAD(18,  4, {{interconnect, 1}, from3, mux2});
-    ?IOB_HEAD(18,  5, {{interconnect, 2}, from3, mux1});
-    ?IOB_HEAD(18,  6, {{interconnect, 2}, from3, mux2});
-    ?IOB_HEAD(18,  7, {{interconnect, 3}, from3, mux1});
-    ?IOB_HEAD(18,  8, {{interconnect, 3}, from3, mux2});
-    ?IOB_HEAD(18,  9, {{interconnect, 4}, from3, mux1});
-    ?IOB_HEAD(18, 10, {{interconnect, 4}, from3, mux2});
-    ?IOB_HEAD(19,  1, {{interconnect, 0}, from3, mux0});
-    ?IOB_HEAD(19,  3, {{interconnect, 1}, from3, mux0});
-    ?IOB_HEAD(19,  5, {{interconnect, 2}, from3, mux0});
-    ?IOB_HEAD(19,  7, {{interconnect, 3}, from3, mux0});
-    ?IOB_HEAD(19,  9, {{interconnect, 4}, from3, mux0});
-    ?IOB_HEAD(20,  1, {{interconnect, 0}, from4, mux2});
-    ?IOB_HEAD(20,  2, {{interconnect, 0}, from4, mux3});
-    ?IOB_HEAD(20,  3, {{interconnect, 1}, from4, mux2});
-    ?IOB_HEAD(20,  4, {{interconnect, 1}, from4, mux3});
-    ?IOB_HEAD(20,  5, {{interconnect, 2}, from4, mux2});
-    ?IOB_HEAD(20,  6, {{interconnect, 2}, from4, mux3});
-    ?IOB_HEAD(20,  7, {{interconnect, 3}, from4, mux2});
-    ?IOB_HEAD(20,  8, {{interconnect, 3}, from4, mux3});
-    ?IOB_HEAD(20,  9, {{interconnect, 4}, from4, mux2});
-    ?IOB_HEAD(20, 10, {{interconnect, 4}, from4, mux3});
-    ?IOB_HEAD(21,  1, {{interconnect, 0}, from4, mux0});
-    ?IOB_HEAD(21,  2, {{interconnect, 0}, from4, mux1});
-    ?IOB_HEAD(21,  3, {{interconnect, 1}, from4, mux0});
-    ?IOB_HEAD(21,  4, {{interconnect, 1}, from4, mux1});
-    ?IOB_HEAD(21,  5, {{interconnect, 2}, from4, mux0});
-    ?IOB_HEAD(21,  6, {{interconnect, 2}, from4, mux1});
-    ?IOB_HEAD(21,  7, {{interconnect, 3}, from4, mux0});
-    ?IOB_HEAD(21,  8, {{interconnect, 3}, from4, mux1});
-    ?IOB_HEAD(21,  9, {{interconnect, 4}, from4, mux0});
-    ?IOB_HEAD(21, 10, {{interconnect, 4}, from4, mux1});
+    ?IOB_HEAD( 2,  1, {interconnect, 5}, {from4, mux0});
+    ?IOB_HEAD( 2,  2, {interconnect, 5}, {from4, mux1});
+    ?IOB_HEAD( 2,  3, {interconnect, 6}, {from4, mux0});
+    ?IOB_HEAD( 2,  4, {interconnect, 6}, {from4, mux1});
+    ?IOB_HEAD( 2,  5, {interconnect, 7}, {from4, mux0});
+    ?IOB_HEAD( 2,  6, {interconnect, 7}, {from4, mux1});
+    ?IOB_HEAD( 2,  7, {interconnect, 8}, {from4, mux0});
+    ?IOB_HEAD( 2,  8, {interconnect, 8}, {from4, mux1});
+    ?IOB_HEAD( 2,  9, {interconnect, 9}, {from4, mux0});
+    ?IOB_HEAD( 2, 10, {interconnect, 9}, {from4, mux1});
+    ?IOB_HEAD( 3,  1, {interconnect, 5}, {from4, mux2});
+    ?IOB_HEAD( 3,  2, {interconnect, 5}, {from4, mux3});
+    ?IOB_HEAD( 3,  3, {interconnect, 6}, {from4, mux2});
+    ?IOB_HEAD( 3,  4, {interconnect, 6}, {from4, mux3});
+    ?IOB_HEAD( 3,  5, {interconnect, 7}, {from4, mux2});
+    ?IOB_HEAD( 3,  6, {interconnect, 7}, {from4, mux3});
+    ?IOB_HEAD( 3,  7, {interconnect, 8}, {from4, mux2});
+    ?IOB_HEAD( 3,  8, {interconnect, 8}, {from4, mux3});
+    ?IOB_HEAD( 3,  9, {interconnect, 9}, {from4, mux2});
+    ?IOB_HEAD( 3, 10, {interconnect, 9}, {from4, mux3});
+    ?IOB_HEAD( 4,  1, {interconnect, 5}, {from3, mux0});
+    ?IOB_HEAD( 4,  3, {interconnect, 6}, {from3, mux0});
+    ?IOB_HEAD( 4,  5, {interconnect, 7}, {from3, mux0});
+    ?IOB_HEAD( 4,  7, {interconnect, 8}, {from3, mux0});
+    ?IOB_HEAD( 4,  9, {interconnect, 9}, {from3, mux0});
+    ?IOB_HEAD( 5,  1, {interconnect, 5}, {from3, mux1});
+    ?IOB_HEAD( 5,  2, {interconnect, 5}, {from3, mux2});
+    ?IOB_HEAD( 5,  3, {interconnect, 6}, {from3, mux1});
+    ?IOB_HEAD( 5,  4, {interconnect, 6}, {from3, mux2});
+    ?IOB_HEAD( 5,  5, {interconnect, 7}, {from3, mux1});
+    ?IOB_HEAD( 5,  6, {interconnect, 7}, {from3, mux2});
+    ?IOB_HEAD( 5,  7, {interconnect, 8}, {from3, mux1});
+    ?IOB_HEAD( 5,  8, {interconnect, 8}, {from3, mux2});
+    ?IOB_HEAD( 5,  9, {interconnect, 9}, {from3, mux1});
+    ?IOB_HEAD( 5, 10, {interconnect, 9}, {from3, mux2});
+    ?IOB_HEAD(18,  1, {interconnect, 0}, {from3, mux1});
+    ?IOB_HEAD(18,  2, {interconnect, 0}, {from3, mux2});
+    ?IOB_HEAD(18,  3, {interconnect, 1}, {from3, mux1});
+    ?IOB_HEAD(18,  4, {interconnect, 1}, {from3, mux2});
+    ?IOB_HEAD(18,  5, {interconnect, 2}, {from3, mux1});
+    ?IOB_HEAD(18,  6, {interconnect, 2}, {from3, mux2});
+    ?IOB_HEAD(18,  7, {interconnect, 3}, {from3, mux1});
+    ?IOB_HEAD(18,  8, {interconnect, 3}, {from3, mux2});
+    ?IOB_HEAD(18,  9, {interconnect, 4}, {from3, mux1});
+    ?IOB_HEAD(18, 10, {interconnect, 4}, {from3, mux2});
+    ?IOB_HEAD(19,  1, {interconnect, 0}, {from3, mux0});
+    ?IOB_HEAD(19,  3, {interconnect, 1}, {from3, mux0});
+    ?IOB_HEAD(19,  5, {interconnect, 2}, {from3, mux0});
+    ?IOB_HEAD(19,  7, {interconnect, 3}, {from3, mux0});
+    ?IOB_HEAD(19,  9, {interconnect, 4}, {from3, mux0});
+    ?IOB_HEAD(20,  1, {interconnect, 0}, {from4, mux2});
+    ?IOB_HEAD(20,  2, {interconnect, 0}, {from4, mux3});
+    ?IOB_HEAD(20,  3, {interconnect, 1}, {from4, mux2});
+    ?IOB_HEAD(20,  4, {interconnect, 1}, {from4, mux3});
+    ?IOB_HEAD(20,  5, {interconnect, 2}, {from4, mux2});
+    ?IOB_HEAD(20,  6, {interconnect, 2}, {from4, mux3});
+    ?IOB_HEAD(20,  7, {interconnect, 3}, {from4, mux2});
+    ?IOB_HEAD(20,  8, {interconnect, 3}, {from4, mux3});
+    ?IOB_HEAD(20,  9, {interconnect, 4}, {from4, mux2});
+    ?IOB_HEAD(20, 10, {interconnect, 4}, {from4, mux3});
+    ?IOB_HEAD(21,  1, {interconnect, 0}, {from4, mux0});
+    ?IOB_HEAD(21,  2, {interconnect, 0}, {from4, mux1});
+    ?IOB_HEAD(21,  3, {interconnect, 1}, {from4, mux0});
+    ?IOB_HEAD(21,  4, {interconnect, 1}, {from4, mux1});
+    ?IOB_HEAD(21,  5, {interconnect, 2}, {from4, mux0});
+    ?IOB_HEAD(21,  6, {interconnect, 2}, {from4, mux1});
+    ?IOB_HEAD(21,  7, {interconnect, 3}, {from4, mux0});
+    ?IOB_HEAD(21,  8, {interconnect, 3}, {from4, mux1});
+    ?IOB_HEAD(21,  9, {interconnect, 4}, {from4, mux0});
+    ?IOB_HEAD(21, 10, {interconnect, 4}, {from4, mux1});
 ).
 
 -define(IOC_ZEROS(),
@@ -2507,6 +2518,14 @@ from_density({{global, G}, Name, Value}, With = #with{}) ->
         error ->
             {error, {{invalid_global, G}, Name}}
     end;
+from_density({{global, X, Y}, N, Name}, With = #with{}) ->
+    case from_density_global(X, Y, N, With) of
+        ok ->
+            from_global_select(N, Name, With);
+
+        error ->
+            {error, {{invalid_global, X, Y, N}, Name}}
+    end;
 from_density({{global, X, Y}, N, Name, Value}, With = #with{}) ->
     case from_density_global(X, Y, N, With) of
         ok ->
@@ -2515,24 +2534,13 @@ from_density({{global, X, Y}, N, Name, Value}, With = #with{}) ->
         error ->
             {error, {{invalid_global, X, Y, N}, Name}}
     end;
-from_density({{iob, X, Y}, Name}, With = #with{}) ->
-    case from_density_iob(X, Y, With) of
-        side ->
-            from_iob_side(X, Y, Name, With);
-
-        cell ->
-            from_iob(X, Y, Name, With);
-
-        error ->
-            {error, {{invalid_iob, X, Y}, Name}}
-    end;
 from_density({{iob, X, Y}, Name, Value}, With = #with{}) ->
     case from_density_iob(X, Y, With) of
         side ->
-            from_iob_side(X, Y, {Name, Value}, With);
+            from_iob_side(X, Y, Name, Value, With);
 
         cell ->
-            from_iob(X, Y, {Name, Value}, With);
+            from_iob(X, Y, Name, Value, With);
 
         error ->
             {error, {{invalid_iob, X, Y}, Name}}
@@ -2540,10 +2548,10 @@ from_density({{iob, X, Y}, Name, Value}, With = #with{}) ->
 from_density({{iob, X, Y}, Name, Key, Value}, With = #with{}) ->
     case from_density_iob(X, Y, With) of
         side ->
-            from_iob_side(X, Y, {Name, Key, Value}, With);
+            from_iob_side(X, Y, Name, {Key, Value}, With);
 
         cell ->
-            from_iob(X, Y, {Name, Key, Value}, With);
+            from_iob(X, Y, Name, {Key, Value}, With);
 
         error ->
             {error, {{invalid_iob, X, Y}, Name}}
@@ -2570,6 +2578,8 @@ from_density({{ioc, X, Y, N}, Name, Value}, With = #with{}) ->
         error ->
             {error, {{invalid_ioc, X, Y, N}, Name}}
     end;
+from_density({{jtag, X, Y}, Name, Value}, With = #with{}) ->
+    from_jtag(X, Y, {Name, Value}, With);
 from_density({{jtag, X, Y}, Name, Key, Value}, With = #with{}) ->
     from_jtag(X, Y, {Name, Key, Value}, With);
 from_density({{lab, X, Y}, Name}, With = #with{}) ->
@@ -2645,7 +2655,9 @@ from_density({{r4, X, Y}, {mux, Index}, Key, Value}, With = #with{}) ->
             {error, {{invalid_r4, X, Y}, {mux, Index}, Key, Value}}
     end;
 from_density({{ufm, X, Y}, Name, Key, Value}, With = #with{}) ->
-    from_ufm(X, Y, {Name, Key, Value}, With);
+    from_ufm(X, Y, Name, {Key, Value}, With);
+from_density({{ufm, X, Y}, Name, Value}, With = #with{}) ->
+    from_ufm(X, Y, Name, Value, With);
 from_density(_Name, _With = #with{}) ->
     {error, density}.
 
@@ -2837,24 +2849,24 @@ from_global_select(G, Name, _With) ->
 
 %%--------------------------------------------------------------------
 
--define(IOB_SIDE(Sector, N, Index, Name),
-    from_iob_side(X, Y, Name, With) ->
+-define(IOB_SIDE(Sector, N, Index, Name, Value),
+    from_iob_side(X, Y, Name, Value, With) ->
         from_side(X, Sector, Y, N, Index, With)
 ).
--define(IOB_LEFT_LINE(Sector, Index, Name),
-    from_iob_side(X, Y, Name, With) when X =:= With#with.left_x ->
+-define(IOB_LEFT_LINE(Sector, Index, Name, Value),
+    from_iob_side(X, Y, Name, Value, With) when X =:= With#with.left_x ->
         from_line(X, Sector, Y, Index, With)
 ).
--define(IOB_RIGHT_LINE(Sector, Index, Name),
-    from_iob_side(X, Y, Name, With) when X =:= With#with.right_x ->
+-define(IOB_RIGHT_LINE(Sector, Index, Name, Value),
+    from_iob_side(X, Y, Name, Value, With) when X =:= With#with.right_x ->
         from_line(X, Sector, Y, Index, With)
 ).
 
 ?IOB_SIDES()
 ?IOB_LEFT_LINES()
 ?IOB_RIGHT_LINES()
-from_iob_side(X, Y, Name, _With) ->
-    {error, {iob_side, X, Y, Name}}.
+from_iob_side(X, Y, Name, Value, _With) ->
+    {error, {iob_side, X, Y, Name, Value}}.
 
 -undef(IOB_SIDE).
 -undef(IOB_LEFT_LINE).
@@ -2862,26 +2874,26 @@ from_iob_side(X, Y, Name, _With) ->
 
 %%--------------------------------------------------------------------
 
--define(IOB_HEAD(Sector, Index, Name),
-    from_iob(X, Y, Name, With = #with{top_y = Y}) ->
+-define(IOB_HEAD(Sector, Index, Name, Value),
+    from_iob(X, Y, Name, Value, With = #with{top_y = Y}) ->
         from_head(X, Sector, Index, With);
-    from_iob(X, Y, Name, With = #with{short_y = Y})
+    from_iob(X, Y, Name, Value, With = #with{short_y = Y})
             when X < With#with.grow_x ->
         from_tail(X, Sector, Index, With, With#with.short_lines);
-    from_iob(X, Y, Name, With = #with{long_y = Y})
+    from_iob(X, Y, Name, Value, With = #with{long_y = Y})
             when X > With#with.grow_x ->
         from_tail(X, Sector, Index, With, With#with.long_lines)
 ).
--define(UFM_INTERCONNECT(Sector, Index, From, Mux),
-    from_iob(X, Y, {{interconnect, N}, From, Mux}, With = #with{grow_x = X, short_y = 3})
+-define(UFM_INTERCONNECT(Sector, Index, Value),
+    from_iob(X, Y, {interconnect, N}, Value, With = #with{grow_x = X, short_y = 3})
             when Y =:= 2 orelse Y =:= 3 ->
         from_cell(X, Sector, Y, N, Index, With)
 ).
 
 ?IOB_HEADS()
 ?UFM_INTERCONNECTS()
-from_iob(X, Y, Name, _With) ->
-    {error, {iob, X, Y, Name}}.
+from_iob(X, Y, Name, Value, _With) ->
+    {error, {{iob, X, Y}, Name, Value}}.
 
 -undef(IOB_HEAD).
 -undef(UFM_INTERCONNECT).
@@ -3132,53 +3144,60 @@ from_ioc_strip(X, Y, N, R, C, With = #with{density = max_v_2210z}) ->
 ).
 -define(JTAG_LARGE_SELECT(Y, N, U),
     from_jtag(X, Y, {U, Key, Value}, With = #with{grow_x = X}) ->
-        from_ufm_select(X, Y, N, {Key, Value}, With)
+        from_ufm_select(X, Y, N, {Key, Value}, With);
+    from_jtag(X, Y, {U, DirectLink}, With = #with{grow_x = X}) ->
+        from_ufm_select(X, Y, N, DirectLink, With)
 ).
 
 ?JTAG_SMALL_SELECTS()
 ?JTAG_LARGE_SELECTS()
-from_jtag(X, Y, {Name, Key, Value}, _With) ->
-    {error, {{invalid_jtag, X, Y}, Name, Key, Value}}.
+from_jtag(X, Y, Name, _With) ->
+    {error, {{invalid_jtag, X, Y}, Name}}.
 
 -undef(JTAG_SMALL_SELECT).
 -undef(JTAG_LARGE_SELECT).
 
 %%--------------------------------------------------------------------
 
--define(UFM_INTERCONNECT(Sector, Index, From, Mux),
-    from_ufm(X, Y, {{interconnect, N}, From, Mux}, With = #with{grow_x = X})
+-define(UFM_INTERCONNECT(Sector, Index, Name),
+    from_ufm(X, Y, {interconnect, N}, Name, With = #with{grow_x = X})
             when Y =:= 2 orelse Y =:= 3 ->
         from_cell(X, Sector, Y, N, Index, With)
 ).
+-define(UFM_SMALL_INVERT(Y, N, FromN, U),
+    from_ufm(X, Y, U, invert, With = #with{density = max_v_240z}) ->
+        from_ioc_side(X, Y, N, FromN, With)
+).
 -define(UFM_SMALL_SELECT(Y, N, FromN, FromU, U),
-    from_ufm(X, Y, {U, FromU, Mux}, With = #with{density = max_v_240z}) ->
+    from_ufm(X, Y, U, {FromU, Mux}, With = #with{density = max_v_240z}) ->
         from_ioc_side(X, Y, N, {FromN, Mux}, With)
 ).
 -define(UFM_LARGE_SELECT(Y, N, U),
-    from_ufm(X, Y, {U, Key, Value}, With = #with{grow_x = X}) ->
-        from_ufm_select(X, Y, N, {Key, Value}, With)
+    from_ufm(X, Y, U, Value, With = #with{grow_x = X}) ->
+        from_ufm_select(X, Y, N, Value, With)
 ).
 
 ?UFM_INTERCONNECTS()
 ?UFM_SMALL_SELECTS()
 ?UFM_LARGE_SELECTS()
-from_ufm(X, Y, {Name, Key, Value}, _With) ->
-    {error, {{invalid_ufm, X, Y}, Name, Key, Value}}.
+from_ufm(X, Y, Name, Value, _With) ->
+    {error, {{invalid_ufm, X, Y}, Name, Value}}.
 
 -undef(UFM_INTERCONNECT).
+-undef(UFM_SMALL_INVERT).
 -undef(UFM_SMALL_SELECT).
 -undef(UFM_LARGE_SELECT).
 
 %%--------------------------------------------------------------------
 
--define(UFM_SELECT(Sector, Index, From, Mux),
-    from_ufm_select(X, Y, N, {From, Mux}, With) ->
+-define(UFM_SELECT(Sector, Index, Name),
+    from_ufm_select(X, Y, N, Name, With) ->
         from_cell(X, Sector, Y, N, Index, With)
 ).
 
 ?UFM_SELECTS()
-from_ufm_select(X, Y, N, {Key, Value}, _With) ->
-    {error, {{invalid_ufm_select, X, Y}, N, Key, Value}}.
+from_ufm_select(X, Y, N, Name, _With) ->
+    {error, {{invalid_ufm_select, X, Y}, N, Name}}.
 
 -undef(UFM_SELECT).
 
@@ -3787,9 +3806,9 @@ to_ioc_strip(X, Y, N, R, C) ->
     to_cell_head(X, Index, Sector, With) ->
         to_c4(X - 1, With#with.top_y, Name)
  ).
--define(IOB_HEAD(Sector, Index, Name),
+-define(IOB_HEAD(Sector, Index, Name, Value),
     to_cell_head(X, Index, Sector, With) ->
-        to_iob(X, With#with.top_y, Name)
+        to_iob(X, With#with.top_y, Name, Value)
 ).
 -define(IOC_HEAD(Sector, Index, N, Name),
     to_cell_head(X, Index, Sector, With) ->
@@ -3829,11 +3848,11 @@ to_cell_head(X, Index, Sector, _With) ->
  ).
 -define(DEVICE_PIN_SIDE(Sector, Index, Name),
  ).
--define(IOB_HEAD(Sector, Index, Name),
+-define(IOB_HEAD(Sector, Index, Name, Value),
     to_cell_tail(X, Index, Sector, With) when X < With#with.grow_x ->
-        to_iob(X, With#with.short_y, Name);
+        to_iob(X, With#with.short_y, Name, Value);
     to_cell_tail(X, Index, Sector, With) when X > With#with.grow_x ->
-        to_iob(X, With#with.long_y, Name)
+        to_iob(X, With#with.long_y, Name, Value)
 ).
 -define(IOC_HEAD(Sector, Index, N, Name),
     to_cell_tail(X, Index, Sector, With) when X < With#with.grow_x ->
@@ -3908,13 +3927,13 @@ to_side_tail(X, Index, Sector, _With) ->
 
 %%--------------------------------------------------------------------
 
--define(IOB_LEFT_LINE(Sector, Index, Name),
+-define(IOB_LEFT_LINE(Sector, Index, Name, Value),
     to_side_line(X, Y, Index, Sector, With) when X =:= With#with.left_x ->
-        to_iob(X, Y, Name)
+        to_iob(X, Y, Name, Value)
 ).
--define(IOB_RIGHT_LINE(Sector, Index, Name),
+-define(IOB_RIGHT_LINE(Sector, Index, Name, Value),
     to_side_line(X, Y, Index, Sector, With) when X =:= With#with.right_x ->
-        to_iob(X, Y, Name)
+        to_iob(X, Y, Name, Value)
 ).
 -define(IOC_LEFT_LINE(Sector, Index, N, Name),
     to_side_line(X, Y, Index, Sector, With) when X =:= With#with.left_x ->
@@ -3959,9 +3978,9 @@ to_side_line(X, Y, Index, Sector, _) ->
     to_side(X, Y, N, Index, Sector, With) when X =:= With#with.right_x ->
         to_r4(X, Y, Name)
 ).
--define(IOB_SIDE(Sector, N, Index, Name),
+-define(IOB_SIDE(Sector, N, Index, Name, Value),
     to_side(X, Y, N, Index, Sector, _) ->
-        to_iob(X, Y, Name)
+        to_iob(X, Y, Name, Value)
 ).
 -define(IOC_LEFT(Sector, U, V, N, Name),
     to_side(X, Y, U, V, Sector, With) when X =:= With#with.left_x ->
@@ -4043,15 +4062,15 @@ to_cell_line(X, Y, Index, Sector, _) ->
     to_cell(X, Y, N, I, Sector, _) ->
         to_r4(X, Y, Name)
  ).
--define(UFM_INTERCONNECT(Sector, Index, From, Mux),
+-define(UFM_INTERCONNECT(Sector, Index, Name),
     to_cell(X, Y, N, Index, Sector, #with{grow_x = X, short_y = 3})
             when Y =:= 2 orelse Y =:= 3 ->
-        to_ufm(X, Y, {{interconnect, N}, From, Mux})
+        to_ufm(X, Y, {interconnect, N}, Name)
 ).
--define(UFM_SELECT(Sector, Index, From, Mux),
+-define(UFM_SELECT(Sector, Index, Name),
     to_cell(X, Y, N, Index, Sector, #with{grow_x = X, short_y = 3})
             when Y =:= 2 orelse Y =:= 3 ->
-        to_ufm_select(X, Y, N, {From, Mux})
+        to_ufm_select(X, Y, N, Name)
 ).
 -define(LAB_CELL(Sector, N, I, Name),
     to_cell(X, Y, N, I, Sector, _) ->
@@ -4160,6 +4179,10 @@ to_skip(X, Cell, Sector, #with{skip = Skip}) ->
     to_ioc_side(1, Y, N, {FromN, Mux}, _) ->
         {ok, {{jtag, 1, Y}, U, FromU, Mux}}
 ).
+-define(UFM_SMALL_INVERT(Y, N, FromN, U),
+    to_ioc_side(1, Y, N, FromN, _) ->
+        {ok, {{ufm, 1, Y}, U, invert}}
+).
 -define(UFM_SMALL_SELECT(Y, N, FromN, FromU, U),
     to_ioc_side(1, Y, N, {FromN, Mux}, _) ->
         {ok, {{ufm, 1, Y}, U, FromU, Mux}}
@@ -4173,6 +4196,7 @@ to_ioc_side(X, Y, N, Name, _) ->
 
 -undef(GLOBAL_SMALL_SELECT).
 -undef(JTAG_SMALL_SELECT).
+-undef(UFM_SMALL_INVERT).
 -undef(UFM_SMALL_SELECT).
 
 %%--------------------------------------------------------------------
@@ -4184,9 +4208,9 @@ to_global(G, Name) ->
 
 %%--------------------------------------------------------------------
 
-to_iob(X, Y, {Name, Key, Value}) ->
+to_iob(X, Y, Name, {Key, Value}) ->
     {ok, {{iob, X, Y}, Name, Key, Value}};
-to_iob(X, Y, {Name, Value}) ->
+to_iob(X, Y, Name, Value) ->
     {ok, {{iob, X, Y}, Name, Value}}.
 
 %%--------------------------------------------------------------------
@@ -4228,29 +4252,37 @@ to_r4(X, Y, {Index, Key, Value}) ->
 
 %%--------------------------------------------------------------------
 
-to_ufm(X, Y, {Name, Key, Value}) ->
-    {ok, {{ufm, X, Y}, Name, Key, Value}}.
+to_ufm(X, Y, Name, {Key, Value}) ->
+    {ok, {{ufm, X, Y}, Name, Key, Value}};
+to_ufm(X, Y, Name, Value) ->
+    {ok, {{ufm, X, Y}, Name, Value}}.
 
 %%--------------------------------------------------------------------
 
 -define(GLOBAL_LARGE_SELECT(Y, N, G),
     to_ufm_select(X, Y, N, {Key, Value}) ->
-        {ok, {{global, X, Y}, G, Key, Value}}
+        {ok, {{global, X, Y}, G, Key, Value}};
+    to_ufm_select(X, Y, N, DirectLink) ->
+        {ok, {{global, X, Y}, G, DirectLink}}
 ).
 -define(JTAG_LARGE_SELECT(Y, N, J),
     to_ufm_select(X, Y, N, {Key, Value}) ->
-        {ok, {{jtag, X, Y}, J, Key, Value}}
+        {ok, {{jtag, X, Y}, J, Key, Value}};
+    to_ufm_select(X, Y, N, DirectLink) ->
+        {ok, {{jtag, X, Y}, J, DirectLink}}
 ).
 -define(UFM_LARGE_SELECT(Y, N, U),
     to_ufm_select(X, Y, N, {Key, Value}) ->
-        {ok, {{ufm, X, Y}, U, Key, Value}}
+        {ok, {{ufm, X, Y}, U, Key, Value}};
+    to_ufm_select(X, Y, N, DirectLink) ->
+        {ok, {{ufm, X, Y}, U, DirectLink}}
 ).
 
 ?GLOBAL_LARGE_SELECTS()
 ?JTAG_LARGE_SELECTS()
 ?UFM_LARGE_SELECTS()
-to_ufm_select(X, Y, N, {Key, Value}) ->
-    {error, {{ufm, X, Y}, N, Key, Value}}.
+to_ufm_select(X, Y, N, Name) ->
+    {error, {{invalid_ufm, X, Y}, N, Name}}.
 
 -undef(GLOBAL_LARGE_SELECT).
 -undef(JTAG_LARGE_SELECT).

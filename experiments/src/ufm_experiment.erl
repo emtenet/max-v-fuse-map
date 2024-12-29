@@ -4,14 +4,16 @@
 
 % This experiment looks at the UFM block (User Flash Memory)
 
+% {9,2,4,3,cell,23} direct-link?
+
 %%====================================================================
 %% run
 %%====================================================================
 
 run() ->
-    density(max_v_240z),
+    %density(max_v_240z),
     %density(max_v_570z),
-    %lists:foreach(fun density/1, density:list()),
+    lists:foreach(fun density/1, density:list()),
     ok.
 
 %%--------------------------------------------------------------------
@@ -26,11 +28,13 @@ density(Density) ->
     {Settings2, Pins3} = pin_settings(Pins2),
     {Settings3, _} = pin_settings(Pins3),
     {ok, Experiments} = experiment:compile_to_fuses_and_rcf([
-        source(Device, plain, []),
-        source(Device, {pins, 0}, Settings0),
-        source(Device, {pins, 1}, Settings1),
-        source(Device, {pins, 2}, Settings2),
-        source(Device, {pins, 3}, Settings3),
+        source(Device, plain, <<>>, []),
+        source(Device, plain, <<"!">>, []),
+        source(Device, {pins, 0}, <<>>, Settings0),
+        source(Device, {pins, 1}, <<>>, Settings1),
+        source(Device, {pins, 2}, <<>>, Settings2),
+        source(Device, {pins, 3}, <<>>, Settings3),
+        source(Device, {nots, 3}, <<"!">>, Settings3),
         source(Device, Clk)
     ]),
     _ = Experiments,
@@ -42,6 +46,8 @@ density(Density) ->
     %    ({{global, _}, _, _}) -> true;
     %    ({{iob, _, _}, _, _, _}) -> true;
     %    ({{iob, _, _}, _, _}) -> true;
+    %    ({{ioc, 1, _, N}, _}) when N > 3 -> false;
+    %    ({{ioc, 1, _, N}, _, _}) when N > 3 -> false;
     %    ({{ioc, _, _, _}, _}) -> true;
     %    ({{ioc, _, _, _}, _, _}) -> true;
     %    ({{lab, _, _}, _}) -> true;
@@ -80,7 +86,7 @@ pin_settings([A, B, C, D, E, F, G, H, I, J, K, L, M | Pins]) ->
 
 %%--------------------------------------------------------------------
 
-source(Device, Title, Settings) ->
+source(Device, Title, Not, Settings) ->
     #{
         title => Title,
         device => Device,
@@ -103,14 +109,14 @@ source(Device, Title, Settings) ->
             ");\n"
             "  maxv_ufm ufm (\n"
             "    .program(program),\n"
-            "    .erase(erase),\n"
+            "    .erase(", Not/binary, "erase),\n"
             "    .oscena(osc_ena),\n"
             "    .arclk(ar_clk),\n"
             "    .arshft(ar_shift),\n"
             "    .ardin(ar_din),\n"
-            "    .drclk(dr_clk),\n"
-            "    .drshft(dr_shift),\n"
-            "    .drdin(dr_in),\n"
+            "    .drclk(", Not/binary, "dr_clk),\n"
+            "    .drshft(", Not/binary, "dr_shift),\n"
+            "    .drdin(", Not/binary, "dr_in),\n"
             "    .busy(busy),\n"
             "    .osc(osc),\n"
             "    .drdout(dr_out),\n"
