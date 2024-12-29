@@ -751,6 +751,7 @@
 {{mux3,mux2},{c4,2,6,mux,13}}.
 {{r4,2,5},{mux,0}}.
 {direct_link,{le_buffer,2,5,0,0}}.
+{{mux0,mux2},{le_buffer,1,5,0,1}}.
 {{mux1,mux0},{c4,1,7,mux,7}}.
 {{mux2,mux0},{c4,1,8,mux,7}}.
 {{mux2,mux1},{le_buffer,2,6,0,10}}.
@@ -945,6 +946,7 @@
 {{mux2,mux0},{c4,1,5,mux,5}}.
 {{mux2,mux1},{c4,1,7,mux,11}}.
 {{mux2,mux2},{le_buffer,2,6,0,14}}.
+{{mux3,mux0},{r4,0,6,mux,5}}.
 {{mux3,mux2},{c4,1,4,mux,5}}.
 {{r4,2,6},{mux,6}}.
 {direct_link,{le_buffer,1,6,0,17}}.
@@ -5357,21 +5359,21 @@
 {{mux1,mux0},{r4,11,2,mux,13}}.
 {{mux1,mux2},{r4,11,2,mux,15}}.
 {{mux2,mux0},{c4,9,1,mux,5}}.
-{{mux2,mux2},{jtag_tms_tap,9,2,5,0}}.
+{{mux2,mux2},{jtag,9,2,tms}}.
 {{r4,9,2},{mux,14}}.
 {direct_link,{le_buffer,10,2,0,16}}.
 {{mux0,mux0},{c4,9,3,mux,12}}.
 {{mux0,mux1},{r4,12,2,mux,15}}.
 {{mux1,mux0},{r4,11,2,mux,13}}.
-{{mux2,mux0},{jtag_tck_tap,9,2,5,0}}.
-{{mux2,mux1},{jtag_tms_tap,9,2,5,0}}.
+{{mux2,mux0},{jtag,9,2,tck}}.
+{{mux2,mux1},{jtag,9,2,tms}}.
 {{mux3,mux0},{r4,10,2,mux,15}}.
 {{mux3,mux1},{r4,12,2,mux,14}}.
 {{mux3,mux2},{c4,9,0,mux,13}}.
 {{r4,9,2},{mux,15}}.
 {direct_link,{le_buffer,10,2,0,18}}.
 {{mux0,mux0},{c4,9,1,mux,6}}.
-{{mux0,mux2},{jtag_tdi_tap,9,2,5,0}}.
+{{mux0,mux2},{jtag,9,2,tdi}}.
 {{mux1,mux1},{c4,9,6,mux,13}}.
 {{mux1,mux2},{c4,9,4,mux,13}}.
 {{mux3,mux0},{c4,9,5,mux,13}}.
@@ -5386,6 +5388,7 @@
 {{r4,9,3},{mux,9}}.
 {direct_link,{le_buffer,10,3,0,4}}.
 {{mux0,mux0},{c4,9,4,mux,8}}.
+{{mux0,mux2},{ufm,9,3,busy}}.
 {{mux1,mux0},{c4,9,5,mux,8}}.
 {{mux1,mux1},{c4,9,6,mux,8}}.
 {{mux2,mux1},{r4,12,3,mux,10}}.
@@ -5394,6 +5397,7 @@
 {{mux3,mux2},{r4,11,3,mux,11}}.
 {{r4,9,3},{mux,10}}.
 {direct_link,{le_buffer,10,3,0,6}}.
+{{mux0,mux1},{ufm,9,3,busy}}.
 {{mux0,mux2},{c4,9,7,mux,9}}.
 {{mux1,mux0},{r4,10,3,mux,9}}.
 {{mux1,mux2},{c4,9,5,mux,9}}.
@@ -5407,6 +5411,7 @@
 {{mux1,mux2},{c4,9,2,mux,3}}.
 {{mux2,mux0},{c4,9,4,mux,9}}.
 {{mux2,mux1},{r4,11,3,mux,9}}.
+{{mux2,mux2},{ufm,9,3,isp_busy}}.
 {{mux3,mux2},{c4,9,1,mux,3}}.
 {{r4,9,3},{mux,12}}.
 {direct_link,{le_buffer,10,3,0,12}}.
@@ -6258,7 +6263,7 @@
 {{mux3,mux1},{c4,9,5,mux,11}}.
 {{mux3,mux2},{c4,9,0,mux,12}}.
 {{r4,10,2},{mux,6}}.
-{direct_link,{jtag_tck_tap,9,2,5,0}}.
+{direct_link,{jtag,9,2,tck}}.
 {{mux0,mux1},{c4,9,4,mux,12}}.
 {{mux1,mux0},{r4,11,2,mux,14}}.
 {{mux2,mux0},{le_buffer,10,2,0,16}}.
@@ -6266,7 +6271,7 @@
 {{mux2,mux2},{c4,9,6,mux,12}}.
 {{mux3,mux2},{c4,9,5,mux,13}}.
 {{r4,10,2},{mux,7}}.
-{direct_link,{jtag_tdi_tap,9,2,5,0}}.
+{direct_link,{jtag,9,2,tdi}}.
 {{mux0,mux0},{le_buffer,10,2,0,18}}.
 {{mux0,mux2},{c4,9,6,mux,13}}.
 {{mux1,mux0},{r4,11,2,mux,14}}.
@@ -6332,6 +6337,7 @@
 {{mux2,mux2},{c4,9,4,mux,7}}.
 {{mux3,mux0},{r4,10,3,mux,8}}.
 {{r4,10,3},{mux,1}}.
+{direct_link,{ufm,9,3,dr_out}}.
 {{mux0,mux0},{c4,9,4,mux,8}}.
 {{mux0,mux1},{c4,9,2,mux,1}}.
 {{mux0,mux2},{le_buffer,10,3,0,4}}.
@@ -6344,6 +6350,7 @@
 {{mux1,mux2},{c4,9,0,mux,10}}.
 {{mux2,mux1},{c4,9,1,mux,2}}.
 {{r4,10,3},{mux,3}}.
+{direct_link,{ufm,9,3,isp_busy}}.
 {{mux0,mux0},{r4,10,3,mux,10}}.
 {{mux0,mux1},{c4,9,2,mux,3}}.
 {{mux0,mux2},{c4,9,0,mux,10}}.
@@ -7296,6 +7303,7 @@
 {{mux3,mux0},{r4,13,2,mux,0}}.
 {{mux3,mux1},{c4,11,4,mux,7}}.
 {{r4,11,2},{mux,9}}.
+{direct_link,{le_buffer,12,2,0,4}}.
 {{mux0,mux1},{r4,11,2,mux,3}}.
 {{mux1,mux1},{c4,11,3,mux,8}}.
 {{mux2,mux0},{le_buffer,11,2,0,3}}.
@@ -9248,6 +9256,7 @@
 {{mux2,mux0},{io_data_in,13,2,4,0}}.
 {{mux3,mux2},{r4,10,2,mux,1}}.
 {{r4,13,2},{mux,4}}.
+{direct_link,{io_data_in,13,2,5,0}}.
 {{mux0,mux0},{r4,10,2,mux,6}}.
 {{mux0,mux1},{c4,12,3,mux,10}}.
 {{mux1,mux0},{r4,12,2,mux,4}}.

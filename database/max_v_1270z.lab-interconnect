@@ -3332,6 +3332,7 @@
 {{gclk,mux2},{lab_clk,4,3,0,2}}.
 {{mux1,mux0},{r4,7,5,mux,10}}.
 {{mux1,mux1},{c4,3,7,mux,9}}.
+{{mux1,mux2},{r4,1,5,mux,2}}.
 {{mux2,mux1},{r4,5,5,mux,11}}.
 {{mux3,mux0},{c4,3,6,mux,9}}.
 {{lab,4,5},{interconnect,13}}.
@@ -11804,6 +11805,7 @@
 {{mux0,mux1},{c4,9,5,mux,3}}.
 {{mux0,mux2},{r4,9,6,mux,1}}.
 {{mux1,mux1},{r4,12,6,mux,9}}.
+{{mux1,mux2},{r4,8,6,mux,2}}.
 {{mux2,mux2},{r4,6,6,mux,1}}.
 {{mux3,mux0},{le_buffer,9,6,0,9}}.
 {{mux3,mux1},{r4,13,6,mux,9}}.
@@ -15025,6 +15027,7 @@
 {{lab,11,4},{interconnect,3}}.
 {direct_link,{le_buffer,12,4,0,6}}.
 {{mux0,mux0},{c4,11,2,mux,3}}.
+{{mux0,mux2},{c4,11,3,mux,3}}.
 {{mux1,mux0},{c4,11,1,mux,3}}.
 {{mux1,mux1},{c4,11,8,mux,9}}.
 {{mux1,mux2},{r4,14,4,mux,9}}.
@@ -16919,6 +16922,7 @@
 {{mux1,mux0},{r4,14,2,mux,10}}.
 {{mux1,mux2},{c4,12,6,mux,8}}.
 {{lab,12,2},{interconnect,2}}.
+{{mux0,mux0},{c4,12,0,mux,9}}.
 {{mux3,mux0},{c4,12,4,mux,8}}.
 {{mux3,mux2},{c4,12,5,mux,9}}.
 {{lab,12,2},{interconnect,3}}.
@@ -16998,6 +17002,7 @@
 {{gclk,mux1},{lab_clk,12,0,0,0}}.
 {{gclk,mux2},{lab_clk,12,0,0,3}}.
 {{mux0,mux0},{c4,11,6,mux,12}}.
+{{mux1,mux0},{c4,11,0,mux,13}}.
 {{mux2,mux1},{r4,11,2,mux,14}}.
 {{mux3,mux0},{r4,14,2,mux,15}}.
 {{lab,12,3},{interconnect,0}}.
@@ -17011,6 +17016,7 @@
 {{lab,12,3},{interconnect,2}}.
 {{mux0,mux1},{c4,12,6,mux,9}}.
 {{mux0,mux2},{c4,12,4,mux,9}}.
+{{mux3,mux0},{c4,12,5,mux,8}}.
 {{lab,12,3},{interconnect,3}}.
 {{mux1,mux0},{c4,12,0,mux,10}}.
 {{mux1,mux1},{c4,12,7,mux,9}}.
@@ -17032,6 +17038,7 @@
 {{mux0,mux1},{c4,11,4,mux,7}}.
 {{mux2,mux2},{r4,14,3,mux,8}}.
 {{lab,12,3},{interconnect,8}}.
+{direct_link,{ufm,11,3,dr_out}}.
 {{mux2,mux2},{c4,11,5,mux,8}}.
 {{mux3,mux1},{c4,11,4,mux,8}}.
 {{lab,12,3},{interconnect,9}}.
@@ -17047,6 +17054,7 @@
 {{mux3,mux0},{c4,11,5,mux,9}}.
 {{lab,12,3},{interconnect,12}}.
 {{gclk,mux2},{lab_clk,12,0,0,2}}.
+{{mux0,mux2},{ufm,11,3,osc}}.
 {{mux1,mux0},{r4,12,3,mux,10}}.
 {{mux1,mux1},{c4,11,4,mux,9}}.
 {{mux1,mux2},{r4,11,3,mux,10}}.
@@ -17063,6 +17071,7 @@
 {{mux2,mux0},{c4,12,5,mux,12}}.
 {{lab,12,3},{interconnect,16}}.
 {{mux2,mux0},{c4,12,5,mux,13}}.
+{{mux2,mux2},{c4,12,4,mux,13}}.
 {{mux3,mux0},{c4,12,6,mux,13}}.
 {{lab,12,3},{interconnect,17}}.
 {{mux0,mux1},{c4,12,7,mux,13}}.
@@ -17139,6 +17148,7 @@
 {{mux2,mux1},{c4,12,0,mux,10}}.
 {{mux2,mux2},{r4,9,4,mux,1}}.
 {{mux3,mux0},{le_buffer,12,4,0,9}}.
+{{mux3,mux2},{r4,12,4,mux,1}}.
 {{lab,12,4},{interconnect,5}}.
 {direct_link,{le_buffer,12,4,0,0}}.
 {{mux0,mux1},{c4,11,8,mux,7}}.
@@ -19234,6 +19244,7 @@
 {{mux1,mux2},{r4,12,4,mux,3}}.
 {{mux2,mux0},{c4,12,1,mux,2}}.
 {{mux3,mux0},{c4,12,6,mux,9}}.
+{{mux3,mux1},{r4,15,4,mux,11}}.
 {{mux3,mux2},{r4,11,4,mux,2}}.
 {{lab,13,4},{interconnect,13}}.
 {{mux0,mux0},{c4,13,7,mux,10}}.
