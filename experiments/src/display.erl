@@ -4,55 +4,9 @@
 -export([port_routing/2]).
 -export([routing/2]).
 
--type density() :: density:density().
--type fuses() :: [fuse:fuse()].
--type ioc() :: ioc:ioc().
--type jtag() :: jtag:jtag().
--type lc() :: lc:lc().
--type title() :: term().
+-export([expression/1]).
 
--define(LUT_INIT, 2#1111111111111111).
-
--record(lc, {
-    carry_in = false :: boolean(),
-    carry_out = false :: boolean(),
-    feedback = false :: boolean(),
-    lut = ?LUT_INIT :: non_neg_integer(),
-    lut_chain = true :: boolean(),
-    lut_name :: binary() | undefined,
-    lut_ports = #{} :: #{},
-    output_left = reg :: lut | reg,
-    output_local = reg :: lut | reg,
-    output_right = reg :: lut | reg,
-    reg_chain = true :: boolean(),
-    reg_name :: binary() | undefined,
-    reg_ports = #{} :: #{}
-}).
-
--record(ioc, {
-    enable = normal :: normal | invert,
-    enable_port :: {binary(), list()} | undefined,
-    input_name :: binary() | undefined,
-    output = normal :: normal | invert,
-    output_name :: binary() | undefined,
-    output_port :: {binary(), list()} | undefined
-}).
-
--record(jtag, {
-    name :: binary() | undefined,
-    ports = #{} :: #{}
-}).
-
--record(ufm, {
-    name :: binary() | undefined,
-    ports = #{} :: #{}
-}).
-
--type logic() :: #{
-    lc() => #lc{},
-    ioc() => #ioc{},
-    jtag() => #jtag{}
-}.
+-include("decompile.hrl").
 
 %%====================================================================
 %% carry_adjust
@@ -94,477 +48,10 @@ sum_expression(LUT) ->
             expression((S bsl 8) bor S)
     end.
 
-%%====================================================================
-%% collect
-%%====================================================================
-
--spec collect({title(), fuses(), rcf_file:rcf()}, density()) -> logic().
-
-collect({_Name, Fuses, #{signals := Signals}}, Density) ->
-    Cells0 = lists:foldl(fun (Fuse, Cells) ->
-        collect_fuse(Fuse, Density, Cells)
-    end, #{}, Fuses),
-    maps:fold(fun collect_signal/3, Cells0, Signals).
-
 %%--------------------------------------------------------------------
 
 carry_out({lc, X, Y, 0}) -> {lc, X - 1, Y, 9};
 carry_out({lc, X, Y, N}) -> {lc, X, Y, N - 1}.
-
-%%--------------------------------------------------------------------
-
-collect_fuse(Fuse, Density, Cells0) ->
-    case fuse_map:to_name(Fuse, Density) of
-        {ok, {In, carry_in}} ->
-            Cells1 = collect_lc(In, fun (LC) ->
-                LC#lc{carry_in = true}
-            end, Cells0),
-            collect_lc(carry_out(In), fun (LC) ->
-                LC#lc{carry_out = true}
-            end, Cells1);
-
-        {ok, {At, feedback}} ->
-            collect_lc(At, fun (LC) -> LC#lc{feedback = true} end, Cells0);
-
-        {ok, {At, lut, LUT}} ->
-            collect_lc(At, fun (LC) -> collect_lut(LUT, LC) end, Cells0);
-
-        {ok, {At, lut_chain, off}} ->
-            collect_lc(At, fun (LC) -> LC#lc{lut_chain = false} end, Cells0);
-
-        {ok, {At, output_left, lut}} ->
-            collect_lc(At, fun (LC) -> LC#lc{output_left = lut} end, Cells0);
-
-        {ok, {At, output_local, lut}} ->
-            collect_lc(At, fun (LC) -> LC#lc{output_local = lut} end, Cells0);
-
-        {ok, {At, output_right, lut}} ->
-            collect_lc(At, fun (LC) -> LC#lc{output_right = lut} end, Cells0);
-
-        {ok, {At, register_chain, off}} ->
-            collect_lc(At, fun (LC) ->
-                LC#lc{reg_chain = false}
-            end, Cells0);
-
-        {ok, {At, enable_invert}} ->
-            collect_ioc(At, fun (IOC) -> IOC#ioc{enable = invert} end, Cells0);
-
-        {ok, {At, output_invert}} ->
-            collect_ioc(At, fun (IOC) -> IOC#ioc{output = invert} end, Cells0);
-
-        _ ->
-            Cells0
-    end.
-
-%%--------------------------------------------------------------------
-
-collect_signal(Signal, #{dests := Dests}, Cells0) ->
-    lists:foldl(fun (Dest, Cells) ->
-        collect_dest(Signal, Dest, Cells)
-    end, Cells0, Dests).
-
-%%--------------------------------------------------------------------
-
-collect_dest(Signal, Dest, Cells0) ->
-    case Dest of
-        #{name := Name, lc := At, route := Route0, port := P}
-                when P =:= data_a; P =:= data_b; P =:= data_c; P =:= data_d ->
-            #{route_port := Port} = Dest,
-            Route = collect_route(Route0, Cells0),
-            collect_lc(At, fun(LC) ->
-                collect_lut_port(LC, Name, Port, Route, Signal)
-            end, collect_source(Signal, Route0, Cells0));
-
-        #{name := Name, lc := At, route := Route0, port := Port}
-                when Port =:= invert_a ->
-            Route = collect_route(Route0, Cells0),
-            collect_lc(At, fun(LC) ->
-                collect_lut_port(LC, Name, Port, Route, Signal)
-            end, collect_source(Signal, Route0, Cells0));
-
-        #{name := Name, lc := At, route := Route0, port := Port} ->
-            Route = collect_route(Route0, Cells0),
-            collect_lc(At, fun(LC) ->
-                collect_reg_port(LC, Name, Port, Route, Signal)
-            end, collect_source(Signal, Route0, Cells0));
-
-        #{name := Name, ioc := At, route := [], port := data_in} ->
-            % JTAG
-            collect_ioc(At, fun(IOC0) ->
-                IOC = collect_ioc_output_name(IOC0, Name),
-                IOC#ioc{output_port = {Signal, {}}}
-            end, Cells0);
-
-        #{name := Name, ioc := At, route := Route0, port := data_in} ->
-            Route = case Route0 of
-                [{io_bypass_out, _, _, _, 0} | Route1] ->
-                    collect_route(Route1, Cells0);
-
-                [{io_data_out, _, _, _, 0} | Route1] ->
-                    collect_route(Route1, Cells0)
-            end,
-            collect_ioc(At, fun(IOC0) ->
-                IOC = collect_ioc_output_name(IOC0, Name),
-                IOC#ioc{output_port = {Signal, Route}}
-            end, collect_source(Signal, Route0, Cells0));
-
-        #{name := Name, ioc := At, route := Route0, port := oe} ->
-            [{io_oe, _, _, _, 0} | Route1] = Route0,
-            Route = collect_route(Route1, Cells0),
-            collect_ioc(At, fun(IOC0) ->
-                IOC = collect_ioc_output_name(IOC0, Name),
-                IOC#ioc{enable_port = {Signal, Route}}
-            end, collect_source(Signal, Route0, Cells0));
-
-        #{name := Name, jtag := At, route := Route0, port := Port} ->
-            Route = collect_route(Route0, Cells0),
-            collect_jtag(At, fun(JTAG) ->
-                collect_jtag_port(JTAG, Name, Port, Route, Signal)
-            end, collect_source(Signal, Route0, Cells0));
-
-        #{name := Name, ufm := At, route := Route0, port := Port} ->
-            Route = collect_route(Route0, Cells0),
-            collect_ufm(At, fun(UFM) ->
-                collect_ufm_port(UFM, Name, Port, Route, Signal)
-            end, collect_source(Signal, Route0, Cells0))
-    end.
-
-%%--------------------------------------------------------------------
-
-collect_route([], _) ->
-    {};
-collect_route([{jtag, X, Y, tdo} | Route], Cells) ->
-    collect_route({jtag, X, Y, tdo}, Route, Cells);
-collect_route([{lab_clk, X, Y, 0, I} | Route], Cells) ->
-    collect_route({clk, X, Y, I}, Route, Cells);
-collect_route([{lab_control_mux, _, _, 0, I} | Route], Cells) ->
-    collect_route({control, I}, Route, Cells);
-collect_route([{le_buffer, X, Y, 0, I}], _) ->
-    {lc, X, Y, I div 2};
-collect_route([{local_interconnect, _, _, 0, I} | Route], Cells) ->
-    collect_route({interconnect, I}, Route, Cells);
-collect_route([{local_line, X, Y, 0, N}], Cells) ->
-    LC = {lc, X, Y, N},
-    {LC, collect_route_local(LC, Cells)};
-collect_route([{lut_chain, X, Y, 0, N}], _) ->
-    LC = {lc, X, Y, N},
-    {LC, lut_chain}.
-
-%%--------------------------------------------------------------------
-
-collect_route(Local, [Direct], Cells) ->
-    case Direct of
-        {io_data_in, X, Y, N, 0} ->
-            {Local, {ioc, X, Y, N}};
-
-        {jtag, X, Y, Port} ->
-            {Local, {jtag, X, Y}, Port};
-
-        {le_buffer, X, Y, 0, I} when I rem 2 =:= 0 ->
-            LC = {lc, X, Y, I div 2},
-            {Local, LC, collect_route_left(LC, Cells)};
-
-        {le_buffer, X, Y, 0, I} when I rem 2 =:= 1 ->
-            LC = {lc, X, Y, I div 2},
-            {Local, LC, collect_route_right(LC, Cells)};
-
-        {local_line, X, Y, 0, N} ->
-            LC = {lc, X, Y, N},
-            {Local, LC, collect_route_local(LC, Cells)};
-
-        {ufm, X, Y, Port} ->
-            {Local, {ufm, X, Y}, Port}
-    end;
-collect_route(Local, [_ | Route], Cells) ->
-    collect_route_inner(Local, Route, Cells).
-
-%%--------------------------------------------------------------------
-
-collect_route_inner(Local, [Source], Cells) ->
-    case Source of
-        {clk_buffer, _, _, N, 0} ->
-            {Local, '...', {global, N}};
-
-        {io_data_in, X, Y, N, 0} ->
-            {Local, '...', {ioc, X, Y, N}};
-
-        {jtag, X, Y, Port} ->
-            {Local, '...', {jtag, X, Y}, Port};
-
-        {le_buffer, X, Y, 0, I} when I rem 2 =:= 0 ->
-            LC = {lc, X, Y, I div 2},
-            {Local, '...', LC, collect_route_left(LC, Cells)};
-
-        {le_buffer, X, Y, 0, I} when I rem 2 =:= 1 ->
-            LC = {lc, X, Y, I div 2},
-            {Local, '...', LC, collect_route_right(LC, Cells)};
-
-        {ufm, X, Y, Port} ->
-            {Local, '...', {ufm, X, Y}, Port}
-    end;
-collect_route_inner(Local, [_ | Route], Cells) ->
-    collect_route_inner(Local, Route, Cells).
-
-%%--------------------------------------------------------------------
-
-collect_route_left(At, Cells) ->
-    #{At := #lc{output_left = Output}} = Cells,
-    Output.
-
-%%--------------------------------------------------------------------
-
-collect_route_local(At, Cells) ->
-    #{At := #lc{output_local = Output}} = Cells,
-    Output.
-
-%%--------------------------------------------------------------------
-
-collect_route_right(At, Cells) ->
-    #{At := #lc{output_right = Output}} = Cells,
-    Output.
-
-%%--------------------------------------------------------------------
-
-collect_source(_, [], Cells) ->
-    Cells;
-collect_source(Signal, [Source], Cells) ->
-    case Source of
-        {clk_buffer, _, _, _, 0} ->
-            Cells;
-
-        {io_data_in, X, Y, N, 0} ->
-            At = {ioc, X, Y, N},
-            collect_ioc(At, fun (IOC) ->
-                collect_ioc_input_name(IOC, Signal)
-            end, Cells);
-
-        {jtag, X, Y, _} ->
-            At = {jtag, X, Y},
-            collect_jtag(At, fun (JTAG) ->
-                collect_jtag_name(JTAG, Signal)
-            end, Cells);
-
-        {le_buffer, X, Y, 0, I} when I rem 2 =:= 0 ->
-            At = {lc, X, Y, I div 2},
-            collect_lc(At, fun (LC) ->
-                collect_lc_left(LC, Signal)
-            end, Cells);
-
-        {le_buffer, X, Y, 0, I} when I rem 2 =:= 1 ->
-            At = {lc, X, Y, I div 2},
-            collect_lc(At, fun (LC) ->
-                collect_lc_right(LC, Signal)
-            end, Cells);
-
-        {local_line, X, Y, 0, N} ->
-            At = {lc, X, Y, N},
-            collect_lc(At, fun (LC) ->
-                collect_lc_local(LC, Signal)
-            end, Cells);
-
-        {lut_chain, X, Y, 0, N} ->
-            At = {lc, X, Y, N},
-            collect_lc(At, fun (LC) ->
-                collect_lut_name(LC, Signal)
-            end, Cells);
-
-        {ufm, X, Y, _} ->
-            At = {ufm, X, Y},
-            collect_ufm(At, fun (UFM) ->
-                collect_ufm_name(UFM, Signal)
-            end, Cells)
-    end;
-collect_source(Signal, [_ | Route], Cells) ->
-    collect_source(Signal, Route, Cells).
-
-%%--------------------------------------------------------------------
-
-collect_jtag(At = {jtag, _, _}, Collect, Cells) ->
-    case Cells of
-        #{At := LC} ->
-            Cells#{At => Collect(LC)};
-
-        _ ->
-            Cells#{At => Collect(#jtag{})}
-    end.
-
-%%--------------------------------------------------------------------
-
-collect_jtag_name(JTAG = #jtag{name = Name}, Name) ->
-    JTAG;
-collect_jtag_name(JTAG = #jtag{name = undefined}, Name) ->
-    JTAG#jtag{name = Name};
-collect_jtag_name(JTAG, _Name) ->
-    %io:format("JTAG NAME ~p ~s~n", [JTAG, _Name]),
-    JTAG.
-
-%%--------------------------------------------------------------------
-
-collect_jtag_port(JTAG0 = #jtag{ports = Ports0}, Name, Port, Route, Signal) ->
-    JTAG = collect_jtag_name(JTAG0, Name),
-    Ports = Ports0#{Port => {Signal, Route}},
-    JTAG#jtag{ports = Ports}.
-
-%%--------------------------------------------------------------------
-
-collect_lc(At = {lc, _, _, _}, Collect, Cells) ->
-    case Cells of
-        #{At := LC} ->
-            Cells#{At => Collect(LC)};
-
-        _ ->
-            Cells#{At => Collect(#lc{})}
-    end.
-
-%%--------------------------------------------------------------------
-
-collect_lc_left(LC = #lc{}, Name) ->
-    case LC#lc.output_left of
-        lut ->
-            collect_lut_name(LC, Name);
-
-        reg ->
-            collect_reg_name(LC, Name)
-    end.
-
-%%--------------------------------------------------------------------
-
-collect_lc_local(LC = #lc{}, Name) ->
-    case LC#lc.output_local of
-        lut ->
-            collect_lut_name(LC, Name);
-
-        reg ->
-            collect_reg_name(LC, Name)
-    end.
-
-%%--------------------------------------------------------------------
-
-collect_lc_right(LC = #lc{}, Name) ->
-    case LC#lc.output_right of
-        lut ->
-            collect_lut_name(LC, Name);
-
-        reg ->
-            collect_reg_name(LC, Name)
-    end.
-
-%%--------------------------------------------------------------------
-
-collect_ioc(At = {ioc, _, _, _}, Collect, Cells) ->
-    case Cells of
-        #{At := IOC} ->
-            Cells#{At => Collect(IOC)};
-
-        _ ->
-            Cells#{At => Collect(#ioc{})}
-    end.
-
-%%--------------------------------------------------------------------
-
-collect_ioc_input_name(IOC = #ioc{input_name = Name}, Name) ->
-    IOC;
-collect_ioc_input_name(IOC = #ioc{input_name = undefined}, Name) ->
-    IOC#ioc{input_name = Name}.
-
-%%--------------------------------------------------------------------
-
-collect_ioc_output_name(IOC = #ioc{output_name = Name}, Name) ->
-    IOC;
-collect_ioc_output_name(IOC = #ioc{output_name = undefined}, Name) ->
-    IOC#ioc{output_name = Name}.
-
-%%--------------------------------------------------------------------
-
-collect_lut(a0b0c0d0, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1111111111111110};
-collect_lut(a1b0c0d0, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1111111111111101};
-collect_lut(a0b1c0d0, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1111111111111011};
-collect_lut(a1b1c0d0, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1111111111110111};
-collect_lut(a0b0c1d0, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1111111111101111};
-collect_lut(a1b0c1d0, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1111111111011111};
-collect_lut(a0b1c1d0, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1111111110111111};
-collect_lut(a1b1c1d0, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1111111101111111};
-collect_lut(a0b0c0d1, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1111111011111111};
-collect_lut(a1b0c0d1, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1111110111111111};
-collect_lut(a0b1c0d1, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1111101111111111};
-collect_lut(a1b1c0d1, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1111011111111111};
-collect_lut(a0b0c1d1, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1110111111111111};
-collect_lut(a1b0c1d1, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1101111111111111};
-collect_lut(a0b1c1d1, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#1011111111111111};
-collect_lut(a1b1c1d1, LC = #lc{lut = LUT}) ->
-    LC#lc{lut = LUT band 2#0111111111111111}.
-
-%%--------------------------------------------------------------------
-
-collect_lut_name(LC = #lc{lut_name = Name}, Name) ->
-    LC;
-collect_lut_name(LC = #lc{lut_name = undefined}, Name) ->
-    LC#lc{lut_name = Name}.
-
-%%--------------------------------------------------------------------
-
-collect_lut_port(LC0 = #lc{lut_ports = Ports0}, _Name, Port, Route, Signal) ->
-    % not sure if this is a LUT or REG name
-    %LC = collect_lut_name(LC0, Name),
-    Ports = Ports0#{Port => {Signal, Route}},
-    LC0#lc{lut_ports = Ports}.
-
-%%--------------------------------------------------------------------
-
-collect_reg_name(LC = #lc{reg_name = Name}, Name) ->
-    LC;
-collect_reg_name(LC = #lc{reg_name = undefined}, Name) ->
-    LC#lc{reg_name = Name}.
-
-%%--------------------------------------------------------------------
-
-collect_reg_port(LC0 = #lc{reg_ports = Ports0}, Name, Port, Route, Signal) ->
-    LC = collect_reg_name(LC0, Name),
-    Ports = Ports0#{Port => {Signal, Route}},
-    LC#lc{reg_ports = Ports}.
-
-%%--------------------------------------------------------------------
-
-collect_ufm(At = {ufm, _, _}, Collect, Cells) ->
-    case Cells of
-        #{At := LC} ->
-            Cells#{At => Collect(LC)};
-
-        _ ->
-            Cells#{At => Collect(#ufm{})}
-    end.
-
-%%--------------------------------------------------------------------
-
-collect_ufm_name(UFM = #ufm{name = Name}, Name) ->
-    UFM;
-collect_ufm_name(UFM = #ufm{name = undefined}, Name) ->
-    UFM#ufm{name = Name};
-collect_ufm_name(UFM, _Name) ->
-    %io:format("UFM NAME ~p ~s~n", [UFM, _Name]),
-    UFM.
-
-%%--------------------------------------------------------------------
-
-collect_ufm_port(UFM0 = #ufm{ports = Ports0}, Name, Port, Route, Signal) ->
-    UFM = collect_ufm_name(UFM0, Name),
-    Ports = Ports0#{Port => {Signal, Route}},
-    UFM#ufm{ports = Ports}.
 
 %%====================================================================
 %% control_routing
@@ -811,6 +298,8 @@ port_routing_dest(_, _, Routing) ->
 
 -spec routing({title(), fuses(), rcf_file:rcf()}, density()) -> ok.
 
+routing(Experiment = {_, _, _}, Density) ->
+    routing_experiment(Experiment, Density);
 routing(Experiments, Density) ->
     lists:foreach(fun (Experiment) ->
         routing_experiment(Experiment, Density)
@@ -820,7 +309,7 @@ routing(Experiments, Density) ->
 
 routing_experiment(Experiment = {Name, _, _}, Density) ->
     io:format(" --> ~p~n", [Name]),
-    Cells = collect(Experiment, Density),
+    Cells = decompile:experiment(Experiment, Density),
     lists:foreach(fun ({Key, Value}) ->
         routing_cell(Key, Value, Cells)
     end, lists:sort(maps:to_list(Cells))),
@@ -894,8 +383,7 @@ routing_jtag(At, #jtag{name = Name, ports = Ports}) ->
 
 %%--------------------------------------------------------------------
 
-routing_lut(_, #lc{lut_name = undefined, carry_out = false, lut_ports = Ports})
-        when map_size(Ports) =:= 0 ->
+routing_lut(_, #lc{lut_name = undefined, output_left = reg, output_right = reg, output_local = reg}) ->
     ok;
 routing_lut(At, LC = #lc{lut_name = Name}) ->
     io:format("LUT ~w ~s~n", [At, Name]),
@@ -907,6 +395,20 @@ routing_lut_common(At, LC = #lc{lut_ports = Ports}) ->
     lists:foreach(fun ({Port, Routing}) ->
         routing_port(Port, Routing)
     end, lists:sort(maps:to_list(Ports))),
+    case LC#lc.feedback of
+        true ->
+            routing_port(feedback, {LC#lc.reg_name, {At,reg}});
+
+        false ->
+            ok
+    end,
+    case LC#lc.carry_in of
+        true ->
+            io:format("  carry_in <- ~w~n", [{carry_out(At), carry_out}]);
+
+        false ->
+            ok
+    end,
     case LC#lc.carry_out of
         true ->
             LUT = carry_adjust(At, LC#lc.lut),
