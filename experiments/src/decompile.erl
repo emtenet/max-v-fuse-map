@@ -14,7 +14,8 @@ experiment({_Name, Fuses, #{signals := Signals}}, Density) ->
     Cells0 = lists:foldl(fun (Fuse, Cells) ->
         fuse(Fuse, Density, Cells)
     end, #{}, Fuses),
-    maps:fold(fun signal/3, Cells0, Signals).
+    Cells1 = maps:fold(fun signal/3, Cells0, Signals),
+    maps:map(fun fixup_lut/2, Cells1).
 
 %%--------------------------------------------------------------------
 
@@ -471,4 +472,14 @@ ufm_port(UFM0 = #ufm{ports = Ports0}, Name, Port, Route, Signal) ->
     UFM = ufm_name(UFM0, Name),
     Ports = Ports0#{Port => {Signal, Route}},
     UFM#ufm{ports = Ports}.
+
+%%--------------------------------------------------------------------
+
+fixup_lut(_, LC = #lc{feedback = true, lut = LUT}) ->
+    % inverted C input
+    LC#lc{
+        lut = ((LUT band 16#F0F0) bsr 4) bor ((LUT band 16#0F0F) bsl 4)
+    };
+fixup_lut(_, Cell) ->
+    Cell.
 

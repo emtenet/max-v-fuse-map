@@ -496,6 +496,8 @@ Each LC can __feedback__ the register output into it's own LUT at `data_c`.
 
 This fuse enables that feedback.
 
+The feedback is __invered__, the LUT logic must take that into account.
+
 NOTE: The normal `data_c` selection can then only be used as a `s_load` source.
 
 ### `{lc(), output_local, lut}`

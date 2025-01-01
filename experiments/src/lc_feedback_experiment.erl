@@ -6,6 +6,10 @@
 %
 % This also depends on the ability to build a source with a stacked
 % LC from independant LUT & REG parts.
+%
+% The feedback path (data_c) is invered, check that with decompile.
+
+-include("decompile.hrl").
 
 %%====================================================================
 %% run
@@ -86,7 +90,32 @@ experiments(Device, LAB, Experiments) ->
     expect:fuse(Matrix, [1,1,1,1,0], {lab:lc(LAB, 4), feedback},
                                      {lab:lc(LAB, 9), feedback}),
     %
+    Density = device:density(Device),
+    lists:foreach(fun (Experiment) ->
+        lut_experiment(Experiment, Density)
+    end, Experiments),
     ok.
+
+%%--------------------------------------------------------------------
+
+lut_experiment(Experiment = {Name, _, _}, Density) ->
+    Logic = decompile:experiment(Experiment, Density),
+    {LAB, N} = Name,
+    At1 = lab:lc(LAB, N),
+    At2 = lab:lc(LAB, N + 5),
+    #{At1 := LC1} = Logic,
+    #{At2 := LC2} = Logic,
+    lut_lc(Name, At1, LC1),
+    lut_lc(Name, At2, LC2).
+
+%%--------------------------------------------------------------------
+
+lut_lc(Name, At, LC = #lc{feedback = true, lut_ports = #{data_a := _}}) ->
+    expect:lut(Name, At, LC, a_xor_c);
+lut_lc(Name, At, LC = #lc{feedback = true, lut_ports = #{data_b := _}}) ->
+    expect:lut(Name, At, LC, b_xor_c);
+lut_lc(Name, At, LC = #lc{feedback = true, lut_ports = #{data_d := _}}) ->
+    expect:lut(Name, At, LC, c_xor_d).
 
 %%--------------------------------------------------------------------
 

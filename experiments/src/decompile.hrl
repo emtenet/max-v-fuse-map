@@ -7,6 +7,9 @@
 -type title() :: term().
 
 -define(LUT_INIT, 2#1111111111111111).
+-define(LUT_A_XOR_C, 2#0101101001011010).
+-define(LUT_B_XOR_C, 2#0011110000111100).
+-define(LUT_C_XOR_D, 2#0000111111110000).
 
 -record(lc, {
     carry_in = false :: boolean(),

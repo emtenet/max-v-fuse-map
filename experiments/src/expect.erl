@@ -3,6 +3,9 @@
 -export([control/4]).
 -export([fuse/3]).
 -export([fuse/4]).
+-export([lut/4]).
+
+-include("decompile.hrl").
 
 %%====================================================================
 %% control
@@ -75,4 +78,27 @@ fuse(Matrix, Pattern, Fuse1, Fuse2) ->
                     throw(fuses_not_found)
             end
     end.
+
+%%====================================================================
+%% lut
+%%====================================================================
+
+lut(Name, At, LC, Expect) ->
+    lut(Name, At, LC, Expect, lut_value(Expect)).
+
+%%--------------------------------------------------------------------
+
+lut(_, _, #lc{lut = LUT}, _, LUT) ->
+    ok;
+lut(Name, At, #lc{lut = GotLUT}, Expect, ExpectLUT) ->
+    io:format(" --> ~p ~p~n", [Name, At]),
+    io:format("EXPECT (~4.16.0B) ~p~n", [ExpectLUT, Expect]),
+    io:format("   GOT (~4.16.0B)~n", [GotLUT]),
+    throw(lut_not_as_expected).
+
+%%--------------------------------------------------------------------
+
+lut_value(a_xor_c) -> ?LUT_A_XOR_C;
+lut_value(b_xor_c) -> ?LUT_B_XOR_C;
+lut_value(c_xor_d) -> ?LUT_C_XOR_D.
 
