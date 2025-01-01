@@ -18,18 +18,14 @@ experiment({_Name, Fuses, #{signals := Signals}}, Density) ->
 
 %%--------------------------------------------------------------------
 
-carry_out({lc, X, Y, 0}) -> {lc, X - 1, Y, 9};
-carry_out({lc, X, Y, N}) -> {lc, X, Y, N - 1}.
-
-%%--------------------------------------------------------------------
-
 fuse(Fuse, Density, Cells0) ->
     case fuse_map:to_name(Fuse, Density) of
         {ok, {In, carry_in}} ->
             Cells1 = lc(In, fun (LC) ->
                 LC#lc{carry_in = true}
             end, Cells0),
-            lc(carry_out(In), fun (LC) ->
+            {ok, Out} = lc:carry_from(In, Density),
+            lc(Out, fun (LC) ->
                 LC#lc{carry_out = true}
             end, Cells1);
 

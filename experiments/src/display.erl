@@ -48,11 +48,6 @@ sum_expression(LUT) ->
             expression((S bsl 8) bor S)
     end.
 
-%%--------------------------------------------------------------------
-
-carry_out({lc, X, Y, 0}) -> {lc, X - 1, Y, 9};
-carry_out({lc, X, Y, N}) -> {lc, X, Y, N - 1}.
-
 %%====================================================================
 %% control_routing
 %%====================================================================
@@ -404,7 +399,7 @@ routing_lut_common(At, LC = #lc{lut_ports = Ports}) ->
     end,
     case LC#lc.carry_in of
         true ->
-            io:format("  carry_in <- ~w~n", [{carry_out(At), carry_out}]);
+            io:format("  carry_in <- ~w~n", [{lc:carry_from(At), carry_out}]);
 
         false ->
             ok
