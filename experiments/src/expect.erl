@@ -98,7 +98,9 @@ lut(Name, At, #lc{lut = GotLUT}, Expect, ExpectLUT) ->
 
 %%--------------------------------------------------------------------
 
-lut_value(a_xor_c) -> ?LUT_A_XOR_C;
-lut_value(b_xor_c) -> ?LUT_B_XOR_C;
-lut_value(c_xor_d) -> ?LUT_C_XOR_D.
+lut_value(a_and_b_and_c_and_d) -> ?LUT_A_and_B_and_C_and_D;
+lut_value(a_and_b_and_c_and_not_d) -> ?LUT_A_and_B_and_C_and_not_D;
+lut_value(a_xor_c) -> ?LUT_A_xor_C;
+lut_value(b_xor_c) -> ?LUT_B_xor_C;
+lut_value(c_xor_d) -> ?LUT_C_xor_D.
 

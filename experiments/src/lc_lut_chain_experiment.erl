@@ -6,6 +6,10 @@
 %
 % There seems to be a fuse for a LUT Chain into LC #0 but not
 % sure if it is possible or what source might show it.
+%
+% The lut-chain path (data_d) is invered, check that with decompile.
+
+-include("decompile.hrl").
 
 %%====================================================================
 %% run
@@ -81,6 +85,11 @@ experiments(Device, LAB = {lab, X, Y}, Experiments) ->
     lut_chain_fuse(Matrix, Experiments, X, Y, 8),
     lut_chain_fuse(Matrix, Experiments, X, Y, 9),
     %
+    Density = device:density(Device),
+    lists:foreach(fun (Experiment) ->
+        lut_value(Experiment, Density)
+    end, Experiments),
+    %
     ok.
 
 %%--------------------------------------------------------------------
@@ -113,6 +122,21 @@ lut_chain_pattern_bit(#{dests := [Dest]}, N, Acc) ->
     end;
 lut_chain_pattern_bit(_, _, Acc) ->
     Acc.
+
+%%--------------------------------------------------------------------
+
+lut_value(Experiment = {Name, _, _}, Density) ->
+    Logic = decompile:experiment(Experiment, Density),
+    {LAB, X, Y, Z} = Name,
+    AtX = lab:lc(LAB, X),
+    AtY = lab:lc(LAB, Y),
+    AtZ = lab:lc(LAB, Z),
+    #{AtX := LCX} = Logic,
+    #{AtY := LCY} = Logic,
+    #{AtZ := LCZ} = Logic,
+    expect:lut(Name, AtX, LCX, a_and_b_and_c_and_d),
+    expect:lut(Name, AtY, LCY, a_and_b_and_c_and_d),
+    expect:lut(Name, AtZ, LCZ, a_and_b_and_c_and_d).
 
 %%--------------------------------------------------------------------
 

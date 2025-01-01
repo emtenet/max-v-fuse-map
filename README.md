@@ -535,6 +535,8 @@ Each LC can receive a LUT input from the LUT output of the previous LC.
 
 The input always comes into the `data_d` input.
 
+The lut-chain input is __invered__, the LUT logic must take that into account.
+
 The first LC in a LAB has this fuse, but not sure where that input comes from.
 
 ### `{lc(), lut, a#b#c#d#}`
