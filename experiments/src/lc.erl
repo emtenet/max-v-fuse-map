@@ -8,7 +8,10 @@
 -export([inputs/0]).
 -export([carry_from/1]).
 -export([carry_from/2]).
+-export([carry_to/1]).
+-export([carry_to/2]).
 -export([chain_from/1]).
+-export([chain_to/1]).
 
 -export_type([lc/0]).
 -export_type([input/0]).
@@ -106,7 +109,7 @@ inputs() ->
 carry_from({lc, X, Y, 0}) ->
     {lc, X - 1, Y, 9};
 carry_from({lc, X, Y, N}) ->
-    {ok, {lc, X, Y, N - 1}}.
+    {lc, X, Y, N - 1}.
 
 %%--------------------------------------------------------------------
 
@@ -124,6 +127,32 @@ carry_from({lc, X, Y, N}, _) ->
     {ok, {lc, X, Y, N - 1}}.
 
 %%====================================================================
+%% carry_to
+%%====================================================================
+
+-spec carry_to(lc()) -> lc().
+
+carry_to({lc, X, Y, 9}) ->
+    {lc, X + 1, Y, 0};
+carry_to({lc, X, Y, N}) ->
+    {lc, X, Y, N + 1}.
+
+%%--------------------------------------------------------------------
+
+-spec carry_to(lc(), density()) -> {ok, lc()} | false.
+
+carry_to({lc, X, Y, 9}, Density) ->
+    case density:is_lab(X + 1, Y, Density) of
+        true ->
+            {ok, {lc, X + 1, Y, 9}};
+
+        false ->
+            false
+    end;
+carry_to({lc, X, Y, N}, _) ->
+    {ok, {lc, X, Y, N + 1}}.
+
+%%====================================================================
 %% chain_from
 %%====================================================================
 
@@ -133,4 +162,15 @@ chain_from({lc, _, _, 0}) ->
     false;
 chain_from({lc, X, Y, N}) ->
     {ok, {lc, X, Y, N - 1}}.
+
+%%====================================================================
+%% chain_to
+%%====================================================================
+
+-spec chain_to(lc()) -> {ok, lc()} | false.
+
+chain_to({lc, _, _, 9}) ->
+    false;
+chain_to({lc, X, Y, N}) ->
+    {ok, {lc, X, Y, N + 1}}.
 
