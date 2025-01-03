@@ -100,7 +100,12 @@ lut(Name, At, #lc{lut = GotLUT}, Expect, ExpectLUT) ->
 
 lut_value(a_and_b_and_c_and_d) -> ?LUT_A_and_B_and_C_and_D;
 lut_value(a_and_b_and_c_and_not_d) -> ?LUT_A_and_B_and_C_and_not_D;
+lut_value(a_xor_b_carry) -> ?LUT_A_xor_B_carry;
+lut_value(a_xor_b_xor_c_carry) -> ?LUT_A_xor_B_xor_C_carry;
+lut_value(a_xor_b_xor_not_c_carry) -> ?LUT_A_xor_B_xor_not_C_carry;
 lut_value(a_xor_c) -> ?LUT_A_xor_C;
 lut_value(b_xor_c) -> ?LUT_B_xor_C;
-lut_value(c_xor_d) -> ?LUT_C_xor_D.
+lut_value(c) -> ?LUT_C;
+lut_value(c_xor_d) -> ?LUT_C_xor_D;
+lut_value(not_c) -> ?LUT_not_C.
 

@@ -5,6 +5,8 @@
 % Duplicate of lc_carry_chain_3_experiment
 % but with a carry-chain length of 9
 
+-include("decompile.hrl").
+
 %%====================================================================
 %% run
 %%====================================================================
@@ -69,7 +71,48 @@ experiments(Density, Device, LAB, Experiments) ->
     %display:control_routing(Experiments),
     %display:routing(Experiments, Density),
     %
+    Density = device:density(Device),
+    lists:foreach(fun (Experiment) ->
+        lut_value(Experiment, Density)
+    end, Experiments),
+    %
     ok.
+
+%%--------------------------------------------------------------------
+
+lut_value(Experiment = {Name, _, _}, Density) ->
+    Logic = decompile:experiment(Experiment, Density),
+    {LAB, adder} = Name,
+    At0 = lab:lc(LAB, 0),
+    At1 = lc:carry_to(At0),
+    At2 = lc:carry_to(At1),
+    At3 = lc:carry_to(At2),
+    At4 = lc:carry_to(At3),
+    At5 = lc:carry_to(At4),
+    At6 = lc:carry_to(At5),
+    At7 = lc:carry_to(At6),
+    At8 = lc:carry_to(At7),
+    At9 = lc:carry_to(At8),
+    #{At0 := LC0} = Logic,
+    #{At1 := LC1} = Logic,
+    #{At2 := LC2} = Logic,
+    #{At3 := LC3} = Logic,
+    #{At4 := LC4} = Logic,
+    #{At5 := LC5} = Logic,
+    #{At6 := LC6} = Logic,
+    #{At7 := LC7} = Logic,
+    #{At8 := LC8} = Logic,
+    #{At9 := LC9} = Logic,
+    expect:lut(Name, At0, LC0, a_xor_b_carry),
+    expect:lut(Name, At1, LC1, a_xor_b_xor_c_carry),
+    expect:lut(Name, At2, LC2, a_xor_b_xor_not_c_carry),
+    expect:lut(Name, At3, LC3, a_xor_b_xor_c_carry),
+    expect:lut(Name, At4, LC4, a_xor_b_xor_not_c_carry),
+    expect:lut(Name, At5, LC5, a_xor_b_xor_c_carry),
+    expect:lut(Name, At6, LC6, a_xor_b_xor_not_c_carry),
+    expect:lut(Name, At7, LC7, a_xor_b_xor_c_carry),
+    expect:lut(Name, At8, LC8, a_xor_b_xor_not_c_carry),
+    expect:lut(Name, At9, LC9, c).
 
 %%--------------------------------------------------------------------
 

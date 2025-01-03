@@ -475,15 +475,35 @@ ufm_port(UFM0 = #ufm{ports = Ports0}, Name, Port, Route, Signal) ->
 
 %%--------------------------------------------------------------------
 
+% The following fixups match the LUTs shown in the Quartus II 13.1 software.
+
+fixup_lut({lc, _, _, N}, LC = #lc{carry_out = true, lut = LUT})
+        when N =:= 4 orelse N =:= 9 ->
+    % inverted CARRY input (swap last two nibbles)
+    LC#lc{
+        lut = (LUT band 16#ff00) bor
+              ((LUT band 16#00f0) bsr 4) bor
+              ((LUT band 16#000f) bsl 4)
+    };
+fixup_lut(_, LC = #lc{carry_out = true, lut = LUT}) ->
+    % inverted CARRY input (swap last two nibbles)
+    % inverted CARRY output (invert last byte)
+    LC#lc{
+        lut = (LUT band 16#ff00) bor
+              (((bnot LUT) band 16#00f0) bsr 4) bor
+              (((bnot LUT) band 16#000f) bsl 4)
+    };
 fixup_lut(_, LC = #lc{feedback = true, lut = LUT}) ->
     % inverted C input
     LC#lc{
-        lut = ((LUT band 16#F0F0) bsr 4) bor ((LUT band 16#0F0F) bsl 4)
+        lut = ((LUT band 16#F0F0) bsr 4) bor
+              ((LUT band 16#0F0F) bsl 4)
     };
 fixup_lut(_, LC = #lc{lut_chain = true, lut = LUT}) ->
     % inverted D input
     LC#lc{
-        lut = ((LUT band 16#FF00) bsr 8) bor ((LUT band 16#00FF) bsl 8)
+        lut = ((LUT band 16#FF00) bsr 8) bor
+              ((LUT band 16#00FF) bsl 8)
     };
 fixup_lut(_, Cell) ->
     Cell.

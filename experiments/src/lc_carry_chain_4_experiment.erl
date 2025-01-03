@@ -5,6 +5,8 @@
 % Duplicate of lc_carry_chain_3_experiment
 % but with a carry-chain length of 4
 
+-include("decompile.hrl").
+
 %%====================================================================
 %% run
 %%====================================================================
@@ -94,6 +96,11 @@ experiments(Density, Device, LAB, Experiments) ->
     %
     expect(Matrix, LAB, adjacent(Density, LAB)),
     %
+    Density = device:density(Device),
+    lists:foreach(fun (Experiment) ->
+        lut_value(Experiment, Density)
+    end, Experiments),
+    %
     ok.
 
 %%--------------------------------------------------------------------
@@ -122,6 +129,27 @@ expect(Matrix, LAB, false) ->
     expect:fuse(Matrix, [1,1,1,0,0,0], {lab:lc(LAB, 7), carry_in}),
     expect:fuse(Matrix, [1,1,1,1,0,0], {lab:lc(LAB, 8), carry_in}),
     expect:fuse(Matrix, [1,1,1,1,1,0], {lab:lc(LAB, 9), carry_in}).
+
+%%--------------------------------------------------------------------
+
+lut_value(Experiment = {Name, _, _}, Density) ->
+    Logic = decompile:experiment(Experiment, Density),
+    {LAB, adder, N} = Name,
+    At0 = lab:lc(LAB, N),
+    At1 = lc:carry_to(At0),
+    At2 = lc:carry_to(At1),
+    At3 = lc:carry_to(At2),
+    At4 = lc:carry_to(At3),
+    #{At0 := LC0} = Logic,
+    #{At1 := LC1} = Logic,
+    #{At2 := LC2} = Logic,
+    #{At3 := LC3} = Logic,
+    #{At4 := LC4} = Logic,
+    expect:lut(Name, At0, LC0, a_xor_b_carry),
+    expect:lut(Name, At1, LC1, a_xor_b_xor_c_carry),
+    expect:lut(Name, At2, LC2, a_xor_b_xor_not_c_carry),
+    expect:lut(Name, At3, LC3, a_xor_b_xor_c_carry),
+    expect:lut(Name, At4, LC4, not_c).
 
 %%--------------------------------------------------------------------
 

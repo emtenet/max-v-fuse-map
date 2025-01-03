@@ -496,7 +496,7 @@ Each LC can __feedback__ the register output into it's own LUT at `data_c`.
 
 This fuse enables that feedback.
 
-The feedback is __invered__, the LUT logic must take that into account.
+The feedback is __inverted__, the LUT logic must take that into account.
 
 NOTE: The normal `data_c` selection can then only be used as a `s_load` source.
 
@@ -520,14 +520,31 @@ Most LCs can receive a carry-in from the "previous" LC.
 
 The carry-in always comes into the `data_c` input.
 
-The "previous" LC to `{lc, X, Y, N}` is:
+The __previous__ LC to `{lc, X, Y, N}` is:
 
  * `{lc, X, Y, N - 1}` for `N` in `1..9`, otherwise
  * `{lc, X - 1, Y, 9}` for `N` is `0`.
 
-NOTE: The carry-change can go across the whole row.
+NOTE: The carry-chain can go across the whole row.
 
 NOTE: The left most `{lc, _, _, 0}` of each row cannot receive a carry-in.
+
+This turns the __previous__ LC into __arithmetic__ mode:
+
+ * the sum is the equivilent to the LUT with `data_d = 1` (top 8 bits of LUT)
+ * the carry is the equivilent to the LUT with `data_d = 0`
+
+The carry-out is split two ways:
+
+ * one, to the next sum / standard LUT stage,
+ * two, to the next carry stage.
+
+One and only one of these two carry's is __inverted__ and
+the the LUT logic of the next LC must take that into account.
+
+The carry-out is __inverted__:
+ * to the next carry stage for `{lc, X, Y, 4}` and `{lc, X, Y, 9}`
+ * to the next sum / LUT for all other `{lc, X, Y, N}`.
 
 ### `{lc(), lut_chain, off}`
 
@@ -535,7 +552,7 @@ Each LC can receive a LUT input from the LUT output of the previous LC.
 
 The input always comes into the `data_d` input.
 
-The lut-chain input is __invered__, the LUT logic must take that into account.
+The lut-chain input is __inverted__, the LUT logic must take that into account.
 
 The first LC in a LAB has this fuse, but not sure where that input comes from.
 

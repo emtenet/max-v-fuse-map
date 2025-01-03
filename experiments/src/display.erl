@@ -9,19 +9,8 @@
 -include("decompile.hrl").
 
 %%====================================================================
-%% carry_adjust
+%% sum / carry expressions
 %%====================================================================
-
-carry_adjust({lc, _, _, N}, LUT) when N =:= 4 orelse N =:= 9 ->
-    (LUT band 16#ff00) bor
-    ((LUT band 16#00f0) bsr 4) bor
-    ((LUT band 16#000f) bsl 4);
-carry_adjust({lc, _, _, _}, LUT) ->
-    (LUT band 16#ff00) bor
-    (((bnot LUT) band 16#00f0) bsr 4) bor
-    (((bnot LUT) band 16#000f) bsl 4).
-
-%%--------------------------------------------------------------------
 
 carry_expression(LUT) ->
     C = LUT band 2#11111111,
@@ -406,7 +395,7 @@ routing_lut_common(At, LC = #lc{lut_ports = Ports}) ->
     end,
     case LC#lc.carry_out of
         true ->
-            LUT = carry_adjust(At, LC#lc.lut),
+            LUT = LC#lc.lut,
             io:format("    (~4.16.0B) sum = ~s, carry = ~s~n", [
                 LUT,
                 sum_expression(LUT),

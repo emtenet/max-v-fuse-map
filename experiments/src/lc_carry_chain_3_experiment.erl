@@ -15,6 +15,8 @@
 %  * {lc, X, Y, N - 1} when N is 1..9
 %  * {lc, X - 1, Y, 9} when N is 0.
 
+-include("decompile.hrl").
+
 %%====================================================================
 %% run
 %%====================================================================
@@ -104,6 +106,11 @@ experiments(Density, Device, LAB, Experiments) ->
     %
     expect(Matrix, LAB, adjacent(Density, LAB)),
     %
+    Density = device:density(Device),
+    lists:foreach(fun (Experiment) ->
+        lut_value(Experiment, Density)
+    end, Experiments),
+    %
     ok.
 
 %%--------------------------------------------------------------------
@@ -131,6 +138,31 @@ expect(Matrix, LAB, false) ->
     expect:fuse(Matrix, [1,1,1,1,0,0,0], {lab:lc(LAB, 7), carry_in}),
     expect:fuse(Matrix, [1,1,1,1,1,0,0], {lab:lc(LAB, 8), carry_in}),
     expect:fuse(Matrix, [1,1,1,1,1,1,0], {lab:lc(LAB, 9), carry_in}).
+
+%%--------------------------------------------------------------------
+
+lut_value(Experiment = {Name, _, _}, Density) ->
+    % LUT 0 (6666) a^b
+    %       (8888) a.b
+    % LUT 1 (9696) a^b^c
+    %       (1717) !(a.b | a.c | b.c)
+    % LUT 2 (6969) a^b^(!c)
+    %       (8E8E) a.b | a.(!c) | b.(!c)
+    % LUT 3 (F0F0) c
+    Logic = decompile:experiment(Experiment, Density),
+    {LAB, adder, N} = Name,
+    At0 = lab:lc(LAB, N),
+    At1 = lc:carry_to(At0),
+    At2 = lc:carry_to(At1),
+    At3 = lc:carry_to(At2),
+    #{At0 := LC0} = Logic,
+    #{At1 := LC1} = Logic,
+    #{At2 := LC2} = Logic,
+    #{At3 := LC3} = Logic,
+    expect:lut(Name, At0, LC0, a_xor_b_carry),
+    expect:lut(Name, At1, LC1, a_xor_b_xor_c_carry),
+    expect:lut(Name, At2, LC2, a_xor_b_xor_not_c_carry),
+    expect:lut(Name, At3, LC3, c).
 
 %%--------------------------------------------------------------------
 
