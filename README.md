@@ -99,6 +99,7 @@ My experiments are being run in the following
  * [UFM](experiments/src/ufm_experiment.erl)
  * UFM interconnect MUX
    [database](experiments/src/ufm_interconnect_mux_database.erl)
+ * Fuse [database](experiments/src/fuse_database.erl)
 
 ## Maps
 
@@ -129,6 +130,10 @@ Some MUX databases have been collected:
    `database/*.r4-interconnect`
  * [UFM interconnect MUX](experiments/src/ufm_interconnect_mux_database.erl)
    `database/*.ufm-interconnect`
+
+All known fuses are also dumped for import into rust tools:
+
+ * [Fuses](experiments/src/fuse_database.erl) `database/*.fuses`
 
 ## Device Fuses
 
