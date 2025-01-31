@@ -4,29 +4,29 @@ use crate::IOCellNumber;
 pub struct Device {
     pub (crate) has_grow: bool,
     // x
-    pub (crate) grow: usize,
-    pub (crate) left: usize,
-    pub (crate) right: usize,
+    pub (crate) grow: u8,
+    pub (crate) left: u8,
+    pub (crate) right: u8,
     // y
-    pub (crate) top: usize,
+    pub (crate) top: u8,
     // io
     pci_compliance: bool,
     bottom_io: &'static [StripEnd],
-    bottom_io_base: usize,
+    bottom_io_base: u16,
     left_io: &'static [StripSide],
-    left_io_base: usize,
+    left_io_base: u16,
     right_io: &'static [StripSide],
-    right_io_base: usize,
+    right_io_base: u16,
     shelf_io: &'static [StripEnd],
-    shelf_io_base: usize,
-    shelf_io_wrap: usize,
+    shelf_io_base: u16,
+    shelf_io_wrap: u16,
     top_io: &'static [StripEnd],
-    top_io_base: usize,
+    top_io_base: u16,
     // sector
-    pub (crate) global_row: usize,
-    pub (crate) short_rows: usize,
+    pub (crate) global_row: u8,
+    pub (crate) short_rows: u8,
     pub (crate) short_sector: usize,
-    pub (crate) long_rows: usize,
+    pub (crate) long_rows: u8,
     pub (crate) long_sector: usize,
     // sync
     pub (crate) sync_width: usize,
@@ -351,7 +351,7 @@ pub enum DeviceIOBlock {
 }
 
 impl Device {
-    pub fn io_block(&self, x: usize, y: usize)
+    pub fn io_block(&self, x: u8, y: u8)
         -> Option<DeviceIOBlock>
     {
         if y == 0 {
@@ -389,31 +389,34 @@ impl Device {
 #[derive(Eq, PartialEq)]
 pub enum DeviceIOCell {
     Bottom {
-        strip: Option<usize>,
+        left: bool,
+        strip: Option<u16>,
     },
     Left {
-        strip: Option<usize>,
+        strip: Option<u16>,
     },
     Right {
         pci_compliance: bool,
-        strip: Option<usize>,
+        strip: Option<u16>,
     },
     Top {
-        strip: Option<usize>,
+        strip: Option<u16>,
     },
 }
 
 impl Device {
-    pub fn io_cell(&self, x: usize, y: usize, n: IOCellNumber)
+    pub fn io_cell(&self, x: u8, y: u8, n: IOCellNumber)
         -> Option<DeviceIOCell>
     {
         if y == 0 {
             if x > self.grow && x < self.right {
                 io_cell_end(self.bottom_io, self.right - x - 1, n)
                     .map(|strip| DeviceIOCell::Bottom {
+                        left: false,
                         strip: Some(self.bottom_io_base + (6 * strip)),
                     })
                     .or_else(|| Some(DeviceIOCell::Bottom {
+                        left: false,
                         strip: None,
                     }))
             } else {
@@ -454,7 +457,7 @@ impl Device {
                 None
             }
         } else if x == self.right {
-            let stride: usize = if self.pci_compliance { 7 } else { 6 };
+            let stride: u16 = if self.pci_compliance { 7 } else { 6 };
             io_cell_side(self.right_io, self.top - y - 1, n)
                 .map(|strip| DeviceIOCell::Right {
                     strip: Some(self.right_io_base + (stride * strip)),
@@ -468,15 +471,18 @@ impl Device {
             io_cell_end(self.shelf_io, self.grow - x - 1, n)
                 .map(|strip| if strip >= self.shelf_io_wrap {
                     let strip = strip - self.shelf_io_wrap;
-                    DeviceIOCell::Left {
+                    DeviceIOCell::Bottom {
+                        left: true,
                         strip: Some(self.left_io_base + (6 * strip)),
                     }
                 } else {
                     DeviceIOCell::Bottom {
+                        left: false,
                         strip: Some(self.shelf_io_base + (6 * strip)),
                     }
                 })
                 .or_else(|| Some(DeviceIOCell::Bottom {
+                    left: false,
                     strip: None,
                 }))
         } else {
@@ -486,17 +492,18 @@ impl Device {
 }
 
 type StripEnd = (
-    Option<usize>,
-    Option<usize>,
-    Option<usize>,
-    Option<usize>,
+    Option<u16>,
+    Option<u16>,
+    Option<u16>,
+    Option<u16>,
 );
 
-fn io_cell_end(strip: &'static[StripEnd], i: usize, n: IOCellNumber)
-    -> Option<usize>
+fn io_cell_end(strip: &'static[StripEnd], i: u8, n: IOCellNumber)
+    -> Option<u16>
 {
     use IOCellNumber::*;
 
+    let i = usize::from(i);
     match n {
         IOCell0 => strip[i].0,
         IOCell1 => strip[i].1,
@@ -507,20 +514,21 @@ fn io_cell_end(strip: &'static[StripEnd], i: usize, n: IOCellNumber)
 }
 
 type StripSide = (
-    Option<usize>,
-    Option<usize>,
-    Option<usize>,
-    Option<usize>,
-    Option<usize>,
-    Option<usize>,
-    Option<usize>,
+    Option<u16>,
+    Option<u16>,
+    Option<u16>,
+    Option<u16>,
+    Option<u16>,
+    Option<u16>,
+    Option<u16>,
 );
 
-fn io_cell_side(strip: &'static[StripSide], i: usize, n: IOCellNumber)
-    -> Option<usize>
+fn io_cell_side(strip: &'static[StripSide], i: u8, n: IOCellNumber)
+    -> Option<u16>
 {
     use IOCellNumber::*;
 
+    let i = usize::from(i);
     match n {
         IOCell0 => strip[i].0,
         IOCell1 => strip[i].1,

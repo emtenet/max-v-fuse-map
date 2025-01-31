@@ -69,8 +69,8 @@ fn max_v_2210z() {
 fn fuse(s: &str) -> (usize, Fuse) {
     let (index, s) = usize_once(s, "=");
     if let Some(s) = s.strip_prefix("{{c4,") {
-        let (x, s) = usize_once(s, ",");
-        let (y, s) = usize_once(s, "},{mux,");
+        let (x, s) = u8_once(s, ",");
+        let (y, s) = u8_once(s, "},{mux,");
         let (i, s) = try_usize_once(s, "},");
         let fuse = c4_fuse(s);
         (index, Fuse::C4Interconnect { x, y, i, fuse })
@@ -84,15 +84,15 @@ fn fuse(s: &str) -> (usize, Fuse) {
             let fuse = global_fuse(s);
             (index, Fuse::Global { index: i, fuse })
         } else {
-            let (_x, s) = usize_once(s, ",");
-            let (_y, s) = usize_once(s, "},");
+            let (_x, s) = u8_once(s, ",");
+            let (_y, s) = u8_once(s, "},");
             let (i, s) = try_usize_once(s, ",");
             let fuse = global_fuse(s);
             (index, Fuse::Global { index: i, fuse })
         }
     } else if let Some(s) = s.strip_prefix("{{iob,") {
-        let (x, s) = usize_once(s, ",");
-        let (y, s) = usize_once(s, "},");
+        let (x, s) = u8_once(s, ",");
+        let (y, s) = u8_once(s, "},");
         if let Some(s) = s.strip_prefix("{interconnect,") {
             let (i, s) = try_usize_once(s, "},");
             let fuse = io_interconnect_fuse(s);
@@ -101,19 +101,19 @@ fn fuse(s: &str) -> (usize, Fuse) {
             todo!("{s}");
         }
     } else if let Some(s) = s.strip_prefix("{{ioc,") {
-        let (x, s) = usize_once(s, ",");
-        let (y, s) = usize_once(s, ",");
+        let (x, s) = u8_once(s, ",");
+        let (y, s) = u8_once(s, ",");
         let (n, s) = try_usize_once(s, "},");
         let fuse = io_cell_fuse(s);
         (index, Fuse::IOCell { x, y, n, fuse })
     } else if let Some(s) = s.strip_prefix("{{jtag,") {
-        let (_x, s) = usize_once(s, ",");
-        let (_y, s) = usize_once(s, "},");
+        let (_x, s) = u8_once(s, ",");
+        let (_y, s) = u8_once(s, "},");
         let fuse = jtag_fuse(s);
         (index, Fuse::JTAG { fuse })
     } else if let Some(s) = s.strip_prefix("{{lab,") {
-        let (x, s) = usize_once(s, ",");
-        let (y, s) = usize_once(s, "},");
+        let (x, s) = u8_once(s, ",");
+        let (y, s) = u8_once(s, "},");
         if let Some(s) = s.strip_prefix("{interconnect,") {
             let (i, s) = try_usize_once(s, "},");
             let fuse = logic_interconnect_fuse(s);
@@ -123,20 +123,20 @@ fn fuse(s: &str) -> (usize, Fuse) {
             (index, Fuse::LogicBlock { x, y, fuse })
         }
     } else if let Some(s) = s.strip_prefix("{{lc,") {
-        let (x, s) = usize_once(s, ",");
-        let (y, s) = usize_once(s, ",");
+        let (x, s) = u8_once(s, ",");
+        let (y, s) = u8_once(s, ",");
         let (n, s) = try_usize_once(s, "},");
         let fuse = logic_cell_fuse(s);
         (index, Fuse::LogicCell { x, y, n, fuse })
     } else if let Some(s) = s.strip_prefix("{{r4,") {
-        let (x, s) = usize_once(s, ",");
-        let (y, s) = usize_once(s, "},{mux,");
+        let (x, s) = u8_once(s, ",");
+        let (y, s) = u8_once(s, "},{mux,");
         let (i, s) = try_usize_once(s, "},");
         let fuse = r4_fuse(s);
         (index, Fuse::R4Interconnect { x, y, i, fuse })
     } else if let Some(s) = s.strip_prefix("{{ufm,") {
-        let (x, s) = usize_once(s, ",");
-        let (y, s) = usize_once(s, "},");
+        let (x, s) = u8_once(s, ",");
+        let (y, s) = u8_once(s, "},");
         if let Some(s) = s.strip_prefix("{interconnect,") {
             let (i, s) = try_usize_once(s, "},");
             let fuse = ufm_interconnect_fuse(s);
@@ -151,6 +151,12 @@ fn fuse(s: &str) -> (usize, Fuse) {
     } else {
         todo!("{s}");
     }
+}
+
+fn u8_once<'a>(s: &'a str, delimiter: &str) -> (u8, &'a str) {
+    let (n, s) = s.split_once(delimiter).unwrap();
+    let n: u8 = n.parse().unwrap();
+    (n, s)
 }
 
 fn usize_once<'a>(s: &'a str, delimiter: &str) -> (usize, &'a str) {
@@ -215,7 +221,7 @@ fn global(s: &str) -> Global {
 
 fn global_fuse(s: &str) -> GlobalFuse {
     if let Some(s) = s.strip_prefix("{column,") {
-        let (column, _) = usize_once(s, "},off}");
+        let (column, _) = u8_once(s, "},off}");
         GlobalFuse::ColumnOff(column)
     } else if s == "internal}" {
         GlobalFuse::Internal
