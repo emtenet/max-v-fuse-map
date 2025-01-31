@@ -21,7 +21,7 @@
 -type block() :: lab:lab().
 
 -type indexes() :: #{index() => mux()}.
--type index() :: 0..25.
+-type index() :: 0..9.
 
 -type mux() :: #{mux_key() => from()}.
 -type mux_key() :: direct_link | {mux4(), mux3()}.
