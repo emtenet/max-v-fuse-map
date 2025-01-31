@@ -1,7 +1,7 @@
 
 use crate::IOCellNumber;
 
-pub struct Device {
+pub struct Density {
     pub (crate) has_grow: bool,
     // x
     pub (crate) grow: u8,
@@ -32,7 +32,7 @@ pub struct Device {
     pub (crate) sync_width: usize,
 }
 
-pub const MAX_V_240Z: Device = Device {
+pub const MAX_V_240Z: Density = Density {
     has_grow: false,
     // x
     grow: 1,
@@ -87,7 +87,7 @@ pub const MAX_V_240Z: Device = Device {
     sync_width: 32,
 };
 
-pub const MAX_V_570Z: Device = Device {
+pub const MAX_V_570Z: Density = Density {
     has_grow: true,
     // x
     grow: 9,
@@ -157,7 +157,7 @@ pub const MAX_V_570Z: Device = Device {
     sync_width: 32,
 };
 
-pub const MAX_V_1270Z: Device = Device {
+pub const MAX_V_1270Z: Density = Density {
     has_grow: true,
     // x
     grow: 11,
@@ -241,7 +241,7 @@ pub const MAX_V_1270Z: Device = Device {
     sync_width: 64,
 };
 
-pub const MAX_V_2210Z: Device = Device {
+pub const MAX_V_2210Z: Density = Density {
     has_grow: true,
     // x
     grow: 13,
@@ -343,26 +343,26 @@ pub const MAX_V_2210Z: Device = Device {
 #[derive(Copy, Clone)]
 #[derive(Debug)]
 #[derive(Eq, PartialEq)]
-pub enum DeviceIOBlock {
+pub enum DensityIOBlock {
     Bottom,
     Left,
     Right,
     Top,
 }
 
-impl Device {
+impl Density {
     pub fn io_block(&self, x: u8, y: u8)
-        -> Option<DeviceIOBlock>
+        -> Option<DensityIOBlock>
     {
         if y == 0 {
             if x > self.grow && x < self.right {
-                Some(DeviceIOBlock::Bottom)
+                Some(DensityIOBlock::Bottom)
             } else {
                 None
             }
         } else if y == self.top {
             if x > self.left && x < self.right {
-                Some(DeviceIOBlock::Top)
+                Some(DensityIOBlock::Top)
             } else {
                 None
             }
@@ -370,14 +370,14 @@ impl Device {
             None
         } else if x == self.left {
             if !self.has_grow || y > 3 {
-                Some(DeviceIOBlock::Left)
+                Some(DensityIOBlock::Left)
             } else {
                 None
             }
         } else if x == self.right {
-            Some(DeviceIOBlock::Right)
+            Some(DensityIOBlock::Right)
         } else if self.has_grow && x < self.grow {
-            Some(DeviceIOBlock::Bottom)
+            Some(DensityIOBlock::Bottom)
         } else {
             None
         }
@@ -387,7 +387,7 @@ impl Device {
 #[derive(Copy, Clone)]
 #[derive(Debug)]
 #[derive(Eq, PartialEq)]
-pub enum DeviceIOCell {
+pub enum DensityIOCell {
     Bottom {
         left: bool,
         strip: Option<u16>,
@@ -404,18 +404,18 @@ pub enum DeviceIOCell {
     },
 }
 
-impl Device {
+impl Density {
     pub fn io_cell(&self, x: u8, y: u8, n: IOCellNumber)
-        -> Option<DeviceIOCell>
+        -> Option<DensityIOCell>
     {
         if y == 0 {
             if x > self.grow && x < self.right {
                 io_cell_end(self.bottom_io, self.right - x - 1, n)
-                    .map(|strip| DeviceIOCell::Bottom {
+                    .map(|strip| DensityIOCell::Bottom {
                         left: false,
                         strip: Some(self.bottom_io_base + (6 * strip)),
                     })
-                    .or_else(|| Some(DeviceIOCell::Bottom {
+                    .or_else(|| Some(DensityIOCell::Bottom {
                         left: false,
                         strip: None,
                     }))
@@ -425,10 +425,10 @@ impl Device {
         } else if y == self.top {
             if x > self.left && x < self.right {
                 io_cell_end(self.top_io, x - self.left - 1, n)
-                    .map(|strip| DeviceIOCell::Top {
+                    .map(|strip| DensityIOCell::Top {
                         strip: Some(self.top_io_base + (6 * strip)),
                     })
-                    .or_else(|| Some(DeviceIOCell::Top {
+                    .or_else(|| Some(DensityIOCell::Top {
                         strip: None,
                     }))
             } else {
@@ -439,18 +439,18 @@ impl Device {
         } else if x == self.left {
             if !self.has_grow {
                 io_cell_side(self.left_io, y - 1, n)
-                    .map(|strip| DeviceIOCell::Left {
+                    .map(|strip| DensityIOCell::Left {
                         strip: Some(self.left_io_base + (6 * strip)),
                     })
-                    .or_else(|| Some(DeviceIOCell::Left {
+                    .or_else(|| Some(DensityIOCell::Left {
                         strip: None,
                     }))
             } else if y > 3 {
                 io_cell_side(self.left_io, y - 4, n)
-                    .map(|strip| DeviceIOCell::Left {
+                    .map(|strip| DensityIOCell::Left {
                         strip: Some(self.left_io_base + (6 * strip)),
                     })
-                    .or_else(|| Some(DeviceIOCell::Left {
+                    .or_else(|| Some(DensityIOCell::Left {
                         strip: None,
                     }))
             } else {
@@ -459,11 +459,11 @@ impl Device {
         } else if x == self.right {
             let stride: u16 = if self.pci_compliance { 7 } else { 6 };
             io_cell_side(self.right_io, self.top - y - 1, n)
-                .map(|strip| DeviceIOCell::Right {
+                .map(|strip| DensityIOCell::Right {
                     strip: Some(self.right_io_base + (stride * strip)),
                     pci_compliance: self.pci_compliance,
                 })
-                .or_else(|| Some(DeviceIOCell::Right {
+                .or_else(|| Some(DensityIOCell::Right {
                     strip: None,
                     pci_compliance: false,
                 }))
@@ -471,17 +471,17 @@ impl Device {
             io_cell_end(self.shelf_io, self.grow - x - 1, n)
                 .map(|strip| if strip >= self.shelf_io_wrap {
                     let strip = strip - self.shelf_io_wrap;
-                    DeviceIOCell::Bottom {
+                    DensityIOCell::Bottom {
                         left: true,
                         strip: Some(self.left_io_base + (6 * strip)),
                     }
                 } else {
-                    DeviceIOCell::Bottom {
+                    DensityIOCell::Bottom {
                         left: false,
                         strip: Some(self.shelf_io_base + (6 * strip)),
                     }
                 })
-                .or_else(|| Some(DeviceIOCell::Bottom {
+                .or_else(|| Some(DensityIOCell::Bottom {
                     left: false,
                     strip: None,
                 }))

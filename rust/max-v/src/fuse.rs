@@ -1,5 +1,8 @@
-
 use crate::*;
+
+mod at;
+
+use at::*;
 
 #[derive(Copy, Clone)]
 #[derive(Debug)]
@@ -300,22 +303,22 @@ pub enum FuseOutOfRange {
 }
 
 impl Fuse {
-    pub fn to_index(self, device: &Device) -> Result<usize, FuseOutOfRange> {
-        self.to_location(device)?.to_index(device)
+    pub fn to_index(self, density: &Density) -> Result<usize, FuseOutOfRange> {
+        self.to_location(density)?.to_index(density)
     }
 
-    fn to_location(self, device: &Device)
-        -> Result<FuseLocation, FuseOutOfRange>
+    fn to_location(self, density: &Density)
+        -> Result<FuseAt, FuseOutOfRange>
     {
-        use FuseLocation as At;
+        use FuseAt as At;
 
         match self {
             Fuse::C4Interconnect { .. } =>
                 Err(FuseOutOfRange::Unimplemented),
 
             Fuse::DeviceOutputEnable => {
-                let x = device.grow;
-                if device.has_grow {
+                let x = density.grow;
+                if density.has_grow {
                     Ok(At::End { x, top: false, sector: 9, index: 9 })
                 } else {
                     Ok(At::End { x, top: false, sector: 8, index: 1 })
@@ -323,8 +326,8 @@ impl Fuse {
             }
 
             Fuse::DeviceReset => {
-                let x = device.grow;
-                if device.has_grow {
+                let x = density.grow;
+                if density.has_grow {
                     Ok(At::End { x, top: false, sector: 8, index: 9 })
                 } else {
                     Ok(At::End { x, top: false, sector: 7, index: 1 })
@@ -332,20 +335,20 @@ impl Fuse {
             }
 
             Fuse::Global { index, fuse } =>
-                global_location(index, fuse, device),
+                global_location(index, fuse, density),
 
             Fuse::IOCell { x, y, n, fuse } =>
-                match device.io_cell(x, y, n) {
-                    Some(DeviceIOCell::Bottom { left, strip }) =>
+                match density.io_cell(x, y, n) {
+                    Some(DensityIOCell::Bottom { left, strip }) =>
                         io_cell_column(x, false, left, n, strip, fuse),
 
-                    Some(DeviceIOCell::Top { strip }) =>
+                    Some(DensityIOCell::Top { strip }) =>
                         io_cell_column(x, true, false, n, strip, fuse),
 
-                    Some(DeviceIOCell::Left { strip }) =>
+                    Some(DensityIOCell::Left { strip }) =>
                         io_cell_row(x, true, y, n, strip, false, fuse),
 
-                    Some(DeviceIOCell::Right { strip, pci_compliance: pci }) =>
+                    Some(DensityIOCell::Right { strip, pci_compliance: pci }) =>
                         io_cell_row(x, false, y, n, strip, pci, fuse),
 
                     None =>
@@ -353,11 +356,11 @@ impl Fuse {
                 },
 
             Fuse::IOInterconnect { x, y, i, fuse } =>
-                match device.io_block(x, y) {
-                    Some(DeviceIOBlock::Bottom) =>
+                match density.io_block(x, y) {
+                    Some(DensityIOBlock::Bottom) =>
                         io_interconnect_column(x, false, i, fuse),
 
-                    Some(DeviceIOBlock::Top) =>
+                    Some(DensityIOBlock::Top) =>
                         io_interconnect_column(x, true, i, fuse),
 
                     _ =>
@@ -380,8 +383,8 @@ impl Fuse {
                 Err(FuseOutOfRange::Unimplemented),
 
             Fuse::UserCode { bit } =>
-                if device.has_grow {
-                    Ok(user_code_location_grow(bit, device.grow))
+                if density.has_grow {
+                    Ok(user_code_location_grow(bit, density.grow))
                 } else {
                     Ok(user_code_location(bit))
                 },
@@ -395,14 +398,14 @@ impl Fuse {
     }
 }
 
-fn global_location(global: Global, fuse: GlobalFuse, device: &Device)
-    -> Result<FuseLocation, FuseOutOfRange>
+fn global_location(global: Global, fuse: GlobalFuse, density: &Density)
+    -> Result<FuseAt, FuseOutOfRange>
 {
     use Global::*;
-    use FuseLocation as At;
+    use FuseAt as At;
 
     match fuse {
-        GlobalFuse::ColumnOff(x) if x == device.left =>
+        GlobalFuse::ColumnOff(x) if x == density.left =>
             match global {
                 Global0 => Ok(At::Global { x, sector: 5 }),
                 Global1 => Ok(At::Global { x, sector: 6 }),
@@ -410,27 +413,27 @@ fn global_location(global: Global, fuse: GlobalFuse, device: &Device)
                 Global3 => Ok(At::Global { x, sector: 8 }),
             },
 
-        GlobalFuse::ColumnOff(x) if x > device.left && x <= device.right =>
+        GlobalFuse::ColumnOff(x) if x > density.left && x <= density.right =>
             match global {
-                Global0 if x == device.left + 1 =>
+                Global0 if x == density.left + 1 =>
                     Ok(At::Global { x: x - 1, sector: 12 }),
 
                 Global0 =>
                     Ok(At::Global { x: x - 1, sector: 27 }),
 
-                //Global1 if x == device.right =>
+                //Global1 if x == density.right =>
                 //    Ok(At::Global { x, sector: 12 }),
 
                 Global1 =>
                     Ok(At::Global { x, sector: 0 }),
 
-                //Global2 if x == device.right =>
+                //Global2 if x == density.right =>
                 //    Ok(At::Global { x, sector: 10 }),
 
                 Global2 =>
                     Ok(At::Global { x, sector: 2 }),
 
-                //Global3 if x == device.right =>
+                //Global3 if x == density.right =>
                 //    Ok(At::Global { x, sector: 9 }),
 
                 Global3 =>
@@ -443,29 +446,29 @@ fn global_location(global: Global, fuse: GlobalFuse, device: &Device)
         GlobalFuse::Internal =>
             match global {
                 Global0 =>
-                    if device.has_grow {
-                        Ok(At::Global { x: device.grow + 1, sector: 4 })
+                    if density.has_grow {
+                        Ok(At::Global { x: density.grow + 1, sector: 4 })
                     } else {
                         Ok(At::Global { x: 2, sector: 4 })
                     },
 
                 Global1 =>
-                    if device.has_grow {
-                        Ok(At::Global { x: device.grow, sector: 26 })
+                    if density.has_grow {
+                        Ok(At::Global { x: density.grow, sector: 26 })
                     } else {
                         Ok(At::Global { x: 1, sector: 11 })
                     },
 
                 Global2 =>
-                    if device.has_grow {
-                        Ok(At::Global { x: device.grow, sector: 24 })
+                    if density.has_grow {
+                        Ok(At::Global { x: density.grow, sector: 24 })
                     } else {
                         Ok(At::Global { x: 1, sector: 3 })
                     },
 
                 Global3 =>
-                    if device.has_grow {
-                        Ok(At::Global { x: device.grow, sector: 22 })
+                    if density.has_grow {
+                        Ok(At::Global { x: density.grow, sector: 22 })
                     } else {
                         Ok(At::Global { x: 1, sector: 9 })
                     },
@@ -477,29 +480,29 @@ fn global_location(global: Global, fuse: GlobalFuse, device: &Device)
         GlobalFuse::RowOff =>
             match global {
                 Global0 =>
-                    if device.has_grow {
-                        Ok(At::Global { x: device.grow + 1, sector: 5 })
+                    if density.has_grow {
+                        Ok(At::Global { x: density.grow + 1, sector: 5 })
                     } else {
                         Ok(At::Global { x: 2, sector: 5 })
                     },
 
                 Global1 =>
-                    if device.has_grow {
-                        Ok(At::Global { x: device.grow + 1, sector: 1 })
+                    if density.has_grow {
+                        Ok(At::Global { x: density.grow + 1, sector: 1 })
                     } else {
                         Ok(At::Global { x: 2, sector: 1 })
                     },
 
                 Global2 =>
-                    if device.has_grow {
-                        Ok(At::Global { x: device.grow, sector: 25 })
+                    if density.has_grow {
+                        Ok(At::Global { x: density.grow, sector: 25 })
                     } else {
                         Ok(At::Global { x: 1, sector: 4 })
                     },
 
                 Global3 =>
-                    if device.has_grow {
-                        Ok(At::Global { x: device.grow, sector: 23 })
+                    if density.has_grow {
+                        Ok(At::Global { x: density.grow, sector: 23 })
                     } else {
                         Ok(At::Global { x: 1, sector: 10 })
                     },
@@ -523,7 +526,7 @@ fn io_cell_column(
     n: IOCellNumber,
     strip: Option<u16>,
     fuse: IOCellFuse,
-) -> Result<FuseLocation, FuseOutOfRange> {
+) -> Result<FuseAt, FuseOutOfRange> {
     use io_cell_column_end as end;
     use IOCellFuse as Fuse;
     use Select3::*;
@@ -592,9 +595,9 @@ fn io_cell_column_end(
     top: bool,
     n: IOCellNumber,
     cell: [(u8, u8); 4],
-) -> FuseLocation {
+) -> FuseAt {
     let (sector, index) = cell[n.index()];
-    FuseLocation::End { x, top, sector, index }
+    FuseAt::End { x, top, sector, index }
 }
 
 fn io_cell_row(
@@ -605,7 +608,7 @@ fn io_cell_row(
     strip: Option<u16>,
     pci_compliance: bool,
     fuse: IOCellFuse,
-) -> Result<FuseLocation, FuseOutOfRange> {
+) -> Result<FuseAt, FuseOutOfRange> {
     use IOCellFuse as Fuse;
     use Select3::*;
     use Select6::*;
@@ -680,14 +683,14 @@ fn io_cell_strip(
     top_left: bool,
     index: u16,
     pci_compliance: bool,
-) -> Result<FuseLocation, FuseOutOfRange> {
+) -> Result<FuseAt, FuseOutOfRange> {
     if let Some(strip) = strip {
         if top_left {
-            Ok(FuseLocation::Strip { strip: strip + index })
+            Ok(FuseAt::Strip { strip: strip + index })
         } else if pci_compliance {
-            Ok(FuseLocation::Strip { strip: strip + 6 - index })
+            Ok(FuseAt::Strip { strip: strip + 6 - index })
         } else {
-            Ok(FuseLocation::Strip { strip: strip + 7 - index })
+            Ok(FuseAt::Strip { strip: strip + 7 - index })
         }
     } else {
         Err(FuseOutOfRange::IO)
@@ -701,8 +704,8 @@ fn io_cell_row_side(
     mut sector: u8,
     n: IOCellNumber,
     index: u8,
-) -> Result<FuseLocation, FuseOutOfRange> {
-    use FuseLocation as At;
+) -> Result<FuseAt, FuseOutOfRange> {
+    use FuseAt as At;
     use IOCellNumber::*;
     use LogicCellNumber::*;
 
@@ -725,7 +728,7 @@ fn io_interconnect_column(
     top: bool,
     i: IOInterconnectIndex,
     fuse: IOInterconnectFuse,
-) -> Result<FuseLocation, FuseOutOfRange> {
+) -> Result<FuseAt, FuseOutOfRange> {
     use IOInterconnectFuse as Fuse;
     use Select3::*;
     use Select4::*;
@@ -756,8 +759,8 @@ fn io_interconnect_column_end(
     i: IOInterconnectIndex,
     sector: u8,
     index: u8,
-) -> Result<FuseLocation, FuseOutOfRange> {
-    use FuseLocation as At;
+) -> Result<FuseAt, FuseOutOfRange> {
+    use FuseAt as At;
     use IOInterconnectIndex::*;
 
     let s = 23 - sector;
@@ -781,13 +784,13 @@ fn logic_block(
     x: u8,
     y: u8,
     fuse: LogicBlockFuse,
-) -> Result<FuseLocation, FuseOutOfRange> {
+) -> Result<FuseAt, FuseOutOfRange> {
     use Control::*;
     use Global::*;
     use LogicCellNumber::*;
     use LogicBlockControlFuse::*;
     use LogicBlockFuse as Fuse;
-    use FuseLocation as At;
+    use FuseAt as At;
     use Select3::*;
     use Select6::*;
 
@@ -992,11 +995,11 @@ fn logic_cell(
     y: u8,
     n: LogicCellNumber,
     fuse: LogicCellFuse,
-) -> Result<FuseLocation, FuseOutOfRange> {
+) -> Result<FuseAt, FuseOutOfRange> {
     use LogicCellFuse as Fuse;
     use LogicCellInput::*;
     use LogicCellInputFuse::*;
-    use FuseLocation as At;
+    use FuseAt as At;
     use LUTBit::*;
     use Select3::*;
     use Select6::*;
@@ -1134,8 +1137,8 @@ fn logic_interconnect(
     y: u8,
     i: LogicInterconnectIndex,
     fuse: LogicInterconnectFuse,
-) -> Result<FuseLocation, FuseOutOfRange> {
-    use FuseLocation as At;
+) -> Result<FuseAt, FuseOutOfRange> {
+    use FuseAt as At;
     use LogicCellNumber::*;
     use LogicInterconnectFuse as Fuse;
     use LogicInterconnectIndex::*;
@@ -1568,8 +1571,8 @@ fn logic_interconnect(
     }
 }
 
-fn user_code_location(bit: UserCodeBit) -> FuseLocation {
-    use FuseLocation as At;
+fn user_code_location(bit: UserCodeBit) -> FuseAt {
+    use FuseAt as At;
     use UserCodeBit::*;
 
     match bit {
@@ -1608,8 +1611,8 @@ fn user_code_location(bit: UserCodeBit) -> FuseLocation {
     }
 }
 
-fn user_code_location_grow(bit: UserCodeBit, x: u8) -> FuseLocation {
-    use FuseLocation as At;
+fn user_code_location_grow(bit: UserCodeBit, x: u8) -> FuseAt {
+    use FuseAt as At;
     use UserCodeBit::*;
 
     match bit {

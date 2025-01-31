@@ -1,13 +1,10 @@
 
 pub mod config;
-mod device;
+mod density;
 mod enums;
 mod fuse;
-mod fuse_location;
 
-pub use device::*;
+pub use density::*;
 pub use enums::*;
 pub use fuse::*;
-
-pub (crate) use fuse_location::*;
 
