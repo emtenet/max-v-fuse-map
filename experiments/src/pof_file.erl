@@ -3,6 +3,7 @@
 -export([read/1]).
 -export([decode/1]).
 -export([fuse_count/1]).
+-export([fuse_data/1]).
 -export([fuses/2]).
 -export([has_fuse/2]).
 -export([is_stripe/2]).
@@ -102,6 +103,15 @@ fuse_count(#{cfm := #{size := Size}}) ->
     Size.
 
 %%====================================================================
+%% fuse_data
+%%====================================================================
+
+-spec fuse_data(pof()) -> binary().
+
+fuse_data(#{cfm := #{data := Data}}) ->
+    Data.
+
+%%====================================================================
 %% fuses
 %%====================================================================
 
@@ -128,7 +138,7 @@ fuses_test() ->
 
 %%--------------------------------------------------------------------
 
--spec fuses(density(), pof()) -> [fuse:fuse()].
+-spec fuses(density(), pof() | binary()) -> [fuse:fuse()].
 
 fuses(max_v_240z, #{cfm := #{data := Bytes}}) ->
     fuses_small_bytes(0, Bytes, []);
@@ -137,6 +147,14 @@ fuses(max_v_570z, #{cfm := #{data := Bytes}}) ->
 fuses(max_v_1270z, #{cfm := #{data := Bytes}}) ->
     fuses_large_bytes(0, Bytes, []);
 fuses(max_v_2210z, #{cfm := #{data := Bytes}}) ->
+    fuses_large_bytes(0, Bytes, []);
+fuses(max_v_240z, Bytes) when is_binary(Bytes) ->
+    fuses_small_bytes(0, Bytes, []);
+fuses(max_v_570z, Bytes) when is_binary(Bytes) ->
+    fuses_small_bytes(0, Bytes, []);
+fuses(max_v_1270z, Bytes) when is_binary(Bytes) ->
+    fuses_large_bytes(0, Bytes, []);
+fuses(max_v_2210z, Bytes) when is_binary(Bytes) ->
     fuses_large_bytes(0, Bytes, []).
 
 %%--------------------------------------------------------------------
