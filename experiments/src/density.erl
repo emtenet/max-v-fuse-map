@@ -23,6 +23,7 @@
 -export([left_rows/1]).
 -export([right_rows/1]).
 -export([global_block/1]).
+-export([ufm_block/1]).
 -export([block_type/3]).
 -export([is_global/3]).
 -export([is_lab/2]).
@@ -651,6 +652,17 @@ global_block(max_v_1270z) -> {11, 3};
 global_block(max_v_2210z) -> {13, 3}.
 
 %%====================================================================
+%% ufm_block
+%%====================================================================
+
+-spec ufm_block(density()) -> {max_v:x(), max_v:y()} | false.
+
+ufm_block(max_v_240z) -> false;
+ufm_block(max_v_570z) -> {9, 2};
+ufm_block(max_v_1270z) -> {11, 2};
+ufm_block(max_v_2210z) -> {13, 2}.
+
+%%====================================================================
 %% block_type
 %%====================================================================
 
@@ -669,10 +681,15 @@ block_type_test(Density) ->
     IOBs = [IOB || {IOB, _} <- iobs(Density)],
     LABs = labs(Density),
     Global = global_block(Density),
+    UFM = ufm_block(Density),
     Expect0 = length(IOBs) + length(LABs),
-    Expect = case Global of
+    Expect1 = case Global of
         {_, _} -> Expect0 + 1;
         false -> Expect0
+    end,
+    Expect = case UFM of
+        {_, _} -> Expect1 + 1;
+        false -> Expect1
     end,
     Grid = [
         {X, Y}
@@ -681,14 +698,14 @@ block_type_test(Density) ->
         Y <- lists:seq(-5, 20)
     ],
     Count = lists:foldl(fun ({X, Y}, Tally) ->
-        block_type_test(X, Y, Density, IOBs, LABs, Global, Tally)
+        block_type_test(X, Y, Density, IOBs, LABs, Global, UFM, Tally)
     end, 0, Grid),
     ?assertEqual(Expect, Count),
     ok.
 
 %%--------------------------------------------------------------------
 
-block_type_test(X, Y, Density, IOBs, LABs, Global, Tally) ->
+block_type_test(X, Y, Density, IOBs, LABs, Global, UFM, Tally) ->
     Type = block_type(X, Y, Density),
     ?assertEqual(Type =:= logic, is_lab(X, Y, Density)),
     ?assertEqual(Type =:= column, is_column_iob(X, Y, Density)),
@@ -711,6 +728,10 @@ block_type_test(X, Y, Density, IOBs, LABs, Global, Tally) ->
             ?assertEqual(Global, {X, Y}),
             Tally + 1;
 
+        ufm ->
+            ?assertEqual(UFM, {X, Y}),
+            Tally + 1;
+
         false ->
             Tally
     end.
@@ -719,61 +740,59 @@ block_type_test(X, Y, Density, IOBs, LABs, Global, Tally) ->
 
 %%--------------------------------------------------------------------
 
--spec block_type(max_v:x(), max_v:y(), density())
-    -> logic | row | column | global | false.
+-spec block_type(max_v:x(), max_v:y(), density() | #metric{})
+    -> logic | row | column | global | ufm | false.
 
-block_type(X, Y, Density) ->
-    block(X, Y, metric(Density)).
-
-%%--------------------------------------------------------------------
-
-block(X, Y, #metric{top_io = Y, left_lab = L, right_lab = R}) ->
+block_type(X, Y, #metric{top_io = Y, left_lab = L, right_lab = R}) ->
     if
         X < L -> false;
         X > R -> false;
         true -> column
     end;
-block(_, Y, #metric{top_lab = T}) when Y > T ->
+block_type(_, Y, #metric{top_lab = T}) when Y > T ->
     false;
-block(X, Y, #metric{left_io = X, indent_bottom_lab = B}) ->
+block_type(X, Y, #metric{left_io = X, indent_bottom_lab = B}) ->
     if
         Y < B -> false;
         true -> row
     end;
-block(X, _, #metric{left_lab = L}) when X < L ->
+block_type(X, _, #metric{left_lab = L}) when X < L ->
     false;
-block(X, Y, #metric{right_io = X, bottom_lab = B}) ->
+block_type(X, Y, #metric{right_io = X, bottom_lab = B}) ->
     if
         Y < B -> false;
         true -> row
     end;
-block(X, _, #metric{right_lab = R}) when X > R ->
+block_type(X, _, #metric{right_lab = R}) when X > R ->
     false;
-block(X, Y, #metric{bottom_io = Y, indent_left_lab = L, right_lab = R}) ->
+block_type(X, Y, #metric{bottom_io = Y, indent_left_lab = L, right_lab = R}) ->
     if
         X < L -> false;
         X > R -> false;
         true -> column
     end;
-block(_, Y, #metric{bottom_lab = B}) when Y < B ->
+block_type(_, Y, #metric{bottom_lab = B}) when Y < B ->
     false;
-block(X, _, #metric{indent_left_io = G}) when X > G ->
+block_type(X, _, #metric{indent_left_io = G}) when X > G ->
     logic;
-block(X, Y, #metric{indent_left_io = X, indent_bottom_io = B}) ->
+block_type(X, Y, #metric{indent_left_io = X, indent_bottom_io = B}) ->
     if
-        Y < B -> false;
         Y =:= B -> global;
+        Y =:= B - 1 -> ufm;
+        Y < B -> false;
         true -> logic
     end;
-block(X, Y, #metric{indent_bottom_io = Y, left_lab = L}) ->
+block_type(X, Y, #metric{indent_bottom_io = Y, left_lab = L}) ->
     if
         X < L -> false;
         true -> column
     end;
-block(_, Y, #metric{indent_bottom_lab = B}) when Y < B ->
+block_type(_, Y, #metric{indent_bottom_lab = B}) when Y < B ->
     false;
-block(_, _, _) ->
-    logic.
+block_type(_, _, #metric{}) ->
+    logic;
+block_type(X, Y, Density) ->
+    block_type(X, Y, metric(Density)).
 
 %%====================================================================
 %% is_global
