@@ -3,6 +3,9 @@ PROJECT_DESCRIPTION = Altera MAX V Fuse Map (experiments)
 PROJECT_VERSION = 1.0.0
 PROJECT_MOD = experiments
 
+DEPS += jsx
+dep_jsx = git https://github.com/talentdeficit/jsx v3.0.0
+
 ERLC_OPTS = -Werror \
  +warn_bif_clash \
  +warn_deprecated_function \
