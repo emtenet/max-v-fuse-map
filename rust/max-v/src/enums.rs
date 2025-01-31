@@ -190,42 +190,70 @@ enumerated! {
 }
 
 enumerated! {
-    enum IOCellNumber {
-        IOCell0,
-        IOCell1,
-        IOCell2,
-        IOCell3,
-        IOCell4,
-        IOCell5,
-        IOCell6,
+    enum IOColumnCellNumber {
+        IOColumnCell0,
+        IOColumnCell1,
+        IOColumnCell2,
+        IOColumnCell3,
     }
-    struct IOCellNumberOutOfRange ;
-    struct IOCellNumbers : Iterator ;
+    struct IOColumnCellNumberOutOfRange ;
+    struct IOColumnCellNumbers : Iterator ;
 }
 
 enumerated! {
-    enum IOInterconnectIndex {
-        IOInterconnect0,
-        IOInterconnect1,
-        IOInterconnect2,
-        IOInterconnect3,
-        IOInterconnect4,
-        IOInterconnect5,
-        IOInterconnect6,
-        IOInterconnect7,
-        IOInterconnect8,
-        IOInterconnect9,
-        IOInterconnect10,
-        IOInterconnect11,
-        IOInterconnect12,
-        IOInterconnect13,
-        IOInterconnect14,
-        IOInterconnect15,
-        IOInterconnect16,
-        IOInterconnect17,
+    enum IOColumnInterconnectIndex {
+        IOColumnInterconnect0,
+        IOColumnInterconnect1,
+        IOColumnInterconnect2,
+        IOColumnInterconnect3,
+        IOColumnInterconnect4,
+        IOColumnInterconnect5,
+        IOColumnInterconnect6,
+        IOColumnInterconnect7,
+        IOColumnInterconnect8,
+        IOColumnInterconnect9,
     }
-    struct IOInterconnectIndexOutOfRange ;
-    struct IOInterconnectIndexs : Iterator ;
+    struct IOColumnInterconnectIndexOutOfRange ;
+    struct IOColumnInterconnectIndexs : Iterator ;
+}
+
+enumerated! {
+    enum IORowCellNumber {
+        IORowCell0,
+        IORowCell1,
+        IORowCell2,
+        IORowCell3,
+        IORowCell4,
+        IORowCell5,
+        IORowCell6,
+    }
+    struct IORowCellNumberOutOfRange ;
+    struct IORowCellNumbers : Iterator ;
+}
+
+enumerated! {
+    enum IORowInterconnectIndex {
+        IORowInterconnect0,
+        IORowInterconnect1,
+        IORowInterconnect2,
+        IORowInterconnect3,
+        IORowInterconnect4,
+        IORowInterconnect5,
+        IORowInterconnect6,
+        IORowInterconnect7,
+        IORowInterconnect8,
+        IORowInterconnect9,
+        IORowInterconnect10,
+        IORowInterconnect11,
+        IORowInterconnect12,
+        IORowInterconnect13,
+        IORowInterconnect14,
+        IORowInterconnect15,
+        IORowInterconnect16,
+        IORowInterconnect17,
+    }
+    struct IORowInterconnectIndexOutOfRange ;
+    struct IORowInterconnectIndexs : Iterator ;
 }
 
 enumerated! {

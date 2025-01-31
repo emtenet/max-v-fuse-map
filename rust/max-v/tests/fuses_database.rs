@@ -5,57 +5,31 @@ use max_v::*;
 #[test]
 fn max_v_240z() {
     let s = read_to_string("../../database/max_v_240z.fuses").unwrap();
-    for s in s.lines() {
-        let (index, fuse) = fuse(s);
-        match fuse.to_index(&MAX_V_240Z) {
-            Err(FuseOutOfRange::Unimplemented) => {
-            }
-
-            to_index => {
-                assert_eq!((fuse, Ok(index)), (fuse, to_index));
-            }
-        }
-    }
+    fuses(s, &MAX_V_240Z);
 }
 
 #[test]
 fn max_v_570z() {
     let s = read_to_string("../../database/max_v_570z.fuses").unwrap();
-    for s in s.lines() {
-        let (index, fuse) = fuse(s);
-        match fuse.to_index(&MAX_V_570Z) {
-            Err(FuseOutOfRange::Unimplemented) => {
-            }
-
-            to_index => {
-                assert_eq!((fuse, Ok(index)), (fuse, to_index));
-            }
-        }
-    }
+    fuses(s, &MAX_V_570Z);
 }
 
 #[test]
 fn max_v_1270z() {
     let s = read_to_string("../../database/max_v_1270z.fuses").unwrap();
-    for s in s.lines() {
-        let (index, fuse) = fuse(s);
-        match fuse.to_index(&MAX_V_1270Z) {
-            Err(FuseOutOfRange::Unimplemented) => {
-            }
-
-            to_index => {
-                assert_eq!((fuse, Ok(index)), (fuse, to_index));
-            }
-        }
-    }
+    fuses(s, &MAX_V_1270Z);
 }
 
 #[test]
 fn max_v_2210z() {
     let s = read_to_string("../../database/max_v_2210z.fuses").unwrap();
+    fuses(s, &MAX_V_2210Z);
+}
+
+fn fuses(s: String, density: &Density) {
     for s in s.lines() {
-        let (index, fuse) = fuse(s);
-        match fuse.to_index(&MAX_V_2210Z) {
+        let (index, fuse) = fuse(s, density);
+        match fuse.to_index(density) {
             Err(FuseOutOfRange::Unimplemented) => {
             }
 
@@ -66,7 +40,7 @@ fn max_v_2210z() {
     }
 }
 
-fn fuse(s: &str) -> (usize, Fuse) {
+fn fuse(s: &str, density: &Density) -> (usize, Fuse) {
     let (index, s) = usize_once(s, "=");
     if let Some(s) = s.strip_prefix("{{c4,") {
         let (x, s) = u8_once(s, ",");
@@ -94,18 +68,44 @@ fn fuse(s: &str) -> (usize, Fuse) {
         let (x, s) = u8_once(s, ",");
         let (y, s) = u8_once(s, "},");
         if let Some(s) = s.strip_prefix("{interconnect,") {
-            let (i, s) = try_usize_once(s, "},");
-            let fuse = io_interconnect_fuse(s);
-            (index, Fuse::IOInterconnect { x, y, i, fuse })
+            match density.io_block(x, y) {
+                Some(DensityIOBlock::Top) | Some(DensityIOBlock::Bottom) => {
+                    let (i, s) = try_usize_once(s, "},");
+                    let fuse = io_interconnect_fuse(s);
+                    (index, Fuse::IOColumnInterconnect { x, y, i, fuse })
+                }
+
+                Some(DensityIOBlock::Left) | Some(DensityIOBlock::Right) => {
+                    let (i, s) = try_usize_once(s, "},");
+                    let fuse = io_interconnect_fuse(s);
+                    (index, Fuse::IORowInterconnect { x, y, i, fuse })
+                }
+
+                None =>
+                    todo!("{x}x{y}"),
+            }
         } else {
             todo!("{s}");
         }
     } else if let Some(s) = s.strip_prefix("{{ioc,") {
         let (x, s) = u8_once(s, ",");
         let (y, s) = u8_once(s, ",");
-        let (n, s) = try_usize_once(s, "},");
-        let fuse = io_cell_fuse(s);
-        (index, Fuse::IOCell { x, y, n, fuse })
+        match density.io_block(x, y) {
+            Some(DensityIOBlock::Top) | Some(DensityIOBlock::Bottom) => {
+                let (n, s) = try_usize_once(s, "},");
+                let fuse = io_cell_fuse(s);
+                (index, Fuse::IOColumnCell { x, y, n, fuse })
+            }
+
+            Some(DensityIOBlock::Left) | Some(DensityIOBlock::Right) => {
+                let (n, s) = try_usize_once(s, "},");
+                let fuse = io_cell_fuse(s);
+                (index, Fuse::IORowCell { x, y, n, fuse })
+            }
+
+            None =>
+                todo!("{x}x{y}"),
+        }
     } else if let Some(s) = s.strip_prefix("{{jtag,") {
         let (_x, s) = u8_once(s, ",");
         let (_y, s) = u8_once(s, "},");

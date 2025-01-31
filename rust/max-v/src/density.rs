@@ -1,5 +1,7 @@
-
-use crate::IOCellNumber;
+use crate::{
+    IOColumnCellNumber,
+    IORowCellNumber,
+};
 
 pub struct Density {
     pub (crate) has_grow: bool,
@@ -11,16 +13,16 @@ pub struct Density {
     pub (crate) top: u8,
     // io
     pci_compliance: bool,
-    bottom_io: &'static [StripEnd],
+    bottom_io: &'static [ColumnStrip],
     bottom_io_base: u16,
-    left_io: &'static [StripSide],
+    left_io: &'static [RowStrip],
     left_io_base: u16,
-    right_io: &'static [StripSide],
+    right_io: &'static [RowStrip],
     right_io_base: u16,
-    shelf_io: &'static [StripEnd],
+    shelf_io: &'static [ColumnStrip],
     shelf_io_base: u16,
     shelf_io_wrap: u16,
-    top_io: &'static [StripEnd],
+    top_io: &'static [ColumnStrip],
     top_io_base: u16,
     // sector
     pub (crate) global_row: u8,
@@ -387,16 +389,9 @@ impl Density {
 #[derive(Copy, Clone)]
 #[derive(Debug)]
 #[derive(Eq, PartialEq)]
-pub enum DensityIOCell {
+pub enum DensityIOColumnCell {
     Bottom {
         left: bool,
-        strip: Option<u16>,
-    },
-    Left {
-        strip: Option<u16>,
-    },
-    Right {
-        pci_compliance: bool,
         strip: Option<u16>,
     },
     Top {
@@ -405,83 +400,42 @@ pub enum DensityIOCell {
 }
 
 impl Density {
-    pub fn io_cell(&self, x: u8, y: u8, n: IOCellNumber)
-        -> Option<DensityIOCell>
+    pub fn io_column_cell(&self, x: u8, y: u8, n: IOColumnCellNumber)
+        -> Option<DensityIOColumnCell>
     {
-        if y == 0 {
-            if x > self.grow && x < self.right {
-                io_cell_end(self.bottom_io, self.right - x - 1, n)
-                    .map(|strip| DensityIOCell::Bottom {
-                        left: false,
-                        strip: Some(self.bottom_io_base + (6 * strip)),
-                    })
-                    .or_else(|| Some(DensityIOCell::Bottom {
-                        left: false,
-                        strip: None,
-                    }))
-            } else {
-                None
-            }
-        } else if y == self.top {
-            if x > self.left && x < self.right {
-                io_cell_end(self.top_io, x - self.left - 1, n)
-                    .map(|strip| DensityIOCell::Top {
-                        strip: Some(self.top_io_base + (6 * strip)),
-                    })
-                    .or_else(|| Some(DensityIOCell::Top {
-                        strip: None,
-                    }))
-            } else {
-                None
-            }
-        } else if y > self.top {
-            None
-        } else if x == self.left {
-            if !self.has_grow {
-                io_cell_side(self.left_io, y - 1, n)
-                    .map(|strip| DensityIOCell::Left {
-                        strip: Some(self.left_io_base + (6 * strip)),
-                    })
-                    .or_else(|| Some(DensityIOCell::Left {
-                        strip: None,
-                    }))
-            } else if y > 3 {
-                io_cell_side(self.left_io, y - 4, n)
-                    .map(|strip| DensityIOCell::Left {
-                        strip: Some(self.left_io_base + (6 * strip)),
-                    })
-                    .or_else(|| Some(DensityIOCell::Left {
-                        strip: None,
-                    }))
-            } else {
-                None
-            }
-        } else if x == self.right {
-            let stride: u16 = if self.pci_compliance { 7 } else { 6 };
-            io_cell_side(self.right_io, self.top - y - 1, n)
-                .map(|strip| DensityIOCell::Right {
-                    strip: Some(self.right_io_base + (stride * strip)),
-                    pci_compliance: self.pci_compliance,
+        if y == 0 && x > self.grow && x < self.right {
+            io_column_strip(self.bottom_io, self.right - x - 1, n)
+                .map(|strip| DensityIOColumnCell::Bottom {
+                    left: false,
+                    strip: Some(self.bottom_io_base + (6 * strip)),
                 })
-                .or_else(|| Some(DensityIOCell::Right {
+                .or_else(|| Some(DensityIOColumnCell::Bottom {
+                    left: false,
                     strip: None,
-                    pci_compliance: false,
                 }))
-        } else if self.has_grow && x < self.grow {
-            io_cell_end(self.shelf_io, self.grow - x - 1, n)
+        } else if y == self.top && x > self.left && x < self.right {
+            io_column_strip(self.top_io, x - self.left - 1, n)
+                .map(|strip| DensityIOColumnCell::Top {
+                    strip: Some(self.top_io_base + (6 * strip)),
+                })
+                .or_else(|| Some(DensityIOColumnCell::Top {
+                    strip: None,
+                }))
+        } else if self.has_grow && x > self.left && x < self.grow {
+            io_column_strip(self.shelf_io, self.grow - x - 1, n)
                 .map(|strip| if strip >= self.shelf_io_wrap {
                     let strip = strip - self.shelf_io_wrap;
-                    DensityIOCell::Bottom {
+                    DensityIOColumnCell::Bottom {
                         left: true,
                         strip: Some(self.left_io_base + (6 * strip)),
                     }
                 } else {
-                    DensityIOCell::Bottom {
+                    DensityIOColumnCell::Bottom {
                         left: false,
                         strip: Some(self.shelf_io_base + (6 * strip)),
                     }
                 })
-                .or_else(|| Some(DensityIOCell::Bottom {
+                .or_else(|| Some(DensityIOColumnCell::Bottom {
                     left: false,
                     strip: None,
                 }))
@@ -491,29 +445,82 @@ impl Density {
     }
 }
 
-type StripEnd = (
+type ColumnStrip = (
     Option<u16>,
     Option<u16>,
     Option<u16>,
     Option<u16>,
 );
 
-fn io_cell_end(strip: &'static[StripEnd], i: u8, n: IOCellNumber)
+fn io_column_strip(strip: &'static[ColumnStrip], i: u8, n: IOColumnCellNumber)
     -> Option<u16>
 {
-    use IOCellNumber::*;
+    use IOColumnCellNumber::*;
 
     let i = usize::from(i);
     match n {
-        IOCell0 => strip[i].0,
-        IOCell1 => strip[i].1,
-        IOCell2 => strip[i].2,
-        IOCell3 => strip[i].3,
-        _ => None,
+        IOColumnCell0 => strip[i].0,
+        IOColumnCell1 => strip[i].1,
+        IOColumnCell2 => strip[i].2,
+        IOColumnCell3 => strip[i].3,
     }
 }
 
-type StripSide = (
+#[derive(Copy, Clone)]
+#[derive(Debug)]
+#[derive(Eq, PartialEq)]
+pub enum DensityIORowCell {
+    Left {
+        strip: Option<u16>,
+    },
+    Right {
+        pci_compliance: bool,
+        strip: Option<u16>,
+    },
+}
+
+impl Density {
+    pub fn io_row_cell(&self, x: u8, y: u8, n: IORowCellNumber)
+        -> Option<DensityIORowCell>
+    {
+        if x == self.left && y < self.top {
+            if !self.has_grow && y > 0 {
+                io_row_strip(self.left_io, y - 1, n)
+                    .map(|strip| DensityIORowCell::Left {
+                        strip: Some(self.left_io_base + (6 * strip)),
+                    })
+                    .or_else(|| Some(DensityIORowCell::Left {
+                        strip: None,
+                    }))
+            } else if self.has_grow && y > 3 {
+                io_row_strip(self.left_io, y - 4, n)
+                    .map(|strip| DensityIORowCell::Left {
+                        strip: Some(self.left_io_base + (6 * strip)),
+                    })
+                    .or_else(|| Some(DensityIORowCell::Left {
+                        strip: None,
+                    }))
+            } else {
+                None
+            }
+        } else if x == self.right && y > 0 && y < self.top {
+            let stride: u16 = if self.pci_compliance { 7 } else { 6 };
+            io_row_strip(self.right_io, self.top - y - 1, n)
+                .map(|strip| DensityIORowCell::Right {
+                    strip: Some(self.right_io_base + (stride * strip)),
+                    pci_compliance: self.pci_compliance,
+                })
+                .or_else(|| Some(DensityIORowCell::Right {
+                    strip: None,
+                    pci_compliance: false,
+                }))
+        } else {
+            None
+        }
+    }
+}
+
+type RowStrip = (
     Option<u16>,
     Option<u16>,
     Option<u16>,
@@ -523,20 +530,20 @@ type StripSide = (
     Option<u16>,
 );
 
-fn io_cell_side(strip: &'static[StripSide], i: u8, n: IOCellNumber)
+fn io_row_strip(strip: &'static[RowStrip], i: u8, n: IORowCellNumber)
     -> Option<u16>
 {
-    use IOCellNumber::*;
+    use IORowCellNumber::*;
 
     let i = usize::from(i);
     match n {
-        IOCell0 => strip[i].0,
-        IOCell1 => strip[i].1,
-        IOCell2 => strip[i].2,
-        IOCell3 => strip[i].3,
-        IOCell4 => strip[i].4,
-        IOCell5 => strip[i].5,
-        IOCell6 => strip[i].6,
+        IORowCell0 => strip[i].0,
+        IORowCell1 => strip[i].1,
+        IORowCell2 => strip[i].2,
+        IORowCell3 => strip[i].3,
+        IORowCell4 => strip[i].4,
+        IORowCell5 => strip[i].5,
+        IORowCell6 => strip[i].6,
     }
 }
 
