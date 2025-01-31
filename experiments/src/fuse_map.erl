@@ -182,6 +182,7 @@
     ?UFM_LARGE_SELECT(3, 7, dr_shift);
     ?UFM_LARGE_SELECT(3, 8, dr_in);
     ?UFM_LARGE_SELECT(2, 9, osc_ena);
+    %?UFM_LARGE_SELECT(2, 9, _); % always {mux3,mux1}
 ).
 
 -define(UFM_SELECTS(),
@@ -884,7 +885,7 @@
     ?LAB_LINE(20, 20, {s_load, not_always});
     ?LAB_LINE(20, 21, {a_clr1, global});
     ?LAB_LINE(20, 22, invert_a);
-    %?LAB_LINE(20, 23, minimum_20_23);
+    %?LAB_LINE(20, 23, _); % always
     ?LAB_LINE(20, 24, {ena2_s_load, invert});
     ?LAB_LINE(20, 25, {a_clr1, off});
     ?LAB_LINE(21, 20, {s_clr, control});
