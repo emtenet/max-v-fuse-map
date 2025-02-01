@@ -593,3 +593,34 @@ fn io_row_strip(strip: &'static[RowStrip], i: u8, n: IORowCellNumber)
     }
 }
 
+#[derive(Copy, Clone)]
+#[derive(Debug)]
+#[derive(Eq, PartialEq)]
+pub enum DensityR4Block {
+    Left,
+    LeftLeft,
+    Column,
+    Grow,
+    Right,
+}
+
+impl Density {
+    pub fn r4_block(&self, x: u8, y: u8) -> Option<DensityR4Block> {
+        if y >= self.top || y == 0 || x < self.left || x > self.right {
+            None
+        } else if x < self.grow && y <= self.short_bottom {
+            None
+        } else if x == self.left {
+            Some(DensityR4Block::Left)
+        } else if x == self.left + 1 {
+            Some(DensityR4Block::LeftLeft)
+        } else if x == self.right {
+            Some(DensityR4Block::Right)
+        } else if x == self.grow && y <= 3 {
+            Some(DensityR4Block::Grow)
+        } else {
+            Some(DensityR4Block::Column)
+        }
+    }
+}
+

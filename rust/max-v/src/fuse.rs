@@ -432,8 +432,27 @@ impl Fuse {
             Fuse::LogicInterconnect { x, y, i, fuse } =>
                 logic_interconnect(x, y, i, fuse),
 
-            Fuse::R4Interconnect { .. } =>
-                Err(FuseOutOfRange::Unimplemented),
+            Fuse::R4Interconnect { x, y, i, fuse } =>
+                match density.r4_block(x, y) {
+                    Some(DensityR4Block::Left) =>
+                        r4_interconnect_left(x, y, i, fuse),
+
+                    Some(DensityR4Block::LeftLeft) =>
+                        r4_interconnect_left_left(x, y, i, fuse),
+
+                    Some(DensityR4Block::Grow) =>
+                        r4_interconnect_grow(x, y, i, fuse),
+
+                    Some(DensityR4Block::Column) =>
+                        r4_interconnect_column(x, y, i, fuse),
+
+                    Some(DensityR4Block::Right) =>
+                        r4_interconnect_right(x, y, i, fuse),
+
+                    _ =>
+                        Err(FuseOutOfRange::XY),
+                },
+
 
             Fuse::UserCode { bit } =>
                 if density.has_grow {
@@ -1495,6 +1514,250 @@ fn logic_interconnect_low(
             } else {
                 Err(FuseOutOfRange::Source)
             },
+    }
+}
+
+fn r4_interconnect_left(
+    x: u8,
+    y: u8,
+    i: R4InterconnectIndex,
+    fuse: R4InterconnectFuse,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use LogicCellNumber::*;
+    use R4InterconnectIndex::*;
+    use R4InterconnectFuse::*;
+
+    match fuse {
+        IODataIn0 =>
+            match i {
+                R4Interconnect0 => cell!(x, y, 5, LogicCell0, 1),
+                R4Interconnect1 => cell!(x, y, 3, LogicCell0, 1),
+                R4Interconnect2 => cell!(x, y, 5, LogicCell0, 3),
+                R4Interconnect3 => cell!(x, y, 3, LogicCell0, 3),
+                R4Interconnect4 => cell!(x, y, 5, LogicCell5, 1),
+                R4Interconnect5 => cell!(x, y, 3, LogicCell5, 1),
+                R4Interconnect6 => cell!(x, y, 5, LogicCell5, 3),
+                R4Interconnect7 => cell!(x, y, 3, LogicCell5, 3),
+                _ => Err(FuseOutOfRange::Interconnect),
+            },
+        IODataIn1 =>
+            match i {
+                R4Interconnect0 => cell!(x, y, 6, LogicCell0, 1),
+                R4Interconnect1 => cell!(x, y, 4, LogicCell0, 1),
+                R4Interconnect2 => cell!(x, y, 6, LogicCell0, 3),
+                R4Interconnect3 => cell!(x, y, 4, LogicCell0, 3),
+                R4Interconnect4 => cell!(x, y, 6, LogicCell5, 1),
+                R4Interconnect5 => cell!(x, y, 4, LogicCell5, 1),
+                R4Interconnect6 => cell!(x, y, 6, LogicCell5, 3),
+                R4Interconnect7 => cell!(x, y, 4, LogicCell5, 3),
+                _ => Err(FuseOutOfRange::Interconnect),
+            },
+        _ =>
+            Err(FuseOutOfRange::Source),
+    }
+}
+
+fn r4_interconnect_left_left(
+    x: u8,
+    y: u8,
+    i: R4InterconnectIndex,
+    fuse: R4InterconnectFuse,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use r4_interconnect_fuse_side as side;
+    use r4_interconnect_fuse_column as column;
+    use LogicCellNumber::*;
+    use R4InterconnectIndex::*;
+
+    match i {
+        R4Interconnect0 => side(x, y, fuse, LogicCell0, 0),
+        R4Interconnect1 => side(x, y, fuse, LogicCell1, 2),
+        R4Interconnect2 => side(x, y, fuse, LogicCell3, 2),
+        R4Interconnect3 => side(x, y, fuse, LogicCell4, 2),
+        R4Interconnect4 => side(x, y, fuse, LogicCell5, 0),
+        R4Interconnect5 => side(x, y, fuse, LogicCell6, 2),
+        R4Interconnect6 => side(x, y, fuse, LogicCell8, 2),
+        R4Interconnect7 => side(x, y, fuse, LogicCell9, 2),
+        R4Interconnect8 => column(x, y, fuse, LogicCell1, 0),
+        R4Interconnect9 => column(x, y, fuse, LogicCell2, 0),
+        R4Interconnect10 => column(x, y, fuse, LogicCell3, 0),
+        R4Interconnect11 => column(x, y, fuse, LogicCell4, 0),
+        R4Interconnect12 => column(x, y, fuse, LogicCell6, 0),
+        R4Interconnect13 => column(x, y, fuse, LogicCell7, 0),
+        R4Interconnect14 => column(x, y, fuse, LogicCell8, 0),
+        R4Interconnect15 => column(x, y, fuse, LogicCell9, 0),
+    }
+}
+
+fn r4_interconnect_grow(
+    x: u8,
+    y: u8,
+    i: R4InterconnectIndex,
+    fuse: R4InterconnectFuse,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use r4_interconnect_fuse_column as column;
+    use LogicCellNumber::*;
+    use R4InterconnectIndex::*;
+
+    match i {
+        R4Interconnect8 => column(x, y, fuse, LogicCell1, 0),
+        R4Interconnect9 => column(x, y, fuse, LogicCell2, 0),
+        R4Interconnect10 => column(x, y, fuse, LogicCell3, 0),
+        R4Interconnect11 => column(x, y, fuse, LogicCell4, 0),
+        R4Interconnect12 => column(x, y, fuse, LogicCell6, 0),
+        R4Interconnect13 => column(x, y, fuse, LogicCell7, 0),
+        R4Interconnect14 => column(x, y, fuse, LogicCell8, 0),
+        R4Interconnect15 => column(x, y, fuse, LogicCell9, 0),
+        _ => Err(FuseOutOfRange::Interconnect),
+    }
+}
+
+fn r4_interconnect_column(
+    x: u8,
+    y: u8,
+    i: R4InterconnectIndex,
+    fuse: R4InterconnectFuse,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use r4_interconnect_fuse_left as left;
+    use r4_interconnect_fuse_column as column;
+    use LogicCellNumber::*;
+    use R4InterconnectIndex::*;
+
+    match i {
+        R4Interconnect0 => left(x, y, fuse, LogicCell0, 0),
+        R4Interconnect1 => left(x, y, fuse, LogicCell1, 2),
+        R4Interconnect2 => left(x, y, fuse, LogicCell3, 2),
+        R4Interconnect3 => left(x, y, fuse, LogicCell4, 2),
+        R4Interconnect4 => left(x, y, fuse, LogicCell5, 0),
+        R4Interconnect5 => left(x, y, fuse, LogicCell6, 2),
+        R4Interconnect6 => left(x, y, fuse, LogicCell8, 2),
+        R4Interconnect7 => left(x, y, fuse, LogicCell9, 2),
+        R4Interconnect8 => column(x, y, fuse, LogicCell1, 0),
+        R4Interconnect9 => column(x, y, fuse, LogicCell2, 0),
+        R4Interconnect10 => column(x, y, fuse, LogicCell3, 0),
+        R4Interconnect11 => column(x, y, fuse, LogicCell4, 0),
+        R4Interconnect12 => column(x, y, fuse, LogicCell6, 0),
+        R4Interconnect13 => column(x, y, fuse, LogicCell7, 0),
+        R4Interconnect14 => column(x, y, fuse, LogicCell8, 0),
+        R4Interconnect15 => column(x, y, fuse, LogicCell9, 0),
+    }
+}
+
+fn r4_interconnect_right(
+    x: u8,
+    y: u8,
+    i: R4InterconnectIndex,
+    fuse: R4InterconnectFuse,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use r4_interconnect_fuse_right as right;
+    use LogicCellNumber::*;
+    use R4InterconnectIndex::*;
+
+    match i {
+        R4Interconnect0 => right(x, y, fuse, LogicCell0, 0),
+        R4Interconnect1 => right(x, y, fuse, LogicCell1, 2),
+        R4Interconnect2 => right(x, y, fuse, LogicCell3, 2),
+        R4Interconnect3 => right(x, y, fuse, LogicCell4, 2),
+        R4Interconnect4 => right(x, y, fuse, LogicCell5, 0),
+        R4Interconnect5 => right(x, y, fuse, LogicCell6, 2),
+        R4Interconnect6 => right(x, y, fuse, LogicCell8, 2),
+        R4Interconnect7 => right(x, y, fuse, LogicCell9, 2),
+        _ => Err(FuseOutOfRange::Interconnect),
+    }
+}
+
+fn r4_interconnect_fuse_side(
+    x: u8,
+    y: u8,
+    fuse: R4InterconnectFuse,
+    n: LogicCellNumber,
+    index: u8,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use R4InterconnectFuse::*;
+    use Select3::*;
+    use Select4::*;
+
+    match fuse {
+        DirectLink         => cell!(x, y,  0, n, index + 1),
+        Source3(Select3_0) => cell!(x, y,  1, n, index + 0),
+        Source3(Select3_1) => cell!(x, y,  1, n, index + 1),
+        Source3(Select3_2) => cell!(x, y,  0, n, index + 0),
+        Source4(Select4_0) => cell!(x - 1, y, 11, n, index + 0),
+        Source4(Select4_1) => cell!(x - 1, y, 11, n, index + 1),
+        Source4(Select4_2) => cell!(x - 1, y, 12, n, index + 0),
+        Source4(Select4_3) => cell!(x - 1, y, 12, n, index + 1),
+        _ => Err(FuseOutOfRange::Source),
+    }
+}
+
+fn r4_interconnect_fuse_left(
+    x: u8,
+    y: u8,
+    fuse: R4InterconnectFuse,
+    n: LogicCellNumber,
+    index: u8,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use R4InterconnectFuse::*;
+    use Select3::*;
+    use Select4::*;
+
+    match fuse {
+        DirectLink         => cell!(x, y,  0, n, index + 1),
+        Source3(Select3_0) => cell!(x, y,  1, n, index + 0),
+        Source3(Select3_1) => cell!(x, y,  1, n, index + 1),
+        Source3(Select3_2) => cell!(x, y,  0, n, index + 0),
+        Source4(Select4_0) => cell!(x - 1, y, 26, n, index + 0),
+        Source4(Select4_1) => cell!(x - 1, y, 26, n, index + 1),
+        Source4(Select4_2) => cell!(x - 1, y, 27, n, index + 0),
+        Source4(Select4_3) => cell!(x - 1, y, 27, n, index + 1),
+        _ => Err(FuseOutOfRange::Source),
+    }
+}
+
+fn r4_interconnect_fuse_column(
+    x: u8,
+    y: u8,
+    fuse: R4InterconnectFuse,
+    n: LogicCellNumber,
+    index: u8,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use R4InterconnectFuse::*;
+    use Select3::*;
+    use Select4::*;
+
+    match fuse {
+        DirectLink         => cell!(x, y, 23, n, index + 1),
+        Source3(Select3_0) => cell!(x, y, 22, n, index + 0),
+        Source3(Select3_1) => cell!(x, y, 22, n, index + 1),
+        Source3(Select3_2) => cell!(x, y, 23, n, index + 0),
+        Source4(Select4_0) => cell!(x, y, 24, n, index + 0),
+        Source4(Select4_1) => cell!(x, y, 24, n, index + 1),
+        Source4(Select4_2) => cell!(x, y, 25, n, index + 0),
+        Source4(Select4_3) => cell!(x, y, 25, n, index + 1),
+        _ => Err(FuseOutOfRange::Source),
+    }
+}
+
+fn r4_interconnect_fuse_right(
+    x: u8,
+    y: u8,
+    fuse: R4InterconnectFuse,
+    n: LogicCellNumber,
+    index: u8,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use R4InterconnectFuse::*;
+    use Select3::*;
+    use Select4::*;
+
+    match fuse {
+        DirectLink         => cell!(x - 1, y, 27, n, index + 1),
+        Source3(Select3_0) => cell!(x - 1, y, 26, n, index + 0),
+        Source3(Select3_1) => cell!(x - 1, y, 26, n, index + 1),
+        Source3(Select3_2) => cell!(x - 1, y, 27, n, index + 0),
+        Source4(Select4_0) => cell!(x, y, 11, n, index + 0),
+        Source4(Select4_1) => cell!(x, y, 11, n, index + 1),
+        Source4(Select4_2) => cell!(x, y, 12, n, index + 0),
+        Source4(Select4_3) => cell!(x, y, 12, n, index + 1),
+        _ => Err(FuseOutOfRange::Source),
     }
 }
 
