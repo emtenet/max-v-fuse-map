@@ -785,20 +785,11 @@ fn global_location(global: Global, fuse: GlobalFuse, density: &Density)
                 Global0 =>
                     Ok(At::Global { x: x - 1, sector: 27 }),
 
-                //Global1 if x == density.right =>
-                //    Ok(At::Global { x, sector: 12 }),
-
                 Global1 =>
                     Ok(At::Global { x, sector: 0 }),
 
-                //Global2 if x == density.right =>
-                //    Ok(At::Global { x, sector: 10 }),
-
                 Global2 =>
                     Ok(At::Global { x, sector: 2 }),
-
-                //Global3 if x == density.right =>
-                //    Ok(At::Global { x, sector: 9 }),
 
                 Global3 =>
                     Ok(At::Global { x, sector: 3 }),
@@ -1214,10 +1205,7 @@ fn logic_block(
     use Control::*;
     use Global::*;
     use LogicCellNumber::*;
-    use LogicBlockControlFuse::*;
     use LogicBlockFuse as Fuse;
-    use Select3::*;
-    use Select6::*;
 
     match fuse {
         Fuse::AClearGlobal(Global0) => cell!(x, y, 5, LogicCell4, 2),
@@ -1249,60 +1237,15 @@ fn logic_block(
         Fuse::Clock2Global(Global2) => cell!(x, y, 4, LogicCell9, 2),
         Fuse::Clock2Global(Global3) => cell!(x, y, 4, LogicCell9, 3),
         Fuse::Clock2Invert => block!(x, y, 19, 2),
-        Fuse::Control { control: Control0, fuse: Source3(Select3_0) } => block!(x, y, 12, 0),
-        Fuse::Control { control: Control0, fuse: Source3(Select3_1) } => block!(x, y, 13, 0),
-        Fuse::Control { control: Control0, fuse: Source3(Select3_2) } => block!(x, y, 14, 0),
-        Fuse::Control { control: Control0, fuse: Source6(Select6_0) } => block!(x, y, 6, 0),
-        Fuse::Control { control: Control0, fuse: Source6(Select6_1) } => block!(x, y, 8, 0),
-        Fuse::Control { control: Control0, fuse: Source6(Select6_2) } => block!(x, y, 6, 1),
-        Fuse::Control { control: Control0, fuse: Source6(Select6_3) } => block!(x, y, 7, 0),
-        Fuse::Control { control: Control0, fuse: Source6(Select6_4) } => block!(x, y, 8, 1),
-        Fuse::Control { control: Control0, fuse: Source6(Select6_5) } => block!(x, y, 7, 1),
-        Fuse::Control { control: Control1, fuse: Source3(Select3_0) } => block!(x, y, 14, 1),
-        Fuse::Control { control: Control1, fuse: Source3(Select3_1) } => block!(x, y, 13, 1),
-        Fuse::Control { control: Control1, fuse: Source3(Select3_2) } => block!(x, y, 12, 1),
-        Fuse::Control { control: Control1, fuse: Source6(Select6_0) } => block!(x, y, 11, 0),
-        Fuse::Control { control: Control1, fuse: Source6(Select6_1) } => block!(x, y, 9, 0),
-        Fuse::Control { control: Control1, fuse: Source6(Select6_2) } => block!(x, y, 9, 1),
-        Fuse::Control { control: Control1, fuse: Source6(Select6_3) } => block!(x, y, 10, 0),
-        Fuse::Control { control: Control1, fuse: Source6(Select6_4) } => block!(x, y, 11, 1),
-        Fuse::Control { control: Control1, fuse: Source6(Select6_5) } => block!(x, y, 10, 1),
-        Fuse::Control { control: Control2, fuse: Source3(Select3_0) } => block!(x, y, 12, 2),
-        Fuse::Control { control: Control2, fuse: Source3(Select3_1) } => block!(x, y, 13, 2),
-        Fuse::Control { control: Control2, fuse: Source3(Select3_2) } => block!(x, y, 14, 2),
-        Fuse::Control { control: Control2, fuse: Source6(Select6_0) } => block!(x, y, 6, 2),
-        Fuse::Control { control: Control2, fuse: Source6(Select6_1) } => block!(x, y, 8, 2),
-        Fuse::Control { control: Control2, fuse: Source6(Select6_2) } => block!(x, y, 6, 3),
-        Fuse::Control { control: Control2, fuse: Source6(Select6_3) } => block!(x, y, 7, 2),
-        Fuse::Control { control: Control2, fuse: Source6(Select6_4) } => block!(x, y, 8, 3),
-        Fuse::Control { control: Control2, fuse: Source6(Select6_5) } => block!(x, y, 7, 3),
-        Fuse::Control { control: Control3, fuse: Source3(Select3_0) } => block!(x, y, 14, 3),
-        Fuse::Control { control: Control3, fuse: Source3(Select3_1) } => block!(x, y, 13, 3),
-        Fuse::Control { control: Control3, fuse: Source3(Select3_2) } => block!(x, y, 12, 3),
-        Fuse::Control { control: Control3, fuse: Source6(Select6_0) } => block!(x, y, 11, 2),
-        Fuse::Control { control: Control3, fuse: Source6(Select6_1) } => block!(x, y, 9, 2),
-        Fuse::Control { control: Control3, fuse: Source6(Select6_2) } => block!(x, y, 9, 3),
-        Fuse::Control { control: Control3, fuse: Source6(Select6_3) } => block!(x, y, 10, 2),
-        Fuse::Control { control: Control3, fuse: Source6(Select6_4) } => block!(x, y, 11, 3),
-        Fuse::Control { control: Control3, fuse: Source6(Select6_5) } => block!(x, y, 10, 3),
-        Fuse::Control { control: Control4, fuse: Source3(Select3_0) } => block!(x, y, 12, 4),
-        Fuse::Control { control: Control4, fuse: Source3(Select3_1) } => block!(x, y, 13, 4),
-        Fuse::Control { control: Control4, fuse: Source3(Select3_2) } => block!(x, y, 14, 4),
-        Fuse::Control { control: Control4, fuse: Source6(Select6_0) } => block!(x, y, 6, 4),
-        Fuse::Control { control: Control4, fuse: Source6(Select6_1) } => block!(x, y, 8, 4),
-        Fuse::Control { control: Control4, fuse: Source6(Select6_2) } => block!(x, y, 6, 5),
-        Fuse::Control { control: Control4, fuse: Source6(Select6_3) } => block!(x, y, 7, 4),
-        Fuse::Control { control: Control4, fuse: Source6(Select6_4) } => block!(x, y, 8, 5),
-        Fuse::Control { control: Control4, fuse: Source6(Select6_5) } => block!(x, y, 7, 5),
-        Fuse::Control { control: Control5, fuse: Source3(Select3_0) } => block!(x, y, 14, 5),
-        Fuse::Control { control: Control5, fuse: Source3(Select3_1) } => block!(x, y, 13, 5),
-        Fuse::Control { control: Control5, fuse: Source3(Select3_2) } => block!(x, y, 12, 5),
-        Fuse::Control { control: Control5, fuse: Source6(Select6_0) } => block!(x, y, 11, 4),
-        Fuse::Control { control: Control5, fuse: Source6(Select6_1) } => block!(x, y, 9, 4),
-        Fuse::Control { control: Control5, fuse: Source6(Select6_2) } => block!(x, y, 9, 5),
-        Fuse::Control { control: Control5, fuse: Source6(Select6_3) } => block!(x, y, 10, 4),
-        Fuse::Control { control: Control5, fuse: Source6(Select6_4) } => block!(x, y, 11, 5),
-        Fuse::Control { control: Control5, fuse: Source6(Select6_5) } => block!(x, y, 10, 5),
+        Fuse::Control { control, fuse } =>
+            match control {
+                Control0 => logic_control_inc(x, y, fuse, 0),
+                Control1 => logic_control_dec(x, y, fuse, 0),
+                Control2 => logic_control_inc(x, y, fuse, 2),
+                Control3 => logic_control_dec(x, y, fuse, 2),
+                Control4 => logic_control_inc(x, y, fuse, 4),
+                Control5 => logic_control_dec(x, y, fuse, 4),
+            },
         Fuse::Enable1Off => block!(x, y, 16, 4),
         Fuse::Enable1Control3Not2 => block!(x, y, 16, 2),
         Fuse::Enable1Invert => block!(x, y, 16, 1),
@@ -1319,6 +1262,52 @@ fn logic_block(
     }
 }
 
+fn logic_control_inc(
+    x: u8,
+    y: u8,
+    fuse: LogicBlockControlFuse,
+    index: u8,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use LogicBlockControlFuse::*;
+    use Select3::*;
+    use Select6::*;
+
+    match fuse {
+        Source3(Select3_0) => block!(x, y, 12, index + 0),
+        Source3(Select3_1) => block!(x, y, 13, index + 0),
+        Source3(Select3_2) => block!(x, y, 14, index + 0),
+        Source6(Select6_0) => block!(x, y, 6, index + 0),
+        Source6(Select6_1) => block!(x, y, 8, index + 0),
+        Source6(Select6_2) => block!(x, y, 6, index + 1),
+        Source6(Select6_3) => block!(x, y, 7, index + 0),
+        Source6(Select6_4) => block!(x, y, 8, index + 1),
+        Source6(Select6_5) => block!(x, y, 7, index + 1),
+    }
+}
+
+fn logic_control_dec(
+    x: u8,
+    y: u8,
+    fuse: LogicBlockControlFuse,
+    index: u8,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use LogicBlockControlFuse::*;
+    use Select3::*;
+    use Select6::*;
+
+    match fuse {
+        Source3(Select3_0) => block!(x, y, 14, index + 1),
+        Source3(Select3_1) => block!(x, y, 13, index + 1),
+        Source3(Select3_2) => block!(x, y, 12, index + 1),
+        Source6(Select6_0) => block!(x, y, 11, index + 0),
+        Source6(Select6_1) => block!(x, y, 9, index + 0),
+        Source6(Select6_2) => block!(x, y, 9, index + 1),
+        Source6(Select6_3) => block!(x, y, 10, index + 0),
+        Source6(Select6_4) => block!(x, y, 11, index + 1),
+        Source6(Select6_5) => block!(x, y, 10, index + 1),
+    }
+}
+
 fn logic_cell(
     x: u8,
     y: u8,
@@ -1327,137 +1316,92 @@ fn logic_cell(
 ) -> Result<FuseAt, FuseOutOfRange> {
     use LogicCellFuse as Fuse;
     use LogicCellInput::*;
-    use LogicCellInputFuse::*;
-    use FuseAt as At;
     use LUTBit::*;
+
+    match fuse {
+        Fuse::AClear1 => cell!(x, y, 20, n, 3),
+        Fuse::CarryIn => cell!(x, y, 20, n, 0),
+        Fuse::Clock2 => cell!(x, y, 19, n, 2),
+        Fuse::Feedback => cell!(x, y, 19, n, 0),
+        Fuse::Input { input, fuse } =>
+            match input {
+                LogicCellInputA => logic_input_inc(x, y, fuse, 11, n, 0),
+                LogicCellInputB => logic_input_dec(x, y, fuse, 8, n, 0),
+                LogicCellInputC => logic_input_inc(x, y, fuse, 8, n, 2),
+                LogicCellInputD => logic_input_dec(x, y, fuse, 11, n, 2),
+            },
+        Fuse::LUTBit(LUTBit0000) => cell!(x, y, 16, n, 3),
+        Fuse::LUTBit(LUTBit0001) => cell!(x, y, 16, n, 1),
+        Fuse::LUTBit(LUTBit0010) => cell!(x, y, 18, n, 2),
+        Fuse::LUTBit(LUTBit0011) => cell!(x, y, 18, n, 1),
+        Fuse::LUTBit(LUTBit0100) => cell!(x, y, 16, n, 2),
+        Fuse::LUTBit(LUTBit0101) => cell!(x, y, 16, n, 0),
+        Fuse::LUTBit(LUTBit0110) => cell!(x, y, 18, n, 3),
+        Fuse::LUTBit(LUTBit0111) => cell!(x, y, 18, n, 0),
+        Fuse::LUTBit(LUTBit1000) => cell!(x, y, 15, n, 3),
+        Fuse::LUTBit(LUTBit1001) => cell!(x, y, 15, n, 1),
+        Fuse::LUTBit(LUTBit1010) => cell!(x, y, 17, n, 2),
+        Fuse::LUTBit(LUTBit1011) => cell!(x, y, 17, n, 1),
+        Fuse::LUTBit(LUTBit1100) => cell!(x, y, 15, n, 2),
+        Fuse::LUTBit(LUTBit1101) => cell!(x, y, 15, n, 0),
+        Fuse::LUTBit(LUTBit1110) => cell!(x, y, 17, n, 3),
+        Fuse::LUTBit(LUTBit1111) => cell!(x, y, 17, n, 0),
+        Fuse::LUTChainOff => cell!(x, y, 19, n, 3),
+        Fuse::OutputLeftLUT => cell!(x, y, 20, n, 1),
+        Fuse::OutputLocalLUT => cell!(x, y, 21, n, 3),
+        Fuse::OutputRightLUT => cell!(x, y, 19, n, 1),
+        Fuse::RegisterChainOff => cell!(x, y, 20, n, 2),
+        Fuse::Syncronous => cell!(x, y, 21, n, 0),
+    }
+}
+
+fn logic_input_inc(
+    x: u8,
+    y: u8,
+    fuse: LogicCellInputFuse,
+    s: u8,
+    n: LogicCellNumber,
+    index: u8,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use LogicCellInputFuse::*;
     use Select3::*;
     use Select6::*;
 
     match fuse {
-        Fuse::AClear1 =>
-            Ok(At::Cell { x, y, sector: 20, n, index: 3 }),
-        Fuse::CarryIn =>
-            Ok(At::Cell { x, y, sector: 20, n, index: 0 }),
-        Fuse::Clock2 =>
-            Ok(At::Cell { x, y, sector: 19, n, index: 2 }),
-        Fuse::Feedback =>
-            Ok(At::Cell { x, y, sector: 19, n, index: 0 }),
-        Fuse::Input { input: LogicCellInputA, fuse: Source3(Select3_0) } =>
-            Ok(At::Cell { x, y, sector:12, n, index: 0 }),
-        Fuse::Input { input: LogicCellInputA, fuse: Source3(Select3_1) } =>
-            Ok(At::Cell { x, y, sector:13, n, index: 0 }),
-        Fuse::Input { input: LogicCellInputA, fuse: Source3(Select3_2) } =>
-            Ok(At::Cell { x, y, sector:14, n, index: 0 }),
-        Fuse::Input { input: LogicCellInputA, fuse: Source6(Select6_0) } =>
-            Ok(At::Cell { x, y, sector: 6, n, index: 0 }),
-        Fuse::Input { input: LogicCellInputA, fuse: Source6(Select6_1) } =>
-            Ok(At::Cell { x, y, sector:11, n, index: 0 }),
-        Fuse::Input { input: LogicCellInputA, fuse: Source6(Select6_2) } =>
-            Ok(At::Cell { x, y, sector: 6, n, index: 1 }),
-        Fuse::Input { input: LogicCellInputA, fuse: Source6(Select6_3) } =>
-            Ok(At::Cell { x, y, sector: 7, n, index: 0 }),
-        Fuse::Input { input: LogicCellInputA, fuse: Source6(Select6_4) } =>
-            Ok(At::Cell { x, y, sector:11, n, index: 1 }),
-        Fuse::Input { input: LogicCellInputA, fuse: Source6(Select6_5) } =>
-            Ok(At::Cell { x, y, sector: 7, n, index: 1 }),
-        Fuse::Input { input: LogicCellInputB, fuse: Source3(Select3_0) } =>
-            Ok(At::Cell { x, y, sector:14, n, index: 1 }),
-        Fuse::Input { input: LogicCellInputB, fuse: Source3(Select3_1) } =>
-            Ok(At::Cell { x, y, sector:13, n, index: 1 }),
-        Fuse::Input { input: LogicCellInputB, fuse: Source3(Select3_2) } =>
-            Ok(At::Cell { x, y, sector:12, n, index: 1 }),
-        Fuse::Input { input: LogicCellInputB, fuse: Source6(Select6_0) } =>
-            Ok(At::Cell { x, y, sector: 8, n, index: 0 }),
-        Fuse::Input { input: LogicCellInputB, fuse: Source6(Select6_1) } =>
-            Ok(At::Cell { x, y, sector: 9, n, index: 0 }),
-        Fuse::Input { input: LogicCellInputB, fuse: Source6(Select6_2) } =>
-            Ok(At::Cell { x, y, sector: 9, n, index: 1 }),
-        Fuse::Input { input: LogicCellInputB, fuse: Source6(Select6_3) } =>
-            Ok(At::Cell { x, y, sector:10, n, index: 0 }),
-        Fuse::Input { input: LogicCellInputB, fuse: Source6(Select6_4) } =>
-            Ok(At::Cell { x, y, sector: 8, n, index: 1 }),
-        Fuse::Input { input: LogicCellInputB, fuse: Source6(Select6_5) } =>
-            Ok(At::Cell { x, y, sector:10, n, index: 1 }),
-        Fuse::Input { input: LogicCellInputC, fuse: Source3(Select3_0) } =>
-            Ok(At::Cell { x, y, sector:12, n, index: 2 }),
-        Fuse::Input { input: LogicCellInputC, fuse: Source3(Select3_1) } =>
-            Ok(At::Cell { x, y, sector:13, n, index: 2 }),
-        Fuse::Input { input: LogicCellInputC, fuse: Source3(Select3_2) } =>
-            Ok(At::Cell { x, y, sector:14, n, index: 2 }),
-        Fuse::Input { input: LogicCellInputC, fuse: Source6(Select6_0) } =>
-            Ok(At::Cell { x, y, sector: 6, n, index: 2 }),
-        Fuse::Input { input: LogicCellInputC, fuse: Source6(Select6_1) } =>
-            Ok(At::Cell { x, y, sector: 8, n, index: 2 }),
-        Fuse::Input { input: LogicCellInputC, fuse: Source6(Select6_2) } =>
-            Ok(At::Cell { x, y, sector: 6, n, index: 3 }),
-        Fuse::Input { input: LogicCellInputC, fuse: Source6(Select6_3) } =>
-            Ok(At::Cell { x, y, sector: 7, n, index: 2 }),
-        Fuse::Input { input: LogicCellInputC, fuse: Source6(Select6_4) } =>
-            Ok(At::Cell { x, y, sector: 8, n, index: 3 }),
-        Fuse::Input { input: LogicCellInputC, fuse: Source6(Select6_5) } =>
-            Ok(At::Cell { x, y, sector: 7, n, index: 3 }),
-        Fuse::Input { input: LogicCellInputD, fuse: Source3(Select3_0) } =>
-            Ok(At::Cell { x, y, sector:14, n, index: 3 }),
-        Fuse::Input { input: LogicCellInputD, fuse: Source3(Select3_1) } =>
-            Ok(At::Cell { x, y, sector:13, n, index: 3 }),
-        Fuse::Input { input: LogicCellInputD, fuse: Source3(Select3_2) } =>
-            Ok(At::Cell { x, y, sector:12, n, index: 3 }),
-        Fuse::Input { input: LogicCellInputD, fuse: Source6(Select6_0) } =>
-            Ok(At::Cell { x, y, sector:11, n, index: 2 }),
-        Fuse::Input { input: LogicCellInputD, fuse: Source6(Select6_1) } =>
-            Ok(At::Cell { x, y, sector: 9, n, index: 2 }),
-        Fuse::Input { input: LogicCellInputD, fuse: Source6(Select6_2) } =>
-            Ok(At::Cell { x, y, sector: 9, n, index: 3 }),
-        Fuse::Input { input: LogicCellInputD, fuse: Source6(Select6_3) } =>
-            Ok(At::Cell { x, y, sector:10, n, index: 2 }),
-        Fuse::Input { input: LogicCellInputD, fuse: Source6(Select6_4) } =>
-            Ok(At::Cell { x, y, sector:11, n, index: 3 }),
-        Fuse::Input { input: LogicCellInputD, fuse: Source6(Select6_5) } =>
-            Ok(At::Cell { x, y, sector:10, n, index: 3 }),
-        Fuse::LUTBit(LUTBit0000) =>
-            Ok(At::Cell { x, y, sector: 16, n, index: 3 }),
-        Fuse::LUTBit(LUTBit0001) =>
-            Ok(At::Cell { x, y, sector: 16, n, index: 1 }),
-        Fuse::LUTBit(LUTBit0010) =>
-            Ok(At::Cell { x, y, sector: 18, n, index: 2 }),
-        Fuse::LUTBit(LUTBit0011) =>
-            Ok(At::Cell { x, y, sector: 18, n, index: 1 }),
-        Fuse::LUTBit(LUTBit0100) =>
-            Ok(At::Cell { x, y, sector: 16, n, index: 2 }),
-        Fuse::LUTBit(LUTBit0101) =>
-            Ok(At::Cell { x, y, sector: 16, n, index: 0 }),
-        Fuse::LUTBit(LUTBit0110) =>
-            Ok(At::Cell { x, y, sector: 18, n, index: 3 }),
-        Fuse::LUTBit(LUTBit0111) =>
-            Ok(At::Cell { x, y, sector: 18, n, index: 0 }),
-        Fuse::LUTBit(LUTBit1000) =>
-            Ok(At::Cell { x, y, sector: 15, n, index: 3 }),
-        Fuse::LUTBit(LUTBit1001) =>
-            Ok(At::Cell { x, y, sector: 15, n, index: 1 }),
-        Fuse::LUTBit(LUTBit1010) =>
-            Ok(At::Cell { x, y, sector: 17, n, index: 2 }),
-        Fuse::LUTBit(LUTBit1011) =>
-            Ok(At::Cell { x, y, sector: 17, n, index: 1 }),
-        Fuse::LUTBit(LUTBit1100) =>
-            Ok(At::Cell { x, y, sector: 15, n, index: 2 }),
-        Fuse::LUTBit(LUTBit1101) =>
-            Ok(At::Cell { x, y, sector: 15, n, index: 0 }),
-        Fuse::LUTBit(LUTBit1110) =>
-            Ok(At::Cell { x, y, sector: 17, n, index: 3 }),
-        Fuse::LUTBit(LUTBit1111) =>
-            Ok(At::Cell { x, y, sector: 17, n, index: 0 }),
-        Fuse::LUTChainOff =>
-            Ok(At::Cell { x, y, sector: 19, n, index: 3 }),
-        Fuse::OutputLeftLUT =>
-            Ok(At::Cell { x, y, sector: 20, n, index: 1 }),
-        Fuse::OutputLocalLUT =>
-            Ok(At::Cell { x, y, sector: 21, n, index: 3 }),
-        Fuse::OutputRightLUT =>
-            Ok(At::Cell { x, y, sector: 19, n, index: 1 }),
-        Fuse::RegisterChainOff =>
-            Ok(At::Cell { x, y, sector: 20, n, index: 2 }),
-        Fuse::Syncronous =>
-            Ok(At::Cell { x, y, sector: 21, n, index: 0 }),
+        Source3(Select3_0) => cell!(x, y, 12, n, index + 0),
+        Source3(Select3_1) => cell!(x, y, 13, n, index + 0),
+        Source3(Select3_2) => cell!(x, y, 14, n, index + 0),
+        Source6(Select6_0) => cell!(x, y,  6, n, index + 0),
+        Source6(Select6_1) => cell!(x, y,  s, n, index + 0),
+        Source6(Select6_2) => cell!(x, y,  6, n, index + 1),
+        Source6(Select6_3) => cell!(x, y,  7, n, index + 0),
+        Source6(Select6_4) => cell!(x, y,  s, n, index + 1),
+        Source6(Select6_5) => cell!(x, y,  7, n, index + 1),
+    }
+}
+
+fn logic_input_dec(
+    x: u8,
+    y: u8,
+    fuse: LogicCellInputFuse,
+    s: u8,
+    n: LogicCellNumber,
+    index: u8,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use LogicCellInputFuse::*;
+    use Select3::*;
+    use Select6::*;
+
+    match fuse {
+        Source3(Select3_0) => cell!(x, y, 14, n, index + 1),
+        Source3(Select3_1) => cell!(x, y, 13, n, index + 1),
+        Source3(Select3_2) => cell!(x, y, 12, n, index + 1),
+        Source6(Select6_0) => cell!(x, y,  s, n, index + 0),
+        Source6(Select6_1) => cell!(x, y,  9, n, index + 0),
+        Source6(Select6_2) => cell!(x, y,  9, n, index + 1),
+        Source6(Select6_3) => cell!(x, y, 10, n, index + 0),
+        Source6(Select6_4) => cell!(x, y,  s, n, index + 1),
+        Source6(Select6_5) => cell!(x, y, 10, n, index + 1),
     }
 }
 
@@ -1467,436 +1411,92 @@ fn logic_interconnect(
     i: LogicInterconnectIndex,
     fuse: LogicInterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
-    use FuseAt as At;
+    use logic_interconnect_high as high;
+    use logic_interconnect_low as low;
     use LogicCellNumber::*;
-    use LogicInterconnectFuse as Fuse;
     use LogicInterconnectIndex::*;
+
+    match i {
+        LogicInterconnect0 =>  high(x, y, fuse, LogicCell0, 2),
+        LogicInterconnect1 =>  high(x, y, fuse, LogicCell1, 2),
+        LogicInterconnect2 =>  high(x, y, fuse, LogicCell2, 2),
+        LogicInterconnect3 =>  high(x, y, fuse, LogicCell3, 2),
+        LogicInterconnect4 =>  high(x, y, fuse, LogicCell4, 2),
+        LogicInterconnect5 =>  low(x, y, fuse, LogicCell0, 0, None),
+        LogicInterconnect6 =>  low(x, y, fuse, LogicCell0, 2, None),
+        LogicInterconnect7 =>  low(x, y, fuse, LogicCell1, 0, None),
+        LogicInterconnect8 =>  low(x, y, fuse, LogicCell1, 2, None),
+        LogicInterconnect9 =>  low(x, y, fuse, LogicCell2, 0, None),
+        LogicInterconnect10 => low(x, y, fuse, LogicCell2, 2, None),
+        LogicInterconnect11 => low(x, y, fuse, LogicCell3, 0, None),
+        LogicInterconnect12 => low(x, y, fuse, LogicCell3, 2, Some(LogicCell4)),
+        LogicInterconnect13 => high(x, y, fuse, LogicCell5, 2),
+        LogicInterconnect14 => high(x, y, fuse, LogicCell6, 2),
+        LogicInterconnect15 => high(x, y, fuse, LogicCell7, 2),
+        LogicInterconnect16 => high(x, y, fuse, LogicCell8, 2),
+        LogicInterconnect17 => high(x, y, fuse, LogicCell9, 2),
+        LogicInterconnect18 => low(x, y, fuse, LogicCell5, 0, None),
+        LogicInterconnect19 => low(x, y, fuse, LogicCell5, 2, None),
+        LogicInterconnect20 => low(x, y, fuse, LogicCell6, 0, None),
+        LogicInterconnect21 => low(x, y, fuse, LogicCell6, 2, None),
+        LogicInterconnect22 => low(x, y, fuse, LogicCell7, 0, None),
+        LogicInterconnect23 => low(x, y, fuse, LogicCell7, 2, None),
+        LogicInterconnect24 => low(x, y, fuse, LogicCell8, 0, None),
+        LogicInterconnect25 => low(x, y, fuse, LogicCell8, 2, Some(LogicCell9)),
+    }
+}
+
+fn logic_interconnect_high(
+    x: u8,
+    y: u8,
+    fuse: LogicInterconnectFuse,
+    n: LogicCellNumber,
+    index: u8,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use LogicInterconnectFuse::*;
     use Select3::*;
     use Select4::*;
 
-    match (i, fuse) {
-        (LogicInterconnect0, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell0, index: 3 }),
-        (LogicInterconnect0, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell0, index: 2 }),
-        (LogicInterconnect0, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell0, index: 3 }),
-        (LogicInterconnect0, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell0, index: 2 }),
-        (LogicInterconnect0, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell0, index: 2 }),
-        (LogicInterconnect0, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell0, index: 3 }),
-        (LogicInterconnect0, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell0, index: 2 }),
-        (LogicInterconnect0, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell0, index: 3 }),
-        (LogicInterconnect1, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell1, index: 3 }),
-        (LogicInterconnect1, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell1, index: 2 }),
-        (LogicInterconnect1, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell1, index: 3 }),
-        (LogicInterconnect1, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell1, index: 2 }),
-        (LogicInterconnect1, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell1, index: 2 }),
-        (LogicInterconnect1, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell1, index: 3 }),
-        (LogicInterconnect1, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell1, index: 2 }),
-        (LogicInterconnect1, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell1, index: 3 }),
-        (LogicInterconnect2, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell2, index: 3 }),
-        (LogicInterconnect2, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell2, index: 2 }),
-        (LogicInterconnect2, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell2, index: 3 }),
-        (LogicInterconnect2, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell2, index: 2 }),
-        (LogicInterconnect2, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell2, index: 2 }),
-        (LogicInterconnect2, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell2, index: 3 }),
-        (LogicInterconnect2, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell2, index: 2 }),
-        (LogicInterconnect2, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell2, index: 3 }),
-        (LogicInterconnect3, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell3, index: 3 }),
-        (LogicInterconnect3, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell3, index: 2 }),
-        (LogicInterconnect3, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell3, index: 3 }),
-        (LogicInterconnect3, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell3, index: 2 }),
-        (LogicInterconnect3, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell3, index: 2 }),
-        (LogicInterconnect3, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell3, index: 3 }),
-        (LogicInterconnect3, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell3, index: 2 }),
-        (LogicInterconnect3, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell3, index: 3 }),
-        (LogicInterconnect4, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell4, index: 3 }),
-        (LogicInterconnect4, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell4, index: 2 }),
-        (LogicInterconnect4, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell4, index: 3 }),
-        (LogicInterconnect4, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell4, index: 2 }),
-        (LogicInterconnect4, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell4, index: 2 }),
-        (LogicInterconnect4, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell4, index: 3 }),
-        (LogicInterconnect4, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell4, index: 2 }),
-        (LogicInterconnect4, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell4, index: 3 }),
-        (LogicInterconnect5, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell0, index: 1 }),
-        (LogicInterconnect5, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell0, index: 0 }),
-        (LogicInterconnect5, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell0, index: 1 }),
-        (LogicInterconnect5, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell0, index: 0 }),
-        (LogicInterconnect5, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell0, index: 0 }),
-        (LogicInterconnect5, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell0, index: 1 }),
-        (LogicInterconnect5, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell0, index: 0 }),
-        (LogicInterconnect5, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell0, index: 1 }),
-        (LogicInterconnect6, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell0, index: 3 }),
-        (LogicInterconnect6, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell0, index: 2 }),
-        (LogicInterconnect6, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell0, index: 3 }),
-        (LogicInterconnect6, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell0, index: 2 }),
-        (LogicInterconnect6, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell0, index: 2 }),
-        (LogicInterconnect6, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell0, index: 3 }),
-        (LogicInterconnect6, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell0, index: 2 }),
-        (LogicInterconnect6, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell0, index: 3 }),
-        (LogicInterconnect7, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell1, index: 1 }),
-        (LogicInterconnect7, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell1, index: 0 }),
-        (LogicInterconnect7, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell1, index: 1 }),
-        (LogicInterconnect7, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell1, index: 0 }),
-        (LogicInterconnect7, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell1, index: 0 }),
-        (LogicInterconnect7, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell1, index: 1 }),
-        (LogicInterconnect7, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell1, index: 0 }),
-        (LogicInterconnect7, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell1, index: 1 }),
-        (LogicInterconnect8, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell1, index: 3 }),
-        (LogicInterconnect8, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell1, index: 2 }),
-        (LogicInterconnect8, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell1, index: 3 }),
-        (LogicInterconnect8, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell1, index: 2 }),
-        (LogicInterconnect8, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell1, index: 2 }),
-        (LogicInterconnect8, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell1, index: 3 }),
-        (LogicInterconnect8, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell1, index: 2 }),
-        (LogicInterconnect8, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell1, index: 3 }),
-        (LogicInterconnect9, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell2, index: 1 }),
-        (LogicInterconnect9, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell2, index: 0 }),
-        (LogicInterconnect9, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell2, index: 1 }),
-        (LogicInterconnect9, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell2, index: 0 }),
-        (LogicInterconnect9, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell2, index: 0 }),
-        (LogicInterconnect9, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell2, index: 1 }),
-        (LogicInterconnect9, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell2, index: 0 }),
-        (LogicInterconnect9, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell2, index: 1 }),
-        (LogicInterconnect10, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell2, index: 3 }),
-        (LogicInterconnect10, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell2, index: 2 }),
-        (LogicInterconnect10, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell2, index: 3 }),
-        (LogicInterconnect10, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell2, index: 2 }),
-        (LogicInterconnect10, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell2, index: 2 }),
-        (LogicInterconnect10, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell2, index: 3 }),
-        (LogicInterconnect10, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell2, index: 2 }),
-        (LogicInterconnect10, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell2, index: 3 }),
-        (LogicInterconnect11, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell3, index: 1 }),
-        (LogicInterconnect11, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell3, index: 0 }),
-        (LogicInterconnect11, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell3, index: 1 }),
-        (LogicInterconnect11, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell3, index: 0 }),
-        (LogicInterconnect11, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell3, index: 0 }),
-        (LogicInterconnect11, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell3, index: 1 }),
-        (LogicInterconnect11, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell3, index: 0 }),
-        (LogicInterconnect11, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell3, index: 1 }),
-        (LogicInterconnect12, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell3, index: 3 }),
-        (LogicInterconnect12, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell3, index: 2 }),
-        (LogicInterconnect12, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell3, index: 3 }),
-        (LogicInterconnect12, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell3, index: 2 }),
-        (LogicInterconnect12, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell3, index: 2 }),
-        (LogicInterconnect12, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell3, index: 3 }),
-        (LogicInterconnect12, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell3, index: 2 }),
-        (LogicInterconnect12, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell3, index: 3 }),
-        (LogicInterconnect12, Fuse::SourceGlobal) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell4, index: 0 }),
-        (LogicInterconnect13, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell5, index: 3 }),
-        (LogicInterconnect13, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell5, index: 2 }),
-        (LogicInterconnect13, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell5, index: 3 }),
-        (LogicInterconnect13, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell5, index: 2 }),
-        (LogicInterconnect13, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell5, index: 2 }),
-        (LogicInterconnect13, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell5, index: 3 }),
-        (LogicInterconnect13, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell5, index: 2 }),
-        (LogicInterconnect13, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell5, index: 3 }),
-        (LogicInterconnect14, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell6, index: 3 }),
-        (LogicInterconnect14, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell6, index: 2 }),
-        (LogicInterconnect14, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell6, index: 3 }),
-        (LogicInterconnect14, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell6, index: 2 }),
-        (LogicInterconnect14, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell6, index: 2 }),
-        (LogicInterconnect14, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell6, index: 3 }),
-        (LogicInterconnect14, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell6, index: 2 }),
-        (LogicInterconnect14, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell6, index: 3 }),
-        (LogicInterconnect15, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell7, index: 3 }),
-        (LogicInterconnect15, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell7, index: 2 }),
-        (LogicInterconnect15, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell7, index: 3 }),
-        (LogicInterconnect15, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell7, index: 2 }),
-        (LogicInterconnect15, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell7, index: 2 }),
-        (LogicInterconnect15, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell7, index: 3 }),
-        (LogicInterconnect15, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell7, index: 2 }),
-        (LogicInterconnect15, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell7, index: 3 }),
-        (LogicInterconnect16, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell8, index: 3 }),
-        (LogicInterconnect16, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell8, index: 2 }),
-        (LogicInterconnect16, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell8, index: 3 }),
-        (LogicInterconnect16, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell8, index: 2 }),
-        (LogicInterconnect16, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell8, index: 2 }),
-        (LogicInterconnect16, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell8, index: 3 }),
-        (LogicInterconnect16, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell8, index: 2 }),
-        (LogicInterconnect16, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell8, index: 3 }),
-        (LogicInterconnect17, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell9, index: 3 }),
-        (LogicInterconnect17, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell9, index: 2 }),
-        (LogicInterconnect17, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 22, n: LogicCell9, index: 3 }),
-        (LogicInterconnect17, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 23, n: LogicCell9, index: 2 }),
-        (LogicInterconnect17, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell9, index: 2 }),
-        (LogicInterconnect17, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 24, n: LogicCell9, index: 3 }),
-        (LogicInterconnect17, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell9, index: 2 }),
-        (LogicInterconnect17, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 25, n: LogicCell9, index: 3 }),
-        (LogicInterconnect18, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell5, index: 1 }),
-        (LogicInterconnect18, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell5, index: 0 }),
-        (LogicInterconnect18, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell5, index: 1 }),
-        (LogicInterconnect18, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell5, index: 0 }),
-        (LogicInterconnect18, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell5, index: 0 }),
-        (LogicInterconnect18, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell5, index: 1 }),
-        (LogicInterconnect18, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell5, index: 0 }),
-        (LogicInterconnect18, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell5, index: 1 }),
-        (LogicInterconnect19, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell5, index: 3 }),
-        (LogicInterconnect19, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell5, index: 2 }),
-        (LogicInterconnect19, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell5, index: 3 }),
-        (LogicInterconnect19, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell5, index: 2 }),
-        (LogicInterconnect19, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell5, index: 2 }),
-        (LogicInterconnect19, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell5, index: 3 }),
-        (LogicInterconnect19, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell5, index: 2 }),
-        (LogicInterconnect19, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell5, index: 3 }),
-        (LogicInterconnect20, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell6, index: 1 }),
-        (LogicInterconnect20, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell6, index: 0 }),
-        (LogicInterconnect20, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell6, index: 1 }),
-        (LogicInterconnect20, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell6, index: 0 }),
-        (LogicInterconnect20, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell6, index: 0 }),
-        (LogicInterconnect20, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell6, index: 1 }),
-        (LogicInterconnect20, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell6, index: 0 }),
-        (LogicInterconnect20, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell6, index: 1 }),
-        (LogicInterconnect21, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell6, index: 3 }),
-        (LogicInterconnect21, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell6, index: 2 }),
-        (LogicInterconnect21, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell6, index: 3 }),
-        (LogicInterconnect21, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell6, index: 2 }),
-        (LogicInterconnect21, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell6, index: 2 }),
-        (LogicInterconnect21, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell6, index: 3 }),
-        (LogicInterconnect21, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell6, index: 2 }),
-        (LogicInterconnect21, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell6, index: 3 }),
-        (LogicInterconnect22, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell7, index: 1 }),
-        (LogicInterconnect22, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell7, index: 0 }),
-        (LogicInterconnect22, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell7, index: 1 }),
-        (LogicInterconnect22, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell7, index: 0 }),
-        (LogicInterconnect22, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell7, index: 0 }),
-        (LogicInterconnect22, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell7, index: 1 }),
-        (LogicInterconnect22, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell7, index: 0 }),
-        (LogicInterconnect22, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell7, index: 1 }),
-        (LogicInterconnect23, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell7, index: 3 }),
-        (LogicInterconnect23, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell7, index: 2 }),
-        (LogicInterconnect23, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell7, index: 3 }),
-        (LogicInterconnect23, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell7, index: 2 }),
-        (LogicInterconnect23, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell7, index: 2 }),
-        (LogicInterconnect23, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell7, index: 3 }),
-        (LogicInterconnect23, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell7, index: 2 }),
-        (LogicInterconnect23, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell7, index: 3 }),
-        (LogicInterconnect24, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell8, index: 1 }),
-        (LogicInterconnect24, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell8, index: 0 }),
-        (LogicInterconnect24, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell8, index: 1 }),
-        (LogicInterconnect24, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell8, index: 0 }),
-        (LogicInterconnect24, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell8, index: 0 }),
-        (LogicInterconnect24, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell8, index: 1 }),
-        (LogicInterconnect24, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell8, index: 0 }),
-        (LogicInterconnect24, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell8, index: 1 }),
-        (LogicInterconnect25, Fuse::DirectLink) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell8, index: 3 }),
-        (LogicInterconnect25, Fuse::Source3(Select3_0)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell8, index: 2 }),
-        (LogicInterconnect25, Fuse::Source3(Select3_1)) =>
-            Ok(At::Cell { x, y, sector: 5,  n: LogicCell8, index: 3 }),
-        (LogicInterconnect25, Fuse::Source3(Select3_2)) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell8, index: 2 }),
-        (LogicInterconnect25, Fuse::Source4(Select4_0)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell8, index: 2 }),
-        (LogicInterconnect25, Fuse::Source4(Select4_1)) =>
-            Ok(At::Cell { x, y, sector: 3,  n: LogicCell8, index: 3 }),
-        (LogicInterconnect25, Fuse::Source4(Select4_2)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell8, index: 2 }),
-        (LogicInterconnect25, Fuse::Source4(Select4_3)) =>
-            Ok(At::Cell { x, y, sector: 2,  n: LogicCell8, index: 3 }),
-        (LogicInterconnect25, Fuse::SourceGlobal) =>
-            Ok(At::Cell { x, y, sector: 4,  n: LogicCell9, index: 0 }),
-        (_, Fuse::SourceGlobal) =>
-            Err(FuseOutOfRange::SourceGlobal),
+    match fuse {
+        DirectLink         => cell!(x, y, 23, n, index + 1),
+        Source3(Select3_0) => cell!(x, y, 22, n, index + 0),
+        Source3(Select3_1) => cell!(x, y, 22, n, index + 1),
+        Source3(Select3_2) => cell!(x, y, 23, n, index + 0),
+        Source4(Select4_0) => cell!(x, y, 24, n, index + 0),
+        Source4(Select4_1) => cell!(x, y, 24, n, index + 1),
+        Source4(Select4_2) => cell!(x, y, 25, n, index + 0),
+        Source4(Select4_3) => cell!(x, y, 25, n, index + 1),
+        SourceGlobal => Err(FuseOutOfRange::SourceGlobal),
+    }
+}
+
+fn logic_interconnect_low(
+    x: u8,
+    y: u8,
+    fuse: LogicInterconnectFuse,
+    n: LogicCellNumber,
+    index: u8,
+    global: Option<LogicCellNumber>,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use LogicInterconnectFuse::*;
+    use Select3::*;
+    use Select4::*;
+
+    match fuse {
+        DirectLink         => cell!(x, y, 4, n, index + 1),
+        Source3(Select3_0) => cell!(x, y, 5, n, index + 0),
+        Source3(Select3_1) => cell!(x, y, 5, n, index + 1),
+        Source3(Select3_2) => cell!(x, y, 4, n, index + 0),
+        Source4(Select4_0) => cell!(x, y, 3, n, index + 0),
+        Source4(Select4_1) => cell!(x, y, 3, n, index + 1),
+        Source4(Select4_2) => cell!(x, y, 2, n, index + 0),
+        Source4(Select4_3) => cell!(x, y, 2, n, index + 1),
+        SourceGlobal =>
+            if let Some(n) = global {
+                cell!(x, y, 4, n, 0)
+            } else {
+                Err(FuseOutOfRange::SourceGlobal)
+            },
     }
 }
 
