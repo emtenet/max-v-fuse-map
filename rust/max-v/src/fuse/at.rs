@@ -45,7 +45,7 @@ impl FuseAt {
             }
 
             FuseAt::Block { .. } =>
-                Err(FuseOutOfRange::SectorBlock),
+                Err(FuseOutOfRange::InternalBlock),
 
             FuseAt::Cell { x, y, mut sector, n, index: index @ 0..4 } => {
                 if x == density.right {
@@ -58,7 +58,7 @@ impl FuseAt {
             }
 
             FuseAt::Cell { .. } =>
-                Err(FuseOutOfRange::SectorCell),
+                Err(FuseOutOfRange::InternalCell),
 
             FuseAt::End { x, top, sector, index: index @ 0..11 } => {
                 let sector = sector_at(x, sector, density)?;
@@ -72,7 +72,7 @@ impl FuseAt {
             }
 
             FuseAt::End { .. } =>
-                Err(FuseOutOfRange::SectorEnd),
+                Err(FuseOutOfRange::InternalEnd),
 
             FuseAt::Global { x, sector } => {
                 let sector = sector_at(x, sector, density)?;
@@ -108,9 +108,9 @@ fn line_at(y: u8, rows: u8, density: &Density)
     -> Result<usize, FuseOutOfRange>
 {
     if y >= density.top {
-        Err(FuseOutOfRange::SectorY)
+        Err(FuseOutOfRange::InternalY)
     } else if y + rows < density.top {
-        Err(FuseOutOfRange::SectorY)
+        Err(FuseOutOfRange::InternalY)
     } else {
         let row = density.top - y - 1;
         if row >= density.global_row {
@@ -125,16 +125,16 @@ fn sector_at(x: u8, sector: u8, density: &Density)
     -> Result<Sector, FuseOutOfRange>
 {
     if x < density.left {
-        return Err(FuseOutOfRange::SectorX);
+        return Err(FuseOutOfRange::InternalX);
     }
     if x > density.right {
-        return Err(FuseOutOfRange::SectorX);
+        return Err(FuseOutOfRange::InternalX);
     }
 
     let mut base = density.sync_width;
     if x == density.left {
         if sector >= 13 {
-            return Err(FuseOutOfRange::Sector { x, sector });
+            return Err(FuseOutOfRange::InternalSector { x, sector });
         }
         return Ok(Sector {
             base: base + (usize::from(sector) * density.short_sector),
@@ -144,11 +144,11 @@ fn sector_at(x: u8, sector: u8, density: &Density)
 
     if x == density.right {
         if sector >= 13 {
-            return Err(FuseOutOfRange::Sector { x, sector });
+            return Err(FuseOutOfRange::InternalSector { x, sector });
         }
     } else {
         if sector >= 28 {
-            return Err(FuseOutOfRange::Sector { x, sector });
+            return Err(FuseOutOfRange::InternalSector { x, sector });
         }
     }
 

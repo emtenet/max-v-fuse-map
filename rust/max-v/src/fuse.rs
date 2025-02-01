@@ -297,21 +297,19 @@ pub enum UFMInterconnectFuse {
 #[derive(Debug)]
 #[derive(Eq, PartialEq)]
 pub enum FuseOutOfRange {
-    Fuse,
-    IO,
-    PCICompliance,
-    Sector {
+    Cell,
+    Interconnect,
+    InternalBlock,
+    InternalCell,
+    InternalEnd,
+    InternalSector {
         x: u8,
         sector: u8,
     },
-    SectorBlock,
-    SectorCell,
-    SectorEnd,
-    SectorX,
-    SectorY,
-    SourceGlobal,
-    X,
-    Y,
+    InternalX,
+    InternalY,
+    Source,
+    XY,
     Unimplemented,
 }
 
@@ -350,7 +348,7 @@ impl Fuse {
                         c4_interconnect_bottom(x, i, fuse),
 
                     _ =>
-                        Err(FuseOutOfRange::Unimplemented),
+                        Err(FuseOutOfRange::XY),
                 },
 
             Fuse::DeviceOutputEnable => {
@@ -383,7 +381,7 @@ impl Fuse {
                         io_column_cell(x, true, false, n, strip, fuse),
 
                     None =>
-                        Err(FuseOutOfRange::IO),
+                        Err(FuseOutOfRange::XY),
                 },
 
             Fuse::IOColumnInterconnect { x, y, i, fuse } =>
@@ -395,7 +393,7 @@ impl Fuse {
                         io_column_interconnect(x, true, i, fuse),
 
                     _ =>
-                        Err(FuseOutOfRange::IO),
+                        Err(FuseOutOfRange::XY),
                 }
 
             Fuse::IORowCell { x, y, n, fuse } =>
@@ -407,7 +405,7 @@ impl Fuse {
                         io_row_cell(x, false, y, n, strip, pci_compliance, fuse),
 
                     None =>
-                        Err(FuseOutOfRange::IO),
+                        Err(FuseOutOfRange::XY),
                 },
 
             Fuse::IORowInterconnect { x, y, i, fuse } =>
@@ -419,7 +417,7 @@ impl Fuse {
                         io_row_interconnect(x, y, i, fuse),
 
                     _ =>
-                        Err(FuseOutOfRange::IO),
+                        Err(FuseOutOfRange::XY),
                 }
 
             Fuse::JTAG { .. } =>
@@ -503,7 +501,7 @@ fn c4_interconnect_top_left(
                 C4Interconnect11 => end!(x + 1, true, 0, 5),
                 C4Interconnect12 => end!(x + 1, true, 0, 7),
                 C4Interconnect13 => end!(x + 1, true, 0, 9),
-                _ => Err(FuseOutOfRange::Fuse),
+                _ => Err(FuseOutOfRange::Interconnect),
             },
         IODataIn1 =>
             match i {
@@ -512,10 +510,10 @@ fn c4_interconnect_top_left(
                 C4Interconnect11 => end!(x, true, 11, 6),
                 C4Interconnect12 => end!(x, true, 11, 8),
                 C4Interconnect13 => end!(x, true, 11, 10),
-                _ => Err(FuseOutOfRange::Fuse),
+                _ => Err(FuseOutOfRange::Interconnect),
             },
         _ =>
-            Err(FuseOutOfRange::Fuse),
+            Err(FuseOutOfRange::Source),
     }
 }
 
@@ -540,7 +538,7 @@ fn c4_interconnect_top(
                 C4Interconnect11 => end!(x + 1, true, 0, 5),
                 C4Interconnect12 => end!(x + 1, true, 0, 7),
                 C4Interconnect13 => end!(x + 1, true, 0, 9),
-                _ => Err(FuseOutOfRange::Fuse),
+                _ => Err(FuseOutOfRange::Interconnect),
             },
         IODataIn1 =>
             match i {
@@ -554,10 +552,10 @@ fn c4_interconnect_top(
                 C4Interconnect11 => end!(x, true, 26, 6),
                 C4Interconnect12 => end!(x, true, 26, 8),
                 C4Interconnect13 => end!(x, true, 26, 10),
-                _ => Err(FuseOutOfRange::Fuse),
+                _ => Err(FuseOutOfRange::Interconnect),
             },
         _ =>
-            Err(FuseOutOfRange::Fuse),
+            Err(FuseOutOfRange::Source),
     }
 }
 
@@ -580,7 +578,7 @@ fn c4_interconnect_row_left(
         Source4(Select4_1) => c4_interconnect_fuse_0(x, y, i, 9, 11, 1),
         Source4(Select4_2) => c4_interconnect_fuse_0(x, y, i, 10, 12, 0),
         Source4(Select4_3) => c4_interconnect_fuse_0(x, y, i, 10, 12, 1),
-        _ => Err(FuseOutOfRange::Fuse),
+        _ => Err(FuseOutOfRange::Source),
     }
 }
 
@@ -603,7 +601,7 @@ fn c4_interconnect_row(
         Source4(Select4_1) => c4_interconnect_fuse_0(x, y, i, 24, 26, 1),
         Source4(Select4_2) => c4_interconnect_fuse_0(x, y, i, 25, 27, 0),
         Source4(Select4_3) => c4_interconnect_fuse_0(x, y, i, 25, 27, 1),
-        _ => Err(FuseOutOfRange::Fuse),
+        _ => Err(FuseOutOfRange::Source),
     }
 }
 
@@ -626,7 +624,7 @@ fn c4_interconnect_row_right(
         Source4(Select4_1) => c4_interconnect_fuse_1(x, y, i, 24, 11, 1),
         Source4(Select4_2) => c4_interconnect_fuse_1(x, y, i, 25, 12, 0),
         Source4(Select4_3) => c4_interconnect_fuse_1(x, y, i, 25, 12, 1),
-        _ => Err(FuseOutOfRange::Fuse),
+        _ => Err(FuseOutOfRange::Source),
     }
 }
 
@@ -704,7 +702,7 @@ fn c4_interconnect_bottom_left(
                 C4Interconnect11 => end!(x + 1, false, 0, 3),
                 C4Interconnect12 => end!(x + 1, false, 0, 5),
                 C4Interconnect13 => end!(x + 1, false, 0, 7),
-                _ => Err(FuseOutOfRange::Fuse),
+                _ => Err(FuseOutOfRange::Interconnect),
             },
         IODataIn1 =>
             match i {
@@ -713,10 +711,10 @@ fn c4_interconnect_bottom_left(
                 C4Interconnect11 => end!(x, false, 11, 4),
                 C4Interconnect12 => end!(x, false, 11, 6),
                 C4Interconnect13 => end!(x, false, 11, 8),
-                _ => Err(FuseOutOfRange::Fuse),
+                _ => Err(FuseOutOfRange::Interconnect),
             },
         _ =>
-            Err(FuseOutOfRange::Fuse),
+            Err(FuseOutOfRange::Source),
     }
 }
 
@@ -741,7 +739,7 @@ fn c4_interconnect_bottom(
                 C4Interconnect11 => end!(x + 1, false, 0, 3),
                 C4Interconnect12 => end!(x + 1, false, 0, 5),
                 C4Interconnect13 => end!(x + 1, false, 0, 7),
-                _ => Err(FuseOutOfRange::Fuse),
+                _ => Err(FuseOutOfRange::Interconnect),
             },
         IODataIn1 =>
             match i {
@@ -755,10 +753,10 @@ fn c4_interconnect_bottom(
                 C4Interconnect11 => end!(x, false, 26, 4),
                 C4Interconnect12 => end!(x, false, 26, 6),
                 C4Interconnect13 => end!(x, false, 26, 8),
-                _ => Err(FuseOutOfRange::Fuse),
+                _ => Err(FuseOutOfRange::Interconnect),
             },
         _ =>
-            Err(FuseOutOfRange::Fuse),
+            Err(FuseOutOfRange::Source),
     }
 }
 
@@ -796,7 +794,7 @@ fn global_location(global: Global, fuse: GlobalFuse, density: &Density)
             },
 
         GlobalFuse::ColumnOff(_) =>
-            Err(FuseOutOfRange::X),
+            Err(FuseOutOfRange::XY),
 
         GlobalFuse::Internal =>
             match global {
@@ -941,7 +939,7 @@ fn io_column_cell(
         Fuse::WeakPullUp =>
             io_cell_strip(strip, top || left, 4, false),
         _ =>
-            Err(FuseOutOfRange::Fuse),
+            Err(FuseOutOfRange::Source),
     }
 }
 
@@ -970,7 +968,7 @@ fn io_cell_strip(
             Ok(FuseAt::Strip { strip: strip + 7 - index })
         }
     } else {
-        Err(FuseOutOfRange::IO)
+        Err(FuseOutOfRange::XY)
     }
 }
 
@@ -994,7 +992,7 @@ fn io_column_interconnect(
         Fuse::Source4(Select4_2) => end(x, top, i, 3, 1),
         Fuse::Source4(Select4_3) => end(x, top, i, 3, 2),
         _ =>
-            Err(FuseOutOfRange::Fuse),
+            Err(FuseOutOfRange::Source),
     }
 }
 
@@ -1069,7 +1067,7 @@ fn io_row_cell(
                 IORowCell4 => block!(x, y, 2, 1),
                 IORowCell5 => cell!(x, y, 3, LogicCell5, 2),
                 IORowCell6 =>
-                    Err(FuseOutOfRange::IO),
+                    Err(FuseOutOfRange::Cell),
             },
         Fuse::InputOff =>
             match n {
@@ -1107,7 +1105,7 @@ fn io_row_cell(
                 IORowCell6 => cell!(x, y, 0, LogicCell6, 0),
             },
         Fuse::WeakPullUp => io_cell_strip(strip, left, 4, pci_compliance),
-        _ => Err(FuseOutOfRange::Fuse),
+        _ => Err(FuseOutOfRange::Source),
     }
 }
 
@@ -1160,7 +1158,7 @@ fn io_row_interconnect(
                 IORowInterconnect17 if x < 2 => block!(x, y, 10, 5),
                 IORowInterconnect17 => block!(x, y, 7, 5),
                 _ =>
-                    Err(FuseOutOfRange::Fuse),
+                    Err(FuseOutOfRange::Source),
             },
     }
 }
@@ -1466,7 +1464,7 @@ fn logic_interconnect_high(
         Source4(Select4_1) => cell!(x, y, 24, n, index + 1),
         Source4(Select4_2) => cell!(x, y, 25, n, index + 0),
         Source4(Select4_3) => cell!(x, y, 25, n, index + 1),
-        SourceGlobal => Err(FuseOutOfRange::SourceGlobal),
+        SourceGlobal => Err(FuseOutOfRange::Source),
     }
 }
 
@@ -1495,7 +1493,7 @@ fn logic_interconnect_low(
             if let Some(n) = global {
                 cell!(x, y, 4, n, 0)
             } else {
-                Err(FuseOutOfRange::SourceGlobal)
+                Err(FuseOutOfRange::Source)
             },
     }
 }
