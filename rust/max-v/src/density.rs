@@ -11,6 +11,7 @@ pub struct Density {
     pub (crate) right: u8,
     // y
     pub (crate) top: u8,
+    pub (crate) short_bottom: u8,
     // io
     pci_compliance: bool,
     bottom_io: &'static [ColumnStrip],
@@ -42,6 +43,7 @@ pub const MAX_V_240Z: Density = Density {
     right: 8,
     // y
     top: 5,
+    short_bottom: 0,
     // io
     pci_compliance: false,
     bottom_io: &[
@@ -97,6 +99,7 @@ pub const MAX_V_570Z: Density = Density {
     right: 13,
     // y
     top: 8,
+    short_bottom: 3,
     // io
     pci_compliance: false,
     bottom_io: &[
@@ -167,6 +170,7 @@ pub const MAX_V_1270Z: Density = Density {
     right: 17,
     // y
     top: 11,
+    short_bottom: 3,
     // io
     pci_compliance: true,
     bottom_io: &[
@@ -251,6 +255,7 @@ pub const MAX_V_2210Z: Density = Density {
     right: 21,
     // y
     top: 14,
+    short_bottom: 3,
     // io
     pci_compliance: true,
     bottom_io: &[
@@ -341,6 +346,47 @@ pub const MAX_V_2210Z: Density = Density {
     sync_width: 64,
 };
 
+
+#[derive(Copy, Clone)]
+#[derive(Debug)]
+#[derive(Eq, PartialEq)]
+pub enum DensityC4Block {
+    TopLeft,
+    Top,
+    RowLeft,
+    Row,
+    RowRight,
+    BottomLeft,
+    Bottom,
+}
+
+impl Density {
+    pub fn c4_block(&self, x: u8, y: u8) -> Option<DensityC4Block> {
+        if y > self.top || x < self.left || x >= self.right {
+            None
+        } else if x < self.grow && y < self.short_bottom {
+            None
+        } else if x == self.left {
+            if y == self.top {
+                Some(DensityC4Block::TopLeft)
+            } else if y == self.short_bottom {
+                Some(DensityC4Block::BottomLeft)
+            } else {
+                Some(DensityC4Block::RowLeft)
+            }
+        } else if y == self.top {
+            Some(DensityC4Block::Top)
+        } else if x < self.grow && y == self.short_bottom {
+            Some(DensityC4Block::Bottom)
+        } else if x >= self.grow && y == 0 {
+            Some(DensityC4Block::Bottom)
+        } else if x + 1 == self.right {
+            Some(DensityC4Block::RowRight)
+        } else {
+            Some(DensityC4Block::Row)
+        }
+    }
+}
 
 #[derive(Copy, Clone)]
 #[derive(Debug)]
