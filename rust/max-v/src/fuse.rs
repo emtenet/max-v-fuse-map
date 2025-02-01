@@ -297,6 +297,7 @@ pub enum UFMInterconnectFuse {
 #[derive(Debug)]
 #[derive(Eq, PartialEq)]
 pub enum FuseOutOfRange {
+    Fuse,
     IO,
     PCICompliance,
     Sector {
@@ -388,10 +389,10 @@ impl Fuse {
             Fuse::IORowInterconnect { x, y, i, fuse } =>
                 match density.io_block(x, y) {
                     Some(DensityIOBlock::Left) =>
-                        io_row_interconnect(x, true, i, fuse),
+                        io_row_interconnect(x, y, i, fuse),
 
                     Some(DensityIOBlock::Right) =>
-                        io_row_interconnect(x, false, i, fuse),
+                        io_row_interconnect(x, y, i, fuse),
 
                     _ =>
                         Err(FuseOutOfRange::IO),
@@ -616,7 +617,7 @@ fn io_column_cell(
         Fuse::WeakPullUp =>
             io_cell_strip(strip, top || left, 4, false),
         _ =>
-            Err(FuseOutOfRange::Unimplemented),
+            Err(FuseOutOfRange::Fuse),
     }
 }
 
@@ -675,7 +676,7 @@ fn io_column_interconnect(
         Fuse::Source4(Select4_3) =>
             io_column_interconnect_end(x, top, i, 3, 2),
         _ =>
-            Err(FuseOutOfRange::Unimplemented),
+            Err(FuseOutOfRange::Fuse),
     }
 }
 
@@ -724,7 +725,10 @@ fn io_row_cell(
     fuse: IOCellFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
     use io_row_cell_at as at;
+    use FuseAt as At;
     use IOCellFuse as Fuse;
+    use IORowCellNumber::*;
+    use LogicCellNumber::*;
     use Select3::*;
     use Select6::*;
 
@@ -732,29 +736,78 @@ fn io_row_cell(
         Fuse::BusHold =>
             io_cell_strip(strip, left, 2, pci_compliance),
         Fuse::EnableInvert =>
-            at(x, left, y, 2, n, 2),
+            at(x, y, 2, n, 2),
         Fuse::Enable3(Select3_0) =>
-            at(x, left, y, 3, n, 3),
+            at(x, y, 3, n, 3),
         Fuse::Enable3(Select3_1) =>
-            at(x, left, y, 2, n, 3),
+            at(x, y, 2, n, 3),
         Fuse::Enable3(Select3_2) =>
-            at(x, left, y, 3, n, 2),
+            at(x, y, 3, n, 2),
         Fuse::Enable6(Select6_0) =>
-            at(x, left, y, 4, n, 3),
+            at(x, y, 4, n, 3),
         Fuse::Enable6(Select6_1) =>
-            at(x, left, y, 4, n, 2),
+            at(x, y, 4, n, 2),
         Fuse::Enable6(Select6_2) =>
-            at(x, left, y, 5, n, 3),
+            at(x, y, 5, n, 3),
         Fuse::Enable6(Select6_3) =>
-            at(x, left, y, 5, n, 2),
+            at(x, y, 5, n, 2),
         Fuse::Enable6(Select6_4) =>
-            at(x, left, y, 6, n, 3),
+            at(x, y, 6, n, 3),
         Fuse::Enable6(Select6_5) =>
-            at(x, left, y, 6, n, 2),
+            at(x, y, 6, n, 2),
         Fuse::FastSlewRate =>
             io_cell_strip(strip, left, 3, pci_compliance),
-        //Fuse::InputDelay,
-        //Fuse::InputOff,
+        Fuse::InputDelay if left =>
+            match n {
+                IORowCell0 =>
+                    Ok(At::Cell { x, y, sector: 2, n: LogicCell1, index: 0 }),
+                IORowCell1 =>
+                    Ok(At::Cell { x, y, sector: 2, n: LogicCell1, index: 1 }),
+                IORowCell2 =>
+                    Ok(At::Cell { x, y, sector: 2, n: LogicCell1, index: 2 }),
+                IORowCell3 =>
+                    Ok(At::Block { x, y, sector: 4, index: 1 }),
+                IORowCell4 =>
+                    Ok(At::Block { x, y, sector: 4, index: 2 }),
+                IORowCell5 =>
+                    Ok(At::Block { x, y, sector: 4, index: 3 }),
+                IORowCell6 =>
+                    Ok(At::Cell { x, y, sector: 1, n: LogicCell5, index: 3 }),
+            },
+        Fuse::InputDelay =>
+            match n {
+                IORowCell0 =>
+                    Ok(At::Cell { x, y, sector: 4, n: LogicCell1, index: 1 }),
+                IORowCell1 =>
+                    Ok(At::Cell { x, y, sector: 4, n: LogicCell1, index: 2 }),
+                IORowCell2 =>
+                    Ok(At::Cell { x, y, sector: 4, n: LogicCell1, index: 3 }),
+                IORowCell3 =>
+                    Ok(At::Block { x, y, sector: 2, index: 0 }),
+                IORowCell4 =>
+                    Ok(At::Block { x, y, sector: 2, index: 1 }),
+                IORowCell5 =>
+                    Ok(At::Cell { x, y, sector: 3, n: LogicCell5, index: 2 }),
+                IORowCell6 =>
+                    Err(FuseOutOfRange::IO),
+            },
+        Fuse::InputOff =>
+            match n {
+                IORowCell0 =>
+                    Ok(At::Cell { x, y, sector: 0, n: LogicCell0, index: 0 }),
+                IORowCell1 =>
+                    Ok(At::Cell { x, y, sector: 0, n: LogicCell1, index: 3 }),
+                IORowCell2 =>
+                    Ok(At::Cell { x, y, sector: 0, n: LogicCell3, index: 1 }),
+                IORowCell3 =>
+                    Ok(At::Block { x, y, sector: 0, index: 0 }),
+                IORowCell4 =>
+                    Ok(At::Cell { x, y, sector: 0, n: LogicCell9, index: 2 }),
+                IORowCell5 =>
+                    Ok(At::Cell { x, y, sector: 0, n: LogicCell8, index: 0 }),
+                IORowCell6 =>
+                    Ok(At::Cell { x, y, sector: 0, n: LogicCell6, index: 1 }),
+            },
         Fuse::LowCurrent0 =>
             io_cell_strip(strip, left, 5, pci_compliance),
         Fuse::LowCurrent1 =>
@@ -762,42 +815,57 @@ fn io_row_cell(
         Fuse::OpenDrain =>
             io_cell_strip(strip, left, 1, pci_compliance),
         Fuse::OutputInvert =>
-            at(x, left, y, 2, n, 1),
+            at(x, y, 2, n, 1),
         Fuse::OutputFast =>
-            at(x, left, y, 1, n, 1),
+            at(x, y, 1, n, 1),
         Fuse::Output3(Select3_0) =>
-            at(x, left, y, 3, n, 0),
+            at(x, y, 3, n, 0),
         Fuse::Output3(Select3_1) =>
-            at(x, left, y, 2, n, 0),
+            at(x, y, 2, n, 0),
         Fuse::Output3(Select3_2) =>
-            at(x, left, y, 3, n, 1),
+            at(x, y, 3, n, 1),
         Fuse::Output6(Select6_0) =>
-            at(x, left, y, 4, n, 0),
+            at(x, y, 4, n, 0),
         Fuse::Output6(Select6_1) =>
-            at(x, left, y, 4, n, 1),
+            at(x, y, 4, n, 1),
         Fuse::Output6(Select6_2) =>
-            at(x, left, y, 5, n, 0),
+            at(x, y, 5, n, 0),
         Fuse::Output6(Select6_3) =>
-            at(x, left, y, 5, n, 1),
+            at(x, y, 5, n, 1),
         Fuse::Output6(Select6_4) =>
-            at(x, left, y, 6, n, 0),
+            at(x, y, 6, n, 0),
         Fuse::Output6(Select6_5) =>
-            at(x, left, y, 6, n, 1),
+            at(x, y, 6, n, 1),
         Fuse::PCICompliance =>
             io_cell_strip(strip, left, 0, pci_compliance),
-        //Fuse::SchmittTrigger,
+        Fuse::SchmittTrigger =>
+            match n {
+                IORowCell0 =>
+                    Ok(At::Cell { x, y, sector: 0, n: LogicCell0, index: 1 }),
+                IORowCell1 =>
+                    Ok(At::Cell { x, y, sector: 0, n: LogicCell2, index: 0 }),
+                IORowCell2 =>
+                    Ok(At::Cell { x, y, sector: 0, n: LogicCell3, index: 2 }),
+                IORowCell3 =>
+                    Ok(At::Block { x, y, sector: 0, index: 1 }),
+                IORowCell4 =>
+                    Ok(At::Cell { x, y, sector: 0, n: LogicCell9, index: 1 }),
+                IORowCell5 =>
+                    Ok(At::Cell { x, y, sector: 0, n: LogicCell7, index: 3 }),
+                IORowCell6 =>
+                    Ok(At::Cell { x, y, sector: 0, n: LogicCell6, index: 0 }),
+            },
         Fuse::WeakPullUp =>
             io_cell_strip(strip, left, 4, pci_compliance),
         _ =>
-            Err(FuseOutOfRange::Unimplemented),
+            Err(FuseOutOfRange::Fuse),
     }
 }
 
 fn io_row_cell_at(
     x: u8,
-    left: bool,
     y: u8,
-    mut sector: u8,
+    sector: u8,
     n: IORowCellNumber,
     index: u8,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -805,9 +873,6 @@ fn io_row_cell_at(
     use IORowCellNumber::*;
     use LogicCellNumber::*;
 
-    if !left {
-        sector = 12 - sector;
-    }
     match n {
         IORowCell0 => Ok(At::Cell { x, y, sector, n: LogicCell2, index }),
         IORowCell1 => Ok(At::Cell { x, y, sector, n: LogicCell3, index }),
@@ -820,18 +885,99 @@ fn io_row_cell_at(
 }
 
 fn io_row_interconnect(
-    _x: u8,
-    _left: bool,
-    _i: IORowInterconnectIndex,
-    _fuse: IOInterconnectFuse,
+    x: u8,
+    y: u8,
+    i: IORowInterconnectIndex,
+    fuse: IOInterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
-    //use IOInterconnectFuse as Fuse;
-    //use Select3::*;
-    //use Select4::*;
+    use io_row_interconnect_at as at;
+    use FuseAt as At;
+    use IORowInterconnectIndex::*;
+    use IOInterconnectFuse as Fuse;
+    use Select3::*;
+    use Select4::*;
 
-    match _fuse {
-        _ =>
-            Err(FuseOutOfRange::Unimplemented),
+    match fuse {
+        Fuse::DirectLink =>
+            at(x, y, i, 8, 1),
+        Fuse::Source3(Select3_0) =>
+            at(x, y, i, 7, 0),
+        Fuse::Source3(Select3_1) =>
+            at(x, y, i, 7, 1),
+        Fuse::Source3(Select3_2) =>
+            at(x, y, i, 8, 0),
+        Fuse::Source4(Select4_0) =>
+            at(x, y, i, 9, 0),
+        Fuse::Source4(Select4_1) =>
+            at(x, y, i, 9, 1),
+        Fuse::Source4(Select4_2) =>
+            at(x, y, i, 10, 0),
+        Fuse::Source4(Select4_3) =>
+            at(x, y, i, 10, 1),
+        Fuse::SourceGlobal =>
+            match i {
+                IORowInterconnect8 if x < 2 =>
+                    Ok(At::Block { x, y, sector: 10, index: 0 }),
+                IORowInterconnect8 =>
+                    Ok(At::Block { x, y, sector: 7, index: 0 }),
+                IORowInterconnect17 if x < 2 =>
+                    Ok(At::Block { x, y, sector: 10, index: 5 }),
+                IORowInterconnect17 =>
+                    Ok(At::Block { x, y, sector: 7, index: 5 }),
+                _ =>
+                    Err(FuseOutOfRange::Fuse),
+            },
+    }
+}
+
+fn io_row_interconnect_at(
+    x: u8,
+    y: u8,
+    i: IORowInterconnectIndex,
+    sector: u8,
+    index: u8,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use FuseAt as At;
+    use IORowInterconnectIndex::*;
+    use LogicCellNumber::*;
+
+    match i {
+        IORowInterconnect0 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell0, index: index + 2 }),
+        IORowInterconnect1 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell1, index: index + 0 }),
+        IORowInterconnect2 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell1, index: index + 2 }),
+        IORowInterconnect3 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell2, index: index + 0 }),
+        IORowInterconnect4 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell2, index: index + 2 }),
+        IORowInterconnect5 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell3, index: index + 0 }),
+        IORowInterconnect6 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell3, index: index + 2 }),
+        IORowInterconnect7 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell4, index: index + 0 }),
+        IORowInterconnect8 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell4, index: index + 2 }),
+        IORowInterconnect9 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell5, index: index + 2 }),
+        IORowInterconnect10 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell6, index: index + 0 }),
+        IORowInterconnect11 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell6, index: index + 2 }),
+        IORowInterconnect12 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell7, index: index + 0 }),
+        IORowInterconnect13 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell7, index: index + 2 }),
+        IORowInterconnect14 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell8, index: index + 0 }),
+        IORowInterconnect15 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell8, index: index + 2 }),
+        IORowInterconnect16 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell9, index: index + 0 }),
+        IORowInterconnect17 =>
+            Ok(At::Cell { x, y, sector, n: LogicCell9, index: index + 2 }),
     }
 }
 
@@ -1178,12 +1324,12 @@ fn logic_cell(
             Ok(At::Cell { x, y, sector: 20, n, index: 1 }),
         Fuse::OutputLocalLUT =>
             Ok(At::Cell { x, y, sector: 21, n, index: 3 }),
+        Fuse::OutputRightLUT =>
+            Ok(At::Cell { x, y, sector: 19, n, index: 1 }),
         Fuse::RegisterChainOff =>
             Ok(At::Cell { x, y, sector: 20, n, index: 2 }),
         Fuse::Syncronous =>
             Ok(At::Cell { x, y, sector: 21, n, index: 0 }),
-        _ =>
-            Err(FuseOutOfRange::Unimplemented),
     }
 }
 

@@ -34,7 +34,10 @@ impl FuseAt {
         -> Result<usize, FuseOutOfRange>
     {
         match self {
-            FuseAt::Block { x, y, sector, index: index @ 0..6 } => {
+            FuseAt::Block { x, y, mut sector, index: index @ 0..6 } => {
+                if x == density.right {
+                    sector = 12 - sector;
+                }
                 let sector = sector_at(x, sector, density)?;
                 let cell = line_at(y, sector.rows, density)?;
                 let index = cell + 20 + usize::from(index);
@@ -44,7 +47,10 @@ impl FuseAt {
             FuseAt::Block { .. } =>
                 Err(FuseOutOfRange::SectorBlock),
 
-            FuseAt::Cell { x, y, sector, n, index: index @ 0..4 } => {
+            FuseAt::Cell { x, y, mut sector, n, index: index @ 0..4 } => {
+                if x == density.right {
+                    sector = 12 - sector;
+                }
                 let sector = sector_at(x, sector, density)?;
                 let cell = line_at(y, sector.rows, density)?;
                 let index = cell + cell_at(n, index);
