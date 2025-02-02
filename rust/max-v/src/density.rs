@@ -622,5 +622,13 @@ impl Density {
             Some(DensityR4Block::Column)
         }
     }
+
+    pub fn ufm_block(&self, x: u8, y: u8) -> bool {
+        if self.has_grow {
+            x == self.grow && y > 1 && y <= 3
+        } else {
+            false
+        }
+    }
 }
 
