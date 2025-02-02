@@ -346,6 +346,11 @@ pub const MAX_V_2210Z: Density = Density {
     sync_width: 64,
 };
 
+impl Density {
+    pub fn large(&self) -> bool {
+        self.has_grow
+    }
+}
 
 #[derive(Copy, Clone)]
 #[derive(Debug)]

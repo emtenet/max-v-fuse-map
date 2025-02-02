@@ -20,11 +20,15 @@ pub enum Fuse {
         index: Global,
         fuse: GlobalFuse,
     },
+    GlobalSource {
+        index: Global,
+        fuse: SourceFuse,
+    },
     IOColumnCell {
         x: u8,
         y: u8,
         n: IOColumnCellNumber,
-        fuse: IOCellFuse,
+        fuse: IOCellFuse<IOColumnSourceFuse>,
     },
     IOColumnInterconnect {
         x: u8,
@@ -36,7 +40,7 @@ pub enum Fuse {
         x: u8,
         y: u8,
         n: IORowCellNumber,
-        fuse: IOCellFuse,
+        fuse: IOCellFuse<IORowSourceFuse>,
     },
     IORowInterconnect {
         x: u8,
@@ -45,7 +49,8 @@ pub enum Fuse {
         fuse: IOInterconnectFuse,
     },
     JTAG {
-        fuse: JTAGFuse,
+        signal: JTAGSignal,
+        fuse: SourceFuse,
     },
     LogicBlock {
         x: u8,
@@ -74,7 +79,8 @@ pub enum Fuse {
         bit: UserCodeBit,
     },
     UFM {
-        fuse: UFMFuse,
+        signal: UFMSignal,
+        fuse: SourceFuse,
     },
     UFMInterconnect {
         x: u8,
@@ -101,36 +107,44 @@ pub enum C4InterconnectFuse {
 pub enum GlobalFuse {
     ColumnOff(u8),
     Internal,
-    Invert,
     RowOff,
-    Source3(Select3),
-    Source4(Select4),
-    Source6(Select6),
 }
 
 #[derive(Copy, Clone)]
 #[derive(Debug)]
 #[derive(Eq, PartialEq)]
-pub enum IOCellFuse {
+pub enum IOCellFuse<Output> {
     BusHold,
-    EnableInvert,
-    Enable3(Select3),
-    Enable4(Select4),
-    Enable6(Select6),
+    Enable(Output),
     FastSlewRate,
     InputDelay,
     InputOff,
     LowCurrent0,
     LowCurrent1,
     OpenDrain,
-    OutputInvert,
+    Output(Output),
     OutputFast,
-    Output3(Select3),
-    Output4(Select4),
-    Output6(Select6),
     PCICompliance,
     SchmittTrigger,
     WeakPullUp,
+}
+
+#[derive(Copy, Clone)]
+#[derive(Debug)]
+#[derive(Eq, PartialEq)]
+pub enum IOColumnSourceFuse {
+    Invert,
+    Source3(Select3),
+    Source4(Select4),
+}
+
+#[derive(Copy, Clone)]
+#[derive(Debug)]
+#[derive(Eq, PartialEq)]
+pub enum IORowSourceFuse {
+    Invert,
+    Source3(Select3),
+    Source6(Select6),
 }
 
 #[derive(Copy, Clone)]
@@ -141,26 +155,6 @@ pub enum IOInterconnectFuse {
     Source3(Select3),
     Source4(Select4),
     SourceGlobal,
-}
-
-#[derive(Copy, Clone)]
-#[derive(Debug)]
-#[derive(Eq, PartialEq)]
-pub enum JTAGFuse {
-    Input {
-        input: JTAGInput,
-        fuse: JTAGInputFuse,
-    },
-}
-
-#[derive(Copy, Clone)]
-#[derive(Debug)]
-#[derive(Eq, PartialEq)]
-pub enum JTAGInputFuse {
-    Invert,
-    Source3(Select3),
-    Source4(Select4),
-    Source6(Select6),
 }
 
 #[derive(Copy, Clone)]
@@ -224,7 +218,7 @@ pub enum LogicCellFuse {
     Feedback,
     Input {
         input: LogicCellInput,
-        fuse: LogicCellInputFuse,
+        fuse: LogicCellSourceFuse,
     },
     LUTBit(LUTBit),
     LUTChainOff,
@@ -238,7 +232,7 @@ pub enum LogicCellFuse {
 #[derive(Copy, Clone)]
 #[derive(Debug)]
 #[derive(Eq, PartialEq)]
-pub enum LogicCellInputFuse {
+pub enum LogicCellSourceFuse {
     Source3(Select3),
     Source6(Select6),
 }
@@ -267,21 +261,18 @@ pub enum R4InterconnectFuse {
 #[derive(Copy, Clone)]
 #[derive(Debug)]
 #[derive(Eq, PartialEq)]
-pub enum UFMFuse {
-    Input {
-        input: UFMInput,
-        fuse: UFMInputFuse,
-    },
+pub enum SourceFuse {
+    Small(IORowSourceFuse),
+    Large(UFMSourceFuse),
 }
 
 #[derive(Copy, Clone)]
 #[derive(Debug)]
 #[derive(Eq, PartialEq)]
-pub enum UFMInputFuse {
+pub enum UFMSourceFuse {
     Invert,
     Source3(Select3),
     Source4(Select4),
-    Source6(Select6),
 }
 
 #[derive(Copy, Clone)]
@@ -310,7 +301,6 @@ pub enum FuseOutOfRange {
     InternalY,
     Source,
     XY,
-    Unimplemented,
 }
 
 impl Fuse {
@@ -322,6 +312,8 @@ impl Fuse {
         -> Result<FuseAt, FuseOutOfRange>
     {
         use FuseAt as At;
+        use IORowCellNumber::*;
+        use LogicCellNumber::*;
 
         match self {
             Fuse::C4Interconnect { x, y, i, fuse } =>
@@ -370,7 +362,19 @@ impl Fuse {
             }
 
             Fuse::Global { index, fuse } =>
-                global_location(index, fuse, density),
+                global(index, fuse, density),
+
+            Fuse::GlobalSource { index: Global::Global0, fuse } =>
+                source_output(3, IORowCell4, 3, LogicCell0, fuse, density),
+
+            Fuse::GlobalSource { index: Global::Global1, fuse } =>
+                source_enable(3, IORowCell4, 3, LogicCell1, fuse, density),
+
+            Fuse::GlobalSource { index: Global::Global2, fuse } =>
+                source_output(3, IORowCell5, 3, LogicCell2, fuse, density),
+
+            Fuse::GlobalSource { index: Global::Global3, fuse } =>
+                source_enable(3, IORowCell5, 3, LogicCell3, fuse, density),
 
             Fuse::IOColumnCell { x, y, n, fuse } =>
                 match density.io_column_cell(x, y, n) {
@@ -420,8 +424,8 @@ impl Fuse {
                         Err(FuseOutOfRange::XY),
                 }
 
-            Fuse::JTAG { .. } =>
-                Err(FuseOutOfRange::Unimplemented),
+            Fuse::JTAG { signal: JTAGSignal::TDO, fuse } =>
+                source_enable(4, IORowCell6, 2, LogicCell7, fuse, density),
 
             Fuse::LogicBlock { x, y, fuse } =>
                 logic_block(x, y, fuse),
@@ -461,8 +465,8 @@ impl Fuse {
                     user_code_location(bit)
                 },
 
-            Fuse::UFM { .. } =>
-                Err(FuseOutOfRange::Unimplemented),
+            Fuse::UFM { signal, fuse } =>
+                ufm_signal(signal, fuse, density),
 
             Fuse::UFMInterconnect { x, y, i, fuse } =>
                 if density.ufm_block(x, y) {
@@ -783,7 +787,7 @@ fn c4_interconnect_bottom(
     }
 }
 
-fn global_location(global: Global, fuse: GlobalFuse, density: &Density)
+fn global(global: Global, fuse: GlobalFuse, density: &Density)
     -> Result<FuseAt, FuseOutOfRange>
 {
     use Global::*;
@@ -850,9 +854,6 @@ fn global_location(global: Global, fuse: GlobalFuse, density: &Density)
                     },
             },
 
-        GlobalFuse::Invert =>
-            Err(FuseOutOfRange::Unimplemented),
-
         GlobalFuse::RowOff =>
             match global {
                 Global0 =>
@@ -883,15 +884,6 @@ fn global_location(global: Global, fuse: GlobalFuse, density: &Density)
                         Ok(At::Global { x: 1, sector: 10 })
                     },
             },
-
-        GlobalFuse::Source3(_select) =>
-            Err(FuseOutOfRange::Unimplemented),
-
-        GlobalFuse::Source4(_select) =>
-            Err(FuseOutOfRange::Unimplemented),
-
-        GlobalFuse::Source6(_select) =>
-            Err(FuseOutOfRange::Unimplemented),
     }
 }
 
@@ -901,32 +893,16 @@ fn io_column_cell(
     left: bool,
     n: IOColumnCellNumber,
     strip: Option<u16>,
-    fuse: IOCellFuse,
+    fuse: IOCellFuse<IOColumnSourceFuse>,
 ) -> Result<FuseAt, FuseOutOfRange> {
     use io_column_cell_at as at;
     use IOCellFuse as Fuse;
-    use Select3::*;
-    use Select4::*;
 
     match fuse {
         Fuse::BusHold =>
             io_cell_strip(strip, top || left, 2, false),
-        Fuse::EnableInvert =>
-            Ok(at(x, top, n, [(13, 6), (13, 8), (9, 6), (9, 8)])),
-        Fuse::Enable3(Select3_0) =>
-            Ok(at(x, top, n, [(15, 5), (15, 7), (8, 5), (8, 7)])),
-        Fuse::Enable3(Select3_1) =>
-            Ok(at(x, top, n, [(13, 5), (13, 7), (9, 5), (9, 7)])),
-        Fuse::Enable3(Select3_2) =>
-            Ok(at(x, top, n, [(15, 6), (15, 8), (8, 6), (8, 8)])),
-        Fuse::Enable4(Select4_0) =>
-            Ok(at(x, top, n, [(16, 5), (16, 7), (7, 5), (7, 7)])),
-        Fuse::Enable4(Select4_1) =>
-            Ok(at(x, top, n, [(16, 6), (16, 8), (7, 6), (7, 8)])),
-        Fuse::Enable4(Select4_2) =>
-            Ok(at(x, top, n, [(17, 5), (17, 7), (6, 5), (6, 7)])),
-        Fuse::Enable4(Select4_3) =>
-            Ok(at(x, top, n, [(17, 6), (17, 8), (6, 6), (6, 8)])),
+        Fuse::Enable(fuse) =>
+            io_column_enable(x, top, n, fuse),
         Fuse::FastSlewRate =>
             io_cell_strip(strip, top || left, 3, false),
         Fuse::InputDelay =>
@@ -939,30 +915,78 @@ fn io_column_cell(
             io_cell_strip(strip, top || left, 6, false),
         Fuse::OpenDrain =>
             io_cell_strip(strip, top || left, 1, false),
-        Fuse::OutputInvert =>
-            Ok(at(x, top, n, [(13, 2), (13, 4), (9, 2), (9, 4)])),
+        Fuse::Output(fuse) =>
+            io_column_output(x, top, n, fuse),
         Fuse::OutputFast =>
             Ok(at(x, top, n, [(12, 2), (12, 4), (10, 2), (10, 4)])),
-        Fuse::Output3(Select3_0) =>
-            Ok(at(x, top, n, [(15, 1), (15, 3), (8, 1), (8, 3)])),
-        Fuse::Output3(Select3_1) =>
-            Ok(at(x, top, n, [(13, 1), (13, 3), (9, 1), (9, 3)])),
-        Fuse::Output3(Select3_2) =>
-            Ok(at(x, top, n, [(15, 2), (15, 4), (8, 2), (8, 4)])),
-        Fuse::Output4(Select4_0) =>
-            Ok(at(x, top, n, [(16, 1), (16, 3), (7, 1), (7, 3)])),
-        Fuse::Output4(Select4_1) =>
-            Ok(at(x, top, n, [(16, 2), (16, 4), (7, 2), (7, 4)])),
-        Fuse::Output4(Select4_2) =>
-            Ok(at(x, top, n, [(17, 1), (17, 3), (6, 1), (6, 3)])),
-        Fuse::Output4(Select4_3) =>
-            Ok(at(x, top, n, [(17, 2), (17, 4), (6, 2), (6, 4)])),
         Fuse::SchmittTrigger =>
             Ok(at(x, top, n, [(25, 0), (16, 0), (9, 0), (7, 0)])),
         Fuse::WeakPullUp =>
             io_cell_strip(strip, top || left, 4, false),
         _ =>
             Err(FuseOutOfRange::Source),
+    }
+}
+
+fn io_column_enable(
+    x: u8,
+    top: bool,
+    n: IOColumnCellNumber,
+    fuse: IOColumnSourceFuse,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use io_column_cell_at as at;
+    use IOColumnSourceFuse as Fuse;
+    use Select3::*;
+    use Select4::*;
+
+    match fuse {
+        Fuse::Invert =>
+            Ok(at(x, top, n, [(13, 6), (13, 8), (9, 6), (9, 8)])),
+        Fuse::Source3(Select3_0) =>
+            Ok(at(x, top, n, [(15, 5), (15, 7), (8, 5), (8, 7)])),
+        Fuse::Source3(Select3_1) =>
+            Ok(at(x, top, n, [(13, 5), (13, 7), (9, 5), (9, 7)])),
+        Fuse::Source3(Select3_2) =>
+            Ok(at(x, top, n, [(15, 6), (15, 8), (8, 6), (8, 8)])),
+        Fuse::Source4(Select4_0) =>
+            Ok(at(x, top, n, [(16, 5), (16, 7), (7, 5), (7, 7)])),
+        Fuse::Source4(Select4_1) =>
+            Ok(at(x, top, n, [(16, 6), (16, 8), (7, 6), (7, 8)])),
+        Fuse::Source4(Select4_2) =>
+            Ok(at(x, top, n, [(17, 5), (17, 7), (6, 5), (6, 7)])),
+        Fuse::Source4(Select4_3) =>
+            Ok(at(x, top, n, [(17, 6), (17, 8), (6, 6), (6, 8)])),
+    }
+}
+
+fn io_column_output(
+    x: u8,
+    top: bool,
+    n: IOColumnCellNumber,
+    fuse: IOColumnSourceFuse,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use io_column_cell_at as at;
+    use IOColumnSourceFuse as Fuse;
+    use Select3::*;
+    use Select4::*;
+
+    match fuse {
+        Fuse::Invert =>
+            Ok(at(x, top, n, [(13, 2), (13, 4), (9, 2), (9, 4)])),
+        Fuse::Source3(Select3_0) =>
+            Ok(at(x, top, n, [(15, 1), (15, 3), (8, 1), (8, 3)])),
+        Fuse::Source3(Select3_1) =>
+            Ok(at(x, top, n, [(13, 1), (13, 3), (9, 1), (9, 3)])),
+        Fuse::Source3(Select3_2) =>
+            Ok(at(x, top, n, [(15, 2), (15, 4), (8, 2), (8, 4)])),
+        Fuse::Source4(Select4_0) =>
+            Ok(at(x, top, n, [(16, 1), (16, 3), (7, 1), (7, 3)])),
+        Fuse::Source4(Select4_1) =>
+            Ok(at(x, top, n, [(16, 2), (16, 4), (7, 2), (7, 4)])),
+        Fuse::Source4(Select4_2) =>
+            Ok(at(x, top, n, [(17, 1), (17, 3), (6, 1), (6, 3)])),
+        Fuse::Source4(Select4_3) =>
+            Ok(at(x, top, n, [(17, 2), (17, 4), (6, 2), (6, 4)])),
     }
 }
 
@@ -1049,27 +1073,17 @@ fn io_row_cell(
     n: IORowCellNumber,
     strip: Option<u16>,
     pci_compliance: bool,
-    fuse: IOCellFuse,
+    fuse: IOCellFuse<IORowSourceFuse>,
 ) -> Result<FuseAt, FuseOutOfRange> {
     use io_row_cell_at as at;
     use IOCellFuse as Fuse;
     use IORowCellNumber::*;
     use LogicCellNumber::*;
-    use Select3::*;
-    use Select6::*;
 
     match fuse {
         Fuse::BusHold => io_cell_strip(strip, left, 2, pci_compliance),
-        Fuse::EnableInvert => at(x, y, 2, n, 2),
-        Fuse::Enable3(Select3_0) => at(x, y, 3, n, 3),
-        Fuse::Enable3(Select3_1) => at(x, y, 2, n, 3),
-        Fuse::Enable3(Select3_2) => at(x, y, 3, n, 2),
-        Fuse::Enable6(Select6_0) => at(x, y, 4, n, 3),
-        Fuse::Enable6(Select6_1) => at(x, y, 4, n, 2),
-        Fuse::Enable6(Select6_2) => at(x, y, 5, n, 3),
-        Fuse::Enable6(Select6_3) => at(x, y, 5, n, 2),
-        Fuse::Enable6(Select6_4) => at(x, y, 6, n, 3),
-        Fuse::Enable6(Select6_5) => at(x, y, 6, n, 2),
+        Fuse::Enable(fuse) =>
+            io_row_enable(x, y, n, fuse),
         Fuse::FastSlewRate => io_cell_strip(strip, left, 3, pci_compliance),
         Fuse::InputDelay if left =>
             match n {
@@ -1105,17 +1119,9 @@ fn io_row_cell(
         Fuse::LowCurrent0 => io_cell_strip(strip, left, 5, pci_compliance),
         Fuse::LowCurrent1 => io_cell_strip(strip, left, 6, pci_compliance),
         Fuse::OpenDrain => io_cell_strip(strip, left, 1, pci_compliance),
-        Fuse::OutputInvert => at(x, y, 2, n, 1),
+        Fuse::Output(fuse) =>
+            io_row_output(x, y, n, fuse),
         Fuse::OutputFast => at(x, y, 1, n, 1),
-        Fuse::Output3(Select3_0) => at(x, y, 3, n, 0),
-        Fuse::Output3(Select3_1) => at(x, y, 2, n, 0),
-        Fuse::Output3(Select3_2) => at(x, y, 3, n, 1),
-        Fuse::Output6(Select6_0) => at(x, y, 4, n, 0),
-        Fuse::Output6(Select6_1) => at(x, y, 4, n, 1),
-        Fuse::Output6(Select6_2) => at(x, y, 5, n, 0),
-        Fuse::Output6(Select6_3) => at(x, y, 5, n, 1),
-        Fuse::Output6(Select6_4) => at(x, y, 6, n, 0),
-        Fuse::Output6(Select6_5) => at(x, y, 6, n, 1),
         Fuse::PCICompliance => io_cell_strip(strip, left, 0, pci_compliance),
         Fuse::SchmittTrigger =>
             match n {
@@ -1128,7 +1134,56 @@ fn io_row_cell(
                 IORowCell6 => cell!(x, y, 0, LogicCell6, 0),
             },
         Fuse::WeakPullUp => io_cell_strip(strip, left, 4, pci_compliance),
-        _ => Err(FuseOutOfRange::Source),
+    }
+}
+
+fn io_row_enable(
+    x: u8,
+    y: u8,
+    n: IORowCellNumber,
+    fuse: IORowSourceFuse,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use io_row_cell_at as at;
+    use IORowSourceFuse as Fuse;
+    use Select3::*;
+    use Select6::*;
+
+    match fuse {
+        Fuse::Invert => at(x, y, 2, n, 2),
+        Fuse::Source3(Select3_0) => at(x, y, 3, n, 3),
+        Fuse::Source3(Select3_1) => at(x, y, 2, n, 3),
+        Fuse::Source3(Select3_2) => at(x, y, 3, n, 2),
+        Fuse::Source6(Select6_0) => at(x, y, 4, n, 3),
+        Fuse::Source6(Select6_1) => at(x, y, 4, n, 2),
+        Fuse::Source6(Select6_2) => at(x, y, 5, n, 3),
+        Fuse::Source6(Select6_3) => at(x, y, 5, n, 2),
+        Fuse::Source6(Select6_4) => at(x, y, 6, n, 3),
+        Fuse::Source6(Select6_5) => at(x, y, 6, n, 2),
+    }
+}
+
+fn io_row_output(
+    x: u8,
+    y: u8,
+    n: IORowCellNumber,
+    fuse: IORowSourceFuse,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use io_row_cell_at as at;
+    use IORowSourceFuse as Fuse;
+    use Select3::*;
+    use Select6::*;
+
+    match fuse {
+        Fuse::Invert => at(x, y, 2, n, 1),
+        Fuse::Source3(Select3_0) => at(x, y, 3, n, 0),
+        Fuse::Source3(Select3_1) => at(x, y, 2, n, 0),
+        Fuse::Source3(Select3_2) => at(x, y, 3, n, 1),
+        Fuse::Source6(Select6_0) => at(x, y, 4, n, 0),
+        Fuse::Source6(Select6_1) => at(x, y, 4, n, 1),
+        Fuse::Source6(Select6_2) => at(x, y, 5, n, 0),
+        Fuse::Source6(Select6_3) => at(x, y, 5, n, 1),
+        Fuse::Source6(Select6_4) => at(x, y, 6, n, 0),
+        Fuse::Source6(Select6_5) => at(x, y, 6, n, 1),
     }
 }
 
@@ -1379,12 +1434,12 @@ fn logic_cell(
 fn logic_input_inc(
     x: u8,
     y: u8,
-    fuse: LogicCellInputFuse,
+    fuse: LogicCellSourceFuse,
     s: u8,
     n: LogicCellNumber,
     index: u8,
 ) -> Result<FuseAt, FuseOutOfRange> {
-    use LogicCellInputFuse::*;
+    use LogicCellSourceFuse::*;
     use Select3::*;
     use Select6::*;
 
@@ -1404,12 +1459,12 @@ fn logic_input_inc(
 fn logic_input_dec(
     x: u8,
     y: u8,
-    fuse: LogicCellInputFuse,
+    fuse: LogicCellSourceFuse,
     s: u8,
     n: LogicCellNumber,
     index: u8,
 ) -> Result<FuseAt, FuseOutOfRange> {
-    use LogicCellInputFuse::*;
+    use LogicCellSourceFuse::*;
     use Select3::*;
     use Select6::*;
 
@@ -1764,6 +1819,46 @@ fn r4_interconnect_fuse_right(
     }
 }
 
+fn source_enable(
+    small_y: u8,
+    small_n: IORowCellNumber,
+    large_y: u8,
+    large_n: LogicCellNumber,
+    fuse: SourceFuse,
+    density: &Density,
+) -> Result<FuseAt, FuseOutOfRange> {
+    match fuse {
+        SourceFuse::Small(fuse) if !density.has_grow =>
+            io_row_enable(1, small_y, small_n, fuse),
+
+        SourceFuse::Large(fuse) if density.has_grow =>
+            ufm_source(density.grow, large_y, large_n, fuse),
+
+        _ =>
+            Err(FuseOutOfRange::Source),
+    }
+}
+
+fn source_output(
+    small_y: u8,
+    small_n: IORowCellNumber,
+    large_y: u8,
+    large_n: LogicCellNumber,
+    fuse: SourceFuse,
+    density: &Density,
+) -> Result<FuseAt, FuseOutOfRange> {
+    match fuse {
+        SourceFuse::Small(fuse) if !density.has_grow =>
+            io_row_output(1, small_y, small_n, fuse),
+
+        SourceFuse::Large(fuse) if density.has_grow =>
+            ufm_source(density.grow, large_y, large_n, fuse),
+
+        _ =>
+            Err(FuseOutOfRange::Source),
+    }
+}
+
 fn ufm_interconnect(
     x: u8,
     y: u8,
@@ -1806,6 +1901,48 @@ fn ufm_interconnect_fuse(
         Source4(Select4_1) => cell!(x, y, 25, n, 3),
         Source4(Select4_2) => cell!(x, y, 24, n, 2),
         Source4(Select4_3) => cell!(x, y, 24, n, 3),
+    }
+}
+
+fn ufm_signal(signal: UFMSignal, fuse: SourceFuse, density: &Density)
+    -> Result<FuseAt, FuseOutOfRange>
+{
+    use IORowCellNumber::*;
+    use LogicCellNumber::*;
+    use UFMSignal::*;
+
+    match signal {
+        ArClk =>   source_enable(1, IORowCell6, 2, LogicCell2, fuse, density),
+        ArIn =>    source_enable(1, IORowCell5, 3, LogicCell5, fuse, density),
+        ArShift => source_output(1, IORowCell6, 2, LogicCell1, fuse, density),
+        DrClk =>   source_output(1, IORowCell5, 3, LogicCell6, fuse, density),
+        DrIn =>    source_output(1, IORowCell4, 3, LogicCell8, fuse, density),
+        DrShift => source_enable(1, IORowCell4, 3, LogicCell7, fuse, density),
+        Erase =>   source_enable(2, IORowCell4, 2, LogicCell4, fuse, density),
+        OscEna =>  source_output(2, IORowCell5, 2, LogicCell9, fuse, density),
+        Program => source_output(2, IORowCell4, 2, LogicCell3, fuse, density),
+    }
+}
+
+fn ufm_source(
+    x: u8,
+    y: u8,
+    n: LogicCellNumber,
+    fuse: UFMSourceFuse,
+) -> Result<FuseAt, FuseOutOfRange> {
+    use UFMSourceFuse as Fuse;
+    use Select3::*;
+    use Select4::*;
+
+    match fuse {
+        Fuse::Invert => cell!(x, y, 21, n, 1),
+        Fuse::Source3(Select3_0) => cell!(x, y, 20, n, 1),
+        Fuse::Source3(Select3_1) => cell!(x, y, 20, n, 0),
+        Fuse::Source3(Select3_2) => cell!(x, y, 21, n, 0),
+        Fuse::Source4(Select4_0) => cell!(x, y, 20, n, 2),
+        Fuse::Source4(Select4_1) => cell!(x, y, 20, n, 3),
+        Fuse::Source4(Select4_2) => cell!(x, y, 21, n, 2),
+        Fuse::Source4(Select4_3) => cell!(x, y, 21, n, 3),
     }
 }
 

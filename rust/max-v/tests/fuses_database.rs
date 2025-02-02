@@ -29,14 +29,10 @@ fn max_v_2210z() {
 fn fuses(s: String, density: &Density) {
     for s in s.lines() {
         let (index, fuse) = fuse(s, density);
-        match fuse.to_index(density) {
-            Err(FuseOutOfRange::Unimplemented) => {
-            }
-
-            to_index => {
-                assert_eq!((fuse, Ok(index)), (fuse, to_index));
-            }
-        }
+        assert_eq!(
+            (fuse, Ok(index)),
+            (fuse, fuse.to_index(density)),
+        );
     }
 }
 
@@ -61,8 +57,8 @@ fn fuse(s: &str, density: &Density) -> (usize, Fuse) {
             let (_x, s) = u8_once(s, ",");
             let (_y, s) = u8_once(s, "},");
             let (i, s) = try_usize_once(s, ",");
-            let fuse = global_fuse(s);
-            (index, Fuse::Global { index: i, fuse })
+            let fuse = source_fuse(s, density);
+            (index, Fuse::GlobalSource { index: i, fuse })
         }
     } else if let Some(s) = s.strip_prefix("{{iob,") {
         let (x, s) = u8_once(s, ",");
@@ -93,13 +89,13 @@ fn fuse(s: &str, density: &Density) -> (usize, Fuse) {
         match density.io_block(x, y) {
             Some(DensityIOBlock::Top) | Some(DensityIOBlock::Bottom) => {
                 let (n, s) = try_usize_once(s, "},");
-                let fuse = io_cell_fuse(s);
+                let fuse = io_column_cell_fuse(s);
                 (index, Fuse::IOColumnCell { x, y, n, fuse })
             }
 
             Some(DensityIOBlock::Left) | Some(DensityIOBlock::Right) => {
                 let (n, s) = try_usize_once(s, "},");
-                let fuse = io_cell_fuse(s);
+                let fuse = io_row_cell_fuse(s);
                 (index, Fuse::IORowCell { x, y, n, fuse })
             }
 
@@ -109,8 +105,9 @@ fn fuse(s: &str, density: &Density) -> (usize, Fuse) {
     } else if let Some(s) = s.strip_prefix("{{jtag,") {
         let (_x, s) = u8_once(s, ",");
         let (_y, s) = u8_once(s, "},");
-        let fuse = jtag_fuse(s);
-        (index, Fuse::JTAG { fuse })
+        let (signal, s) = jtag_signal(s);
+        let fuse = source_fuse(s, density);
+        (index, Fuse::JTAG { signal, fuse })
     } else if let Some(s) = s.strip_prefix("{{lab,") {
         let (x, s) = u8_once(s, ",");
         let (y, s) = u8_once(s, "},");
@@ -142,8 +139,9 @@ fn fuse(s: &str, density: &Density) -> (usize, Fuse) {
             let fuse = ufm_interconnect_fuse(s);
             (index, Fuse::UFMInterconnect { x, y, i, fuse })
         } else {
-            let fuse = ufm_fuse(s);
-            (index, Fuse::UFM { fuse })
+            let (signal, s) = ufm_signal(s);
+            let fuse = source_fuse(s, density);
+            (index, Fuse::UFM { signal, fuse })
         }
     } else if let Some(s) = s.strip_prefix("{user_code,") {
         let (bit, _) = try_usize_once(s, "}");
@@ -225,38 +223,64 @@ fn global_fuse(s: &str) -> GlobalFuse {
         GlobalFuse::ColumnOff(column)
     } else if s == "internal}" {
         GlobalFuse::Internal
-    } else if s == "invert}" {
-        GlobalFuse::Invert
     } else if s == "row,off}" {
         GlobalFuse::RowOff
-    } else if let Some(s) = s.strip_prefix("from3,") {
-        let select = select3(s);
-        GlobalFuse::Source3(select)
-    } else if let Some(s) = s.strip_prefix("from4,") {
-        let select = select4(s);
-        GlobalFuse::Source4(select)
-    } else if let Some(s) = s.strip_prefix("from6,") {
-        let select = select6(s);
-        GlobalFuse::Source6(select)
     } else {
         todo!("{s}")
     }
 }
 
-fn io_cell_fuse(s: &str) -> IOCellFuse {
-    if s == "bus_hold}" {
-        IOCellFuse::BusHold
-    } else if s == "enable_invert}" {
-        IOCellFuse::EnableInvert
+fn io_column_cell_fuse(s: &str) -> IOCellFuse<IOColumnSourceFuse> {
+    use IOColumnSourceFuse as Fuse;
+
+    if s == "enable_invert}" {
+        IOCellFuse::Enable(Fuse::Invert)
     } else if let Some(s) = s.strip_prefix("enable3,") {
         let select = select3(s);
-        IOCellFuse::Enable3(select)
+        IOCellFuse::Enable(Fuse::Source3(select))
     } else if let Some(s) = s.strip_prefix("enable4,") {
         let select = select4(s);
-        IOCellFuse::Enable4(select)
+        IOCellFuse::Enable(Fuse::Source4(select))
+    } else if s == "output_invert}" {
+        IOCellFuse::Output(Fuse::Invert)
+    } else if let Some(s) = s.strip_prefix("output3,") {
+        let select = select3(s);
+        IOCellFuse::Output(Fuse::Source3(select))
+    } else if let Some(s) = s.strip_prefix("output4,") {
+        let select = select4(s);
+        IOCellFuse::Output(Fuse::Source4(select))
+    } else {
+        io_cell_fuse(s)
+    }
+}
+
+fn io_row_cell_fuse(s: &str) -> IOCellFuse<IORowSourceFuse> {
+    use IORowSourceFuse as Fuse;
+
+    if s == "enable_invert}" {
+        IOCellFuse::Enable(Fuse::Invert)
+    } else if let Some(s) = s.strip_prefix("enable3,") {
+        let select = select3(s);
+        IOCellFuse::Enable(Fuse::Source3(select))
     } else if let Some(s) = s.strip_prefix("enable6,") {
         let select = select6(s);
-        IOCellFuse::Enable6(select)
+        IOCellFuse::Enable(Fuse::Source6(select))
+    } else if s == "output_invert}" {
+        IOCellFuse::Output(Fuse::Invert)
+    } else if let Some(s) = s.strip_prefix("output3,") {
+        let select = select3(s);
+        IOCellFuse::Output(Fuse::Source3(select))
+    } else if let Some(s) = s.strip_prefix("output6,") {
+        let select = select6(s);
+        IOCellFuse::Output(Fuse::Source6(select))
+    } else {
+        io_cell_fuse(s)
+    }
+}
+
+fn io_cell_fuse<T>(s: &str) -> IOCellFuse<T> {
+    if s == "bus_hold}" {
+        IOCellFuse::BusHold
     } else if s == "fast_out}" {
         IOCellFuse::OutputFast
     } else if s == "fast_slew_rate}" {
@@ -271,17 +295,6 @@ fn io_cell_fuse(s: &str) -> IOCellFuse {
         IOCellFuse::LowCurrent1
     } else if s == "open_drain}" {
         IOCellFuse::OpenDrain
-    } else if s == "output_invert}" {
-        IOCellFuse::OutputInvert
-    } else if let Some(s) = s.strip_prefix("output3,") {
-        let select = select3(s);
-        IOCellFuse::Output3(select)
-    } else if let Some(s) = s.strip_prefix("output4,") {
-        let select = select4(s);
-        IOCellFuse::Output4(select)
-    } else if let Some(s) = s.strip_prefix("output6,") {
-        let select = select6(s);
-        IOCellFuse::Output6(select)
     } else if s == "pci_compliance}" {
         IOCellFuse::PCICompliance
     } else if s == "schmitt_trigger}" {
@@ -309,21 +322,11 @@ fn io_interconnect_fuse(s: &str) -> IOInterconnectFuse {
     }
 }
 
-fn jtag_fuse(s: &str) -> JTAGFuse {
-    use JTAGInput::*;
-    use JTAGInputFuse::*;
+fn jtag_signal(s: &str) -> (JTAGSignal, &str) {
+    use JTAGSignal::*;
 
-    if let Some(s) = s.strip_prefix("tdo,from3,") {
-        let select = select3(s);
-        JTAGFuse::Input { input: TDO, fuse: Source3(select) }
-    } else if let Some(s) = s.strip_prefix("tdo,from4,") {
-        let select = select4(s);
-        JTAGFuse::Input { input: TDO, fuse: Source4(select) }
-    } else if let Some(s) = s.strip_prefix("tdo,from6,") {
-        let select = select6(s);
-        JTAGFuse::Input { input: TDO, fuse: Source6(select) }
-    } else if s == "tdo,invert}" {
-        JTAGFuse::Input { input: TDO, fuse: Invert }
+    if let Some(s) = s.strip_prefix("tdo,") {
+        (TDO, s)
     } else {
         todo!("{s}")
     }
@@ -477,13 +480,13 @@ fn logic_cell_fuse(s: &str) -> LogicCellFuse {
     }
 }
 
-fn logic_cell_input_fuse(s: &str) -> LogicCellInputFuse {
+fn logic_cell_input_fuse(s: &str) -> LogicCellSourceFuse {
     if let Some(s) = s.strip_prefix("3,") {
         let select = select3(s);
-        LogicCellInputFuse::Source3(select)
+        LogicCellSourceFuse::Source3(select)
     } else if let Some(s) = s.strip_prefix("6,") {
         let select = select6(s);
-        LogicCellInputFuse::Source6(select)
+        LogicCellSourceFuse::Source6(select)
     } else {
         todo!("{s}")
     }
@@ -567,53 +570,57 @@ fn select6(s: &str) -> Select6 {
     }
 }
 
-fn ufm_fuse(s: &str) -> UFMFuse {
-    use UFMInput::*;
+fn source_fuse(s: &str, density: &Density) -> SourceFuse {
+    use SourceFuse::*;
 
-    if let Some(s) = s.strip_prefix("ar_clk,") {
-        let fuse = ufm_input_fuse(s);
-        UFMFuse::Input { input: ArClk, fuse }
-    } else if let Some(s) = s.strip_prefix("ar_in,") {
-        let fuse = ufm_input_fuse(s);
-        UFMFuse::Input { input: ArIn, fuse }
-    } else if let Some(s) = s.strip_prefix("ar_shift,") {
-        let fuse = ufm_input_fuse(s);
-        UFMFuse::Input { input: ArShift, fuse }
-    } else if let Some(s) = s.strip_prefix("dr_clk,") {
-        let fuse = ufm_input_fuse(s);
-        UFMFuse::Input { input: DrClk, fuse }
-    } else if let Some(s) = s.strip_prefix("dr_in,") {
-        let fuse = ufm_input_fuse(s);
-        UFMFuse::Input { input: DrIn, fuse }
-    } else if let Some(s) = s.strip_prefix("dr_shift,") {
-        let fuse = ufm_input_fuse(s);
-        UFMFuse::Input { input: DrShift, fuse }
-    } else if let Some(s) = s.strip_prefix("erase,") {
-        let fuse = ufm_input_fuse(s);
-        UFMFuse::Input { input: Erase, fuse }
-    } else if let Some(s) = s.strip_prefix("osc_ena,") {
-        let fuse = ufm_input_fuse(s);
-        UFMFuse::Input { input: OscEna, fuse }
-    } else if let Some(s) = s.strip_prefix("program,") {
-        let fuse = ufm_input_fuse(s);
-        UFMFuse::Input { input: Program, fuse }
+    if density.large() {
+        if s == "invert}" {
+            Large(UFMSourceFuse::Invert)
+        } else if let Some(s) = s.strip_prefix("from3,") {
+            let select = select3(s);
+            Large(UFMSourceFuse::Source3(select))
+        } else if let Some(s) = s.strip_prefix("from4,") {
+            let select = select4(s);
+            Large(UFMSourceFuse::Source4(select))
+        } else {
+            todo!("{s}")
+        }
     } else {
-        todo!("{s}")
+        if s == "invert}" {
+            Small(IORowSourceFuse::Invert)
+        } else if let Some(s) = s.strip_prefix("from3,") {
+            let select = select3(s);
+            Small(IORowSourceFuse::Source3(select))
+        } else if let Some(s) = s.strip_prefix("from6,") {
+            let select = select6(s);
+            Small(IORowSourceFuse::Source6(select))
+        } else {
+            todo!("{s}")
+        }
     }
 }
 
-fn ufm_input_fuse(s: &str) -> UFMInputFuse {
-    if s == "invert}" {
-        UFMInputFuse::Invert
-    } else if let Some(s) = s.strip_prefix("from3,") {
-        let select = select3(s);
-        UFMInputFuse::Source3(select)
-    } else if let Some(s) = s.strip_prefix("from4,") {
-        let select = select4(s);
-        UFMInputFuse::Source4(select)
-    } else if let Some(s) = s.strip_prefix("from6,") {
-        let select = select6(s);
-        UFMInputFuse::Source6(select)
+fn ufm_signal(s: &str) -> (UFMSignal, &str) {
+    use UFMSignal::*;
+
+    if let Some(s) = s.strip_prefix("ar_clk,") {
+        (ArClk, s)
+    } else if let Some(s) = s.strip_prefix("ar_in,") {
+        (ArIn, s)
+    } else if let Some(s) = s.strip_prefix("ar_shift,") {
+        (ArShift, s)
+    } else if let Some(s) = s.strip_prefix("dr_clk,") {
+        (DrClk, s)
+    } else if let Some(s) = s.strip_prefix("dr_in,") {
+        (DrIn, s)
+    } else if let Some(s) = s.strip_prefix("dr_shift,") {
+        (DrShift, s)
+    } else if let Some(s) = s.strip_prefix("erase,") {
+        (Erase, s)
+    } else if let Some(s) = s.strip_prefix("osc_ena,") {
+        (OscEna, s)
+    } else if let Some(s) = s.strip_prefix("program,") {
+        (Program, s)
     } else {
         todo!("{s}")
     }

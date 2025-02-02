@@ -257,11 +257,11 @@ enumerated! {
 }
 
 enumerated! {
-    enum JTAGInput {
+    enum JTAGSignal {
         TDO,
     }
-    struct JTAGInputOutOfRange ;
-    struct JTAGInputs : Iterator ;
+    struct JTAGSignalOutOfRange ;
+    struct JTAGSignals : Iterator ;
 }
 
 enumerated! {
@@ -408,7 +408,7 @@ enumerated! {
 }
 
 enumerated! {
-    enum UFMInput {
+    enum UFMSignal {
         ArClk,
         ArIn,
         ArShift,
@@ -419,8 +419,8 @@ enumerated! {
         OscEna,
         Program,
     }
-    struct UFMInputOutOfRange ;
-    struct UFMInputs : Iterator ;
+    struct UFMSignalOutOfRange ;
+    struct UFMSignals : Iterator ;
 }
 
 enumerated! {
