@@ -76,9 +76,6 @@ pub enum Fuse {
         i: R4InterconnectIndex,
         fuse: R4InterconnectFuse,
     },
-    UserCode {
-        bit: UserCodeBit,
-    },
     UFM {
         signal: UFMSignal,
         fuse: SourceFuse,
@@ -88,6 +85,9 @@ pub enum Fuse {
         y: u8,
         i: UFMInterconnectIndex,
         fuse: UFMInterconnectFuse,
+    },
+    UserCode {
+        bit: UserCodeBit,
     },
 }
 
@@ -444,13 +444,25 @@ impl Fuse {
                 source_enable(4, IORowCell6, 2, LogicCell7, fuse, density),
 
             Fuse::LogicBlock { x, y, fuse } =>
-                logic_block(x, y, fuse),
+                if density.logic_block(x, y) {
+                    logic_block(x, y, fuse)
+                } else {
+                    Err(FuseOutOfRange::XY)
+                },
 
             Fuse::LogicCell { x, y, n, fuse } =>
-                logic_cell(x, y, n, fuse),
+                if density.logic_block(x, y) {
+                    logic_cell(x, y, n, fuse)
+                } else {
+                    Err(FuseOutOfRange::XY)
+                },
 
             Fuse::LogicInterconnect { x, y, i, fuse } =>
-                logic_interconnect(x, y, i, fuse),
+                if density.logic_block(x, y) {
+                    logic_interconnect(x, y, i, fuse)
+                } else {
+                    Err(FuseOutOfRange::XY)
+                },
 
             Fuse::R4Interconnect { x, y, i, fuse } =>
                 match density.r4_block(x, y) {
@@ -473,14 +485,6 @@ impl Fuse {
                         Err(FuseOutOfRange::XY),
                 },
 
-
-            Fuse::UserCode { bit } =>
-                if density.has_grow {
-                    user_code_location_grow(bit, density.grow)
-                } else {
-                    user_code_location(bit)
-                },
-
             Fuse::UFM { signal, fuse } =>
                 ufm_signal(signal, fuse, density),
 
@@ -489,6 +493,13 @@ impl Fuse {
                     ufm_interconnect(x, y, i, fuse)
                 } else {
                     Err(FuseOutOfRange::XY)
+                },
+
+            Fuse::UserCode { bit } =>
+                if density.has_grow {
+                    user_code_location_grow(bit, density.grow)
+                } else {
+                    user_code_location(bit)
                 },
         }
     }

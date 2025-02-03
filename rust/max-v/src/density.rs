@@ -649,6 +649,20 @@ where
     }
 }
 
+impl Density {
+    pub fn logic_block(&self, x: u8, y: u8) -> bool {
+        if y >= self.top || y == 0 {
+            false
+        } else if x <= self.left || x >= self.right {
+            false
+        } else if x <= self.grow && y <= self.short_bottom {
+            false
+        } else {
+            true
+        }
+    }
+}
+
 #[derive(Copy, Clone)]
 #[derive(Debug)]
 #[derive(Eq, PartialEq)]

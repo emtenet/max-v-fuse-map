@@ -8,7 +8,6 @@ fn max_v_240z() {
     let s = read_to_string("../../database/max_v_240z.fuses").unwrap();
     let mut db: HashSet<Fuse> = HashSet::with_capacity(34_000);
     fuses(s, &mut db, &MAX_V_240Z);
-    // should be in the database?
     only_fuses(&db, &MAX_V_240Z);
 }
 
@@ -685,18 +684,31 @@ fn only_fuses(fuses: &HashSet<Fuse>, density:& Density) {
     only(fuses, density, Fuse:: DeviceOutputEnable);
     only(fuses, density, Fuse::DeviceReset);
     only_global(fuses, density);
+    only_jtag(fuses, density);
+    only_ufm(fuses, density);
+    only_user_code(fuses, density);
     for x in 0..23u8 {
         for y in 0..16u8 {
-            only_c4(&fuses, density, x, y);
+            only_c4_interconnect(&fuses, density, x, y);
             only_io_column_cell(&fuses, density, x, y);
             only_io_column_interconnect(&fuses, density, x, y);
             only_io_row_cell(&fuses, density, x, y);
             only_io_row_interconnect(&fuses, density, x, y);
+            only_logic_block(&fuses, density, x, y);
+            only_logic_cell(&fuses, density, x, y);
+            only_logic_interconnect(&fuses, density, x, y);
+            only_r4_interconnect(&fuses, density, x, y);
+            only_ufm_interconnect(&fuses, density, x, y);
         }
     }
 }
 
-fn only_c4(fuses: &HashSet<Fuse>, density:& Density, x: u8, y: u8) {
+fn only_c4_interconnect(
+    fuses: &HashSet<Fuse>,
+    density:& Density,
+    x: u8,
+    y: u8,
+) {
     use C4InterconnectFuse::*;
 
     for i in C4InterconnectIndex::iter() {
@@ -944,6 +956,327 @@ fn only_io_row_interconnect(
         only(fuses, density, Fuse::IORowInterconnect {
             x, y, i, fuse: SourceGlobal,
         });
+    }
+}
+
+fn only_jtag(fuses: &HashSet<Fuse>, density:& Density) {
+    use JTAGSignal::*;
+    use SourceFuse::*;
+
+    for select in Select3::iter() {
+        only(fuses, density, Fuse::JTAG {
+            signal: TDO, fuse: Small(IORowSourceFuse::Source3(select)),
+        });
+        only(fuses, density, Fuse::JTAG {
+            signal: TDO, fuse: Large(UFMSourceFuse::Source3(select)),
+        });
+    }
+    for select in Select4::iter() {
+        only(fuses, density, Fuse::JTAG {
+            signal: TDO, fuse: Large(UFMSourceFuse::Source4(select)),
+        });
+    }
+    for select in Select6::iter() {
+        only(fuses, density, Fuse::JTAG {
+            signal: TDO, fuse: Small(IORowSourceFuse::Source6(select)),
+        });
+    }
+}
+
+fn only_logic_block(fuses: &HashSet<Fuse>, density:& Density, x: u8, y: u8) {
+    use LogicBlockFuse::*;
+    use LogicBlockControlFuse::*;
+
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: AClear1Control5Not4,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: AClear1Global,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: AClear1Invert,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: AClear1Off,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: AClear2Control5Not4,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: AClear2Global,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: AClear2Invert,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: AClear2Off,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: ALoadControl,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: ALoadInvert,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: CarryInInvertA,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: Clock1Control,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: Clock1Control0Not1,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: Clock1Invert,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: Clock2ALoadControl3Not2,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: Clock2Control,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: Clock2Invert,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: Enable1Off,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: Enable1Control3Not2,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: Enable1Invert,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: Enable2Off,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: Enable2SLoadControl0Not1,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: Enable2SLoadInvert,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: InvertA,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: InvertAControl4Not3,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: SClearControl,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: SClearControl5Not4,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: SClearInvert,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: SLoadControl,
+    });
+    only(fuses, density, Fuse::LogicBlock {
+        x, y, fuse: SLoadNotAlways,
+    });
+    for global in Global::iter() {
+        only(fuses, density, Fuse::LogicBlock {
+            x, y, fuse: AClearGlobal(global),
+        });
+        only(fuses, density, Fuse::LogicBlock {
+            x, y, fuse: Clock1Global(global),
+        });
+        only(fuses, density, Fuse::LogicBlock {
+            x, y, fuse: Clock2Global(global),
+        });
+    }
+    for control in max_v::Control::iter() {
+        for select in Select3::iter() {
+            only(fuses, density, Fuse::LogicBlock {
+                x, y, fuse: LogicBlockFuse::Control {
+                    control, fuse: Source3(select),
+                },
+            });
+        }
+        for select in Select6::iter() {
+            only(fuses, density, Fuse::LogicBlock {
+                x, y, fuse: LogicBlockFuse::Control {
+                    control, fuse: Source6(select),
+                },
+            });
+        }
+    }
+}
+
+fn only_logic_cell(fuses: &HashSet<Fuse>, density:& Density, x: u8, y: u8) {
+    use LogicCellFuse::*;
+    use LogicCellSourceFuse::*;
+
+    for n in LogicCellNumber::iter() {
+        only(fuses, density, Fuse::LogicCell {
+            x, y, n, fuse: AClear1,
+        });
+        only(fuses, density, Fuse::LogicCell {
+            x, y, n, fuse: CarryIn,
+        });
+        only(fuses, density, Fuse::LogicCell {
+            x, y, n, fuse: Clock2,
+        });
+        only(fuses, density, Fuse::LogicCell {
+            x, y, n, fuse: Feedback,
+        });
+        for input in LogicCellInput::iter() {
+            for select in Select3::iter() {
+                only(fuses, density, Fuse::LogicCell {
+                    x, y, n, fuse: Input {
+                        input, fuse: Source3(select),
+                    },
+                });
+            }
+            for select in Select6::iter() {
+                only(fuses, density, Fuse::LogicCell {
+                    x, y, n, fuse: Input {
+                        input, fuse: Source6(select),
+                    },
+                });
+            }
+        }
+        for bit in max_v::LUTBit::iter() {
+            only(fuses, density, Fuse::LogicCell {
+                x, y, n, fuse: LUTBit(bit),
+            });
+        }
+        only(fuses, density, Fuse::LogicCell {
+            x, y, n, fuse: LUTChainOff,
+        });
+        only(fuses, density, Fuse::LogicCell {
+            x, y, n, fuse: OutputLeftLUT,
+        });
+        only(fuses, density, Fuse::LogicCell {
+            x, y, n, fuse: OutputLocalLUT,
+        });
+        only(fuses, density, Fuse::LogicCell {
+            x, y, n, fuse: OutputRightLUT,
+        });
+        only(fuses, density, Fuse::LogicCell {
+            x, y, n, fuse: RegisterChainOff,
+        });
+        only(fuses, density, Fuse::LogicCell {
+            x, y, n, fuse: Syncronous,
+        });
+    }
+}
+
+fn only_logic_interconnect(
+    fuses: &HashSet<Fuse>,
+    density:& Density,
+    x: u8,
+    y: u8,
+) {
+    use LogicInterconnectFuse::*;
+
+    for i in LogicInterconnectIndex::iter() {
+        only(fuses, density, Fuse::LogicInterconnect {
+            x, y, i, fuse: DirectLink,
+        });
+        for select in Select3::iter() {
+            only(fuses, density, Fuse::LogicInterconnect {
+                x, y, i, fuse: Source3(select),
+            });
+        }
+        for select in Select4::iter() {
+            only(fuses, density, Fuse::LogicInterconnect {
+                x, y, i, fuse: Source4(select),
+            });
+        }
+        only(fuses, density, Fuse::LogicInterconnect {
+            x, y, i, fuse: SourceGlobal,
+        });
+    }
+}
+
+fn only_r4_interconnect(
+    fuses: &HashSet<Fuse>,
+    density:& Density,
+    x: u8,
+    y: u8,
+) {
+    use R4InterconnectFuse::*;
+
+    for i in R4InterconnectIndex::iter() {
+        only(fuses, density, Fuse::R4Interconnect {
+            x, y, i, fuse: DirectLink,
+        });
+        only(fuses, density, Fuse::R4Interconnect {
+            x, y, i, fuse: IODataIn0,
+        });
+        only(fuses, density, Fuse::R4Interconnect {
+            x, y, i, fuse: IODataIn1,
+        });
+        for select in Select3::iter() {
+            only(fuses, density, Fuse::R4Interconnect {
+                x, y, i, fuse: Source3(select),
+            });
+        }
+        for select in Select4::iter() {
+            only(fuses, density, Fuse::R4Interconnect {
+                x, y, i, fuse: Source4(select),
+            });
+        }
+    }
+}
+
+fn only_user_code(fuses: &HashSet<Fuse>, density:& Density) {
+    for bit in UserCodeBit::iter() {
+        only(fuses, density, Fuse::UserCode { bit });
+    }
+}
+
+fn only_ufm(fuses: &HashSet<Fuse>, density:& Density) {
+    use SourceFuse::*;
+
+    for signal in UFMSignal::iter() {
+        for select in Select3::iter() {
+            only(fuses, density, Fuse::UFM {
+                signal, fuse: Small(IORowSourceFuse::Source3(select)),
+            });
+            only(fuses, density, Fuse::UFM {
+                signal, fuse: Large(UFMSourceFuse::Source3(select)),
+            });
+        }
+        for select in Select4::iter() {
+            only(fuses, density, Fuse::UFM {
+                signal, fuse: Large(UFMSourceFuse::Source4(select)),
+            });
+        }
+        for select in Select6::iter() {
+            only(fuses, density, Fuse::UFM {
+                signal, fuse: Small(IORowSourceFuse::Source6(select)),
+            });
+        }
+    }
+}
+
+fn only_ufm_interconnect(
+    fuses: &HashSet<Fuse>,
+    density:& Density,
+    x: u8,
+    y: u8,
+) {
+    use UFMInterconnectFuse::*;
+
+    for i in UFMInterconnectIndex::iter() {
+        only(fuses, density, Fuse::UFMInterconnect {
+            x, y, i, fuse: DirectLink,
+        });
+        for select in Select3::iter() {
+            only(fuses, density, Fuse::UFMInterconnect {
+                x, y, i, fuse: Source3(select),
+            });
+        }
+        for select in Select4::iter() {
+            only(fuses, density, Fuse::UFMInterconnect {
+                x, y, i, fuse: Source4(select),
+            });
+        }
     }
 }
 
