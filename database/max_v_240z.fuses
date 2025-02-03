@@ -117,7 +117,7 @@
 597={{ioc,1,4,5},output_invert}
 598={{ioc,1,4,5},output3,mux1}
 599={{jtag,1,4},tdo,from3,mux1}
-600={{ioc,1,4,6},enable_invert}
+600={{jtag,1,4},tdo,invert}
 601={{ioc,1,4,6},output_invert}
 602={{ioc,1,4,6},output3,mux1}
 614={{ioc,1,3,0},input_delay}
@@ -140,12 +140,12 @@
 638={{ioc,1,3,3},output_invert}
 639={{ioc,1,3,3},output3,mux1}
 643={{global,1,3},1,from3,mux1}
-644={{ioc,1,3,4},enable_invert}
-645={{ioc,1,3,4},output_invert}
+644={{global,1,3},1,invert}
+645={{global,1,3},0,invert}
 646={{global,1,3},0,from3,mux1}
 647={{global,1,3},3,from3,mux1}
-648={{ioc,1,3,5},enable_invert}
-649={{ioc,1,3,5},output_invert}
+648={{global,1,3},3,invert}
+649={{global,1,3},2,invert}
 650={{global,1,3},2,from3,mux1}
 651={{ioc,1,3,6},enable3,mux1}
 652={{ioc,1,3,6},enable_invert}

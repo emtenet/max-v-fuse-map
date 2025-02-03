@@ -13,18 +13,11 @@ pub struct Density {
     pub (crate) top: u8,
     pub (crate) short_bottom: u8,
     // io
-    pci_compliance: bool,
-    bottom_io: &'static [ColumnStrip],
-    bottom_io_base: u16,
-    left_io: &'static [RowStrip],
-    left_io_base: u16,
-    right_io: &'static [RowStrip],
-    right_io_base: u16,
-    shelf_io: &'static [ColumnStrip],
-    shelf_io_base: u16,
-    shelf_io_wrap: u16,
-    top_io: &'static [ColumnStrip],
-    top_io_base: u16,
+    bottom_io: &'static [ColumnStrip<DensityIOStrip>],
+    left_io: &'static [RowStrip<DensityIOStrip>],
+    right_io: &'static [RowStrip<DensityIOStrip>],
+    shelf_io: &'static [ColumnStrip<DensityIOStrip>],
+    top_io: &'static [ColumnStrip<DensityIOStrip>],
     // sector
     pub (crate) global_row: u8,
     pub (crate) short_rows: u8,
@@ -33,6 +26,102 @@ pub struct Density {
     pub (crate) long_sector: usize,
     // sync
     pub (crate) sync_width: usize,
+}
+
+macro_rules! bottom_io {
+    (@cell $base:literal + no) => {
+        DensityIOStrip::No {
+            special_enable: false,
+            special_output: false,
+        }
+    };
+    (@cell $base:literal + { $strip:literal }) => {
+        DensityIOStrip::Forward($strip)
+    };
+    (@cell $base:literal + $index:literal) => {
+        DensityIOStrip::Reverse($base + (6 * $index))
+    };
+    ( $base:literal : $( $cell:tt ),* ) => {
+        ( $( bottom_io!(@cell $base + $cell) ),* )
+    };
+}
+
+macro_rules! left_io {
+    (@cell $base:literal + no) => {
+        DensityIOStrip::No {
+            special_enable: false,
+            special_output: false,
+        }
+    };
+    (@cell $base:literal + e) => {
+        DensityIOStrip::No {
+            special_enable: true,
+            special_output: false,
+        }
+    };
+    (@cell $base:literal + eo) => {
+        DensityIOStrip::No {
+            special_enable: true,
+            special_output: true,
+        }
+    };
+    (@cell $base:literal + o) => {
+        DensityIOStrip::No {
+            special_enable: false,
+            special_output: true,
+        }
+    };
+    (@cell $base:literal + $index:literal) => {
+        DensityIOStrip::Forward($base + (6 * $index))
+    };
+    ( $base:literal : $( $cell:tt ),* ) => {
+        ( $( left_io!(@cell $base + $cell) ),* )
+    };
+}
+
+macro_rules! right_io {
+    (@cell $base:literal + no) => {
+        DensityIOStrip::No {
+            special_enable: false,
+            special_output: false,
+        }
+    };
+    (@cell $base:literal + $index:literal) => {
+        DensityIOStrip::Reverse($base + (6 * $index))
+    };
+    ( $base:literal : $( $cell:tt ),* ) => {
+        ( $( right_io!(@cell $base + $cell) ),* )
+    };
+}
+
+macro_rules! right_pci_io {
+    (@cell $base:literal + no) => {
+        DensityIOStrip::No {
+            special_enable: false,
+            special_output: false,
+        }
+    };
+    (@cell $base:literal + $index:literal) => {
+        DensityIOStrip::PCICompliance($base + (7 * $index))
+    };
+    ( $base:literal : $( $cell:tt ),* ) => {
+        ( $( right_pci_io!(@cell $base + $cell) ),* )
+    };
+}
+
+macro_rules! top_io {
+    (@cell $base:literal + no) => {
+        DensityIOStrip::No {
+            special_enable: false,
+            special_output: false,
+        }
+    };
+    (@cell $base:literal + $index:literal) => {
+        DensityIOStrip::Forward($base + (6 * $index))
+    };
+    ( $base:literal : $( $cell:tt ),* ) => {
+        ( $( top_io!(@cell $base + $cell) ),* )
+    };
 }
 
 pub const MAX_V_240Z: Density = Density {
@@ -45,42 +134,35 @@ pub const MAX_V_240Z: Density = Density {
     top: 5,
     short_bottom: 0,
     // io
-    pci_compliance: false,
     bottom_io: &[
-        (Some( 0), Some( 1), Some( 2), None    ),
-        (Some( 3), Some( 4), Some( 5), Some( 6)),
-        (Some( 7), Some( 8), Some( 9), Some(10)),
-        (Some(11), Some(12), Some(13), None    ),
-        (Some(14), Some(15), Some(16), Some(17)),
-        (Some(18), Some(19), Some(20), Some(21)),
+        bottom_io!(1428:  0,  1,  2, no),
+        bottom_io!(1428:  3,  4,  5,  6),
+        bottom_io!(1428:  7,  8,  9, 10),
+        bottom_io!(1428: 11, 12, 13, no),
+        bottom_io!(1428: 14, 15, 16, 17),
+        bottom_io!(1428: 18, 19, 20, 21),
     ],
-    bottom_io_base: 1428,
     left_io: &[
-        (Some( 3), Some( 2), Some( 1), Some( 0), None,     None,     None    ),
-        (Some( 7), Some( 6), Some( 5), Some( 4), None,     None,     None    ),
-        (Some(11), Some(10), Some( 9), Some( 8), None,     None,     None    ),
-        (Some(15), Some(14), Some(13), Some(12), None,     None,     None    ),
+        left_io!(1080:  3,  2,  1,  0, eo, eo, eo),
+        left_io!(1080:  7,  6,  5,  4, eo,  o, no),
+        left_io!(1080: 11, 10,  9,  8, eo, eo, no),
+        left_io!(1080: 15, 14, 13, 12, no, no,  e),
     ],
-    left_io_base: 1080,
     right_io: &[
-        (Some( 0), Some( 1), Some( 2), Some( 3), Some( 4), None,     None    ),
-        (Some( 5), Some( 6), Some( 7), Some( 8), Some( 9), None,     None    ),
-        (Some(10), Some(11), Some(12), Some(13), None,     None,     None    ),
-        (Some(14), Some(15), Some(16), Some(17), Some(18), None,     None    ),
+        right_io!(1314:  0,  1,  2,  3,  4, no, no),
+        right_io!(1314:  5,  6,  7,  8,  9, no, no),
+        right_io!(1314: 10, 11, 12, 13, no, no, no),
+        right_io!(1314: 14, 15, 16, 17, 18, no, no),
     ],
-    right_io_base: 1314,
     shelf_io: &[],
-    shelf_io_base: 1428,
-    shelf_io_wrap: 0,
     top_io: &[
-        (Some( 3), Some( 2), Some( 1), Some( 0)),
-        (Some( 7), Some( 6), Some( 5), Some( 4)),
-        (Some(10), Some( 9), Some( 8), None    ),
-        (Some(14), Some(13), Some(12), Some(11)),
-        (Some(18), Some(17), Some(16), Some(15)),
-        (Some(22), Some(21), Some(20), Some(19)),
+        top_io!(1176:  3,  2,  1,  0),
+        top_io!(1176:  7,  6,  5,  4),
+        top_io!(1176: 10,  9,  8, no),
+        top_io!(1176: 14, 13, 12, 11),
+        top_io!(1176: 18, 17, 16, 15),
+        top_io!(1176: 22, 21, 20, 19),
     ],
-    top_io_base: 1176,
     // sector
     global_row: 2,
     short_rows: 4,
@@ -101,57 +183,51 @@ pub const MAX_V_570Z: Density = Density {
     top: 8,
     short_bottom: 3,
     // io
-    pci_compliance: false,
     bottom_io: &[
-        (Some( 0), Some( 1), Some( 2), Some( 3)),
-        (Some( 4), Some( 5), Some( 6), Some( 7)),
-        (Some( 8), Some( 9), Some(10), Some(11)),
+        bottom_io!(3088:  0,  1,  2,  3),
+        bottom_io!(3088:  4,  5,  6,  7),
+        bottom_io!(3088:  8,  9, 10, 11),
     ],
-    bottom_io_base: 3088,
     left_io: &[
-        (Some(10), Some( 9), Some( 8), Some( 7), Some( 6), Some( 5), Some( 4)),
-        (Some(17), Some(16), Some(15), Some(14), Some(13), Some(12), Some(11)),
-        (Some(24), Some(23), Some(22), Some(21), Some(20), Some(19), Some(18)),
-        (Some(31), Some(30), Some(29), Some(28), Some(27), Some(26), Some(25)),
+        left_io!(2368: 10,  9,  8,  7,  6,  5,  4),
+        left_io!(2368: 17, 16, 15, 14, 13, 12, 11),
+        left_io!(2368: 24, 23, 22, 21, 20, 19, 18),
+        left_io!(2368: 31, 30, 29, 28, 27, 26, 25),
     ],
-    left_io_base: 2368,
     right_io: &[
-        (Some( 0), Some( 1), Some( 2), Some( 3), Some( 4), Some( 5), None    ),
-        (Some( 6), Some( 7), Some( 8), Some( 9), Some(10), Some(11), None    ),
-        (Some(12), Some(13), Some(14), Some(15), Some(16), Some(17), None    ),
-        (Some(18), Some(19), Some(20), Some(21), Some(22), Some(23), None    ),
-        (Some(24), Some(25), Some(26), Some(27), Some(28), Some(29), None    ),
-        (Some(30), Some(31), Some(32), Some(33), Some(34), Some(35), None    ),
-        (Some(36), Some(37), Some(38), Some(39), Some(40), Some(41), None    ),
+        right_io!(2836:  0,  1,  2,  3,  4,  5, no),
+        right_io!(2836:  6,  7,  8,  9, 10, 11, no),
+        right_io!(2836: 12, 13, 14, 15, 16, 17, no),
+        right_io!(2836: 18, 19, 20, 21, 22, 23, no),
+        right_io!(2836: 24, 25, 26, 27, 28, 29, no),
+        right_io!(2836: 30, 31, 32, 33, 34, 35, no),
+        right_io!(2836: 36, 37, 38, 39, 40, 41, no),
     ],
-    right_io_base: 2836,
     shelf_io: &[
-        (Some( 0), Some( 1), Some( 2), Some( 3)),
-        (Some( 4), Some( 5), Some( 6), Some( 7)),
-        (Some( 8), Some( 9), Some(10), Some(11)),
-        (Some(12), Some(13), Some(14), Some(15)),
-        (Some(16), Some(17), Some(18), Some(19)),
-        (Some(20), Some(21), Some(22), Some(23)),
-        (Some(24), Some(25), Some(26), Some(27)),
-        (Some(28), Some(29), Some(30), Some(31)),
+        bottom_io!(3160:  0,  1,  2,  3),
+        bottom_io!(3160:  4,  5,  6,  7),
+        bottom_io!(3160:  8,  9, 10, 11),
+        bottom_io!(3160: 12, 13, 14, 15),
+        bottom_io!(3160: 16, 17, 18, 19),
+        bottom_io!(3160: 20, 21, 22, 23),
+        bottom_io!(3160: 24, 25, 26, 27),
+        // wrap around to start of left strips
+        bottom_io!(3160: {2368}, {2374}, {2380}, {2386}),
     ],
-    shelf_io_base: 3160,
-    shelf_io_wrap: 28,
     top_io: &[
-        (Some( 3), Some( 2), Some( 1), Some( 0)),
-        (Some( 7), Some( 6), Some( 5), Some( 4)),
-        (Some(11), Some(10), Some( 9), Some( 8)),
-        (Some(15), Some(14), Some(13), Some(12)),
-        (Some(18), Some(17), Some(16), None    ),
-        (Some(22), Some(21), Some(20), Some(19)),
-        (Some(26), Some(25), Some(24), Some(23)),
-        (Some(30), Some(29), Some(28), Some(27)),
-        (Some(33), Some(32), Some(31), None    ),
-        (Some(37), Some(36), Some(35), Some(34)),
-        (Some(41), Some(40), Some(39), Some(38)),
-        (Some(45), Some(44), Some(43), Some(42)),
+        top_io!(2560:  3,  2,  1,  0),
+        top_io!(2560:  7,  6,  5,  4),
+        top_io!(2560: 11, 10,  9,  8),
+        top_io!(2560: 15, 14, 13, 12),
+        top_io!(2560: 18, 17, 16, no),
+        top_io!(2560: 22, 21, 20, 19),
+        top_io!(2560: 26, 25, 24, 23),
+        top_io!(2560: 30, 29, 28, 27),
+        top_io!(2560: 33, 32, 31, no),
+        top_io!(2560: 37, 36, 35, 34),
+        top_io!(2560: 41, 40, 39, 38),
+        top_io!(2560: 45, 44, 43, 42),
     ],
-    top_io_base: 2560,
     // sector
     global_row: 3,
     short_rows: 4,
@@ -172,71 +248,65 @@ pub const MAX_V_1270Z: Density = Density {
     top: 11,
     short_bottom: 3,
     // io
-    pci_compliance: true,
     bottom_io: &[
-        (Some( 0), Some( 1), Some( 2), Some( 3)),
-        (Some( 4), Some( 5), Some( 6), None    ),
-        (Some( 7), Some( 8), Some( 9), Some(10)),
-        (Some(11), Some(12), Some(13), Some(14)),
-        (Some(15), Some(16), Some(17), None    ),
+        bottom_io!(2856:  0,  1,  2,  3),
+        bottom_io!(2856:  4,  5,  6, no),
+        bottom_io!(2856:  7,  8,  9, 10),
+        bottom_io!(2856: 11, 12, 13, 14),
+        bottom_io!(2856: 15, 16, 17, no),
     ],
-    bottom_io_base: 2856,
     left_io: &[
-        (Some( 8), Some( 7), Some( 6), Some( 5), Some( 4), Some( 3), Some( 2)),
-        (Some(15), Some(14), Some(13), Some(12), Some(11), Some(10), Some( 9)),
-        (Some(22), Some(21), Some(20), Some(19), Some(18), Some(17), Some(16)),
-        (Some(29), Some(28), Some(27), Some(26), Some(25), Some(24), Some(23)),
-        (Some(36), Some(35), Some(34), Some(33), Some(32), Some(31), Some(30)),
-        (Some(43), Some(42), Some(41), Some(40), Some(39), Some(38), Some(37)),
-        (Some(50), Some(49), Some(48), Some(47), Some(46), Some(45), Some(44)),
+        left_io!(1847:  8,  7,  6,  5,  4,  3,  2),
+        left_io!(1847: 15, 14, 13, 12, 11, 10,  9),
+        left_io!(1847: 22, 21, 20, 19, 18, 17, 16),
+        left_io!(1847: 29, 28, 27, 26, 25, 24, 23),
+        left_io!(1847: 36, 35, 34, 33, 32, 31, 30),
+        left_io!(1847: 43, 42, 41, 40, 39, 38, 37),
+        left_io!(1847: 50, 49, 48, 47, 46, 45, 44),
     ],
-    left_io_base: 1847,
     right_io: &[
-        (Some( 0), Some( 1), Some( 2), Some( 3), Some (4), None,     None    ),
-        (Some( 5), Some( 6), Some( 7), Some( 8), Some( 9), None,     None    ),
-        (Some(10), Some(11), Some(12), Some(13), Some(14), Some(15), None    ),
-        (Some(16), Some(17), Some(18), Some(19), Some(20), None,     None    ),
-        (Some(21), Some(22), Some(23), Some(24), Some(25), Some(26), None    ),
-        (Some(27), Some(28), Some(29), Some(30), Some(31), Some(32), None    ),
-        (Some(33), Some(34), Some(35), Some(36), Some(37), None,     None    ),
-        (Some(38), Some(39), Some(40), Some(41), Some(42), Some(43), None    ),
-        (Some(44), Some(45), Some(46), Some(47), Some(48), None,     None    ),
-        (Some(49), Some(50), Some(51), Some(52), Some(53), Some(54), None    ),
+        right_pci_io!(2472:  0,  1,  2,  3,  4, no, no),
+        right_pci_io!(2472:  5,  6,  7,  8,  9, no, no),
+        right_pci_io!(2472: 10, 11, 12, 13, 14, 15, no),
+        right_pci_io!(2472: 16, 17, 18, 19, 20, no, no),
+        right_pci_io!(2472: 21, 22, 23, 24, 25, 26, no),
+        right_pci_io!(2472: 27, 28, 29, 30, 31, 32, no),
+        right_pci_io!(2472: 33, 34, 35, 36, 37, no, no),
+        right_pci_io!(2472: 38, 39, 40, 41, 42, 43, no),
+        right_pci_io!(2472: 44, 45, 46, 47, 48, no, no),
+        right_pci_io!(2472: 49, 50, 51, 52, 53, 54, no),
     ],
-    right_io_base: 2472,
     shelf_io: &[
-        (Some( 0), Some( 1), Some( 2), Some( 3)),
-        (Some( 4), Some( 5), Some( 6), None    ),
-        (Some( 7), Some( 8), Some( 9), Some(10)),
-        (Some(11), Some(12), Some(13), Some(14)),
-        (Some(15), Some(16), Some(17), None    ),
-        (Some(18), Some(19), Some(20), Some(21)),
-        (Some(22), Some(23), Some(24), Some(25)),
-        (Some(26), Some(27), Some(28), None    ),
-        (Some(29), Some(30), Some(31), Some(32)),
-        (Some(33), Some(34), Some(35), Some(36)),
+        bottom_io!(2964:  0,  1,  2,  3),
+        bottom_io!(2964:  4,  5,  6, no),
+        bottom_io!(2964:  7,  8,  9, 10),
+        bottom_io!(2964: 11, 12, 13, 14),
+        bottom_io!(2964: 15, 16, 17, no),
+        bottom_io!(2964: 18, 19, 20, 21),
+        bottom_io!(2964: 22, 23, 24, 25),
+        bottom_io!(2964: 26, 27, 28, no),
+        bottom_io!(2964: 29, 30, 31, 32),
+        // wrap around to start of left strips
+        bottom_io!(2964: 33, 34, {1847}, {1853}),
     ],
-    shelf_io_base: 2964,
-    shelf_io_wrap: 35,
     top_io: &[
-        (Some( 2), Some( 1), Some( 0), None    ),
-        (Some( 6), Some( 5), Some( 4), Some( 3)),
-        (Some( 9), Some( 8), Some( 7), None    ),
-        (Some(12), Some(11), Some(10), None    ),
-        (Some(15), Some(14), Some(13), None    ),
-        (Some(19), Some(18), Some(17), Some(16)),
-        (Some(22), Some(21), Some(20), None    ),
-        (Some(25), Some(24), Some(23), None    ),
-        (Some(29), Some(28), Some(27), Some(26)),
-        (Some(32), Some(31), Some(30), None    ),
-        (Some(36), Some(35), Some(34), Some(33)),
-        (Some(39), Some(38), Some(37), None    ),
-        (Some(42), Some(41), Some(40), None    ),
-        (Some(45), Some(44), Some(43), None    ),
-        (Some(49), Some(48), Some(47), Some(46)),
-        (Some(52), Some(51), Some(50), None    ),
+        top_io!(2153:  2,  1,  0, no),
+        top_io!(2153:  6,  5,  4,  3),
+        top_io!(2153:  9,  8,  7, no),
+        top_io!(2153: 12, 11, 10, no),
+        top_io!(2153: 15, 14, 13, no),
+        top_io!(2153: 19, 18, 17, 16),
+        top_io!(2153: 22, 21, 20, no),
+        top_io!(2153: 25, 24, 23, no),
+        top_io!(2153: 29, 28, 27, 26),
+        top_io!(2153: 32, 31, 30, no),
+        top_io!(2153: 36, 35, 34, 33),
+        top_io!(2153: 39, 38, 37, no),
+        top_io!(2153: 42, 41, 40, no),
+        top_io!(2153: 45, 44, 43, no),
+        top_io!(2153: 49, 48, 47, 46),
+        top_io!(2153: 52, 51, 50, no),
     ],
-    top_io_base: 2153,
     // sector
     global_row: 5,
     short_rows: 7,
@@ -257,85 +327,78 @@ pub const MAX_V_2210Z: Density = Density {
     top: 14,
     short_bottom: 3,
     // io
-    pci_compliance: true,
     bottom_io: &[
-        (Some( 0), Some( 1), Some( 2), None    ),
-        (Some( 3), Some( 4), Some( 5), Some( 6)),
-        (Some( 7), Some( 8), Some( 9), None    ),
-        (Some(10), Some(11), Some(12), Some(13)),
-        (Some(14), Some(15), Some(16), None    ),
-        (Some(17), Some(18), Some(19), Some(20)),
-        (Some(21), Some(22), Some(23), None    ),
+        bottom_io!(4954:  0,  1,  2, no),
+        bottom_io!(4954:  3,  4,  5,  6),
+        bottom_io!(4954:  7,  8,  9, no),
+        bottom_io!(4954: 10, 11, 12, 13),
+        bottom_io!(4954: 14, 15, 16, no),
+        bottom_io!(4954: 17, 18, 19, 20),
+        bottom_io!(4954: 21, 22, 23, no),
     ],
-    bottom_io_base: 4954,
     left_io: &[
-        (Some( 6), Some( 5), Some( 4), Some( 3), Some( 2), Some( 1), Some( 0)),
-        (Some(13), Some(12), Some(11), Some(10), Some( 9), Some( 8), Some( 7)),
-        (Some(19), Some(18), Some(17), Some(16), Some(15), Some(14), None    ),
-        (Some(26), Some(25), Some(24), Some(23), Some(22), Some(21), Some(20)),
-        (Some(33), Some(32), Some(31), Some(30), Some(29), Some(28), Some(27)),
-        (Some(40), Some(39), Some(38), Some(37), Some(36), Some(35), Some(34)),
-        (Some(47), Some(46), Some(45), Some(44), Some(43), Some(42), Some(41)),
-        (Some(53), Some(52), Some(51), Some(50), Some(49), Some(48), None    ),
-        (Some(60), Some(59), Some(58), Some(57), Some(56), Some(55), Some(54)),
-        (Some(67), Some(66), Some(65), Some(64), Some(63), Some(62), Some(61)),
+        left_io!(3646:  6,  5,  4,  3,  2,  1,  0),
+        left_io!(3646: 13, 12, 11, 10,  9,  8,  7),
+        left_io!(3646: 19, 18, 17, 16, 15, 14, no),
+        left_io!(3646: 26, 25, 24, 23, 22, 21, 20),
+        left_io!(3646: 33, 32, 31, 30, 29, 28, 27),
+        left_io!(3646: 40, 39, 38, 37, 36, 35, 34),
+        left_io!(3646: 47, 46, 45, 44, 43, 42, 41),
+        left_io!(3646: 53, 52, 51, 50, 49, 48, no),
+        left_io!(3646: 60, 59, 58, 57, 56, 55, 54),
+        left_io!(3646: 67, 66, 65, 64, 63, 62, 61),
     ],
-    left_io_base: 3646,
     right_io: &[
-        (Some( 0), Some( 1), Some( 2), Some( 3), Some( 4), Some( 5), None    ),
-        (Some( 6), Some( 7), Some( 8), Some( 9), Some(10), None,     None    ),
-        (Some(11), Some(12), Some(13), Some(14), Some(15), Some(16), None    ),
-        (Some(17), Some(18), Some(19), Some(20), Some(21), None,     None    ),
-        (Some(22), Some(23), Some(24), Some(25), Some(26), None,     None    ),
-        (Some(27), Some(28), Some(29), Some(30), Some(31), Some(32), None    ),
-        (Some(33), Some(34), Some(35), Some(36), Some(37), Some(38), None    ),
-        (Some(39), Some(40), Some(41), Some(42), Some(43), None,     None    ),
-        (Some(44), Some(45), Some(46), Some(47), Some(48), Some(49), None    ),
-        (Some(50), Some(51), Some(52), Some(53), Some(54), None,     None    ),
-        (Some(55), Some(56), Some(57), Some(58), Some(59), Some(60), None    ),
-        (Some(61), Some(62), Some(63), Some(64), Some(65), None,     None    ),
-        (Some(66), Some(67), Some(68), Some(69), Some(70), Some(71), None    ),
+        right_pci_io!(4451:  0,  1,  2,  3,  4,  5, no),
+        right_pci_io!(4451:  6,  7,  8,  9, 10, no, no),
+        right_pci_io!(4451: 11, 12, 13, 14, 15, 16, no),
+        right_pci_io!(4451: 17, 18, 19, 20, 21, no, no),
+        right_pci_io!(4451: 22, 23, 24, 25, 26, no, no),
+        right_pci_io!(4451: 27, 28, 29, 30, 31, 32, no),
+        right_pci_io!(4451: 33, 34, 35, 36, 37, 38, no),
+        right_pci_io!(4451: 39, 40, 41, 42, 43, no, no),
+        right_pci_io!(4451: 44, 45, 46, 47, 48, 49, no),
+        right_pci_io!(4451: 50, 51, 52, 53, 54, no, no),
+        right_pci_io!(4451: 55, 56, 57, 58, 59, 60, no),
+        right_pci_io!(4451: 61, 62, 63, 64, 65, no, no),
+        right_pci_io!(4451: 66, 67, 68, 69, 70, 71, no),
     ],
-    right_io_base: 4451,
     shelf_io: &[
-        (Some( 0), Some( 1), Some( 2), Some( 3)),
-        (Some( 4), Some( 5), Some( 6), None    ),
-        (Some( 7), Some( 8), Some( 9), Some(10)),
-        (Some(11), Some(12), Some(13), None    ),
-        (Some(14), Some(15), Some(16), Some(17)),
-        (Some(18), Some(19), Some(20), None    ),
-        (Some(21), Some(22), Some(23), Some(24)),
-        (Some(25), Some(26), Some(27), None    ),
-        (Some(28), Some(29), Some(30), Some(31)),
-        (Some(32), Some(33), Some(34), None    ),
-        (Some(35), Some(36), Some(37), Some(38)),
-        (Some(39), Some(40), Some(41), None    ),
+        bottom_io!(5098:  0,  1,  2,  3),
+        bottom_io!(5098:  4,  5,  6, no),
+        bottom_io!(5098:  7,  8,  9, 10),
+        bottom_io!(5098: 11, 12, 13, no),
+        bottom_io!(5098: 14, 15, 16, 17),
+        bottom_io!(5098: 18, 19, 20, no),
+        bottom_io!(5098: 21, 22, 23, 24),
+        bottom_io!(5098: 25, 26, 27, no),
+        bottom_io!(5098: 28, 29, 30, 31),
+        bottom_io!(5098: 32, 33, 34, no),
+        bottom_io!(5098: 35, 36, 37, 38),
+        bottom_io!(5098: 39, 40, 41, no),
     ],
-    shelf_io_base: 5098,
-    shelf_io_wrap: 42,
     top_io: &[
-        (Some( 3), Some( 2), Some( 1), Some( 0)),
-        (Some( 6), Some( 5), Some( 4), None    ),
-        (Some(10), Some( 9), Some( 8), Some( 7)),
-        (Some(13), Some(12), Some(11), None    ),
-        (Some(16), Some(15), Some(14), None    ),
-        (Some(19), Some(18), Some(17), None    ),
-        (Some(22), Some(21), Some(20), None    ),
-        (Some(25), Some(24), Some(23), None    ),
-        (Some(29), Some(28), Some(27), Some(26)),
-        (Some(32), Some(31), Some(30), None    ),
-        (Some(36), Some(35), Some(34), Some(33)),
-        (Some(39), Some(38), Some(37), None    ),
-        (Some(42), Some(41), Some(40), None    ),
-        (Some(45), Some(44), Some(43), None    ),
-        (Some(48), Some(47), Some(46), None    ),
-        (Some(51), Some(50), Some(49), None    ),
-        (Some(55), Some(54), Some(53), Some(52)),
-        (Some(58), Some(57), Some(56), None    ),
-        (Some(62), Some(61), Some(60), Some(59)),
-        (Some(65), Some(64), Some(63), None    ),
+        top_io!(4054:  3,  2,  1,  0),
+        top_io!(4054:  6,  5,  4, no),
+        top_io!(4054: 10,  9,  8,  7),
+        top_io!(4054: 13, 12, 11, no),
+        top_io!(4054: 16, 15, 14, no),
+        top_io!(4054: 19, 18, 17, no),
+        top_io!(4054: 22, 21, 20, no),
+        top_io!(4054: 25, 24, 23, no),
+        top_io!(4054: 29, 28, 27, 26),
+        top_io!(4054: 32, 31, 30, no),
+        top_io!(4054: 36, 35, 34, 33),
+        top_io!(4054: 39, 38, 37, no),
+        top_io!(4054: 42, 41, 40, no),
+        top_io!(4054: 45, 44, 43, no),
+        top_io!(4054: 48, 47, 46, no),
+        top_io!(4054: 51, 50, 49, no),
+        top_io!(4054: 55, 54, 53, 52),
+        top_io!(4054: 58, 57, 56, no),
+        top_io!(4054: 62, 61, 60, 59),
+        top_io!(4054: 65, 64, 63, no),
     ],
-    top_io_base: 4054,
     // sector
     global_row: 6,
     short_rows: 10,
@@ -358,11 +421,13 @@ impl Density {
 pub enum DensityC4Block {
     TopLeft,
     Top,
+    TopRight,
     RowLeft,
     Row,
     RowRight,
     BottomLeft,
     Bottom,
+    BottomRight,
 }
 
 impl Density {
@@ -380,9 +445,17 @@ impl Density {
                 Some(DensityC4Block::RowLeft)
             }
         } else if y == self.top {
-            Some(DensityC4Block::Top)
+            if x + 1 == self.right {
+                Some(DensityC4Block::TopRight)
+            } else {
+                Some(DensityC4Block::Top)
+            }
+        } else if x + 1 == self.grow && y == self.short_bottom {
+            Some(DensityC4Block::BottomRight)
         } else if x < self.grow && y == self.short_bottom {
             Some(DensityC4Block::Bottom)
+        } else if x + 1 == self.right && y == 0 {
+            Some(DensityC4Block::BottomRight)
         } else if x >= self.grow && y == 0 {
             Some(DensityC4Block::Bottom)
         } else if x + 1 == self.right {
@@ -429,7 +502,7 @@ impl Density {
             }
         } else if x == self.right {
             Some(DensityIOBlock::Right)
-        } else if self.has_grow && x < self.grow {
+        } else if y == self.short_bottom && x < self.grow {
             Some(DensityIOBlock::Bottom)
         } else {
             None
@@ -440,71 +513,86 @@ impl Density {
 #[derive(Copy, Clone)]
 #[derive(Debug)]
 #[derive(Eq, PartialEq)]
-pub enum DensityIOColumnCell {
-    Bottom {
-        left: bool,
-        strip: Option<u16>,
+pub enum DensityIOStrip {
+    No {
+        special_enable: bool,
+        special_output: bool,
     },
-    Top {
-        strip: Option<u16>,
-    },
+    Forward(u16),
+    Reverse(u16),
+    PCICompliance(u16),
+}
+
+impl DensityIOStrip {
+    pub fn left(self) -> bool {
+        match self {
+            DensityIOStrip::Forward(_) =>
+                true,
+
+            _ =>
+                false,
+        }
+    }
+
+    pub fn pci_compliance(self) -> bool {
+        match self {
+            DensityIOStrip::PCICompliance(_) =>
+                true,
+
+            _ =>
+                false,
+        }
+    }
+
+    pub fn special_enable(self) -> bool {
+        match self {
+            DensityIOStrip::No { special_enable, .. } =>
+                special_enable,
+
+            _ =>
+                false,
+        }
+    }
+
+    pub fn special_output(self) -> bool {
+        match self {
+            DensityIOStrip::No { special_output, .. } =>
+                special_output,
+
+            _ =>
+                false,
+        }
+    }
 }
 
 impl Density {
     pub fn io_column_cell(&self, x: u8, y: u8, n: IOColumnCellNumber)
-        -> Option<DensityIOColumnCell>
+        -> Option<(bool, DensityIOStrip)>
     {
         if y == 0 && x > self.grow && x < self.right {
-            io_column_strip(self.bottom_io, self.right - x - 1, n)
-                .map(|strip| DensityIOColumnCell::Bottom {
-                    left: false,
-                    strip: Some(self.bottom_io_base + (6 * strip)),
-                })
-                .or_else(|| Some(DensityIOColumnCell::Bottom {
-                    left: false,
-                    strip: None,
-                }))
+            Some((
+                false,
+                io_column_strip(self.bottom_io, self.right - x - 1, n),
+            ))
         } else if y == self.top && x > self.left && x < self.right {
-            io_column_strip(self.top_io, x - self.left - 1, n)
-                .map(|strip| DensityIOColumnCell::Top {
-                    strip: Some(self.top_io_base + (6 * strip)),
-                })
-                .or_else(|| Some(DensityIOColumnCell::Top {
-                    strip: None,
-                }))
-        } else if self.has_grow && x > self.left && x < self.grow {
-            io_column_strip(self.shelf_io, self.grow - x - 1, n)
-                .map(|strip| if strip >= self.shelf_io_wrap {
-                    let strip = strip - self.shelf_io_wrap;
-                    DensityIOColumnCell::Bottom {
-                        left: true,
-                        strip: Some(self.left_io_base + (6 * strip)),
-                    }
-                } else {
-                    DensityIOColumnCell::Bottom {
-                        left: false,
-                        strip: Some(self.shelf_io_base + (6 * strip)),
-                    }
-                })
-                .or_else(|| Some(DensityIOColumnCell::Bottom {
-                    left: false,
-                    strip: None,
-                }))
+            Some((true, io_column_strip(self.top_io, x - self.left - 1, n)))
+        } else if y == self.short_bottom && x > self.left && x < self.grow {
+            Some((false, io_column_strip(self.shelf_io, self.grow - x - 1, n)))
         } else {
             None
         }
     }
 }
 
-type ColumnStrip = (
-    Option<u16>,
-    Option<u16>,
-    Option<u16>,
-    Option<u16>,
-);
+type ColumnStrip<T> = (T, T, T, T);
 
-fn io_column_strip(strip: &'static[ColumnStrip], i: u8, n: IOColumnCellNumber)
-    -> Option<u16>
+fn io_column_strip<T>(
+    strip: &'static[ColumnStrip<T>],
+    i: u8,
+    n: IOColumnCellNumber,
+) -> T
+where
+    T: Copy,
 {
     use IOColumnCellNumber::*;
 
@@ -517,72 +605,35 @@ fn io_column_strip(strip: &'static[ColumnStrip], i: u8, n: IOColumnCellNumber)
     }
 }
 
-#[derive(Copy, Clone)]
-#[derive(Debug)]
-#[derive(Eq, PartialEq)]
-pub enum DensityIORowCell {
-    Left {
-        strip: Option<u16>,
-    },
-    Right {
-        pci_compliance: bool,
-        strip: Option<u16>,
-    },
-}
-
 impl Density {
     pub fn io_row_cell(&self, x: u8, y: u8, n: IORowCellNumber)
-        -> Option<DensityIORowCell>
+        -> Option<(bool, DensityIOStrip)>
     {
         if x == self.left && y < self.top {
             if !self.has_grow && y > 0 {
-                io_row_strip(self.left_io, y - 1, n)
-                    .map(|strip| DensityIORowCell::Left {
-                        strip: Some(self.left_io_base + (6 * strip)),
-                    })
-                    .or_else(|| Some(DensityIORowCell::Left {
-                        strip: None,
-                    }))
+                Some((true, io_row_strip(self.left_io, y - 1, n)))
             } else if self.has_grow && y > 3 {
-                io_row_strip(self.left_io, y - 4, n)
-                    .map(|strip| DensityIORowCell::Left {
-                        strip: Some(self.left_io_base + (6 * strip)),
-                    })
-                    .or_else(|| Some(DensityIORowCell::Left {
-                        strip: None,
-                    }))
+                Some((true, io_row_strip(self.left_io, y - 4, n)))
             } else {
                 None
             }
         } else if x == self.right && y > 0 && y < self.top {
-            let stride: u16 = if self.pci_compliance { 7 } else { 6 };
-            io_row_strip(self.right_io, self.top - y - 1, n)
-                .map(|strip| DensityIORowCell::Right {
-                    strip: Some(self.right_io_base + (stride * strip)),
-                    pci_compliance: self.pci_compliance,
-                })
-                .or_else(|| Some(DensityIORowCell::Right {
-                    strip: None,
-                    pci_compliance: false,
-                }))
+            Some((false, io_row_strip(self.right_io, self.top - y - 1, n)))
         } else {
             None
         }
     }
 }
 
-type RowStrip = (
-    Option<u16>,
-    Option<u16>,
-    Option<u16>,
-    Option<u16>,
-    Option<u16>,
-    Option<u16>,
-    Option<u16>,
-);
+type RowStrip<T> = (T, T, T, T, T, T, T);
 
-fn io_row_strip(strip: &'static[RowStrip], i: u8, n: IORowCellNumber)
-    -> Option<u16>
+fn io_row_strip<T>(
+    strip: &'static[RowStrip<T>],
+    i: u8,
+    n: IORowCellNumber,
+) -> T
+where
+    T: Copy,
 {
     use IORowCellNumber::*;
 

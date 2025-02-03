@@ -89,6 +89,7 @@ macro_rules! enumerated {
         #[derive(Copy, Clone)]
         #[derive(Debug)]
         #[derive(Eq, PartialEq)]
+        #[derive(Hash)]
         #[derive(Ord, PartialOrd)]
         pub enum $enum {
             $( $item ),+

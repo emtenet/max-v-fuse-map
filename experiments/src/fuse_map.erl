@@ -125,17 +125,22 @@
 -define(GLOBAL_SMALL_SELECTS(),
     ?GLOBAL_SMALL_SELECT(3, 4, output3, from3, 0);
     ?GLOBAL_SMALL_SELECT(3, 4, output6, from6, 0);
+    ?GLOBAL_SMALL_INVERT(3, 4, output_invert, 0);
     ?GLOBAL_SMALL_SELECT(3, 4, enable3, from3, 1);
     ?GLOBAL_SMALL_SELECT(3, 4, enable6, from6, 1);
+    ?GLOBAL_SMALL_INVERT(3, 4, enable_invert, 1);
     ?GLOBAL_SMALL_SELECT(3, 5, output3, from3, 2);
     ?GLOBAL_SMALL_SELECT(3, 5, output6, from6, 2);
+    ?GLOBAL_SMALL_INVERT(3, 5, output_invert, 2);
     ?GLOBAL_SMALL_SELECT(3, 5, enable3, from3, 3);
     ?GLOBAL_SMALL_SELECT(3, 5, enable6, from6, 3);
+    ?GLOBAL_SMALL_INVERT(3, 5, enable_invert, 3);
 ).
 
 -define(JTAG_SMALL_SELECTS(),
     ?JTAG_SMALL_SELECT(4, 6, enable3, from3, tdo);
     ?JTAG_SMALL_SELECT(4, 6, enable6, from6, tdo);
+    ?JTAG_SMALL_INVERT(4, 6, enable_invert, tdo);
 ).
 
 -define(JTAG_LARGE_SELECTS(),
@@ -245,41 +250,41 @@
     ?IOB_SIDE( 7, 9, 2, {interconnect, 9}, {from3, mux0});
     ?IOB_SIDE( 7, 9, 3, {interconnect, 9}, {from3, mux1});
     ?IOB_SIDE( 8, 0, 2, {interconnect, 0}, {from3, mux2});
-    ?IOB_SIDE( 8, 0, 3, {interconnect, 0}, {direct_link});
+    ?IOB_SIDE( 8, 0, 3, {interconnect, 0}, direct_link);
     ?IOB_SIDE( 8, 1, 0, {interconnect, 1}, {from3, mux2});
-    ?IOB_SIDE( 8, 1, 1, {interconnect, 1}, {direct_link});
+    ?IOB_SIDE( 8, 1, 1, {interconnect, 1}, direct_link);
     ?IOB_SIDE( 8, 1, 2, {interconnect, 2}, {from3, mux2});
-    ?IOB_SIDE( 8, 1, 3, {interconnect, 2}, {direct_link});
+    ?IOB_SIDE( 8, 1, 3, {interconnect, 2}, direct_link);
     ?IOB_SIDE( 8, 2, 0, {interconnect, 3}, {from3, mux2});
-    ?IOB_SIDE( 8, 2, 1, {interconnect, 3}, {direct_link});
+    ?IOB_SIDE( 8, 2, 1, {interconnect, 3}, direct_link);
     ?IOB_SIDE( 8, 2, 2, {interconnect, 4}, {from3, mux2});
-    ?IOB_SIDE( 8, 2, 3, {interconnect, 4}, {direct_link});
+    ?IOB_SIDE( 8, 2, 3, {interconnect, 4}, direct_link);
     ?IOB_SIDE( 8, 3, 0, {interconnect, 5}, {from3, mux2});
-    ?IOB_SIDE( 8, 3, 1, {interconnect, 5}, {direct_link});
+    ?IOB_SIDE( 8, 3, 1, {interconnect, 5}, direct_link);
     ?IOB_SIDE( 8, 3, 2, {interconnect, 6}, {from3, mux2});
-    ?IOB_SIDE( 8, 3, 3, {interconnect, 6}, {direct_link});
+    ?IOB_SIDE( 8, 3, 3, {interconnect, 6}, direct_link);
     ?IOB_SIDE( 8, 4, 0, {interconnect, 7}, {from3, mux2});
-    ?IOB_SIDE( 8, 4, 1, {interconnect, 7}, {direct_link});
+    ?IOB_SIDE( 8, 4, 1, {interconnect, 7}, direct_link);
     ?IOB_SIDE( 8, 4, 2, {interconnect, 8}, {from3, mux2});
-    ?IOB_SIDE( 8, 4, 3, {interconnect, 8}, {direct_link});
+    ?IOB_SIDE( 8, 4, 3, {interconnect, 8}, direct_link);
     ?IOB_SIDE( 8, 5, 0, {interconnect,16}, {from3, mux2});
-    ?IOB_SIDE( 8, 5, 1, {interconnect,16}, {direct_link});
+    ?IOB_SIDE( 8, 5, 1, {interconnect,16}, direct_link);
     ?IOB_SIDE( 8, 5, 2, {interconnect,17}, {from3, mux2});
-    ?IOB_SIDE( 8, 5, 3, {interconnect,17}, {direct_link});
+    ?IOB_SIDE( 8, 5, 3, {interconnect,17}, direct_link);
     ?IOB_SIDE( 8, 6, 0, {interconnect,14}, {from3, mux2});
-    ?IOB_SIDE( 8, 6, 1, {interconnect,14}, {direct_link});
+    ?IOB_SIDE( 8, 6, 1, {interconnect,14}, direct_link);
     ?IOB_SIDE( 8, 6, 2, {interconnect,15}, {from3, mux2});
-    ?IOB_SIDE( 8, 6, 3, {interconnect,15}, {direct_link});
+    ?IOB_SIDE( 8, 6, 3, {interconnect,15}, direct_link);
     ?IOB_SIDE( 8, 7, 0, {interconnect,12}, {from3, mux2});
-    ?IOB_SIDE( 8, 7, 1, {interconnect,12}, {direct_link});
+    ?IOB_SIDE( 8, 7, 1, {interconnect,12}, direct_link);
     ?IOB_SIDE( 8, 7, 2, {interconnect,13}, {from3, mux2});
-    ?IOB_SIDE( 8, 7, 3, {interconnect,13}, {direct_link});
+    ?IOB_SIDE( 8, 7, 3, {interconnect,13}, direct_link);
     ?IOB_SIDE( 8, 8, 0, {interconnect,10}, {from3, mux2});
-    ?IOB_SIDE( 8, 8, 1, {interconnect,10}, {direct_link});
+    ?IOB_SIDE( 8, 8, 1, {interconnect,10}, direct_link);
     ?IOB_SIDE( 8, 8, 2, {interconnect,11}, {from3, mux2});
-    ?IOB_SIDE( 8, 8, 3, {interconnect,11}, {direct_link});
+    ?IOB_SIDE( 8, 8, 3, {interconnect,11}, direct_link);
     ?IOB_SIDE( 8, 9, 2, {interconnect, 9}, {from3, mux2});
-    ?IOB_SIDE( 8, 9, 3, {interconnect, 9}, {direct_link});
+    ?IOB_SIDE( 8, 9, 3, {interconnect, 9}, direct_link);
     ?IOB_SIDE( 9, 0, 2, {interconnect, 0}, {from4, mux0});
     ?IOB_SIDE( 9, 0, 3, {interconnect, 0}, {from4, mux1});
     ?IOB_SIDE( 9, 1, 0, {interconnect, 1}, {from4, mux0});
@@ -2831,6 +2836,10 @@ from_global(G, Name, _With) ->
 
 %%--------------------------------------------------------------------
 
+-define(GLOBAL_SMALL_INVERT(Y, N, FromN, G),
+    from_global_select(G, invert, With = #with{density = max_v_240z}) ->
+        from_ioc_side(1, Y, N, FromN, With)
+).
 -define(GLOBAL_SMALL_SELECT(Y, N, FromN, FromG, G),
     from_global_select(G, {FromG, Mux}, With = #with{density = max_v_240z}) ->
         from_ioc_side(1, Y, N, {FromN, Mux}, With)
@@ -2845,6 +2854,7 @@ from_global(G, Name, _With) ->
 from_global_select(G, Name, _With) ->
     {error, {{global, G}, Name}}.
 
+-undef(GLOBAL_SMALL_INVERT).
 -undef(GLOBAL_SMALL_SELECT).
 -undef(GLOBAL_LARGE_SELECT).
 
@@ -3139,6 +3149,10 @@ from_ioc_strip(X, Y, N, R, C, With = #with{density = max_v_2210z}) ->
 
 %%--------------------------------------------------------------------
 
+-define(JTAG_SMALL_INVERT(Y, N, FromN, U),
+    from_jtag(X, Y, {U, invert}, With = #with{density = max_v_240z}) ->
+        from_ioc_side(X, Y, N, FromN, With)
+).
 -define(JTAG_SMALL_SELECT(Y, N, FromN, FromU, U),
     from_jtag(X, Y, {U, FromU, Mux}, With = #with{density = max_v_240z}) ->
         from_ioc_side(X, Y, N, {FromN, Mux}, With)
@@ -3155,6 +3169,7 @@ from_ioc_strip(X, Y, N, R, C, With = #with{density = max_v_2210z}) ->
 from_jtag(X, Y, Name, _With) ->
     {error, {{invalid_jtag, X, Y}, Name}}.
 
+-undef(JTAG_SMALL_INVERT).
 -undef(JTAG_SMALL_SELECT).
 -undef(JTAG_LARGE_SELECT).
 
@@ -4172,9 +4187,17 @@ to_skip(X, Cell, Sector, #with{skip = Skip}) ->
 
 %%--------------------------------------------------------------------
 
+-define(GLOBAL_SMALL_INVERT(Y, N, FromN, G),
+    to_ioc_side(1, Y, N, FromN, _) ->
+        {ok, {{global, 1, Y}, G, invert}}
+).
 -define(GLOBAL_SMALL_SELECT(Y, N, FromN, FromG, G),
     to_ioc_side(1, Y, N, {FromN, Mux}, _) ->
         {ok, {{global, 1, Y}, G, FromG, Mux}}
+).
+-define(JTAG_SMALL_INVERT(Y, N, FromN, U),
+    to_ioc_side(1, Y, N, FromN, _) ->
+        {ok, {{jtag, 1, Y}, U, invert}}
 ).
 -define(JTAG_SMALL_SELECT(Y, N, FromN, FromU, U),
     to_ioc_side(1, Y, N, {FromN, Mux}, _) ->
@@ -4195,7 +4218,9 @@ to_skip(X, Cell, Sector, #with{skip = Skip}) ->
 to_ioc_side(X, Y, N, Name, _) ->
     to_ioc(X, Y, N, Name).
 
+-undef(GLOBAL_SMALL_INVERT).
 -undef(GLOBAL_SMALL_SELECT).
+-undef(JTAG_SMALL_INVERT).
 -undef(JTAG_SMALL_SELECT).
 -undef(UFM_SMALL_INVERT).
 -undef(UFM_SMALL_SELECT).
@@ -4211,7 +4236,7 @@ to_global(G, Name) ->
 
 to_iob(X, Y, Name, {Key, Value}) ->
     {ok, {{iob, X, Y}, Name, Key, Value}};
-to_iob(X, Y, Name, {Value}) ->
+to_iob(X, Y, Name, Value) ->
     {ok, {{iob, X, Y}, Name, Value}}.
 
 %%--------------------------------------------------------------------

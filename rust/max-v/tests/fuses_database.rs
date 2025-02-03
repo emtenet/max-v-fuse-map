@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fmt::Debug;
 use std::fs::read_to_string;
 use max_v::*;
@@ -5,34 +6,65 @@ use max_v::*;
 #[test]
 fn max_v_240z() {
     let s = read_to_string("../../database/max_v_240z.fuses").unwrap();
-    fuses(s, &MAX_V_240Z);
+    let mut db: HashSet<Fuse> = HashSet::with_capacity(34_000);
+    fuses(s, &mut db, &MAX_V_240Z);
+    // should be in the database?
+    only_fuses(&db, &MAX_V_240Z);
 }
 
 #[test]
 fn max_v_570z() {
+    use C4InterconnectIndex::*;
+
     let s = read_to_string("../../database/max_v_570z.fuses").unwrap();
-    fuses(s, &MAX_V_570Z);
+    let mut db: HashSet<Fuse> = HashSet::with_capacity(77_000);
+    fuses(s, &mut db, &MAX_V_570Z);
+    // should be in the database?
+    db.insert(Fuse::C4Interconnect {
+        x: 8, y: 3, i: C4Interconnect3,
+        fuse: C4InterconnectFuse::IODataIn1,
+    });
+    only_fuses(&db, &MAX_V_570Z);
 }
 
 #[test]
 fn max_v_1270z() {
+    use C4InterconnectIndex::*;
+
     let s = read_to_string("../../database/max_v_1270z.fuses").unwrap();
-    fuses(s, &MAX_V_1270Z);
+    let mut db: HashSet<Fuse> = HashSet::with_capacity(163_000);
+    fuses(s, &mut db, &MAX_V_1270Z);
+    // should be in the database?
+    db.insert(Fuse::C4Interconnect {
+        x: 10, y: 3, i: C4Interconnect3,
+        fuse: C4InterconnectFuse::IODataIn1,
+    });
+    only_fuses(&db, &MAX_V_1270Z);
 }
 
 #[test]
 fn max_v_2210z() {
+    use C4InterconnectIndex::*;
+
     let s = read_to_string("../../database/max_v_2210z.fuses").unwrap();
-    fuses(s, &MAX_V_2210Z);
+    let mut db: HashSet<Fuse> = HashSet::with_capacity(277_000);
+    fuses(s, &mut db, &MAX_V_2210Z);
+    // should be in the database?
+    db.insert(Fuse::C4Interconnect {
+        x: 12, y: 3, i: C4Interconnect3,
+        fuse: C4InterconnectFuse::IODataIn1,
+    });
+    only_fuses(&db, &MAX_V_2210Z);
 }
 
-fn fuses(s: String, density: &Density) {
+fn fuses(s: String, fuses: &mut HashSet<Fuse>, density: &Density) {
     for s in s.lines() {
         let (index, fuse) = fuse(s, density);
         assert_eq!(
             (fuse, Ok(index)),
             (fuse, fuse.to_index(density)),
         );
+        fuses.insert(fuse);
     }
 }
 
@@ -637,6 +669,281 @@ fn ufm_interconnect_fuse(s: &str) -> UFMInterconnectFuse {
         UFMInterconnectFuse::Source4(select)
     } else {
         todo!("{s}")
+    }
+}
+
+fn only(fuses: &HashSet<Fuse>, density:& Density, fuse: Fuse) {
+    if !fuses.contains(&fuse) {
+        assert_eq!(
+            (fuse, true),
+            (fuse, fuse.to_index(density).is_err()),
+        );
+    }
+}
+
+fn only_fuses(fuses: &HashSet<Fuse>, density:& Density) {
+    only(fuses, density, Fuse:: DeviceOutputEnable);
+    only(fuses, density, Fuse::DeviceReset);
+    only_global(fuses, density);
+    for x in 0..23u8 {
+        for y in 0..16u8 {
+            only_c4(&fuses, density, x, y);
+            only_io_column_cell(&fuses, density, x, y);
+            only_io_column_interconnect(&fuses, density, x, y);
+            only_io_row_cell(&fuses, density, x, y);
+            only_io_row_interconnect(&fuses, density, x, y);
+        }
+    }
+}
+
+fn only_c4(fuses: &HashSet<Fuse>, density:& Density, x: u8, y: u8) {
+    use C4InterconnectFuse::*;
+
+    for i in C4InterconnectIndex::iter() {
+        only(fuses, density, Fuse::C4Interconnect {
+            x, y, i, fuse: DirectLink,
+        });
+        only(fuses, density, Fuse::C4Interconnect {
+            x, y, i, fuse: IODataIn0,
+        });
+        only(fuses, density, Fuse::C4Interconnect {
+            x, y, i, fuse: IODataIn1,
+        });
+        for select in Select3::iter() {
+            only(fuses, density, Fuse::C4Interconnect {
+                x, y, i, fuse: Source3(select),
+            });
+        }
+        for select in Select4::iter() {
+            only(fuses, density, Fuse::C4Interconnect {
+                x, y, i, fuse: Source4(select),
+            });
+        }
+    }
+}
+
+fn only_global(fuses: &HashSet<Fuse>, density:& Density) {
+    use GlobalFuse::*;
+    use SourceFuse::*;
+
+    for index in Global::iter() {
+        for x in 0..23u8 {
+            only(fuses, density, Fuse::Global {
+                index, fuse: ColumnOff(x),
+            });
+        }
+        only(fuses, density, Fuse::Global {
+            index, fuse: Internal,
+        });
+        only(fuses, density, Fuse::Global {
+            index, fuse: RowOff,
+        });
+        only(fuses, density, Fuse::GlobalSource {
+            index, fuse: Small(IORowSourceFuse::Invert),
+        });
+        only(fuses, density, Fuse::GlobalSource {
+            index, fuse: Large(UFMSourceFuse::Invert),
+        });
+        for select in Select3::iter() {
+            only(fuses, density, Fuse::GlobalSource {
+                index, fuse: Small(IORowSourceFuse::Source3(select)),
+            });
+            only(fuses, density, Fuse::GlobalSource {
+                index, fuse: Large(UFMSourceFuse::Source3(select)),
+            });
+        }
+        for select in Select4::iter() {
+            only(fuses, density, Fuse::GlobalSource {
+                index, fuse: Large(UFMSourceFuse::Source4(select)),
+            });
+        }
+        for select in Select6::iter() {
+            only(fuses, density, Fuse::GlobalSource {
+                index, fuse: Small(IORowSourceFuse::Source6(select)),
+            });
+        }
+    }
+}
+
+fn only_io_column_cell(fuses: &HashSet<Fuse>, density:& Density, x: u8, y: u8) {
+    use IOCellFuse::*;
+    use IOColumnSourceFuse::*;
+
+    for n in IOColumnCellNumber::iter() {
+        only(fuses, density, Fuse::IOColumnCell {
+            x, y, n, fuse: BusHold,
+        });
+        only(fuses, density, Fuse::IOColumnCell {
+            x, y, n, fuse: FastSlewRate,
+        });
+        only(fuses, density, Fuse::IOColumnCell {
+            x, y, n, fuse: InputDelay,
+        });
+        only(fuses, density, Fuse::IOColumnCell {
+            x, y, n, fuse: InputOff,
+        });
+        only(fuses, density, Fuse::IOColumnCell {
+            x, y, n, fuse: LowCurrent0,
+        });
+        only(fuses, density, Fuse::IOColumnCell {
+            x, y, n, fuse: LowCurrent1,
+        });
+        only(fuses, density, Fuse::IOColumnCell {
+            x, y, n, fuse: OpenDrain,
+        });
+        only(fuses, density, Fuse::IOColumnCell {
+            x, y, n, fuse: OutputFast,
+        });
+        only(fuses, density, Fuse::IOColumnCell {
+            x, y, n, fuse: PCICompliance,
+        });
+        only(fuses, density, Fuse::IOColumnCell {
+            x, y, n, fuse: SchmittTrigger,
+        });
+        only(fuses, density, Fuse::IOColumnCell {
+            x, y, n, fuse: WeakPullUp,
+        });
+        only(fuses, density, Fuse::IOColumnCell {
+            x, y, n, fuse: Enable(Invert),
+        });
+        only(fuses, density, Fuse::IOColumnCell {
+            x, y, n, fuse: Output(Invert),
+        });
+        for select in Select3::iter() {
+            only(fuses, density, Fuse::IOColumnCell {
+                x, y, n, fuse: Enable(Source3(select)),
+            });
+            only(fuses, density, Fuse::IOColumnCell {
+                x, y, n, fuse: Output(Source3(select)),
+            });
+        }
+        for select in Select4::iter() {
+            only(fuses, density, Fuse::IOColumnCell {
+                x, y, n, fuse: Enable(Source4(select)),
+            });
+            only(fuses, density, Fuse::IOColumnCell {
+                x, y, n, fuse: Output(Source4(select)),
+            });
+        }
+    }
+}
+
+fn only_io_column_interconnect(
+    fuses: &HashSet<Fuse>,
+    density:& Density,
+    x: u8,
+    y: u8,
+) {
+    use IOInterconnectFuse::*;
+
+    for i in IOColumnInterconnectIndex::iter() {
+        only(fuses, density, Fuse::IOColumnInterconnect {
+            x, y, i, fuse: DirectLink,
+        });
+        for select in Select3::iter() {
+            only(fuses, density, Fuse::IOColumnInterconnect {
+                x, y, i, fuse: Source3(select),
+            });
+        }
+        for select in Select4::iter() {
+            only(fuses, density, Fuse::IOColumnInterconnect {
+                x, y, i, fuse: Source4(select),
+            });
+        }
+        only(fuses, density, Fuse::IOColumnInterconnect {
+            x, y, i, fuse: SourceGlobal,
+        });
+    }
+}
+
+fn only_io_row_cell(fuses: &HashSet<Fuse>, density:& Density, x: u8, y: u8) {
+    use IOCellFuse::*;
+    use IORowSourceFuse::*;
+
+    for n in IORowCellNumber::iter() {
+        only(fuses, density, Fuse::IORowCell {
+            x, y, n, fuse: BusHold,
+        });
+        only(fuses, density, Fuse::IORowCell {
+            x, y, n, fuse: FastSlewRate,
+        });
+        only(fuses, density, Fuse::IORowCell {
+            x, y, n, fuse: InputDelay,
+        });
+        only(fuses, density, Fuse::IORowCell {
+            x, y, n, fuse: InputOff,
+        });
+        only(fuses, density, Fuse::IORowCell {
+            x, y, n, fuse: LowCurrent0,
+        });
+        only(fuses, density, Fuse::IORowCell {
+            x, y, n, fuse: LowCurrent1,
+        });
+        only(fuses, density, Fuse::IORowCell {
+            x, y, n, fuse: OpenDrain,
+        });
+        only(fuses, density, Fuse::IORowCell {
+            x, y, n, fuse: OutputFast,
+        });
+        only(fuses, density, Fuse::IORowCell {
+            x, y, n, fuse: PCICompliance,
+        });
+        only(fuses, density, Fuse::IORowCell {
+            x, y, n, fuse: SchmittTrigger,
+        });
+        only(fuses, density, Fuse::IORowCell {
+            x, y, n, fuse: WeakPullUp,
+        });
+        only(fuses, density, Fuse::IORowCell {
+            x, y, n, fuse: Enable(Invert),
+        });
+        only(fuses, density, Fuse::IORowCell {
+            x, y, n, fuse: Output(Invert),
+        });
+        for select in Select3::iter() {
+            only(fuses, density, Fuse::IORowCell {
+                x, y, n, fuse: Enable(Source3(select)),
+            });
+            only(fuses, density, Fuse::IORowCell {
+                x, y, n, fuse: Output(Source3(select)),
+            });
+        }
+        for select in Select6::iter() {
+            only(fuses, density, Fuse::IORowCell {
+                x, y, n, fuse: Enable(Source6(select)),
+            });
+            only(fuses, density, Fuse::IORowCell {
+                x, y, n, fuse: Output(Source6(select)),
+            });
+        }
+    }
+}
+
+fn only_io_row_interconnect(
+    fuses: &HashSet<Fuse>,
+    density:& Density,
+    x: u8,
+    y: u8,
+) {
+    use IOInterconnectFuse::*;
+
+    for i in IORowInterconnectIndex::iter() {
+        only(fuses, density, Fuse::IORowInterconnect {
+            x, y, i, fuse: DirectLink,
+        });
+        for select in Select3::iter() {
+            only(fuses, density, Fuse::IORowInterconnect {
+                x, y, i, fuse: Source3(select),
+            });
+        }
+        for select in Select4::iter() {
+            only(fuses, density, Fuse::IORowInterconnect {
+                x, y, i, fuse: Source4(select),
+            });
+        }
+        only(fuses, density, Fuse::IORowInterconnect {
+            x, y, i, fuse: SourceGlobal,
+        });
     }
 }
 
