@@ -50,7 +50,7 @@ pub enum Fuse {
         fuse: IOInterconnectFuse,
     },
     JTAG {
-        signal: JTAGSignal,
+        signal: JTAGInput,
         fuse: SourceFuse,
     },
     LogicBlock {
@@ -77,7 +77,7 @@ pub enum Fuse {
         fuse: R4InterconnectFuse,
     },
     UFM {
-        signal: UFMSignal,
+        signal: UFMInput,
         fuse: SourceFuse,
     },
     UFMInterconnect {
@@ -440,7 +440,7 @@ impl Fuse {
                         Err(FuseOutOfRange::XY),
                 }
 
-            Fuse::JTAG { signal: JTAGSignal::TDO, fuse } =>
+            Fuse::JTAG { signal: JTAGInput::TDO, fuse } =>
                 source_enable(4, IORowCell6, 2, LogicCell7, fuse, density),
 
             Fuse::LogicBlock { x, y, fuse } =>
@@ -2016,12 +2016,12 @@ fn ufm_interconnect_fuse(
     }
 }
 
-fn ufm_signal(signal: UFMSignal, fuse: SourceFuse, density: &Density)
+fn ufm_signal(signal: UFMInput, fuse: SourceFuse, density: &Density)
     -> Result<FuseAt, FuseOutOfRange>
 {
     use IORowCellNumber::*;
     use LogicCellNumber::*;
-    use UFMSignal::*;
+    use UFMInput::*;
 
     match signal {
         ArClk =>   source_enable(1, IORowCell6, 2, LogicCell2, fuse, density),

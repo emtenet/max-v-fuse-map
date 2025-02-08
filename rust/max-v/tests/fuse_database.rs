@@ -353,8 +353,8 @@ fn io_interconnect_fuse(s: &str) -> IOInterconnectFuse {
     }
 }
 
-fn jtag_signal(s: &str) -> (JTAGSignal, &str) {
-    use JTAGSignal::*;
+fn jtag_signal(s: &str) -> (JTAGInput, &str) {
+    use JTAGInput::*;
 
     if let Some(s) = s.strip_prefix("tdo,") {
         (TDO, s)
@@ -631,8 +631,8 @@ fn source_fuse(s: &str, density: &Density) -> SourceFuse {
     }
 }
 
-fn ufm_signal(s: &str) -> (UFMSignal, &str) {
-    use UFMSignal::*;
+fn ufm_signal(s: &str) -> (UFMInput, &str) {
+    use UFMInput::*;
 
     if let Some(s) = s.strip_prefix("ar_clk,") {
         (ArClk, s)
@@ -960,7 +960,7 @@ fn only_io_row_interconnect(
 }
 
 fn only_jtag(fuses: &HashSet<Fuse>, density:& Density) {
-    use JTAGSignal::*;
+    use JTAGInput::*;
     use SourceFuse::*;
 
     for select in Select3::iter() {
@@ -1233,7 +1233,7 @@ fn only_user_code(fuses: &HashSet<Fuse>, density:& Density) {
 fn only_ufm(fuses: &HashSet<Fuse>, density:& Density) {
     use SourceFuse::*;
 
-    for signal in UFMSignal::iter() {
+    for signal in UFMInput::iter() {
         for select in Select3::iter() {
             only(fuses, density, Fuse::UFM {
                 signal, fuse: Small(IORowSourceFuse::Source3(select)),
