@@ -1,17 +1,19 @@
 use crate::{
     IOColumnCellNumber,
     IORowCellNumber,
+    X,
+    Y,
 };
 
-pub struct Density {
+pub struct DensityLayout {
     pub (crate) has_grow: bool,
     // x
-    pub (crate) grow: u8,
-    pub (crate) left: u8,
-    pub (crate) right: u8,
+    pub (crate) grow: X,
+    pub (crate) left: X,
+    pub (crate) right: X,
     // y
-    pub (crate) top: u8,
-    pub (crate) short_bottom: u8,
+    pub (crate) top: Y,
+    pub (crate) short_bottom: Y,
     // io
     bottom_io: &'static [ColumnStrip<DensityIOStrip>],
     left_io: &'static [RowStrip<DensityIOStrip>],
@@ -124,15 +126,15 @@ macro_rules! top_io {
     };
 }
 
-pub const MAX_V_240Z: Density = Density {
+pub const MAX_V_240Z: DensityLayout = DensityLayout {
     has_grow: false,
     // x
-    grow: 1,
-    left: 1,
-    right: 8,
+    grow: X(1),
+    left: X(1),
+    right: X(8),
     // y
-    top: 5,
-    short_bottom: 0,
+    top: Y(5),
+    short_bottom: Y(0),
     // io
     bottom_io: &[
         bottom_io!(1428:  0,  1,  2, no),
@@ -173,15 +175,15 @@ pub const MAX_V_240Z: Density = Density {
     sync_width: 32,
 };
 
-pub const MAX_V_570Z: Density = Density {
+pub const MAX_V_570Z: DensityLayout = DensityLayout {
     has_grow: true,
     // x
-    grow: 9,
-    left: 0,
-    right: 13,
+    grow: X(9),
+    left: X(0),
+    right: X(13),
     // y
-    top: 8,
-    short_bottom: 3,
+    top: Y(8),
+    short_bottom: Y(3),
     // io
     bottom_io: &[
         bottom_io!(3088:  0,  1,  2,  3),
@@ -238,15 +240,15 @@ pub const MAX_V_570Z: Density = Density {
     sync_width: 32,
 };
 
-pub const MAX_V_1270Z: Density = Density {
+pub const MAX_V_1270Z: DensityLayout = DensityLayout {
     has_grow: true,
     // x
-    grow: 11,
-    left: 0,
-    right: 17,
+    grow: X(11),
+    left: X(0),
+    right: X(17),
     // y
-    top: 11,
-    short_bottom: 3,
+    top: Y(11),
+    short_bottom: Y(3),
     // io
     bottom_io: &[
         bottom_io!(2856:  0,  1,  2,  3),
@@ -317,15 +319,15 @@ pub const MAX_V_1270Z: Density = Density {
     sync_width: 64,
 };
 
-pub const MAX_V_2210Z: Density = Density {
+pub const MAX_V_2210Z: DensityLayout = DensityLayout {
     has_grow: true,
     // x
-    grow: 13,
-    left: 0,
-    right: 21,
+    grow: X(13),
+    left: X(0),
+    right: X(21),
     // y
-    top: 14,
-    short_bottom: 3,
+    top: Y(14),
+    short_bottom: Y(3),
     // io
     bottom_io: &[
         bottom_io!(4954:  0,  1,  2, no),
@@ -409,7 +411,7 @@ pub const MAX_V_2210Z: Density = Density {
     sync_width: 64,
 };
 
-impl Density {
+impl DensityLayout {
     pub fn large(&self) -> bool {
         self.has_grow
     }
@@ -430,8 +432,8 @@ pub enum DensityC4Block {
     BottomRight,
 }
 
-impl Density {
-    pub fn c4_block(&self, x: u8, y: u8) -> Option<DensityC4Block> {
+impl DensityLayout {
+    pub fn c4_block(&self, x: X, y: Y) -> Option<DensityC4Block> {
         if y > self.top || x < self.left || x >= self.right {
             None
         } else if x < self.grow && y < self.short_bottom {
@@ -476,8 +478,8 @@ pub enum DensityIOBlock {
     Top,
 }
 
-impl Density {
-    pub fn io_block(&self, x: u8, y: u8)
+impl DensityLayout {
+    pub fn io_block(&self, x: X, y: Y)
         -> Option<DensityIOBlock>
     {
         if y == 0 {
@@ -565,8 +567,8 @@ impl DensityIOStrip {
     }
 }
 
-impl Density {
-    pub fn io_column_cell(&self, x: u8, y: u8, n: IOColumnCellNumber)
+impl DensityLayout {
+    pub fn io_column_cell(&self, x: X, y: Y, n: IOColumnCellNumber)
         -> Option<(bool, DensityIOStrip)>
     {
         if y == 0 && x > self.grow && x < self.right {
@@ -588,7 +590,7 @@ type ColumnStrip<T> = (T, T, T, T);
 
 fn io_column_strip<T>(
     strip: &'static[ColumnStrip<T>],
-    i: u8,
+    i: X,
     n: IOColumnCellNumber,
 ) -> T
 where
@@ -605,8 +607,8 @@ where
     }
 }
 
-impl Density {
-    pub fn io_row_cell(&self, x: u8, y: u8, n: IORowCellNumber)
+impl DensityLayout {
+    pub fn io_row_cell(&self, x: X, y: Y, n: IORowCellNumber)
         -> Option<(bool, DensityIOStrip)>
     {
         if x == self.left && y < self.top {
@@ -629,7 +631,7 @@ type RowStrip<T> = (T, T, T, T, T, T, T);
 
 fn io_row_strip<T>(
     strip: &'static[RowStrip<T>],
-    i: u8,
+    i: Y,
     n: IORowCellNumber,
 ) -> T
 where
@@ -649,8 +651,8 @@ where
     }
 }
 
-impl Density {
-    pub fn logic_block(&self, x: u8, y: u8) -> bool {
+impl DensityLayout {
+    pub fn logic_block(&self, x: X, y: Y) -> bool {
         if y >= self.top || y == 0 {
             false
         } else if x <= self.left || x >= self.right {
@@ -674,8 +676,8 @@ pub enum DensityR4Block {
     Right,
 }
 
-impl Density {
-    pub fn r4_block(&self, x: u8, y: u8) -> Option<DensityR4Block> {
+impl DensityLayout {
+    pub fn r4_block(&self, x: X, y: Y) -> Option<DensityR4Block> {
         if y >= self.top || y == 0 || x < self.left || x > self.right {
             None
         } else if x < self.grow && y <= self.short_bottom {
@@ -693,7 +695,7 @@ impl Density {
         }
     }
 
-    pub fn ufm_block(&self, x: u8, y: u8) -> bool {
+    pub fn ufm_block(&self, x: X, y: Y) -> bool {
         if self.has_grow {
             x == self.grow && y > 1 && y <= 3
         } else {

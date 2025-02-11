@@ -20,7 +20,7 @@ fn max_v_570z() {
     fuses(s, &mut db, &MAX_V_570Z);
     // should be in the database?
     db.insert(Fuse::C4Interconnect {
-        x: 8, y: 3, i: C4Interconnect3,
+        x: X(8), y: Y(3), i: C4Interconnect3,
         fuse: C4InterconnectFuse::IODataIn1,
     });
     only_fuses(&db, &MAX_V_570Z);
@@ -35,7 +35,7 @@ fn max_v_1270z() {
     fuses(s, &mut db, &MAX_V_1270Z);
     // should be in the database?
     db.insert(Fuse::C4Interconnect {
-        x: 10, y: 3, i: C4Interconnect3,
+        x: X(10), y: Y(3), i: C4Interconnect3,
         fuse: C4InterconnectFuse::IODataIn1,
     });
     only_fuses(&db, &MAX_V_1270Z);
@@ -50,13 +50,13 @@ fn max_v_2210z() {
     fuses(s, &mut db, &MAX_V_2210Z);
     // should be in the database?
     db.insert(Fuse::C4Interconnect {
-        x: 12, y: 3, i: C4Interconnect3,
+        x: X(12), y: Y(3), i: C4Interconnect3,
         fuse: C4InterconnectFuse::IODataIn1,
     });
     only_fuses(&db, &MAX_V_2210Z);
 }
 
-fn fuses(s: String, fuses: &mut HashSet<Fuse>, density: &Density) {
+fn fuses(s: String, fuses: &mut HashSet<Fuse>, density: &DensityLayout) {
     for s in s.lines() {
         let (index, fuse) = fuse(s, density);
         assert_eq!(
@@ -67,11 +67,11 @@ fn fuses(s: String, fuses: &mut HashSet<Fuse>, density: &Density) {
     }
 }
 
-fn fuse(s: &str, density: &Density) -> (usize, Fuse) {
+fn fuse(s: &str, density: &DensityLayout) -> (usize, Fuse) {
     let (index, s) = usize_once(s, "=");
     if let Some(s) = s.strip_prefix("{{c4,") {
-        let (x, s) = u8_once(s, ",");
-        let (y, s) = u8_once(s, "},{mux,");
+        let (x, s) = x_once(s, ",");
+        let (y, s) = y_once(s, "},{mux,");
         let (i, s) = try_usize_once(s, "},");
         let fuse = c4_fuse(s);
         (index, Fuse::C4Interconnect { x, y, i, fuse })
@@ -85,15 +85,15 @@ fn fuse(s: &str, density: &Density) -> (usize, Fuse) {
             let fuse = global_fuse(s);
             (index, Fuse::Global { index: i, fuse })
         } else {
-            let (_x, s) = u8_once(s, ",");
-            let (_y, s) = u8_once(s, "},");
+            let (_x, s) = x_once(s, ",");
+            let (_y, s) = y_once(s, "},");
             let (i, s) = try_usize_once(s, ",");
             let fuse = source_fuse(s, density);
             (index, Fuse::GlobalSource { index: i, fuse })
         }
     } else if let Some(s) = s.strip_prefix("{{iob,") {
-        let (x, s) = u8_once(s, ",");
-        let (y, s) = u8_once(s, "},");
+        let (x, s) = x_once(s, ",");
+        let (y, s) = y_once(s, "},");
         if let Some(s) = s.strip_prefix("{interconnect,") {
             match density.io_block(x, y) {
                 Some(DensityIOBlock::Top) | Some(DensityIOBlock::Bottom) => {
@@ -109,14 +109,14 @@ fn fuse(s: &str, density: &Density) -> (usize, Fuse) {
                 }
 
                 None =>
-                    todo!("{x}x{y}"),
+                    todo!("{x:?} {y:?}"),
             }
         } else {
             todo!("{s}");
         }
     } else if let Some(s) = s.strip_prefix("{{ioc,") {
-        let (x, s) = u8_once(s, ",");
-        let (y, s) = u8_once(s, ",");
+        let (x, s) = x_once(s, ",");
+        let (y, s) = y_once(s, ",");
         match density.io_block(x, y) {
             Some(DensityIOBlock::Top) | Some(DensityIOBlock::Bottom) => {
                 let (n, s) = try_usize_once(s, "},");
@@ -131,17 +131,17 @@ fn fuse(s: &str, density: &Density) -> (usize, Fuse) {
             }
 
             None =>
-                todo!("{x}x{y}"),
+                todo!("{x:?} {y:?}"),
         }
     } else if let Some(s) = s.strip_prefix("{{jtag,") {
-        let (_x, s) = u8_once(s, ",");
-        let (_y, s) = u8_once(s, "},");
+        let (_x, s) = x_once(s, ",");
+        let (_y, s) = y_once(s, "},");
         let (signal, s) = jtag_signal(s);
         let fuse = source_fuse(s, density);
         (index, Fuse::JTAG { signal, fuse })
     } else if let Some(s) = s.strip_prefix("{{lab,") {
-        let (x, s) = u8_once(s, ",");
-        let (y, s) = u8_once(s, "},");
+        let (x, s) = x_once(s, ",");
+        let (y, s) = y_once(s, "},");
         if let Some(s) = s.strip_prefix("{interconnect,") {
             let (i, s) = try_usize_once(s, "},");
             let fuse = logic_interconnect_fuse(s);
@@ -151,20 +151,20 @@ fn fuse(s: &str, density: &Density) -> (usize, Fuse) {
             (index, Fuse::LogicBlock { x, y, fuse })
         }
     } else if let Some(s) = s.strip_prefix("{{lc,") {
-        let (x, s) = u8_once(s, ",");
-        let (y, s) = u8_once(s, ",");
+        let (x, s) = x_once(s, ",");
+        let (y, s) = y_once(s, ",");
         let (n, s) = try_usize_once(s, "},");
         let fuse = logic_cell_fuse(s);
         (index, Fuse::LogicCell { x, y, n, fuse })
     } else if let Some(s) = s.strip_prefix("{{r4,") {
-        let (x, s) = u8_once(s, ",");
-        let (y, s) = u8_once(s, "},{mux,");
+        let (x, s) = x_once(s, ",");
+        let (y, s) = y_once(s, "},{mux,");
         let (i, s) = try_usize_once(s, "},");
         let fuse = r4_fuse(s);
         (index, Fuse::R4Interconnect { x, y, i, fuse })
     } else if let Some(s) = s.strip_prefix("{{ufm,") {
-        let (x, s) = u8_once(s, ",");
-        let (y, s) = u8_once(s, "},");
+        let (x, s) = x_once(s, ",");
+        let (y, s) = y_once(s, "},");
         if let Some(s) = s.strip_prefix("{interconnect,") {
             let (i, s) = try_usize_once(s, "},");
             let fuse = ufm_interconnect_fuse(s);
@@ -182,10 +182,16 @@ fn fuse(s: &str, density: &Density) -> (usize, Fuse) {
     }
 }
 
-fn u8_once<'a>(s: &'a str, delimiter: &str) -> (u8, &'a str) {
-    let (n, s) = s.split_once(delimiter).unwrap();
-    let n: u8 = n.parse().unwrap();
-    (n, s)
+fn x_once<'a>(s: &'a str, delimiter: &str) -> (X, &'a str) {
+    let (x, s) = s.split_once(delimiter).unwrap();
+    let x: u8 = x.parse().unwrap();
+    (X(x), s)
+}
+
+fn y_once<'a>(s: &'a str, delimiter: &str) -> (Y, &'a str) {
+    let (y, s) = s.split_once(delimiter).unwrap();
+    let y: u8 = y.parse().unwrap();
+    (Y(y), s)
 }
 
 fn usize_once<'a>(s: &'a str, delimiter: &str) -> (usize, &'a str) {
@@ -250,7 +256,7 @@ fn global(s: &str) -> Global {
 
 fn global_fuse(s: &str) -> GlobalFuse {
     if let Some(s) = s.strip_prefix("{column,") {
-        let (column, _) = u8_once(s, "},off}");
+        let (column, _) = x_once(s, "},off}");
         GlobalFuse::ColumnOff(column)
     } else if s == "internal}" {
         GlobalFuse::Internal
@@ -455,7 +461,6 @@ fn logic_block_control_fuse(s: &str) -> LogicBlockControlFuse {
 }
 
 fn logic_cell_fuse(s: &str) -> LogicCellFuse {
-    use LogicCellInput::*;
     use LUTBit::*;
 
     if s == "a_clr1}" {
@@ -466,16 +471,16 @@ fn logic_cell_fuse(s: &str) -> LogicCellFuse {
         LogicCellFuse::Clock2
     } else if let Some(s) = s.strip_prefix("data_a") {
         let fuse = logic_cell_input_fuse(s);
-        LogicCellFuse::Input { input: LogicCellInputA, fuse }
+        LogicCellFuse::Input { input: LogicCellInput::A, fuse }
     } else if let Some(s) = s.strip_prefix("data_b") {
         let fuse = logic_cell_input_fuse(s);
-        LogicCellFuse::Input { input: LogicCellInputB, fuse }
+        LogicCellFuse::Input { input: LogicCellInput::B, fuse }
     } else if let Some(s) = s.strip_prefix("data_c") {
         let fuse = logic_cell_input_fuse(s);
-        LogicCellFuse::Input { input: LogicCellInputC, fuse }
+        LogicCellFuse::Input { input: LogicCellInput::C, fuse }
     } else if let Some(s) = s.strip_prefix("data_d") {
         let fuse = logic_cell_input_fuse(s);
-        LogicCellFuse::Input { input: LogicCellInputD, fuse }
+        LogicCellFuse::Input { input: LogicCellInput::D, fuse }
     } else if s == "feedback}" {
         LogicCellFuse::Feedback
     } else if s == "lut,a0b0c0d0}" { LogicCellFuse::LUTBit(LUTBit0000)
@@ -601,7 +606,7 @@ fn select6(s: &str) -> Select6 {
     }
 }
 
-fn source_fuse(s: &str, density: &Density) -> SourceFuse {
+fn source_fuse(s: &str, density: &DensityLayout) -> SourceFuse {
     use SourceFuse::*;
 
     if density.large() {
@@ -671,7 +676,7 @@ fn ufm_interconnect_fuse(s: &str) -> UFMInterconnectFuse {
     }
 }
 
-fn only(fuses: &HashSet<Fuse>, density:& Density, fuse: Fuse) {
+fn only(fuses: &HashSet<Fuse>, density: &DensityLayout, fuse: Fuse) {
     if !fuses.contains(&fuse) {
         assert_eq!(
             (fuse, true),
@@ -680,7 +685,7 @@ fn only(fuses: &HashSet<Fuse>, density:& Density, fuse: Fuse) {
     }
 }
 
-fn only_fuses(fuses: &HashSet<Fuse>, density:& Density) {
+fn only_fuses(fuses: &HashSet<Fuse>, density: &DensityLayout) {
     only(fuses, density, Fuse:: DeviceOutputEnable);
     only(fuses, density, Fuse::DeviceReset);
     only_global(fuses, density);
@@ -688,7 +693,9 @@ fn only_fuses(fuses: &HashSet<Fuse>, density:& Density) {
     only_ufm(fuses, density);
     only_user_code(fuses, density);
     for x in 0..23u8 {
+        let x = X(x);
         for y in 0..16u8 {
+            let y = Y(y);
             only_c4_interconnect(&fuses, density, x, y);
             only_io_column_cell(&fuses, density, x, y);
             only_io_column_interconnect(&fuses, density, x, y);
@@ -705,9 +712,9 @@ fn only_fuses(fuses: &HashSet<Fuse>, density:& Density) {
 
 fn only_c4_interconnect(
     fuses: &HashSet<Fuse>,
-    density:& Density,
-    x: u8,
-    y: u8,
+    density: &DensityLayout,
+    x: X,
+    y: Y,
 ) {
     use C4InterconnectFuse::*;
 
@@ -734,12 +741,13 @@ fn only_c4_interconnect(
     }
 }
 
-fn only_global(fuses: &HashSet<Fuse>, density:& Density) {
+fn only_global(fuses: &HashSet<Fuse>, density: &DensityLayout) {
     use GlobalFuse::*;
     use SourceFuse::*;
 
     for index in Global::iter() {
         for x in 0..23u8 {
+            let x = X(x);
             only(fuses, density, Fuse::Global {
                 index, fuse: ColumnOff(x),
             });
@@ -777,7 +785,12 @@ fn only_global(fuses: &HashSet<Fuse>, density:& Density) {
     }
 }
 
-fn only_io_column_cell(fuses: &HashSet<Fuse>, density:& Density, x: u8, y: u8) {
+fn only_io_column_cell(
+    fuses: &HashSet<Fuse>,
+    density: &DensityLayout,
+    x: X,
+    y: Y,
+) {
     use IOCellFuse::*;
     use IOColumnSourceFuse::*;
 
@@ -842,9 +855,9 @@ fn only_io_column_cell(fuses: &HashSet<Fuse>, density:& Density, x: u8, y: u8) {
 
 fn only_io_column_interconnect(
     fuses: &HashSet<Fuse>,
-    density:& Density,
-    x: u8,
-    y: u8,
+    density: &DensityLayout,
+    x: X,
+    y: Y,
 ) {
     use IOInterconnectFuse::*;
 
@@ -868,7 +881,12 @@ fn only_io_column_interconnect(
     }
 }
 
-fn only_io_row_cell(fuses: &HashSet<Fuse>, density:& Density, x: u8, y: u8) {
+fn only_io_row_cell(
+    fuses: &HashSet<Fuse>,
+    density: &DensityLayout,
+    x: X,
+    y: Y,
+) {
     use IOCellFuse::*;
     use IORowSourceFuse::*;
 
@@ -933,9 +951,9 @@ fn only_io_row_cell(fuses: &HashSet<Fuse>, density:& Density, x: u8, y: u8) {
 
 fn only_io_row_interconnect(
     fuses: &HashSet<Fuse>,
-    density:& Density,
-    x: u8,
-    y: u8,
+    density: &DensityLayout,
+    x: X,
+    y: Y,
 ) {
     use IOInterconnectFuse::*;
 
@@ -959,7 +977,7 @@ fn only_io_row_interconnect(
     }
 }
 
-fn only_jtag(fuses: &HashSet<Fuse>, density:& Density) {
+fn only_jtag(fuses: &HashSet<Fuse>, density: &DensityLayout) {
     use JTAGInput::*;
     use SourceFuse::*;
 
@@ -983,7 +1001,12 @@ fn only_jtag(fuses: &HashSet<Fuse>, density:& Density) {
     }
 }
 
-fn only_logic_block(fuses: &HashSet<Fuse>, density:& Density, x: u8, y: u8) {
+fn only_logic_block(
+    fuses: &HashSet<Fuse>,
+    density: &DensityLayout,
+    x: X,
+    y: Y,
+) {
     use LogicBlockFuse::*;
     use LogicBlockControlFuse::*;
 
@@ -1106,7 +1129,12 @@ fn only_logic_block(fuses: &HashSet<Fuse>, density:& Density, x: u8, y: u8) {
     }
 }
 
-fn only_logic_cell(fuses: &HashSet<Fuse>, density:& Density, x: u8, y: u8) {
+fn only_logic_cell(
+    fuses: &HashSet<Fuse>,
+    density: &DensityLayout,
+    x: X,
+    y: Y,
+) {
     use LogicCellFuse::*;
     use LogicCellSourceFuse::*;
 
@@ -1167,9 +1195,9 @@ fn only_logic_cell(fuses: &HashSet<Fuse>, density:& Density, x: u8, y: u8) {
 
 fn only_logic_interconnect(
     fuses: &HashSet<Fuse>,
-    density:& Density,
-    x: u8,
-    y: u8,
+    density: &DensityLayout,
+    x: X,
+    y: Y,
 ) {
     use LogicInterconnectFuse::*;
 
@@ -1195,9 +1223,9 @@ fn only_logic_interconnect(
 
 fn only_r4_interconnect(
     fuses: &HashSet<Fuse>,
-    density:& Density,
-    x: u8,
-    y: u8,
+    density: &DensityLayout,
+    x: X,
+    y: Y,
 ) {
     use R4InterconnectFuse::*;
 
@@ -1224,13 +1252,13 @@ fn only_r4_interconnect(
     }
 }
 
-fn only_user_code(fuses: &HashSet<Fuse>, density:& Density) {
+fn only_user_code(fuses: &HashSet<Fuse>, density: &DensityLayout) {
     for bit in UserCodeBit::iter() {
         only(fuses, density, Fuse::UserCode { bit });
     }
 }
 
-fn only_ufm(fuses: &HashSet<Fuse>, density:& Density) {
+fn only_ufm(fuses: &HashSet<Fuse>, density: &DensityLayout) {
     use SourceFuse::*;
 
     for signal in UFMInput::iter() {
@@ -1257,9 +1285,9 @@ fn only_ufm(fuses: &HashSet<Fuse>, density:& Density) {
 
 fn only_ufm_interconnect(
     fuses: &HashSet<Fuse>,
-    density:& Density,
-    x: u8,
-    y: u8,
+    density: &DensityLayout,
+    x: X,
+    y: Y,
 ) {
     use UFMInterconnectFuse::*;
 

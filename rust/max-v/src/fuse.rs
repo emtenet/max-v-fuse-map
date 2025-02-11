@@ -10,8 +10,8 @@ use at::*;
 #[derive(Hash)]
 pub enum Fuse {
     C4Interconnect {
-        x: u8,
-        y: u8,
+        x: X,
+        y: Y,
         i: C4InterconnectIndex,
         fuse: C4InterconnectFuse,
     },
@@ -26,26 +26,26 @@ pub enum Fuse {
         fuse: SourceFuse,
     },
     IOColumnCell {
-        x: u8,
-        y: u8,
+        x: X,
+        y: Y,
         n: IOColumnCellNumber,
         fuse: IOCellFuse<IOColumnSourceFuse>,
     },
     IOColumnInterconnect {
-        x: u8,
-        y: u8,
+        x: X,
+        y: Y,
         i: IOColumnInterconnectIndex,
         fuse: IOInterconnectFuse,
     },
     IORowCell {
-        x: u8,
-        y: u8,
+        x: X,
+        y: Y,
         n: IORowCellNumber,
         fuse: IOCellFuse<IORowSourceFuse>,
     },
     IORowInterconnect {
-        x: u8,
-        y: u8,
+        x: X,
+        y: Y,
         i: IORowInterconnectIndex,
         fuse: IOInterconnectFuse,
     },
@@ -54,25 +54,25 @@ pub enum Fuse {
         fuse: SourceFuse,
     },
     LogicBlock {
-        x: u8,
-        y: u8,
+        x: X,
+        y: Y,
         fuse: LogicBlockFuse,
     },
     LogicCell {
-        x: u8,
-        y: u8,
+        x: X,
+        y: Y,
         n: LogicCellNumber,
         fuse: LogicCellFuse,
     },
     LogicInterconnect {
-        x: u8,
-        y: u8,
+        x: X,
+        y: Y,
         i: LogicInterconnectIndex,
         fuse: LogicInterconnectFuse,
     },
     R4Interconnect {
-        x: u8,
-        y: u8,
+        x: X,
+        y: Y,
         i: R4InterconnectIndex,
         fuse: R4InterconnectFuse,
     },
@@ -81,8 +81,8 @@ pub enum Fuse {
         fuse: SourceFuse,
     },
     UFMInterconnect {
-        x: u8,
-        y: u8,
+        x: X,
+        y: Y,
         i: UFMInterconnectIndex,
         fuse: UFMInterconnectFuse,
     },
@@ -108,7 +108,7 @@ pub enum C4InterconnectFuse {
 #[derive(Eq, PartialEq)]
 #[derive(Hash)]
 pub enum GlobalFuse {
-    ColumnOff(u8),
+    ColumnOff(X),
     Internal,
     RowOff,
 }
@@ -310,7 +310,7 @@ pub enum FuseOutOfRange {
     InternalCell,
     InternalEnd,
     InternalSector {
-        x: u8,
+        x: X,
         sector: u8,
     },
     InternalX,
@@ -320,11 +320,13 @@ pub enum FuseOutOfRange {
 }
 
 impl Fuse {
-    pub fn to_index(self, density: &Density) -> Result<usize, FuseOutOfRange> {
+    pub fn to_index(self, density: &DensityLayout)
+        -> Result<usize, FuseOutOfRange>
+    {
         self.to_location(density)?.to_index(density)
     }
 
-    fn to_location(self, density: &Density)
+    fn to_location(self, density: &DensityLayout)
         -> Result<FuseAt, FuseOutOfRange>
     {
         use FuseAt as At;
@@ -508,8 +510,8 @@ impl Fuse {
 macro_rules! block {
     ($x:expr, $y:expr, $s:expr, $i:expr) => {
         Ok(FuseAt::Block {
-            x: $x,
-            y: $y,
+            x: $x.into(),
+            y: $y.into(),
             sector: $s,
             index: $i,
         })
@@ -519,8 +521,8 @@ macro_rules! block {
 macro_rules! cell {
     ($x:expr, $y:expr, $s:expr, $n:expr, $i:expr) => {
         Ok(FuseAt::Cell {
-            x: $x,
-            y: $y,
+            x: $x.into(),
+            y: $y.into(),
             sector: $s,
             n: $n,
             index: $i,
@@ -531,7 +533,7 @@ macro_rules! cell {
 macro_rules! end {
     ($x:expr, $top:expr, $s:expr, $i:expr) => {
         Ok(FuseAt::End {
-            x: $x,
+            x: $x.into(),
             top: $top,
             sector: $s,
             index: $i,
@@ -540,7 +542,7 @@ macro_rules! end {
 }
 
 fn c4_interconnect_top_left(
-    x: u8,
+    x: X,
     i: C4InterconnectIndex,
     fuse: C4InterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -572,7 +574,7 @@ fn c4_interconnect_top_left(
 }
 
 fn c4_interconnect_top(
-    x: u8,
+    x: X,
     i: C4InterconnectIndex,
     fuse: C4InterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -614,7 +616,7 @@ fn c4_interconnect_top(
 }
 
 fn c4_interconnect_top_right(
-    x: u8,
+    x: X,
     i: C4InterconnectIndex,
     fuse: C4InterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -651,8 +653,8 @@ fn c4_interconnect_top_right(
 }
 
 fn c4_interconnect_row_left(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     i: C4InterconnectIndex,
     fuse: C4InterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -674,8 +676,8 @@ fn c4_interconnect_row_left(
 }
 
 fn c4_interconnect_row(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     i: C4InterconnectIndex,
     fuse: C4InterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -697,8 +699,8 @@ fn c4_interconnect_row(
 }
 
 fn c4_interconnect_row_right(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     i: C4InterconnectIndex,
     fuse: C4InterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -720,8 +722,8 @@ fn c4_interconnect_row_right(
 }
 
 fn c4_interconnect_fuse_0(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     i: C4InterconnectIndex,
     s0: u8,
     s1: u8,
@@ -749,8 +751,8 @@ fn c4_interconnect_fuse_0(
 }
 
 fn c4_interconnect_fuse_1(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     i: C4InterconnectIndex,
     s0: u8,
     s1: u8,
@@ -778,7 +780,7 @@ fn c4_interconnect_fuse_1(
 }
 
 fn c4_interconnect_bottom_left(
-    x: u8,
+    x: X,
     i: C4InterconnectIndex,
     fuse: C4InterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -810,7 +812,7 @@ fn c4_interconnect_bottom_left(
 }
 
 fn c4_interconnect_bottom(
-    x: u8,
+    x: X,
     i: C4InterconnectIndex,
     fuse: C4InterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -852,7 +854,7 @@ fn c4_interconnect_bottom(
 }
 
 fn c4_interconnect_bottom_right(
-    x: u8,
+    x: X,
     i: C4InterconnectIndex,
     fuse: C4InterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -888,7 +890,7 @@ fn c4_interconnect_bottom_right(
     }
 }
 
-fn global(global: Global, fuse: GlobalFuse, density: &Density)
+fn global(global: Global, fuse: GlobalFuse, density: &DensityLayout)
     -> Result<FuseAt, FuseOutOfRange>
 {
     use Global::*;
@@ -930,28 +932,28 @@ fn global(global: Global, fuse: GlobalFuse, density: &Density)
                     if density.has_grow {
                         Ok(At::Global { x: density.grow + 1, sector: 4 })
                     } else {
-                        Ok(At::Global { x: 2, sector: 4 })
+                        Ok(At::Global { x: X(2), sector: 4 })
                     },
 
                 Global1 =>
                     if density.has_grow {
                         Ok(At::Global { x: density.grow, sector: 26 })
                     } else {
-                        Ok(At::Global { x: 1, sector: 11 })
+                        Ok(At::Global { x: X(1), sector: 11 })
                     },
 
                 Global2 =>
                     if density.has_grow {
                         Ok(At::Global { x: density.grow, sector: 24 })
                     } else {
-                        Ok(At::Global { x: 1, sector: 3 })
+                        Ok(At::Global { x: X(1), sector: 3 })
                     },
 
                 Global3 =>
                     if density.has_grow {
                         Ok(At::Global { x: density.grow, sector: 22 })
                     } else {
-                        Ok(At::Global { x: 1, sector: 9 })
+                        Ok(At::Global { x: X(1), sector: 9 })
                     },
             },
 
@@ -961,35 +963,35 @@ fn global(global: Global, fuse: GlobalFuse, density: &Density)
                     if density.has_grow {
                         Ok(At::Global { x: density.grow + 1, sector: 5 })
                     } else {
-                        Ok(At::Global { x: 2, sector: 5 })
+                        Ok(At::Global { x: X(2), sector: 5 })
                     },
 
                 Global1 =>
                     if density.has_grow {
                         Ok(At::Global { x: density.grow + 1, sector: 1 })
                     } else {
-                        Ok(At::Global { x: 2, sector: 1 })
+                        Ok(At::Global { x: X(2), sector: 1 })
                     },
 
                 Global2 =>
                     if density.has_grow {
                         Ok(At::Global { x: density.grow, sector: 25 })
                     } else {
-                        Ok(At::Global { x: 1, sector: 4 })
+                        Ok(At::Global { x: X(1), sector: 4 })
                     },
 
                 Global3 =>
                     if density.has_grow {
                         Ok(At::Global { x: density.grow, sector: 23 })
                     } else {
-                        Ok(At::Global { x: 1, sector: 10 })
+                        Ok(At::Global { x: X(1), sector: 10 })
                     },
             },
     }
 }
 
 fn io_column_cell(
-    x: u8,
+    x: X,
     top: bool,
     n: IOColumnCellNumber,
     strip: DensityIOStrip,
@@ -1029,7 +1031,7 @@ fn io_column_cell(
 }
 
 fn io_column_enable(
-    x: u8,
+    x: X,
     top: bool,
     n: IOColumnCellNumber,
     fuse: IOColumnSourceFuse,
@@ -1060,7 +1062,7 @@ fn io_column_enable(
 }
 
 fn io_column_output(
-    x: u8,
+    x: X,
     top: bool,
     n: IOColumnCellNumber,
     fuse: IOColumnSourceFuse,
@@ -1091,7 +1093,7 @@ fn io_column_output(
 }
 
 fn io_column_cell_at(
-    x: u8,
+    x: X,
     top: bool,
     n: IOColumnCellNumber,
     cell: [(u8, u8); 4],
@@ -1120,7 +1122,7 @@ fn io_cell_strip(
 }
 
 fn io_column_interconnect(
-    x: u8,
+    x: X,
     top: bool,
     i: IOColumnInterconnectIndex,
     fuse: IOInterconnectFuse,
@@ -1144,7 +1146,7 @@ fn io_column_interconnect(
 }
 
 fn io_column_interconnect_end(
-    x: u8,
+    x: X,
     top: bool,
     i: IOColumnInterconnectIndex,
     sector: u8,
@@ -1167,8 +1169,8 @@ fn io_column_interconnect_end(
 }
 
 fn io_row_cell(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     left: bool,
     n: IORowCellNumber,
     strip: DensityIOStrip,
@@ -1250,8 +1252,8 @@ fn io_row_cell(
 }
 
 fn io_row_enable(
-    x: u8,
-    y: u8,
+    x: impl Into<X>,
+    y: impl Into<Y>,
     n: IORowCellNumber,
     fuse: IORowSourceFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -1261,22 +1263,22 @@ fn io_row_enable(
     use Select6::*;
 
     match fuse {
-        Fuse::Invert => at(x, y, 2, n, 2),
-        Fuse::Source3(Select3_0) => at(x, y, 3, n, 3),
-        Fuse::Source3(Select3_1) => at(x, y, 2, n, 3),
-        Fuse::Source3(Select3_2) => at(x, y, 3, n, 2),
-        Fuse::Source6(Select6_0) => at(x, y, 4, n, 3),
-        Fuse::Source6(Select6_1) => at(x, y, 4, n, 2),
-        Fuse::Source6(Select6_2) => at(x, y, 5, n, 3),
-        Fuse::Source6(Select6_3) => at(x, y, 5, n, 2),
-        Fuse::Source6(Select6_4) => at(x, y, 6, n, 3),
-        Fuse::Source6(Select6_5) => at(x, y, 6, n, 2),
+        Fuse::Invert => at(x.into(), y.into(), 2, n, 2),
+        Fuse::Source3(Select3_0) => at(x.into(), y.into(), 3, n, 3),
+        Fuse::Source3(Select3_1) => at(x.into(), y.into(), 2, n, 3),
+        Fuse::Source3(Select3_2) => at(x.into(), y.into(), 3, n, 2),
+        Fuse::Source6(Select6_0) => at(x.into(), y.into(), 4, n, 3),
+        Fuse::Source6(Select6_1) => at(x.into(), y.into(), 4, n, 2),
+        Fuse::Source6(Select6_2) => at(x.into(), y.into(), 5, n, 3),
+        Fuse::Source6(Select6_3) => at(x.into(), y.into(), 5, n, 2),
+        Fuse::Source6(Select6_4) => at(x.into(), y.into(), 6, n, 3),
+        Fuse::Source6(Select6_5) => at(x.into(), y.into(), 6, n, 2),
     }
 }
 
 fn io_row_output(
-    x: u8,
-    y: u8,
+    x: impl Into<X>,
+    y: impl Into<Y>,
     n: IORowCellNumber,
     fuse: IORowSourceFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -1286,22 +1288,22 @@ fn io_row_output(
     use Select6::*;
 
     match fuse {
-        Fuse::Invert => at(x, y, 2, n, 1),
-        Fuse::Source3(Select3_0) => at(x, y, 3, n, 0),
-        Fuse::Source3(Select3_1) => at(x, y, 2, n, 0),
-        Fuse::Source3(Select3_2) => at(x, y, 3, n, 1),
-        Fuse::Source6(Select6_0) => at(x, y, 4, n, 0),
-        Fuse::Source6(Select6_1) => at(x, y, 4, n, 1),
-        Fuse::Source6(Select6_2) => at(x, y, 5, n, 0),
-        Fuse::Source6(Select6_3) => at(x, y, 5, n, 1),
-        Fuse::Source6(Select6_4) => at(x, y, 6, n, 0),
-        Fuse::Source6(Select6_5) => at(x, y, 6, n, 1),
+        Fuse::Invert => at(x.into(), y.into(), 2, n, 1),
+        Fuse::Source3(Select3_0) => at(x.into(), y.into(), 3, n, 0),
+        Fuse::Source3(Select3_1) => at(x.into(), y.into(), 2, n, 0),
+        Fuse::Source3(Select3_2) => at(x.into(), y.into(), 3, n, 1),
+        Fuse::Source6(Select6_0) => at(x.into(), y.into(), 4, n, 0),
+        Fuse::Source6(Select6_1) => at(x.into(), y.into(), 4, n, 1),
+        Fuse::Source6(Select6_2) => at(x.into(), y.into(), 5, n, 0),
+        Fuse::Source6(Select6_3) => at(x.into(), y.into(), 5, n, 1),
+        Fuse::Source6(Select6_4) => at(x.into(), y.into(), 6, n, 0),
+        Fuse::Source6(Select6_5) => at(x.into(), y.into(), 6, n, 1),
     }
 }
 
 fn io_row_cell_at(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     sector: u8,
     n: IORowCellNumber,
     index: u8,
@@ -1321,8 +1323,8 @@ fn io_row_cell_at(
 }
 
 fn io_row_interconnect(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     i: IORowInterconnectIndex,
     fuse: IOInterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -1354,8 +1356,8 @@ fn io_row_interconnect(
 }
 
 fn io_row_interconnect_at(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     i: IORowInterconnectIndex,
     sector: u8,
     index: u8,
@@ -1385,11 +1387,9 @@ fn io_row_interconnect_at(
     }
 }
 
-fn logic_block(
-    x: u8,
-    y: u8,
-    fuse: LogicBlockFuse,
-) -> Result<FuseAt, FuseOutOfRange> {
+fn logic_block(x: X, y: Y, fuse: LogicBlockFuse)
+    -> Result<FuseAt, FuseOutOfRange>
+{
     use Control::*;
     use Global::*;
     use LogicCellNumber::*;
@@ -1451,8 +1451,8 @@ fn logic_block(
 }
 
 fn logic_control_inc(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     fuse: LogicBlockControlFuse,
     index: u8,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -1474,8 +1474,8 @@ fn logic_control_inc(
 }
 
 fn logic_control_dec(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     fuse: LogicBlockControlFuse,
     index: u8,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -1497,13 +1497,12 @@ fn logic_control_dec(
 }
 
 fn logic_cell(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     n: LogicCellNumber,
     fuse: LogicCellFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
     use LogicCellFuse as Fuse;
-    use LogicCellInput::*;
     use LUTBit::*;
 
     match fuse {
@@ -1513,10 +1512,10 @@ fn logic_cell(
         Fuse::Feedback => cell!(x, y, 19, n, 0),
         Fuse::Input { input, fuse } =>
             match input {
-                LogicCellInputA => logic_input_inc(x, y, fuse, 11, n, 0),
-                LogicCellInputB => logic_input_dec(x, y, fuse, 8, n, 0),
-                LogicCellInputC => logic_input_inc(x, y, fuse, 8, n, 2),
-                LogicCellInputD => logic_input_dec(x, y, fuse, 11, n, 2),
+                LogicCellInput::A => logic_input_inc(x, y, fuse, 11, n, 0),
+                LogicCellInput::B => logic_input_dec(x, y, fuse, 8, n, 0),
+                LogicCellInput::C => logic_input_inc(x, y, fuse, 8, n, 2),
+                LogicCellInput::D => logic_input_dec(x, y, fuse, 11, n, 2),
             },
         Fuse::LUTBit(LUTBit0000) => cell!(x, y, 16, n, 3),
         Fuse::LUTBit(LUTBit0001) => cell!(x, y, 16, n, 1),
@@ -1544,8 +1543,8 @@ fn logic_cell(
 }
 
 fn logic_input_inc(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     fuse: LogicCellSourceFuse,
     s: u8,
     n: LogicCellNumber,
@@ -1569,8 +1568,8 @@ fn logic_input_inc(
 }
 
 fn logic_input_dec(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     fuse: LogicCellSourceFuse,
     s: u8,
     n: LogicCellNumber,
@@ -1594,8 +1593,8 @@ fn logic_input_dec(
 }
 
 fn logic_interconnect(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     i: LogicInterconnectIndex,
     fuse: LogicInterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -1635,8 +1634,8 @@ fn logic_interconnect(
 }
 
 fn logic_interconnect_high(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     fuse: LogicInterconnectFuse,
     n: LogicCellNumber,
     index: u8,
@@ -1659,8 +1658,8 @@ fn logic_interconnect_high(
 }
 
 fn logic_interconnect_low(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     fuse: LogicInterconnectFuse,
     n: LogicCellNumber,
     index: u8,
@@ -1689,8 +1688,8 @@ fn logic_interconnect_low(
 }
 
 fn r4_interconnect_left(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     i: R4InterconnectIndex,
     fuse: R4InterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -1729,8 +1728,8 @@ fn r4_interconnect_left(
 }
 
 fn r4_interconnect_left_left(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     i: R4InterconnectIndex,
     fuse: R4InterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -1760,8 +1759,8 @@ fn r4_interconnect_left_left(
 }
 
 fn r4_interconnect_grow(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     i: R4InterconnectIndex,
     fuse: R4InterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -1783,8 +1782,8 @@ fn r4_interconnect_grow(
 }
 
 fn r4_interconnect_column(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     i: R4InterconnectIndex,
     fuse: R4InterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -1814,8 +1813,8 @@ fn r4_interconnect_column(
 }
 
 fn r4_interconnect_right(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     i: R4InterconnectIndex,
     fuse: R4InterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -1837,8 +1836,8 @@ fn r4_interconnect_right(
 }
 
 fn r4_interconnect_fuse_side(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     fuse: R4InterconnectFuse,
     n: LogicCellNumber,
     index: u8,
@@ -1861,8 +1860,8 @@ fn r4_interconnect_fuse_side(
 }
 
 fn r4_interconnect_fuse_left(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     fuse: R4InterconnectFuse,
     n: LogicCellNumber,
     index: u8,
@@ -1885,8 +1884,8 @@ fn r4_interconnect_fuse_left(
 }
 
 fn r4_interconnect_fuse_column(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     fuse: R4InterconnectFuse,
     n: LogicCellNumber,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -1908,8 +1907,8 @@ fn r4_interconnect_fuse_column(
 }
 
 fn r4_interconnect_fuse_right(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     fuse: R4InterconnectFuse,
     n: LogicCellNumber,
     index: u8,
@@ -1932,12 +1931,12 @@ fn r4_interconnect_fuse_right(
 }
 
 fn source_enable(
-    small_y: u8,
+    small_y: impl Into<Y>,
     small_n: IORowCellNumber,
-    large_y: u8,
+    large_y: impl Into<Y>,
     large_n: LogicCellNumber,
     fuse: SourceFuse,
-    density: &Density,
+    density: &DensityLayout,
 ) -> Result<FuseAt, FuseOutOfRange> {
     match fuse {
         SourceFuse::Small(fuse) if !density.has_grow =>
@@ -1952,12 +1951,12 @@ fn source_enable(
 }
 
 fn source_output(
-    small_y: u8,
+    small_y: impl Into<Y>,
     small_n: IORowCellNumber,
-    large_y: u8,
+    large_y: impl Into<Y>,
     large_n: LogicCellNumber,
     fuse: SourceFuse,
-    density: &Density,
+    density: &DensityLayout,
 ) -> Result<FuseAt, FuseOutOfRange> {
     match fuse {
         SourceFuse::Small(fuse) if !density.has_grow =>
@@ -1972,8 +1971,8 @@ fn source_output(
 }
 
 fn ufm_interconnect(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     i: UFMInterconnectIndex,
     fuse: UFMInterconnectFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -1995,8 +1994,8 @@ fn ufm_interconnect(
 }
 
 fn ufm_interconnect_fuse(
-    x: u8,
-    y: u8,
+    x: X,
+    y: Y,
     fuse: UFMInterconnectFuse,
     n: LogicCellNumber,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -2016,29 +2015,31 @@ fn ufm_interconnect_fuse(
     }
 }
 
-fn ufm_signal(signal: UFMInput, fuse: SourceFuse, density: &Density)
+fn ufm_signal(signal: UFMInput, fuse: SourceFuse, density: &DensityLayout)
     -> Result<FuseAt, FuseOutOfRange>
 {
+    use source_enable as enable;
+    use source_output as output;
     use IORowCellNumber::*;
     use LogicCellNumber::*;
     use UFMInput::*;
 
     match signal {
-        ArClk =>   source_enable(1, IORowCell6, 2, LogicCell2, fuse, density),
-        ArIn =>    source_enable(1, IORowCell5, 3, LogicCell5, fuse, density),
-        ArShift => source_output(1, IORowCell6, 2, LogicCell1, fuse, density),
-        DrClk =>   source_output(1, IORowCell5, 3, LogicCell6, fuse, density),
-        DrIn =>    source_output(1, IORowCell4, 3, LogicCell8, fuse, density),
-        DrShift => source_enable(1, IORowCell4, 3, LogicCell7, fuse, density),
-        Erase =>   source_enable(2, IORowCell4, 2, LogicCell4, fuse, density),
-        OscEna =>  source_output(2, IORowCell5, 2, LogicCell9, fuse, density),
-        Program => source_output(2, IORowCell4, 2, LogicCell3, fuse, density),
+        ArClk =>   enable(Y(1), IORowCell6, Y(2), LogicCell2, fuse, density),
+        ArIn =>    enable(Y(1), IORowCell5, Y(3), LogicCell5, fuse, density),
+        ArShift => output(Y(1), IORowCell6, Y(2), LogicCell1, fuse, density),
+        DrClk =>   output(Y(1), IORowCell5, Y(3), LogicCell6, fuse, density),
+        DrIn =>    output(Y(1), IORowCell4, Y(3), LogicCell8, fuse, density),
+        DrShift => enable(Y(1), IORowCell4, Y(3), LogicCell7, fuse, density),
+        Erase =>   enable(Y(2), IORowCell4, Y(2), LogicCell4, fuse, density),
+        OscEna =>  output(Y(2), IORowCell5, Y(2), LogicCell9, fuse, density),
+        Program => output(Y(2), IORowCell4, Y(2), LogicCell3, fuse, density),
     }
 }
 
 fn ufm_source(
-    x: u8,
-    y: u8,
+    x: impl Into<X>,
+    y: impl Into<Y>,
     n: LogicCellNumber,
     fuse: UFMSourceFuse,
 ) -> Result<FuseAt, FuseOutOfRange> {
@@ -2097,7 +2098,7 @@ fn user_code_location(bit: UserCodeBit) -> Result<FuseAt, FuseOutOfRange> {
     }
 }
 
-fn user_code_location_grow(bit: UserCodeBit, x: u8)
+fn user_code_location_grow(bit: UserCodeBit, x: X)
     -> Result<FuseAt, FuseOutOfRange>
 {
     use UserCodeBit::*;

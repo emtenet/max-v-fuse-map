@@ -5,24 +5,24 @@ pub enum FuseAt {
         strip: u16,
     },
     End {
-        x: u8,
+        x: X,
         top: bool,
         sector: u8,
         index: u8, // 0..10
     },
     Global {
-        x: u8,
+        x: X,
         sector: u8,
     },
     Block {
-        x: u8,
-        y: u8,
+        x: X,
+        y: Y,
         sector: u8,
         index: u8, // 0..5
     },
     Cell {
-        x: u8,
-        y: u8,
+        x: X,
+        y: Y,
         sector: u8,
         n: LogicCellNumber,
         index: u8, // 0..3
@@ -30,7 +30,7 @@ pub enum FuseAt {
 }
 
 impl FuseAt {
-    pub (crate) fn to_index(self, density: &Density)
+    pub (crate) fn to_index(self, density: &DensityLayout)
         -> Result<usize, FuseOutOfRange>
     {
         match self {
@@ -104,7 +104,7 @@ fn cell_at(n: LogicCellNumber, index: u8) -> usize {
     }
 }
 
-fn line_at(y: u8, rows: u8, density: &Density)
+fn line_at(y: Y, rows: u8, density: &DensityLayout)
     -> Result<usize, FuseOutOfRange>
 {
     if y >= density.top {
@@ -121,7 +121,7 @@ fn line_at(y: u8, rows: u8, density: &Density)
     }
 }
 
-fn sector_at(x: u8, sector: u8, density: &Density)
+fn sector_at(x: X, sector: u8, density: &DensityLayout)
     -> Result<Sector, FuseOutOfRange>
 {
     if x < density.left {

@@ -1,383 +1,215 @@
+use std::ops::{Add, Sub};
 
 pub mod config;
 mod density;
+mod device;
 mod enumerated;
+mod enums;
 mod fuse;
 
 pub use density::*;
+pub use device::*;
+pub use enums::*;
 pub use fuse::*;
 
+enumerated_str! {
+    enum Density {
+        Density240 = "5M240Z",
+        Density570 = "5M570Z",
+        Density1270 = "5M1270Z",
+        Density2210 = "5M2210Z",
+    }
+    struct DensityOutOfRange ;
+    struct Densitys : Iterator ;
+}
+
+impl Density {
+    pub fn layout(self) -> &'static DensityLayout {
+        match self {
+            Density::Density240 => &MAX_V_240Z,
+            Density::Density570 => &MAX_V_570Z,
+            Density::Density1270 => &MAX_V_1270Z,
+            Density::Density2210 => &MAX_V_2210Z,
+        }
+    }
+}
+
+enumerated_str! {
+    enum Device {
+        Device40E64 = "5M40ZE64",
+        Device40M64 = "5M40ZM64",
+        Device80E64 = "5M80ZE64",
+        Device80M64 = "5M80ZM64",
+        Device80M68 = "5M80ZM68",
+        Device80T100 = "5M80ZT100",
+        Device160E64 = "5M160ZE64",
+        Device160M68 = "5M160ZM68",
+        Device160M100 = "5M160ZM100",
+        Device160T100 = "5M160ZT100",
+        Device240M68 = "5M240ZM68",
+        Device240M100 = "5M240ZM100",
+        Device240T100 = "5M240ZT100",
+        Device240T144 = "5M240ZT144",
+        Device570M100 = "5M570ZM100",
+        Device570T100 = "5M570ZT100",
+        Device570T144 = "5M570ZT144",
+        Device570F256 = "5M570ZF256",
+        Device1270T144 = "5M1270ZT144",
+        Device1270F256 = "5M1270ZF256",
+        Device1270F324 = "5M1270ZF324",
+        Device2210F256 = "5M2210ZF256",
+        Device2210F324 = "5M2210ZF324",
+    }
+    struct DeviceOutOfRange ;
+    struct Devices : Iterator ;
+}
+
+impl Device {
+    pub fn density(self) -> Density {
+        match self {
+            Device::Device40E64 => Density::Density240,
+            Device::Device40M64 => Density::Density240,
+            Device::Device80E64 => Density::Density240,
+            Device::Device80M64 => Density::Density240,
+            Device::Device80M68 => Density::Density240,
+            Device::Device80T100 => Density::Density240,
+            Device::Device160E64 => Density::Density240,
+            Device::Device160M68 => Density::Density240,
+            Device::Device160M100 => Density::Density240,
+            Device::Device160T100 => Density::Density240,
+            Device::Device240M68 => Density::Density240,
+            Device::Device240M100 => Density::Density240,
+            Device::Device240T100 => Density::Density240,
+            Device::Device240T144 => Density::Density570,
+            Device::Device570M100 => Density::Density570,
+            Device::Device570T100 => Density::Density570,
+            Device::Device570T144 => Density::Density570,
+            Device::Device570F256 => Density::Density570,
+            Device::Device1270T144 => Density::Density1270,
+            Device::Device1270F256 => Density::Density1270,
+            Device::Device1270F324 => Density::Density2210,
+            Device::Device2210F256 => Density::Density2210,
+            Device::Device2210F324 => Density::Density2210,
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+#[derive(Debug)]
+#[derive(Eq, PartialEq)]
+#[derive(Hash)]
+#[derive(Ord, PartialOrd)]
 #[repr(transparent)]
 pub struct X(pub u8);
 
+impl From<u8> for X {
+    fn from(x: u8) -> X {
+        X(x)
+    }
+}
+
+impl From<X> for usize {
+    fn from(x: X) -> usize {
+        usize::from(x.0)
+    }
+}
+
+impl Add<u8> for X {
+    type Output = Self;
+
+    fn add(self, with: u8) -> Self {
+        X(self.0 + with)
+    }
+}
+
+impl Sub<u8> for X {
+    type Output = Self;
+
+    fn sub(self, with: u8) -> Self {
+        X(self.0 - with)
+    }
+}
+
+impl Sub<X> for X {
+    type Output = Self;
+
+    fn sub(self, with: X) -> Self {
+        X(self.0 - with.0)
+    }
+}
+
+impl PartialEq<u8> for X {
+    fn eq(&self, with: &u8) -> bool {
+        self.0.eq(with)
+    }
+}
+
+impl PartialOrd<u8> for X {
+    fn partial_cmp(&self, with: &u8) -> Option<std::cmp::Ordering> {
+        self.0.partial_cmp(with)
+    }
+}
+
+#[derive(Copy, Clone)]
+#[derive(Debug)]
+#[derive(Eq, PartialEq)]
+#[derive(Hash)]
+#[derive(Ord, PartialOrd)]
 #[repr(transparent)]
 pub struct Y(pub u8);
 
-enumerated! {
-    enum C4InterconnectIndex {
-        C4Interconnect0,
-        C4Interconnect1,
-        C4Interconnect2,
-        C4Interconnect3,
-        C4Interconnect4,
-        C4Interconnect5,
-        C4Interconnect6,
-        C4Interconnect7,
-        C4Interconnect8,
-        C4Interconnect9,
-        C4Interconnect10,
-        C4Interconnect11,
-        C4Interconnect12,
-        C4Interconnect13,
+impl From<u8> for Y {
+    fn from(y: u8) -> Y {
+        Y(y)
     }
-    struct C4InterconnectIndexOutOfRange ;
-    struct C4InterconnectIndexs : Iterator ;
 }
 
-enumerated! {
-    enum Control {
-        Control0,
-        Control1,
-        Control2,
-        Control3,
-        Control4,
-        Control5,
+impl From<Y> for usize {
+    fn from(y: Y) -> usize {
+        usize::from(y.0)
     }
-    struct ControlOutOfRange ;
-    struct Controls: Iterator ;
 }
 
-enumerated! {
-    enum Global {
-        Global0,
-        Global1,
-        Global2,
-        Global3,
+impl Add<u8> for Y {
+    type Output = Self;
+
+    fn add(self, with: u8) -> Self {
+        Y(self.0 + with)
     }
-    struct GlobalOutOfRange ;
-    struct Globals: Iterator ;
 }
 
-enumerated! {
-    enum IOColumnCellNumber {
-        IOColumnCell0,
-        IOColumnCell1,
-        IOColumnCell2,
-        IOColumnCell3,
+impl Sub<u8> for Y {
+    type Output = Self;
+
+    fn sub(self, with: u8) -> Self {
+        Y(self.0 - with)
     }
-    struct IOColumnCellNumberOutOfRange ;
-    struct IOColumnCellNumbers : Iterator ;
 }
 
-enumerated! {
-    enum IOColumnInterconnectIndex {
-        IOColumnInterconnect0,
-        IOColumnInterconnect1,
-        IOColumnInterconnect2,
-        IOColumnInterconnect3,
-        IOColumnInterconnect4,
-        IOColumnInterconnect5,
-        IOColumnInterconnect6,
-        IOColumnInterconnect7,
-        IOColumnInterconnect8,
-        IOColumnInterconnect9,
+impl Sub<Y> for Y {
+    type Output = Self;
+
+    fn sub(self, with: Y) -> Self {
+        Y(self.0 - with.0)
     }
-    struct IOColumnInterconnectIndexOutOfRange ;
-    struct IOColumnInterconnectIndexs : Iterator ;
 }
 
-enumerated! {
-    enum IORowCellNumber {
-        IORowCell0,
-        IORowCell1,
-        IORowCell2,
-        IORowCell3,
-        IORowCell4,
-        IORowCell5,
-        IORowCell6,
+impl PartialEq<u8> for Y {
+    fn eq(&self, with: &u8) -> bool {
+        self.0.eq(with)
     }
-    struct IORowCellNumberOutOfRange ;
-    struct IORowCellNumbers : Iterator ;
 }
 
-enumerated! {
-    enum IORowInterconnectIndex {
-        IORowInterconnect0,
-        IORowInterconnect1,
-        IORowInterconnect2,
-        IORowInterconnect3,
-        IORowInterconnect4,
-        IORowInterconnect5,
-        IORowInterconnect6,
-        IORowInterconnect7,
-        IORowInterconnect8,
-        IORowInterconnect9,
-        IORowInterconnect10,
-        IORowInterconnect11,
-        IORowInterconnect12,
-        IORowInterconnect13,
-        IORowInterconnect14,
-        IORowInterconnect15,
-        IORowInterconnect16,
-        IORowInterconnect17,
+impl PartialOrd<u8> for Y {
+    fn partial_cmp(&self, with: &u8) -> Option<std::cmp::Ordering> {
+        self.0.partial_cmp(with)
     }
-    struct IORowInterconnectIndexOutOfRange ;
-    struct IORowInterconnectIndexs : Iterator ;
 }
 
-enumerated! {
-    enum JTAGInput {
-        TDO,
-    }
-    struct JTAGInputOutOfRange ;
-    struct JTAGInputs : Iterator ;
-}
-
-enumerated! {
-    enum JTAGOutput {
-        TCK,
-        TDI,
-        TMS,
-    }
-    struct JTAGOutputOutOfRange ;
-    struct JTAGOutputs : Iterator ;
-}
-
-enumerated! {
-    enum LogicCellInput {
-        LogicCellInputA,
-        LogicCellInputB,
-        LogicCellInputC,
-        LogicCellInputD,
-    }
-    struct LogicCellInputOutOfRange ;
-    struct LogicCellInputs : Iterator ;
-}
-
-enumerated! {
-    enum LogicCellOutput {
-        LogicCellLeft,
-        LogicCellLocal,
-        LogicCellRight,
-    }
-    struct LogicCellOutputOutOfRange ;
-    struct LogicCellOutputs : Iterator ;
-}
-
-enumerated! {
-    enum LogicCellNumber {
-        LogicCell0,
-        LogicCell1,
-        LogicCell2,
-        LogicCell3,
-        LogicCell4,
-        LogicCell5,
-        LogicCell6,
-        LogicCell7,
-        LogicCell8,
-        LogicCell9,
-    }
-    struct LogicCellNumberOutOfRange ;
-    struct LogicCellNumbers : Iterator ;
-}
-
-enumerated! {
-    enum LogicInterconnectIndex {
-        LogicInterconnect0,
-        LogicInterconnect1,
-        LogicInterconnect2,
-        LogicInterconnect3,
-        LogicInterconnect4,
-        LogicInterconnect5,
-        LogicInterconnect6,
-        LogicInterconnect7,
-        LogicInterconnect8,
-        LogicInterconnect9,
-        LogicInterconnect10,
-        LogicInterconnect11,
-        LogicInterconnect12,
-        LogicInterconnect13,
-        LogicInterconnect14,
-        LogicInterconnect15,
-        LogicInterconnect16,
-        LogicInterconnect17,
-        LogicInterconnect18,
-        LogicInterconnect19,
-        LogicInterconnect20,
-        LogicInterconnect21,
-        LogicInterconnect22,
-        LogicInterconnect23,
-        LogicInterconnect24,
-        LogicInterconnect25,
-    }
-    struct LogicInterconnectIndexOutOfRange ;
-    struct LogicInterconnectIndexs : Iterator ;
-}
-
-enumerated! {
-    enum LUTBit {
-        LUTBit0000,
-        LUTBit1000,
-        LUTBit0100,
-        LUTBit1100,
-        LUTBit0010,
-        LUTBit1010,
-        LUTBit0110,
-        LUTBit1110,
-        LUTBit0001,
-        LUTBit1001,
-        LUTBit0101,
-        LUTBit1101,
-        LUTBit0011,
-        LUTBit1011,
-        LUTBit0111,
-        LUTBit1111,
-    }
-    struct LUTBitOutOfRange ;
-    struct LUTBits: Iterator ;
-}
-
-enumerated! {
-    enum R4InterconnectIndex {
-        R4Interconnect0,
-        R4Interconnect1,
-        R4Interconnect2,
-        R4Interconnect3,
-        R4Interconnect4,
-        R4Interconnect5,
-        R4Interconnect6,
-        R4Interconnect7,
-        R4Interconnect8,
-        R4Interconnect9,
-        R4Interconnect10,
-        R4Interconnect11,
-        R4Interconnect12,
-        R4Interconnect13,
-        R4Interconnect14,
-        R4Interconnect15,
-    }
-    struct R4InterconnectIndexOutOfRange ;
-    struct R4InterconnectIndexs : Iterator ;
-}
-
-enumerated! {
-    enum Select3 {
-        Select3_0,
-        Select3_1,
-        Select3_2,
-    }
-    struct Select3OutOfRange ;
-    struct Select3s: Iterator ;
-}
-
-enumerated! {
-    enum Select4 {
-        Select4_0,
-        Select4_1,
-        Select4_2,
-        Select4_3,
-    }
-    struct Select4OutOfRange ;
-    struct Select4s: Iterator ;
-}
-
-pub struct Select4Global;
-
-enumerated! {
-    enum Select6 {
-        Select6_0,
-        Select6_1,
-        Select6_2,
-        Select6_3,
-        Select6_4,
-        Select6_5,
-    }
-    struct Select6OutOfRange ;
-    struct Select6s: Iterator ;
-}
-
-enumerated! {
-    enum UFMInput {
-        ArClk,
-        ArIn,
-        ArShift,
-        DrClk,
-        DrIn,
-        DrShift,
-        Erase,
-        OscEna,
-        Program,
-    }
-    struct UFMInputOutOfRange ;
-    struct UFMInputs : Iterator ;
-}
-
-enumerated! {
-    enum UFMOutput {
-        ArOut,
-        Busy,
-        DrOut,
-        Osc,
-    }
-    struct UFMOutputOutOfRange ;
-    struct UFMOutputs : Iterator ;
-}
-
-enumerated! {
-    enum UFMInterconnectIndex {
-        UFMInterconnect0,
-        UFMInterconnect1,
-        UFMInterconnect2,
-        UFMInterconnect3,
-        UFMInterconnect4,
-        UFMInterconnect5,
-        UFMInterconnect6,
-        UFMInterconnect7,
-        UFMInterconnect8,
-        UFMInterconnect9,
-    }
-    struct UFMInterconnectIndexOutOfRange ;
-    struct UFMInterconnectIndexs : Iterator ;
-}
-enumerated! {
-    enum UserCodeBit {
-        UserCodeBit0,
-        UserCodeBit1,
-        UserCodeBit2,
-        UserCodeBit3,
-        UserCodeBit4,
-        UserCodeBit5,
-        UserCodeBit6,
-        UserCodeBit7,
-        UserCodeBit8,
-        UserCodeBit9,
-        UserCodeBit10,
-        UserCodeBit11,
-        UserCodeBit12,
-        UserCodeBit13,
-        UserCodeBit14,
-        UserCodeBit15,
-        UserCodeBit16,
-        UserCodeBit17,
-        UserCodeBit18,
-        UserCodeBit19,
-        UserCodeBit20,
-        UserCodeBit21,
-        UserCodeBit22,
-        UserCodeBit23,
-        UserCodeBit24,
-        UserCodeBit25,
-        UserCodeBit26,
-        UserCodeBit27,
-        UserCodeBit28,
-        UserCodeBit29,
-        UserCodeBit30,
-        UserCodeBit31,
-    }
-    struct UserCodeBitOutOfRange ;
-    struct UserCodeBits : Iterator ;
-}
-
+#[derive(Copy, Clone)]
+#[derive(Default)]
+#[derive(Debug)]
+#[derive(Eq, PartialEq)]
 pub enum Port {
     C4Interconnect {
         x: X,
@@ -440,6 +272,7 @@ pub enum Port {
     UFMOutput {
         output: UFMOutput,
     },
+    #[default]
     Unknown,
 }
 
