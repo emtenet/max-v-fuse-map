@@ -236,7 +236,9 @@ impl<'de, 'v> Visitor<'de> for BlockVisitor<'v> {
         match access.next_value()? {
             BlockType::Logic =>
                 if self.density.logic_block(x, y) {
-                    let mut logic = Box::new(LogicBlock::default());
+                    let mut logic = Box::new(
+                        LogicBlock::new(x, y, self.density),
+                    );
                     logic_block(self.density, &mut logic, x, y, access)?;
                     *block = Block::Logic(logic);
                 } else {

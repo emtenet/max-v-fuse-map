@@ -160,7 +160,8 @@ macro_rules! enumerated {
             Some($enum::$prev) =>
                 std::mem::replace(&mut $self.0, Some($enum::$next)),
             )*
-            Some($enum::$last) => None,
+            Some($enum::$last) =>
+                std::mem::replace(&mut $self.0, None),
             None => None,
         }
     };
