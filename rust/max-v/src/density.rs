@@ -30,6 +30,17 @@ pub struct DensityLayout {
     pub (crate) sync_width: usize,
 }
 
+#[derive(Debug)]
+pub enum DensityBlockType {
+    Corner,
+    Column,
+    Left,
+    Right,
+    Logic,
+    UFM,
+    Grow,
+}
+
 macro_rules! bottom_io {
     (@cell $base:literal + no) => {
         DensityIOStrip::No {
@@ -414,6 +425,50 @@ pub const MAX_V_2210Z: DensityLayout = DensityLayout {
 impl DensityLayout {
     pub fn large(&self) -> bool {
         self.has_grow
+    }
+
+    pub fn block_type(&self, x: X, y: Y) -> Option<DensityBlockType> {
+        if y > self.top || x < self.left || x > self.right {
+            None
+        } else if y == self.top {
+            if x == self.left {
+                Some(DensityBlockType::Corner)
+            } else if x == self.right {
+                None
+            } else {
+                Some(DensityBlockType::Column)
+            }
+        } else if y == 0 {
+            if x < self.grow {
+                None
+            } else if x == self.grow {
+                Some(DensityBlockType::Corner)
+            } else if x == self.right {
+                None
+            } else {
+                Some(DensityBlockType::Column)
+            }
+        } else if x == self.right {
+            Some(DensityBlockType::Right)
+        } else if x < self.grow && y < self.short_bottom {
+            None
+        } else if x == self.left {
+            if y == self.short_bottom {
+                Some(DensityBlockType::Corner)
+            } else {
+                Some(DensityBlockType::Left)
+            }
+        } else if y == self.short_bottom && x < self.grow {
+            Some(DensityBlockType::Column)
+        } else if x == self.grow && y <= 3 {
+            if y == 1 {
+                Some(DensityBlockType::Grow)
+            } else {
+                Some(DensityBlockType::UFM)
+            }
+        } else {
+            Some(DensityBlockType::Logic)
+        }
     }
 }
 

@@ -114,6 +114,18 @@ impl From<X> for usize {
     }
 }
 
+impl From<X> for i64 {
+    fn from(x: X) -> i64 {
+        i64::from(x.0)
+    }
+}
+
+impl From<X> for u64 {
+    fn from(x: X) -> u64 {
+        u64::from(x.0)
+    }
+}
+
 impl Add<u8> for X {
     type Output = Self;
 
@@ -167,6 +179,18 @@ impl From<u8> for Y {
 impl From<Y> for usize {
     fn from(y: Y) -> usize {
         usize::from(y.0)
+    }
+}
+
+impl From<Y> for i64 {
+    fn from(y: Y) -> i64 {
+        i64::from(y.0)
+    }
+}
+
+impl From<Y> for u64 {
+    fn from(y: Y) -> u64 {
+        u64::from(y.0)
     }
 }
 

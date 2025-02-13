@@ -7,6 +7,7 @@
 -record(db, {
     density :: atom(),
     device :: atom(),
+    iobs :: iob_interconnect_mux_database:blocks(),
     labs :: lab_interconnect_mux_database:blocks(),
     metric :: #metric{}
 }).
@@ -37,9 +38,11 @@ db(Device) ->
     Density = device:density(Device),
     Metric = density:metric(Density),
     {ok, LABs} = lab_interconnect_mux_database:open(Density),
+    {ok, IOBs} = iob_interconnect_mux_database:open(Density),
     #db{
         density = Density,
         device = Device,
+        iobs = IOBs,
         labs = LABs,
         metric = Metric
     }.
@@ -67,10 +70,15 @@ source(Db) ->
 block(X, Y, Db) ->
     Metric = Db#db.metric,
     case density:block_type(X, Y, Metric) of
-        column -> <<>>;
+        column ->
+            block_type(X, Y, <<"column">>, io_column_interconnects(X, Y, Db));
         global -> <<>>;
-        logic -> block_type(X, Y, <<"logic">>, logic_interconnects(X, Y, Db));
-        row -> <<>>;
+        logic ->
+            block_type(X, Y, <<"logic">>, logic_interconnects(X, Y, Db));
+        row when X < 2 ->
+            block_type(X, Y, <<"left">>, io_row_interconnects(X, Y, Db));
+        row ->
+            block_type(X, Y, <<"right">>, io_row_interconnects(X, Y, Db));
         ufm -> <<>>;
         false -> <<>>
     end.
@@ -86,7 +94,97 @@ block_type(X, Y, Type, Block) ->
         Block
     ].
 
+%%====================================================================
+%% io_column
+%%====================================================================
+
+io_column_interconnects(X, Y, Db) ->
+    [
+        io_column_interconnect(X, Y, I, Db)
+        ||
+        I <- lists:seq(0, 9)
+    ].
+
 %%--------------------------------------------------------------------
+
+io_column_interconnect(X, Y, I, Db) ->
+    Sources = [
+        io_interconnect_source(X, Y, I, Mux4, Mux3, Db)
+        ||
+        Mux4 <- [mux0, mux1, mux2, mux3],
+        Mux3 <- [mux0, mux1, mux2]
+    ],
+    [<< "\n"
+        "[[block.io-interconnect]]\n"
+        "interconnect = ">>, s(I), <<"\n">>,
+        Sources
+    ].
+
+%%--------------------------------------------------------------------
+
+io_row_interconnects(X, Y, Db) ->
+    [
+        io_row_interconnect(X, Y, I, Db)
+        ||
+        I <- lists:seq(0, 17)
+    ].
+
+%%--------------------------------------------------------------------
+
+io_row_interconnect(X, Y, I, Db) ->
+    Source = io_interconnect_source(X, Y, I, direct_link, Db),
+    G = case I of
+        8 -> [gclk];
+        17 -> [gclk];
+        _ -> []
+    end,
+    Sources = [
+        io_interconnect_source(X, Y, I, Mux4, Mux3, Db)
+        ||
+        Mux4 <- [mux0, mux1, mux2, mux3 | G],
+        Mux3 <- [mux0, mux1, mux2]
+    ],
+    [<< "\n"
+        "[[block.io-interconnect]]\n"
+        "interconnect = ">>, s(I), <<"\n">>,
+        Source,
+        Sources
+    ].
+
+
+%%--------------------------------------------------------------------
+
+io_interconnect_source(X, Y, I, DirectLink, Db) ->
+    Port = io_interconnect_port(X, Y, I, DirectLink, Db),
+    [s(DirectLink), <<" = ">>, Port, <<"\n">>].
+
+%%--------------------------------------------------------------------
+
+io_interconnect_source(X, Y, I, Mux4, Mux3, Db) ->
+    Port = io_interconnect_port(X, Y, I, {Mux4, Mux3}, Db),
+    [s(Mux4, Mux3), <<" = ">>, Port, <<"\n">>].
+
+%%--------------------------------------------------------------------
+
+io_interconnect_port(X, Y, I, Mux, Db) ->
+    #{{iob, X, Y} := IOB} = Db#db.iobs,
+    case IOB of
+        #{I := Interconnect} ->
+            case Interconnect of
+                #{Mux := From} ->
+                    source_port(From, Db);
+
+                _ ->
+                    source_port(unknown, Db)
+            end;
+
+        _ ->
+            source_port(unknown, Db)
+    end.
+
+%%====================================================================
+%% logic
+%%====================================================================
 
 logic_interconnects(X, Y, Db) ->
     [
