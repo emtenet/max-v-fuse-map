@@ -3,6 +3,7 @@ use super::*;
 
 field! {
     enum RightField {
+        IOCell = "io-cell",
         IOInterconnect = "io-interconnect",
     }
 }
@@ -19,6 +20,11 @@ where
 {
     while let Some(field) = access.next_key()? {
         match field {
+            RightField::IOCell =>
+                access.next_value_seed(IOCellsVisitor {
+                    density, cells: &mut block.io_cells, x, y,
+                })?,
+
             RightField::IOInterconnect =>
                 access.next_value_seed(RightInterconnectsVisitor {
                     density, block, x, y,

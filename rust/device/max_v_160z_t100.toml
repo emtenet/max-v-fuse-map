@@ -5,6 +5,22 @@ x = 1
 y = 1
 type = "left"
 
+[[block.io-cell]]
+n = 0
+pin = "18"
+
+[[block.io-cell]]
+n = 1
+pin = "19"
+
+[[block.io-cell]]
+n = 2
+pin = "20"
+
+[[block.io-cell]]
+n = 3
+pin = "21"
+
 [[block.io-interconnect]]
 interconnect = 0
 direct-link = ["row", 1, 1, 0]
@@ -303,6 +319,22 @@ select-g-2 = ["global", 3]
 x = 1
 y = 2
 type = "left"
+
+[[block.io-cell]]
+n = 0
+pin = "14"
+
+[[block.io-cell]]
+n = 1
+pin = "15"
+
+[[block.io-cell]]
+n = 2
+pin = "16"
+
+[[block.io-cell]]
+n = 3
+pin = "17"
 
 [[block.io-interconnect]]
 interconnect = 0
@@ -603,6 +635,22 @@ x = 1
 y = 3
 type = "left"
 
+[[block.io-cell]]
+n = 0
+pin = "6"
+
+[[block.io-cell]]
+n = 1
+pin = "7"
+
+[[block.io-cell]]
+n = 2
+pin = "8"
+
+[[block.io-cell]]
+n = 3
+pin = "12"
+
 [[block.io-interconnect]]
 interconnect = 0
 direct-link = []
@@ -902,6 +950,22 @@ x = 1
 y = 4
 type = "left"
 
+[[block.io-cell]]
+n = 0
+pin = "2"
+
+[[block.io-cell]]
+n = 1
+pin = "3"
+
+[[block.io-cell]]
+n = 2
+pin = "4"
+
+[[block.io-cell]]
+n = 3
+pin = "5"
+
 [[block.io-interconnect]]
 interconnect = 0
 direct-link = []
@@ -1200,6 +1264,22 @@ select-g-2 = ["global", 3]
 x = 2
 y = 0
 type = "column"
+
+[[block.io-cell]]
+n = 3
+pin = "26"
+
+[[block.io-cell]]
+n = 2
+pin = "27"
+
+[[block.io-cell]]
+n = 1
+pin = "28"
+
+[[block.io-cell]]
+n = 0
+pin = "29"
 
 [[block.io-interconnect]]
 interconnect = 0
@@ -3064,6 +3144,18 @@ x = 2
 y = 5
 type = "column"
 
+[[block.io-cell]]
+n = 0
+pin = "98"
+
+[[block.io-cell]]
+n = 1
+pin = "99"
+
+[[block.io-cell]]
+n = 2
+pin = "100"
+
 [[block.io-interconnect]]
 interconnect = 0
 select-0-0 = []
@@ -3218,6 +3310,22 @@ select-3-2 = ["c4", 1, 1, 5]
 x = 3
 y = 0
 type = "column"
+
+[[block.io-cell]]
+n = 3
+pin = "30"
+
+[[block.io-cell]]
+n = 2
+pin = "33"
+
+[[block.io-cell]]
+n = 1
+pin = "34"
+
+[[block.io-cell]]
+n = 0
+pin = "35"
 
 [[block.io-interconnect]]
 interconnect = 0
@@ -5082,6 +5190,22 @@ x = 3
 y = 5
 type = "column"
 
+[[block.io-cell]]
+n = 0
+pin = "92"
+
+[[block.io-cell]]
+n = 1
+pin = "95"
+
+[[block.io-cell]]
+n = 2
+pin = "96"
+
+[[block.io-cell]]
+n = 3
+pin = "97"
+
 [[block.io-interconnect]]
 interconnect = 0
 select-0-0 = []
@@ -5236,6 +5360,18 @@ select-3-2 = ["c4", 2, 1, 5]
 x = 4
 y = 0
 type = "column"
+
+[[block.io-cell]]
+n = 2
+pin = "36"
+
+[[block.io-cell]]
+n = 1
+pin = "37"
+
+[[block.io-cell]]
+n = 0
+pin = "38"
 
 [[block.io-interconnect]]
 interconnect = 0
@@ -7100,6 +7236,18 @@ x = 4
 y = 5
 type = "column"
 
+[[block.io-cell]]
+n = 0
+pin = "89"
+
+[[block.io-cell]]
+n = 1
+pin = "90"
+
+[[block.io-cell]]
+n = 2
+pin = "91"
+
 [[block.io-interconnect]]
 interconnect = 0
 select-0-0 = []
@@ -7254,6 +7402,22 @@ select-3-2 = ["c4", 3, 1, 5]
 x = 5
 y = 0
 type = "column"
+
+[[block.io-cell]]
+n = 3
+pin = "39"
+
+[[block.io-cell]]
+n = 2
+pin = "40"
+
+[[block.io-cell]]
+n = 1
+pin = "41"
+
+[[block.io-cell]]
+n = 0
+pin = "42"
 
 [[block.io-interconnect]]
 interconnect = 0
@@ -9118,6 +9282,22 @@ x = 5
 y = 5
 type = "column"
 
+[[block.io-cell]]
+n = 0
+pin = "85"
+
+[[block.io-cell]]
+n = 1
+pin = "86"
+
+[[block.io-cell]]
+n = 2
+pin = "87"
+
+[[block.io-cell]]
+n = 3
+pin = "88"
+
 [[block.io-interconnect]]
 interconnect = 0
 select-0-0 = ["c4", 5, 2, 0]
@@ -9272,6 +9452,22 @@ select-3-2 = ["c4", 4, 1, 5]
 x = 6
 y = 0
 type = "column"
+
+[[block.io-cell]]
+n = 3
+pin = "43"
+
+[[block.io-cell]]
+n = 2
+pin = "44"
+
+[[block.io-cell]]
+n = 1
+pin = "47"
+
+[[block.io-cell]]
+n = 0
+pin = "48"
 
 [[block.io-interconnect]]
 interconnect = 0
@@ -11136,6 +11332,22 @@ x = 6
 y = 5
 type = "column"
 
+[[block.io-cell]]
+n = 0
+pin = "81"
+
+[[block.io-cell]]
+n = 1
+pin = "82"
+
+[[block.io-cell]]
+n = 2
+pin = "83"
+
+[[block.io-cell]]
+n = 3
+pin = "84"
+
 [[block.io-interconnect]]
 interconnect = 0
 select-0-0 = []
@@ -11290,6 +11502,18 @@ select-3-2 = ["c4", 5, 1, 5]
 x = 7
 y = 0
 type = "column"
+
+[[block.io-cell]]
+n = 2
+pin = "49"
+
+[[block.io-cell]]
+n = 1
+pin = "50"
+
+[[block.io-cell]]
+n = 0
+pin = "51"
 
 [[block.io-interconnect]]
 interconnect = 0
@@ -13154,6 +13378,22 @@ x = 7
 y = 5
 type = "column"
 
+[[block.io-cell]]
+n = 0
+pin = "75"
+
+[[block.io-cell]]
+n = 1
+pin = "76"
+
+[[block.io-cell]]
+n = 2
+pin = "77"
+
+[[block.io-cell]]
+n = 3
+pin = "78"
+
 [[block.io-interconnect]]
 interconnect = 0
 select-0-0 = ["c4", 7, 2, 0]
@@ -13308,6 +13548,26 @@ select-3-2 = ["c4", 6, 1, 5]
 x = 8
 y = 1
 type = "right"
+
+[[block.io-cell]]
+n = 4
+pin = "52"
+
+[[block.io-cell]]
+n = 3
+pin = "53"
+
+[[block.io-cell]]
+n = 2
+pin = "54"
+
+[[block.io-cell]]
+n = 1
+pin = "55"
+
+[[block.io-cell]]
+n = 0
+pin = "56"
 
 [[block.io-interconnect]]
 interconnect = 0
@@ -13608,6 +13868,22 @@ x = 8
 y = 2
 type = "right"
 
+[[block.io-cell]]
+n = 3
+pin = "57"
+
+[[block.io-cell]]
+n = 2
+pin = "58"
+
+[[block.io-cell]]
+n = 1
+pin = "61"
+
+[[block.io-cell]]
+n = 0
+pin = "62"
+
 [[block.io-interconnect]]
 interconnect = 0
 direct-link = ["right", 7, 2, 0]
@@ -13907,6 +14183,26 @@ x = 8
 y = 3
 type = "right"
 
+[[block.io-cell]]
+n = 4
+pin = "64"
+
+[[block.io-cell]]
+n = 3
+pin = "66"
+
+[[block.io-cell]]
+n = 2
+pin = "67"
+
+[[block.io-cell]]
+n = 1
+pin = "68"
+
+[[block.io-cell]]
+n = 0
+pin = "69"
+
 [[block.io-interconnect]]
 interconnect = 0
 direct-link = ["right", 7, 3, 0]
@@ -14205,6 +14501,26 @@ select-g-2 = ["global", 3]
 x = 8
 y = 4
 type = "right"
+
+[[block.io-cell]]
+n = 4
+pin = "70"
+
+[[block.io-cell]]
+n = 3
+pin = "71"
+
+[[block.io-cell]]
+n = 2
+pin = "72"
+
+[[block.io-cell]]
+n = 1
+pin = "73"
+
+[[block.io-cell]]
+n = 0
+pin = "74"
 
 [[block.io-interconnect]]
 interconnect = 0

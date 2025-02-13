@@ -14,8 +14,10 @@ use crate::{
     DensityBlockType,
     DensityLayout,
     Fuse,
+    IOColumnCellNumber,
     IOColumnInterconnectIndex,
     IOInterconnectFuse,
+    IORowCellNumber,
     IORowInterconnectIndex,
     LogicCellOutput,
     LogicInterconnectFuse,
@@ -75,9 +77,10 @@ impl<'de> Visitor<'de> for DeviceVisitor {
         access.next_key_seed(Key("device"))?;
         let mut device = DeviceSources {
             device: access.next_value()?,
-            block: Default::default(),
+            blocks: Default::default(),
             //global: Default::default(),
             //jtag: Default::default(),
+            pins: Default::default(),
             //ufm: Default::default(),
         };
         let density = device.device.density().layout();
@@ -164,7 +167,7 @@ impl<'de, 'v> Visitor<'de> for BlockVisitor<'v> {
         access.next_key_seed(Key("y"))?;
         let y = access.next_value_seed(DeviceY(self.density))?;
 
-        let block = &mut self.device.block[usize::from(x)][usize::from(y)];
+        let block = &mut self.device.blocks[usize::from(x)][usize::from(y)];
         let Block::Blank = &block else {
             return Err(de::Error::custom("block already defined"));
         };

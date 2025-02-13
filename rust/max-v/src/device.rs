@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::Path;
 
 use crate::{
@@ -5,7 +6,9 @@ use crate::{
     DensityLayout,
     Device,
     Fuse,
+    IOColumnCellNumber,
     IOColumnInterconnectIndex,
+    IORowCellNumber,
     IORowInterconnectIndex,
     LogicBlockFuse,
     LogicBlockControlFuse,
@@ -26,9 +29,10 @@ mod de;
 
 pub struct DeviceSources {
     pub device: Device,
-    block: [[Block; 15]; 22],
+    blocks: [[Block; 15]; 22],
     //global: [Interconnect<18>; 4],
     //jtag: JTAG,
+    pins: HashMap<String, PinSource>,
     //ufm: UFM,
 }
 
@@ -39,7 +43,7 @@ impl DeviceSources {
     }
 
     fn block(&self, x: X, y: Y) -> Option<&Block> {
-        self.block.get(x.0 as usize)
+        self.blocks.get(x.0 as usize)
             .and_then(|col| col.get(y.0 as usize))
     }
 
@@ -158,6 +162,20 @@ impl<'d> Iterator for InterconnectSourcesIter<'d> {
     }
 }
 
+#[derive(Debug)]
+pub enum PinSource {
+    Column {
+        x: X,
+        y: Y,
+        n: IOColumnCellNumber,
+    },
+    Row {
+        x: X,
+        y: Y,
+        n: IORowCellNumber,
+    },
+}
+
 //  Block
 // =======
 
@@ -236,23 +254,30 @@ struct Source {
 #[derive(Default)]
 struct ColumnBlock {
     //c4_interconnects: [Interconnect_; 14],
-    //io_cells: [IOCell; 4],
+    io_cells: [Option<IOCell>; 4],
     io_interconnects: [Interconnect<[Source; 12]>; 10],
 }
 
 #[derive(Default)]
 struct LeftBlock {
     //c4_interconnects: [Interconnect_; 14],
-    //io_cells: [IOCell; 7],
+    io_cells: [Option<IOCell>; 7],
     io_interconnects: IOInterconnects,
     //r4_interconnects: [Interconnect_; 16],
 }
 
 #[derive(Default)]
 struct RightBlock {
-    //io_cells: [IOCell; 7],
+    io_cells: [Option<IOCell>; 7],
     io_interconnects: IOInterconnects,
     //r4_interconnects: [Interconnect_; 16],
+}
+
+#[derive(Default)]
+struct IOCell {
+    enable: Interconnect<[Source; 18]>,
+    name: String,
+    output: Interconnect<[Source; 18]>,
 }
 
 #[derive(Default)]
@@ -748,12 +773,6 @@ fn logic_input_d(
             Port::LogicCellOutput { x, y, n: LogicCell9, output: Local },
     }
 }
-
-//#[derive(Default)]
-//struct IOCell {
-//    enable: Interconnect<18>,
-//    output: Interconnect<18>,
-//}
 
 //#[derive(Default)]
 //struct JTAG {

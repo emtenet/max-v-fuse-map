@@ -71,14 +71,23 @@ block(X, Y, Db) ->
     Metric = Db#db.metric,
     case density:block_type(X, Y, Metric) of
         column ->
-            block_type(X, Y, <<"column">>, io_column_interconnects(X, Y, Db));
+            block_type(X, Y, <<"column">>, [
+                io_cells(X, Y, Db),
+                io_column_interconnects(X, Y, Db)
+            ]);
         global -> <<>>;
         logic ->
             block_type(X, Y, <<"logic">>, logic_interconnects(X, Y, Db));
         row when X < 2 ->
-            block_type(X, Y, <<"left">>, io_row_interconnects(X, Y, Db));
+            block_type(X, Y, <<"left">>, [
+                io_cells(X, Y, Db),
+                io_row_interconnects(X, Y, Db)
+            ]);
         row ->
-            block_type(X, Y, <<"right">>, io_row_interconnects(X, Y, Db));
+            block_type(X, Y, <<"right">>, [
+                io_cells(X, Y, Db),
+                io_row_interconnects(X, Y, Db)
+            ]);
         ufm -> <<>>;
         false -> <<>>
     end.
@@ -95,7 +104,28 @@ block_type(X, Y, Type, Block) ->
     ].
 
 %%====================================================================
-%% io_column
+%% io cells
+%%====================================================================
+
+io_cells(X, Y, Db) ->
+    [
+        io_cell(IOC)
+        ||
+        IOC <- device:iocs(Db#db.device, {iob, X, Y})
+    ].
+
+%%--------------------------------------------------------------------
+
+io_cell({{ioc, _X, _Y, N}, Pin}) ->
+    <<"PIN_", Name/binary>> = pin:name(Pin),
+    [<< "\n"
+        "[[block.io-cell]]\n"
+        "n = ">>, s(N), <<"\n"
+        "pin = \"">>, Name, <<"\"\n"
+    >>].
+
+%%====================================================================
+%% io interconnects
 %%====================================================================
 
 io_column_interconnects(X, Y, Db) ->

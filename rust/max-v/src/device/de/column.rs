@@ -3,6 +3,7 @@ use super::*;
 
 field! {
     enum ColumnField {
+        IOCell = "io-cell",
         IOInterconnect = "io-interconnect",
     }
 }
@@ -19,6 +20,11 @@ where
 {
     while let Some(field) = access.next_key()? {
         match field {
+            ColumnField::IOCell =>
+                access.next_value_seed(IOCellsVisitor {
+                    density, cells: &mut block.io_cells, x, y,
+                })?,
+
             ColumnField::IOInterconnect =>
                 access.next_value_seed(ColumnInterconnectsVisitor {
                     density, block, x, y,
@@ -181,6 +187,24 @@ impl<'v> ColumnInterconnect<'v> {
 
         access.next_key_seed(Key(key))?;
         access.next_value_seed(SourceVisitor { source })
+    }
+}
+
+pub (super) struct IOCellsVisitor<'v> {
+    pub (super) density: &'v DensityLayout,
+    pub (super) cells: &'v mut [Option<IOCell>],
+    pub (super) x: X,
+    pub (super) y: Y,
+}
+
+impl<'de, 'v> DeserializeSeed<'de> for IOCellsVisitor<'v> {
+    type Value = ();
+
+    fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+    where
+        D: Deserializer<'de>
+    {
+        Ok(())
     }
 }
 
