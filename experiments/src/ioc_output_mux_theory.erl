@@ -61,12 +61,11 @@ experiments({Key, Experiment = {Device, _, _}, Iterator}) ->
 %%--------------------------------------------------------------------
 
 experiment(Density, Experiment) ->
-    Metric = density:metric(Density),
     {ok, Fuses} = experiment:fuses(Experiment),
     {ok, #{signals := Signals}} = experiment:rcf(Experiment),
     try
         Model = fuses(Density, Fuses),
-        signals(Signals, Model, Metric),
+        signals(Signals, Model),
         ok
     catch
         throw:Throw ->
@@ -140,26 +139,26 @@ fuse_mux(IOC, Key, Value, IOCs) ->
 %% signals
 %%====================================================================
 
-signals(Signals, Model, Metric) ->
-    maps:foreach(fun (_, Signal) -> signal(Signal, Model, Metric) end, Signals).
+signals(Signals, Model) ->
+    maps:foreach(fun (_, Signal) -> signal(Signal, Model) end, Signals).
 
 %%--------------------------------------------------------------------
 
-signal(#{dests := Dests}, Model, Metric) ->
-    lists:foreach(fun (Dest) -> signal_dest(Dest, Model, Metric) end, Dests).
+signal(#{dests := Dests}, Model) ->
+    lists:foreach(fun (Dest) -> signal_dest(Dest, Model) end, Dests).
 
 %%--------------------------------------------------------------------
 
-signal_dest(Dest = #{ioc := IOC, port := data_in}, Model, Metric) ->
+signal_dest(Dest = #{ioc := IOC, port := data_in}, Model) ->
     Route = signal_route(Dest),
-    case theory(IOC, Model, Metric) of
+    case theory(IOC, Model) of
         Theory when Theory =:= Route ->
             ok;
 
         Theory ->
             throw({IOC, Route, theory, Theory})
     end;
-signal_dest(_, _, _) ->
+signal_dest(_, _) ->
     ok.
 
 %%--------------------------------------------------------------------
@@ -181,19 +180,28 @@ signal_route(#{route := [{io_data_out, _, _, _, _}, Interconnect | _]}) ->
 %% theory
 %%====================================================================
 
-theory(IOC = {ioc, X, Y, N}, Model, Metric) ->
+theory(IOC, Model) ->
     case Model of
         #{IOC := #{output4 := Mux4, output3 := Mux3, fast_out := on}} ->
-            theory_col(X, Y, N, Mux4, Mux3, Metric);
+            theory_col_fast_out(IOC, Mux4, Mux3);
 
         #{IOC := #{output4 := Mux4, output3 := Mux3}} ->
-            theory_col(X, Y, x, Mux4, Mux3, Metric);
+            theory_col(IOC, Mux4, Mux3);
 
         #{IOC := #{output6 := Mux6, output3 := Mux3}} ->
-            theory_row(X, Y, Mux6, Mux3);
+            theory_row(IOC, Mux6, Mux3);
+
+        #{IOC := Muxes = #{output3 := _}} ->
+            Muxes;
+
+        #{IOC := Muxes = #{output4 := _}} ->
+            Muxes;
+
+        #{IOC := Muxes = #{output6 := _}} ->
+            Muxes;
 
         #{IOC := #{fast_out := on}} ->
-            ioc_output_mux_map:fast_out(IOC, Metric);
+            theory_row_fast_out(IOC);
 
         #{IOC := Muxes} ->
             Muxes;
@@ -204,18 +212,24 @@ theory(IOC = {ioc, X, Y, N}, Model, Metric) ->
 
 %%--------------------------------------------------------------------
 
-theory_col(X, Y, FastOut, Mux4, Mux3, Metric) ->
-    case ioc_output_mux_map:to_col_interconnect(Mux4, Mux3) of
-        {interconnect, N} when FastOut =:= x ->
-            {local_interconnect, X, Y, 0, N};
-
-        fast_out when FastOut =/= x ->
-            ioc_output_mux_map:fast_out({ioc, X, Y, FastOut}, Metric)
-    end.
+theory_col({ioc, X, Y, _}, Mux4, Mux3) ->
+    {interconnect, N} = ioc_output_mux_map:to_col_interconnect(Mux4, Mux3),
+    {local_interconnect, X, Y, 0, N}.
 
 %%--------------------------------------------------------------------
 
-theory_row(X, Y, Mux6, Mux3) ->
+theory_col_fast_out(IOC, Mux4, Mux3) ->
+    fast_out = ioc_output_mux_map:to_col_interconnect(Mux4, Mux3),
+    ioc_output_mux_map:fast_out_column(IOC).
+
+%%--------------------------------------------------------------------
+
+theory_row({ioc, X, Y, _}, Mux6, Mux3) ->
     {interconnect, N} = ioc_output_mux_map:to_row_interconnect(Mux6, Mux3),
     {local_interconnect, X, Y, 0, N}.
+
+%%--------------------------------------------------------------------
+
+theory_row_fast_out(IOC) ->
+    ioc_output_mux_map:fast_out_row(IOC).
 

@@ -7,6 +7,8 @@
 -export([from_row_interconnect/1]).
 
 -export([fast_out/2]).
+-export([fast_out_column/1]).
+-export([fast_out_row/1]).
 
 -export([mux6s/0]).
 -export([mux4s/0]).
@@ -152,6 +154,20 @@
 
 fast_out({ioc, X, Y, N}, Density) ->
     fast_out(X, Y, N, density:block_type(X, Y, Density)).
+
+%%--------------------------------------------------------------------
+
+fast_out_column({ioc, X, Y, N}) when Y > 3 ->
+    fast_out_top(X, Y, N);
+fast_out_column({ioc, X, Y, N}) ->
+    fast_out_bottom(X, Y, N).
+
+%%--------------------------------------------------------------------
+
+fast_out_row({ioc, X, Y, N}) when X < 2 ->
+    fast_out_left(X, Y, N);
+fast_out_row({ioc, X, Y, N}) ->
+    fast_out_right(X, Y, N).
 
 %%--------------------------------------------------------------------
 
