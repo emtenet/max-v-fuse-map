@@ -61,11 +61,12 @@ experiments({Key, Experiment = {Device, _, _}, Iterator}) ->
 %%--------------------------------------------------------------------
 
 experiment(Density, Experiment) ->
+    Metric = density:metric(Density),
     {ok, Fuses} = experiment:fuses(Experiment),
     {ok, #{signals := Signals}} = experiment:rcf(Experiment),
     try
         Model = fuses(Density, Fuses),
-        signals(Signals, Model),
+        signals(Signals, Model, Metric),
         ok
     catch
         throw:Throw ->
@@ -86,7 +87,10 @@ contradiction(Density, Key, Fuses0, Signals, Error) ->
 %%--------------------------------------------------------------------
 
 contradiction(Density, Fuse) ->
-    io:format("  ~w~n", [fuse_map:to_location(Fuse, Density)]).
+    io:format("  ~.20w = ~w~n", [
+        fuse_map:to_location(Fuse, Density),
+        fuse_map:to_name(Fuse, Density)
+    ]).
 
 %%====================================================================
 %% fuses
@@ -136,69 +140,77 @@ fuse_mux(IOC, Key, Value, IOCs) ->
 %% signals
 %%====================================================================
 
-signals(Signals, Model) ->
-    maps:foreach(fun (_, Signal) -> signal(Signal, Model) end, Signals).
+signals(Signals, Model, Metric) ->
+    maps:foreach(fun (_, Signal) -> signal(Signal, Model, Metric) end, Signals).
 
 %%--------------------------------------------------------------------
 
-signal(#{dests := Dests}, Model) ->
-    lists:foreach(fun (Dest) -> signal_dest(Dest, Model) end, Dests).
+signal(#{dests := Dests}, Model, Metric) ->
+    lists:foreach(fun (Dest) -> signal_dest(Dest, Model, Metric) end, Dests).
 
 %%--------------------------------------------------------------------
 
-signal_dest(#{ioc := IOC, port := data_in, route := Route0}, Model) ->
-    Route = signal_route(Route0),
-    case theory(IOC, Model) of
+signal_dest(Dest = #{ioc := IOC, port := data_in}, Model, Metric) ->
+    Route = signal_route(Dest),
+    case theory(IOC, Model, Metric) of
         Theory when Theory =:= Route ->
             ok;
 
         Theory ->
             throw({IOC, Route, theory, Theory})
     end;
-signal_dest(_, _) ->
+signal_dest(_, _, _) ->
     ok.
 
 %%--------------------------------------------------------------------
 
-signal_route([Bypass = {io_bypass_out, _, _, _, _} | _]) ->
-    Bypass;
-signal_route([{io_data_out, _, _, _, _}, Interconnect | _]) ->
+signal_route(#{ioc := {ioc, 1, 0, _}, route := [], name := Name}) ->
+    <<"altera_reserved_tdo">> = Name,
+    none;
+signal_route(#{ioc := {ioc, 0, 3, _}, route := [], name := Name}) ->
+    <<"altera_reserved_tdo">> = Name,
+    none;
+signal_route(Dest = #{route := []}) ->
+    throw({route_is_empty, Dest});
+signal_route(#{route := [{io_bypass_out, _, _, _, _}, FastOut]}) ->
+    FastOut;
+signal_route(#{route := [{io_data_out, _, _, _, _}, Interconnect | _]}) ->
     Interconnect.
 
 %%====================================================================
 %% theory
 %%====================================================================
 
-theory(IOC = {ioc, X, Y, N}, Model) ->
+theory(IOC = {ioc, X, Y, N}, Model, Metric) ->
     case Model of
         #{IOC := #{output4 := Mux4, output3 := Mux3, fast_out := on}} ->
-            theory_col(X, Y, N, Mux4, Mux3);
+            theory_col(X, Y, N, Mux4, Mux3, Metric);
 
         #{IOC := #{output4 := Mux4, output3 := Mux3}} ->
-            theory_col(X, Y, x, Mux4, Mux3);
+            theory_col(X, Y, x, Mux4, Mux3, Metric);
 
         #{IOC := #{output6 := Mux6, output3 := Mux3}} ->
             theory_row(X, Y, Mux6, Mux3);
 
         #{IOC := #{fast_out := on}} ->
-            {io_bypass_out, X, Y, N, 0};
+            ioc_output_mux_map:fast_out(IOC, Metric);
 
         #{IOC := Muxes} ->
             Muxes;
 
         _ ->
-            IOC
+            none
     end.
 
 %%--------------------------------------------------------------------
 
-theory_col(X, Y, FastOut, Mux4, Mux3) ->
+theory_col(X, Y, FastOut, Mux4, Mux3, Metric) ->
     case ioc_output_mux_map:to_col_interconnect(Mux4, Mux3) of
         {interconnect, N} when FastOut =:= x ->
             {local_interconnect, X, Y, 0, N};
 
         fast_out when FastOut =/= x ->
-            {io_bypass_out, X, Y, FastOut, 0}
+            ioc_output_mux_map:fast_out({ioc, X, Y, FastOut}, Metric)
     end.
 
 %%--------------------------------------------------------------------

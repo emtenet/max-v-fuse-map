@@ -75,7 +75,10 @@ contradiction(Density, Key, Fuses0, Signals, Error) ->
 %%--------------------------------------------------------------------
 
 contradiction(Density, Fuse) ->
-    io:format("  ~w~n", [fuse_map:to_location(Fuse, Density)]).
+    io:format("  ~.20w = ~w~n", [
+        fuse_map:to_location(Fuse, Density),
+        fuse_map:to_name(Fuse, Density)
+    ]).
 
 %%====================================================================
 %% fuses

@@ -6,6 +6,8 @@
 -export([to_row_interconnect/2]).
 -export([from_row_interconnect/1]).
 
+-export([fast_out/2]).
+
 -export([mux6s/0]).
 -export([mux4s/0]).
 -export([mux3s/0]).
@@ -141,6 +143,59 @@
 ?ROW_MAPPINGS().
 
 -undef(INTERCONNECT).
+
+%%====================================================================
+%% fast_out
+%%====================================================================
+
+%-spec fast_out(ioc(), density() | #metric{}) -> {le_buffer, x(), y(), _, n()}.
+
+fast_out({ioc, X, Y, N}, Density) ->
+    fast_out(X, Y, N, density:block_type(X, Y, Density)).
+
+%%--------------------------------------------------------------------
+
+fast_out(X, Y, N, row) when X < 2 ->
+    fast_out_left(X, Y, N);
+fast_out(X, Y, N, row) ->
+    fast_out_right(X, Y, N);
+fast_out(X, Y, N, column) when Y > 3 ->
+    fast_out_top(X, Y, N);
+fast_out(X, Y, N, column) ->
+    fast_out_bottom(X, Y, N).
+
+%%--------------------------------------------------------------------
+
+fast_out_left(X, Y, 0) -> {le_buffer, X + 1, Y, 0, 4};
+fast_out_left(X, Y, 1) -> {le_buffer, X + 1, Y, 0, 6};
+fast_out_left(X, Y, 2) -> {le_buffer, X + 1, Y, 0, 8};
+fast_out_left(X, Y, 3) -> {le_buffer, X + 1, Y, 0, 18};
+fast_out_left(X, Y, 4) -> {le_buffer, X + 1, Y, 0, 16};
+fast_out_left(X, Y, 5) -> {le_buffer, X + 1, Y, 0, 14};
+fast_out_left(X, Y, 6) -> {le_buffer, X + 1, Y, 0, 12}.
+
+%%--------------------------------------------------------------------
+
+fast_out_right(X, Y, 0) -> {le_buffer, X - 1, Y, 0, 5};
+fast_out_right(X, Y, 1) -> {le_buffer, X - 1, Y, 0, 7};
+fast_out_right(X, Y, 2) -> {le_buffer, X - 1, Y, 0, 9};
+fast_out_right(X, Y, 3) -> {le_buffer, X - 1, Y, 0, 19};
+fast_out_right(X, Y, 4) -> {le_buffer, X - 1, Y, 0, 17};
+fast_out_right(X, Y, 5) -> {le_buffer, X - 1, Y, 0, 15}.
+
+%%--------------------------------------------------------------------
+
+fast_out_top(X, Y, 0) -> {le_buffer, X, Y - 1, 0, 7};
+fast_out_top(X, Y, 1) -> {le_buffer, X, Y - 1, 0, 5};
+fast_out_top(X, Y, 2) -> {le_buffer, X, Y - 1, 0, 3};
+fast_out_top(X, Y, 3) -> {le_buffer, X, Y - 1, 0, 1}.
+
+%%--------------------------------------------------------------------
+
+fast_out_bottom(X, Y, 0) -> {le_buffer, X, Y + 1, 0, 11};
+fast_out_bottom(X, Y, 1) -> {le_buffer, X, Y + 1, 0, 13};
+fast_out_bottom(X, Y, 2) -> {le_buffer, X, Y + 1, 0, 15};
+fast_out_bottom(X, Y, 3) -> {le_buffer, X, Y + 1, 0, 17}.
 
 %%====================================================================
 %% mux6s
