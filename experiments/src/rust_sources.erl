@@ -12,6 +12,50 @@
     metric :: #metric{}
 }).
 
+% device interconnects
+-define(GLOBAL_INTERCONNECTS, 16#ED).
+-define(JTAG_INTERCONNECTS, 16#EE).
+-define(UFM_INTERCONNECTS, 16#EF).
+
+% block types
+-define(CORNDER_BLOCK, 16#F0).
+-define(COLUMN_BLOCK, 16#F1).
+-define(GROWL_BLOCK, 16#F2).
+-define(LEFT_BLOCK, 16#F3).
+-define(LOGIC_BLOCK, 16#F4).
+-define(RIGHT_BLOCK, 16#F5).
+-define(UFM_BLOCK, 16#F6).
+
+% sub-block types
+-define(C4_INTERCONNECTS, 16#F9)).
+-define(IO_CELLS, 16#FA).
+-define(IO_INTERCONNECTS, 16#FB).
+-define(LOGIC_CELLS, 16#FC).
+-define(LOGIC_CONTROLS, 16#FD).
+-define(LOGIC_INTERCONNECTS, 16#FE).
+-define(R4_INTERCONNECTS, 16#FF).
+
+% ports
+-define(C4_INTERCONNECT, 16#D0).
+-define(GLOBAL, 16#D1).
+-define(IO_COLUMN_CELL, 16#D2).
+-define(IO_COLUMN_INTERCONNECT, 16#D3).
+-define(IO_ROW_CELL, 16#D4).
+-define(IO_ROW_INTERCONNECT, 16#D5).
+-define(JTAG_TCK, 16#D6).
+-define(JTAG_TDI, 16#D7).
+-define(JTAG_TMS, 16#D8).
+-define(LOGIC_CELL_LEFT, 16#D9).
+-define(LOGIC_CELL_LOCAL, 16#DA).
+-define(LOGIC_CELL_RIGHT, 16#DB).
+-define(LOGIC_INTERCONNECT, 16#DC).
+-define(R4_INTERCONNECT, 16#DD).
+-define(UFM_AR_OUT, 16#DE).
+-define(UFM_BUSY, 16#DF).
+-define(UFM_DR_OUT, 16#E0).
+-define(UFM_OSC, 16#E1).
+-define(UNKNOWN, 16#E2).
+
 %%====================================================================
 %% run
 %%====================================================================
@@ -72,37 +116,30 @@ block(X, Y, Db) ->
     Metric = Db#db.metric,
     case density:block_type(X, Y, Metric) of
         column ->
-            block_type(X, Y, <<"IC">>, [
-                io_column_cells(X, Y, Db),
-                io_column_interconnects(X, Y, Db)
-            ]);
+            [<<?COLUMN_BLOCK, X, Y>>,
+             io_column_cells(X, Y, Db),
+             io_column_interconnects(X, Y, Db)
+            ];
         global -> <<>>;
         logic ->
-            block_type(X, Y, <<"LC">>, [
-                logic_cells(X, Y, Db),
-                logic_controls(X, Y, Db),
-                logic_interconnects(X, Y, Db)
-            ]);
+            [<<?LOGIC_BLOCK, X, Y>>,
+             logic_cells(X, Y, Db),
+             logic_controls(X, Y, Db),
+             logic_interconnects(X, Y, Db)
+            ];
         row when X < 2 ->
-            block_type(X, Y, <<"IL">>, [
-                io_row_cells(X, Y, Db),
-                io_row_interconnects(X, Y, Db)
-            ]);
+            [<<?LEFT_BLOCK, X, Y>>,
+             io_row_cells(X, Y, Db),
+             io_row_interconnects(X, Y, Db)
+            ];
         row ->
-            block_type(X, Y, <<"IR">>, [
-                io_row_cells(X, Y, Db),
-                io_row_interconnects(X, Y, Db)
-            ]);
+            [<<?RIGHT_BLOCK, X, Y>>,
+             io_row_cells(X, Y, Db),
+             io_row_interconnects(X, Y, Db)
+            ];
         ufm -> <<>>;
         false -> <<>>
     end.
-
-%%--------------------------------------------------------------------
-
-block_type(X, Y, Type, Block) ->
-    [<< Type/binary, X, Y>>,
-        Block
-    ].
 
 %%====================================================================
 %% io cells
@@ -115,7 +152,7 @@ io_column_cells(X, Y, Db) ->
         IOC <- device:iocs(Db#db.device, {iob, X, Y})
     ],
     C = length(Cells),
-    [<<"CE", C>> | Cells].
+    [<<?IO_CELLS, C>> | Cells].
 
 %%--------------------------------------------------------------------
 
@@ -156,7 +193,7 @@ io_column_cell_source(X, Y, N, fast_out, Db) ->
 %%--------------------------------------------------------------------
 
 io_column_cell_source(X, Y, N, I, From4, From3, Db) ->
-    Port = <<"LI", X, Y, I>>,
+    Port = <<?IO_COLUMN_INTERCONNECT, X, Y, I>>,
     {ok, Mux4, Mux3} = ioc_output_mux_map:from_col_interconnect(
         {interconnect, I}
     ),
@@ -179,7 +216,7 @@ io_row_cells(X, Y, Db) ->
         IOC <- device:iocs(Db#db.device, {iob, X, Y})
     ],
     C = length(Cells),
-    [<<"CE", C>> | Cells].
+    [<<?IO_CELLS, C>> | Cells].
 
 %%--------------------------------------------------------------------
 
@@ -215,7 +252,7 @@ io_row_cell_source(X, Y, N, fast_out, Db) ->
 
 io_row_cell_source(X, Y, N, From6, Mux6, From3, Mux3, Db) ->
     {interconnect, I} = ioc_output_mux_map:to_row_interconnect(Mux6, Mux3),
-    Port = <<"LI", X, Y, I>>,
+    Port = <<?IO_ROW_INTERCONNECT, X, Y, I>>,
     {ok, Fuse0} = fuse_map:from_name(
         {{ioc, X, Y, N}, From6, Mux6},
         Db#db.density
@@ -236,7 +273,7 @@ io_column_interconnects(X, Y, Db) ->
         ||
         I <- lists:seq(0, 9)
     ],
-    [<<"IN", 10>> | Interconnects].
+    [<<?IO_INTERCONNECTS, 10>> | Interconnects].
 
 %%--------------------------------------------------------------------
 
@@ -257,7 +294,7 @@ io_row_interconnects(X, Y, Db) ->
         ||
         I <- lists:seq(0, 17)
     ],
-    [<<"IN", 18>> | Interconnects].
+    [<<?IO_INTERCONNECTS, 18>> | Interconnects].
 
 %%--------------------------------------------------------------------
 
@@ -333,7 +370,7 @@ logic_cells(X, Y, Db) ->
         ||
         N <- lists:seq(0, 9)
     ],
-    [<<"CE", 10>> | Cells].
+    [<<?LOGIC_CELLS, 10>> | Cells].
 
 %%--------------------------------------------------------------------
 
@@ -362,17 +399,17 @@ logic_cell(X, Y, N, Db) ->
         Mux6 <- [mux0, mux1, mux2, mux3, mux4, mux5],
         Mux3 <- [mux0, mux1, mux2]
     ],
-    [<<N>>, InputA, InputB, InputC, InputD].
+    [<<18>>, InputA, <<18>>, InputB, <<18>>, InputC, <<18>>, InputD].
 
 %%--------------------------------------------------------------------
 
 logic_cell_input(X, Y, N, Input, From6, Mux6, From3, Mux3, Db) ->
     Port = case lc_data_mux_map:to_interconnect(Input, Mux6, Mux3) of
         {interconnect, I} ->
-            <<"LI", X, Y, I>>;
+            <<?LOGIC_INTERCONNECT, X, Y, I>>;
 
         {local_line, I} ->
-            <<"LC", X, Y, I>>
+            <<?LOGIC_CELL_LOCAL, X, Y, I>>
     end,
     {ok, Fuse0} = fuse_map:from_name(
         {{lc, X, Y, N}, From6, Mux6},
@@ -394,34 +431,36 @@ logic_controls(X, Y, Db) ->
         ||
         N <- lists:seq(0, 5)
     ],
-    [<<"CO", 6>> | Controls].
+    [<<?LOGIC_CONTROLS, 6>> | Controls].
 
 %%--------------------------------------------------------------------
 
 logic_control(X, Y, N, Db) when N rem 2 =:= 0 ->
-    [
+    Sources = [
         logic_control_input(X, Y, N, data_c, Mux6, Mux3, Db)
         ||
         Mux6 <- [mux0, mux1, mux2, mux3, mux4, mux5],
         Mux3 <- [mux0, mux1, mux2]
-    ];
+    ],
+    [<<18>>, Sources];
 logic_control(X, Y, N, Db) ->
-    [
+    Sources = [
         logic_control_input(X, Y, N, data_d, Mux6, Mux3, Db)
         ||
         Mux6 <- [mux0, mux1, mux2, mux3, mux4, mux5],
         Mux3 <- [mux0, mux1, mux2]
-    ].
+    ],
+    [<<18>>, Sources].
 
 %%--------------------------------------------------------------------
 
 logic_control_input(X, Y, N, Input, Mux6, Mux3, Db) ->
     Port = case lc_data_mux_map:to_interconnect(Input, Mux6, Mux3) of
         {interconnect, I} ->
-            <<"LI", X, Y, I>>;
+            <<?LOGIC_INTERCONNECT, X, Y, I>>;
 
         {local_line, I} ->
-            <<"LC", X, Y, I>>
+            <<?LOGIC_CELL_LOCAL, X, Y, I>>
     end,
     {ok, Fuse0} = fuse_map:from_name(
         {{lab, X, Y}, {control, N}, from6, Mux6},
@@ -443,7 +482,7 @@ logic_interconnects(X, Y, Db) ->
         ||
         I <- lists:seq(0, 25)
     ],
-    [<<"IN", 26>> | Interconnects].
+    [<<?LOGIC_INTERCONNECTS, 26>> | Interconnects].
 
 %%--------------------------------------------------------------------
 
@@ -514,40 +553,40 @@ logic_interconnect_port(X, Y, I, Mux, Db) ->
 %%====================================================================
 
 source_port({c4, X, Y, mux, I}, _) ->
-    <<"C4", X, Y, I>>;
+    <<?C4_INTERCONNECT, X, Y, I>>;
 source_port({io_data_in, X, Y, I, 0}, #db{metric = Metric}) ->
     case density:block_type(X, Y, Metric) of
         column ->
-            <<"IC", X, Y, I>>;
+            <<?IO_COLUMN_CELL, X, Y, I>>;
         row ->
-            <<"IR", X, Y, I>>
+            <<?IO_ROW_CELL, X, Y, I>>
     end;
 source_port({jtag, _X, _Y, tck}, _) ->
-    <<"J-tck">>;
+    <<?JTAG_TCK>>;
 source_port({jtag, _X, _Y, tdi}, _) ->
-    <<"J-tdi">>;
+    <<?JTAG_TDI>>;
 source_port({jtag, _X, _Y, tms}, _) ->
-    <<"J-tms">>;
+    <<?JTAG_TMS>>;
 source_port({lab_clk, _, _, _, I}, _) ->
-    <<"GLOB", I>>;
+    <<?GLOBAL, I>>;
 source_port({le_buffer, X, Y, 0, II}, _) when II rem 2 =:= 0 ->
     I = II div 2,
-    <<"LL", X, Y, I>>;
+    <<?LOGIC_CELL_LEFT, X, Y, I>>;
 source_port({le_buffer, X, Y, 0, II}, _) when II rem 2 =:= 1 ->
     I = II div 2,
-    <<"LR", X, Y, I>>;
+    <<?LOGIC_CELL_RIGHT, X, Y, I>>;
 source_port({r4, X, Y, mux, I}, _) ->
-    <<"R4", X, Y, I>>;
+    <<?R4_INTERCONNECT, X, Y, I>>;
 source_port({ufm, _X, _Y, ar_out}, _) ->
-    <<"U-aro">>;
+    <<?UFM_AR_OUT>>;
 source_port({ufm, _X, _Y, busy}, _) ->
-    <<"U-bus">>;
+    <<?UFM_BUSY>>;
 source_port({ufm, _X, _Y, dr_out}, _) ->
-    <<"U-dro">>;
+    <<?UFM_DR_OUT>>;
 source_port({ufm, _X, _Y, osc}, _) ->
-    <<"U-osc">>;
+    <<?UFM_OSC>>;
 source_port(unknown, _) ->
-    <<"XX",0,0,0>>;
+    <<?UNKNOWN>>;
 source_port(Error, _) ->
     throw(Error).
 

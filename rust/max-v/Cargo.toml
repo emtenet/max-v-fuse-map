@@ -9,4 +9,3 @@ path = "src/max_v.rs"
 [dependencies]
 anyhow = "1.0"
 serde = "1.0"
-toml = "0.8"

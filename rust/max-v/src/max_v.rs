@@ -102,6 +102,12 @@ impl Device {
 #[repr(transparent)]
 pub struct X(pub u8);
 
+impl std::fmt::Display for X {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 impl From<u8> for X {
     fn from(x: u8) -> X {
         X(x)
@@ -170,6 +176,12 @@ impl PartialOrd<u8> for X {
 #[repr(transparent)]
 pub struct Y(pub u8);
 
+impl std::fmt::Display for Y {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 impl From<u8> for Y {
     fn from(y: u8) -> Y {
         Y(y)
@@ -231,6 +243,78 @@ impl PartialOrd<u8> for Y {
 }
 
 #[derive(Copy, Clone)]
+#[derive(Eq, PartialEq)]
+#[repr(transparent)]
+pub struct PinName([u8; 4]);
+
+impl PinName {
+    pub fn as_str(&self) -> &str {
+        let to = usize::from(self.0[0] + 1);
+        unsafe {
+            std::str::from_utf8_unchecked(&self.0[1..to])
+        }
+    }
+
+    fn read(bytes: &[u8]) -> anyhow::Result<(Self, &[u8])> {
+        if let Some((&l, bytes)) = bytes.split_first() {
+            if l < 1 || l > 3 {
+                anyhow::bail!("Pin name length: {l}")
+            }
+            let len = usize::from(l);
+            if let Some((name, bytes)) = bytes.split_at_checked(len) {
+                if std::str::from_utf8(name).is_ok() {
+                    match name {
+                        &[a] => Ok((PinName([1, a, 0, 0]), bytes)),
+                        &[a, b] => Ok((PinName([2, a, b, 0]), bytes)),
+                        &[a, b, c] => Ok((PinName([3, a, b, c]), bytes)),
+                        _ => unreachable!(),
+                    }
+                } else {
+                    anyhow::bail!("Pin name is not utf8")
+                }
+            } else {
+                anyhow::bail!("Pin name past EOF")
+            }
+        } else {
+            anyhow::bail!("Pin name at EOF")
+        }
+    }
+}
+
+impl std::borrow::Borrow<str> for PinName {
+    fn borrow(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl Default for PinName {
+    fn default() -> Self {
+        PinName([1, b'?', 0, 0])
+    }
+}
+
+impl std::fmt::Debug for PinName {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "PinName({})", self.as_str())
+    }
+}
+
+impl std::fmt::Display for PinName {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
+impl std::hash::Hash for PinName {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: std::hash::Hasher,
+    {
+        self.as_str().hash(state)
+    }
+}
+
+#[derive(Copy, Clone)]
 #[derive(Default)]
 #[derive(Debug)]
 #[derive(Eq, PartialEq)]
@@ -243,6 +327,12 @@ pub enum Port {
     Global {
         global: Global,
     },
+    IOColumnCellInput {
+        x: X,
+        y: Y,
+        n: IOColumnCellNumber,
+        input: IOCellInput,
+    },
     IOColumnCellOutput {
         x: X,
         y: Y,
@@ -252,6 +342,12 @@ pub enum Port {
         x: X,
         y: Y,
         i: IOColumnInterconnectIndex,
+    },
+    IORowCellInput {
+        x: X,
+        y: Y,
+        n: IORowCellNumber,
+        input: IOCellInput,
     },
     IORowCellOutput {
         x: X,

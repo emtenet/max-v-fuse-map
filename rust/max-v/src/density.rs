@@ -565,6 +565,26 @@ impl DensityLayout {
             None
         }
     }
+
+    pub fn io_column_block(&self, x: X, y: Y) -> bool {
+        match self.io_block(x, y) {
+            Some(DensityIOBlock::Top) |
+            Some(DensityIOBlock::Bottom) =>
+                true,
+            _ =>
+                false,
+        }
+    }
+
+    pub fn io_row_block(&self, x: X, y: Y) -> bool {
+        match self.io_block(x, y) {
+            Some(DensityIOBlock::Left) |
+            Some(DensityIOBlock::Right) =>
+                true,
+            _ =>
+                false,
+        }
+    }
 }
 
 #[derive(Copy, Clone)]

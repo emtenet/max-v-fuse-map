@@ -1,63 +1,86 @@
 use std::collections::HashMap;
-use std::path::Path;
 
 use crate::{
     Control,
-    DensityLayout,
     Device,
-    Fuse,
     IOColumnCellNumber,
     IOColumnInterconnectIndex,
     IORowCellNumber,
     IORowInterconnectIndex,
-    LogicBlockFuse,
-    LogicBlockControlFuse,
-    LogicCellFuse,
     LogicCellInput,
-    LogicCellSourceFuse,
     LogicCellNumber,
-    LogicCellOutput,
     LogicInterconnectIndex,
+    PinName,
     Port,
-    Select3,
-    Select6,
     X,
     Y,
 };
 
-mod de;
+mod read;
 
 pub struct DeviceSources {
     pub device: Device,
     blocks: [[Block; 15]; 22],
     //global: [Interconnect<18>; 4],
     //jtag: JTAG,
-    pins: HashMap<String, PinSource>,
+    pins: HashMap<PinName, PinSource>,
     //ufm: UFM,
 }
 
 impl DeviceSources {
-    pub fn read(path: impl AsRef<Path>) -> anyhow::Result<Self> {
-        let toml = std::fs::read_to_string(path)?;
-        Ok(toml::from_str(&toml)?)
-    }
-
     fn block(&self, x: X, y: Y) -> Option<&Block> {
         self.blocks.get(x.0 as usize)
             .and_then(|col| col.get(y.0 as usize))
     }
 
+    pub fn io_column_cell(
+        &self, x: X, y: Y,
+        n: IOColumnCellNumber,
+    ) -> Option<IOColumnCellSources> {
+        if let Some(Block::Column(block)) = self.block(x, y) {
+            if let Some(io_cell) = &block.io_cells[n.index()] {
+                Some(IOColumnCellSources { io_cell })
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
     pub fn io_column_interconnect(
         &self, x: X, y: Y,
         i: IOColumnInterconnectIndex,
-    )
-        -> Option<InterconnectSources>
-    {
+    ) -> Option<InterconnectSources> {
         if let Some(Block::Column(block)) = self.block(x, y) {
             let interconnect = &block.io_interconnects[i.index()];
             Some(interconnect.sources())
         } else {
             None
+        }
+    }
+
+    pub fn io_row_cell(
+        &self, x: X, y: Y,
+        n: IORowCellNumber,
+    ) -> Option<IORowCellSources> {
+        match self.block(x, y) {
+            Some(Block::Left(block)) =>
+                if let Some(io_cell) = &block.io_cells[n.index()] {
+                    Some(IORowCellSources { io_cell })
+                } else {
+                    None
+                },
+
+            Some(Block::Right(block)) =>
+                if let Some(io_cell) = &block.io_cells[n.index()] {
+                    Some(IORowCellSources { io_cell })
+                } else {
+                    None
+                },
+
+            _ =>
+                None,
         }
     }
 
@@ -122,8 +145,55 @@ impl DeviceSources {
             None
         }
     }
+
+    pub fn pins(&self) -> impl Iterator<Item = (&PinName, &PinSource)> {
+        self.pins.iter()
+    }
+
+    pub fn pin(&self, name: &str) -> Option<PinSource> {
+        self.pins.get(name).cloned()
+    }
 }
 
+#[derive(Copy, Clone)]
+pub struct IOColumnCellSources<'d> {
+    io_cell: &'d IOColumnCell,
+}
+
+impl<'d> IOColumnCellSources<'d> {
+    pub fn enable(&self) -> InterconnectSources<'d> {
+        self.io_cell.enable.sources()
+    }
+
+    pub fn pin_name(&self) -> PinName {
+        self.io_cell.pin_name
+    }
+
+    pub fn output(&self) -> InterconnectSources<'d> {
+        self.io_cell.output.sources()
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct IORowCellSources<'d> {
+    io_cell: &'d IORowCell,
+}
+
+impl<'d> IORowCellSources<'d> {
+    pub fn enable(&self) -> InterconnectSources<'d> {
+        self.io_cell.enable.sources()
+    }
+
+    pub fn pin_name(&self) -> PinName {
+        self.io_cell.pin_name
+    }
+
+    pub fn output(&self) -> InterconnectSources<'d> {
+        self.io_cell.output.sources()
+    }
+}
+
+#[derive(Copy, Clone)]
 pub struct InterconnectSources<'d> {
     port: Port,
     sources: &'d [Source],
@@ -162,7 +232,9 @@ impl<'d> Iterator for InterconnectSourcesIter<'d> {
     }
 }
 
+#[derive(Copy, Clone)]
 #[derive(Debug)]
+#[derive(Eq, PartialEq)]
 pub enum PinSource {
     Column {
         x: X,
@@ -206,13 +278,24 @@ enum Block {
 
 #[derive(Copy, Clone)]
 #[derive(Debug)]
-#[derive(Default)]
-struct Interconnect<T> {
+struct Interconnect<const N: usize> {
     port: Port,
-    sources: T,
+    sources: [Source; N],
 }
 
-impl<const N: usize> Interconnect<[Source; N]> {
+impl<const N: usize> Default for Interconnect<N>
+where
+    [Source; N]: Default,
+{
+    fn default() -> Self {
+        Interconnect {
+            port: Default::default(),
+            sources: Default::default(),
+        }
+    }
+}
+
+impl<const N: usize> Interconnect<N> {
     fn sources(&self) -> InterconnectSources {
         InterconnectSources {
             port: self.port,
@@ -222,8 +305,8 @@ impl<const N: usize> Interconnect<[Source; N]> {
 }
 
 enum InterconnectRef<'d> {
-    Normal(&'d Interconnect<[Source; 13]>),
-    Global(&'d Interconnect<[Source; 16]>),
+    Normal(&'d Interconnect<13>),
+    Global(&'d Interconnect<16>),
 }
 
 impl<'d> InterconnectRef<'d> {
@@ -236,8 +319,8 @@ impl<'d> InterconnectRef<'d> {
 }
 
 enum InterconnectMut<'d> {
-    Normal(&'d mut Interconnect<[Source; 13]>),
-    Global(&'d mut Interconnect<[Source; 16]>),
+    Normal(&'d mut Interconnect<13>),
+    Global(&'d mut Interconnect<16>),
 }
 
 #[derive(Copy, Clone)]
@@ -245,7 +328,7 @@ enum InterconnectMut<'d> {
 #[derive(Default)]
 struct Source {
     port: Port,
-    fuse: [usize; 2],
+    fuse: [usize; 3],
 }
 
 //  IO
@@ -254,55 +337,62 @@ struct Source {
 #[derive(Default)]
 struct ColumnBlock {
     //c4_interconnects: [Interconnect_; 14],
-    io_cells: [Option<IOCell>; 4],
-    io_interconnects: [Interconnect<[Source; 12]>; 10],
+    io_cells: [Option<IOColumnCell>; 4],
+    io_interconnects: [Interconnect<12>; 10],
 }
 
 #[derive(Default)]
 struct LeftBlock {
     //c4_interconnects: [Interconnect_; 14],
-    io_cells: [Option<IOCell>; 7],
-    io_interconnects: IOInterconnects,
+    io_cells: [Option<IORowCell>; 7],
+    io_interconnects: IORowInterconnects,
     //r4_interconnects: [Interconnect_; 16],
 }
 
 #[derive(Default)]
 struct RightBlock {
-    io_cells: [Option<IOCell>; 7],
-    io_interconnects: IOInterconnects,
+    io_cells: [Option<IORowCell>; 7],
+    io_interconnects: IORowInterconnects,
     //r4_interconnects: [Interconnect_; 16],
 }
 
 #[derive(Default)]
-struct IOCell {
-    enable: Interconnect<[Source; 18]>,
-    name: String,
-    output: Interconnect<[Source; 18]>,
+struct IOColumnCell {
+    enable: Interconnect<10>,
+    pin_name: PinName,
+    output: Interconnect<11>,
 }
 
 #[derive(Default)]
-struct IOInterconnects(
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 16]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 16]>,
+struct IORowCell {
+    enable: Interconnect<18>,
+    pin_name: PinName,
+    output: Interconnect<19>,
+}
+
+#[derive(Default)]
+struct IORowInterconnects(
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<16>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<16>,
 );
 
-impl IOInterconnects {
+impl IORowInterconnects {
     fn get(&self, i: IORowInterconnectIndex) -> InterconnectRef {
         use IORowInterconnectIndex::*;
         use InterconnectRef::*;
@@ -363,135 +453,48 @@ impl IOInterconnects {
 struct LogicBlock {
     //c4_interconnect: [Interconnect<13>; 14],
     logic_cells: [LogicCell; 10],
-    logic_controls: [Interconnect<[Source; 18]>; 6],
+    logic_controls: [Interconnect<18>; 6],
     logic_interconnects: LogicInterconnects,
     //r4_interconnect: [Interconnect<13>; 16],
 }
 
 #[derive(Default)]
 struct LogicCell {
-    input_a: Interconnect<[Source; 18]>,
-    input_b: Interconnect<[Source; 18]>,
-    input_c: Interconnect<[Source; 18]>,
-    input_d: Interconnect<[Source; 18]>,
+    input_a: Interconnect<18>,
+    input_b: Interconnect<18>,
+    input_c: Interconnect<18>,
+    input_d: Interconnect<18>,
 }
 
 #[derive(Default)]
 struct LogicInterconnects(
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 16]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 13]>,
-    Interconnect<[Source; 16]>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<16>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<13>,
+    Interconnect<16>,
 );
-
-impl LogicBlock {
-    fn new(x: X, y: Y, density: &DensityLayout) -> Self {
-        use Control::*;
-
-        let mut block = LogicBlock::default();
-
-        for n in LogicCellNumber::iter() {
-            let cell = &mut block.logic_cells[n.index()];
-            for input in LogicCellInput::iter() {
-                let interconnect = match input {
-                    LogicCellInput::A => &mut cell.input_a,
-                    LogicCellInput::B => &mut cell.input_b,
-                    LogicCellInput::C => &mut cell.input_c,
-                    LogicCellInput::D => &mut cell.input_d,
-                };
-                interconnect.port = Port::LogicCellInput { x, y, n, input };
-                for select6 in Select6::iter() {
-                    for select3 in Select3::iter() {
-                        let source = &mut interconnect.sources[
-                            (select6.index() * 3) + select3.index()
-                        ];
-                        source.port = match input {
-                            LogicCellInput::A =>
-                                logic_input_a(x, y, select6, select3),
-                            LogicCellInput::B =>
-                                logic_input_b(x, y, select6, select3),
-                            LogicCellInput::C =>
-                                logic_input_c(x, y, select6, select3),
-                            LogicCellInput::D =>
-                                logic_input_d(x, y, select6, select3),
-                        };
-                        source.fuse[0] = Fuse::LogicCell {
-                            x, y, n,
-                            fuse: LogicCellFuse::Input {
-                                input,
-                                fuse: LogicCellSourceFuse::Source6(select6),
-                            },
-                        }.to_index(density).unwrap();
-                        source.fuse[1] = Fuse::LogicCell {
-                            x, y, n,
-                            fuse: LogicCellFuse::Input {
-                                input,
-                                fuse: LogicCellSourceFuse::Source3(select3),
-                            },
-                        }.to_index(density).unwrap();
-                    }
-                }
-            }
-        }
-
-        for control in Control::iter() {
-            let interconnect = &mut block.logic_controls[control.index()];
-            interconnect.port = Port::LogicControl { x, y, control };
-            for select6 in Select6::iter() {
-                for select3 in Select3::iter() {
-                    let source = &mut interconnect.sources[
-                        (select6.index() * 3) + select3.index()
-                    ];
-                    match control {
-                        Control0 | Control2 | Control4 =>
-                            source.port = logic_input_c(x, y, select6, select3),
-
-                        Control1 | Control3 | Control5 =>
-                            source.port = logic_input_d(x, y, select6, select3),
-                    }
-                    source.fuse[0] = Fuse::LogicBlock {
-                        x, y,
-                        fuse: LogicBlockFuse::Control {
-                            control,
-                            fuse: LogicBlockControlFuse::Source6(select6),
-                        },
-                    }.to_index(density).unwrap();
-                    source.fuse[1] = Fuse::LogicBlock {
-                        x, y,
-                        fuse: LogicBlockFuse::Control {
-                            control,
-                            fuse: LogicBlockControlFuse::Source3(select3),
-                        },
-                    }.to_index(density).unwrap();
-                }
-            }
-        }
-
-        block
-    }
-}
 
 impl LogicInterconnects {
     fn get(&self, i: LogicInterconnectIndex) -> InterconnectRef {
@@ -560,217 +563,6 @@ impl LogicInterconnects {
             LogicInterconnect24 => Normal(&mut self.24),
             LogicInterconnect25 => Global(&mut self.25),
         }
-    }
-}
-
-//  Logic
-// =======
-
-fn logic_input_a(
-    x: X,
-    y: Y,
-    select6: Select6,
-    select3: Select3,
-) -> Port {
-    use LogicCellNumber::*;
-    use LogicCellOutput::*;
-    use LogicInterconnectIndex::*;
-    use Select3::*;
-    use Select6::*;
-
-    match (select6, select3) {
-        (Select6_0, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect0 },
-        (Select6_0, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect3 },
-        (Select6_0, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect8 },
-        (Select6_1, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect1 },
-        (Select6_1, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect6 },
-        (Select6_1, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect15 },
-        (Select6_2, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect9 },
-        (Select6_2, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect11 },
-        (Select6_2, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect14 },
-        (Select6_3, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect18 },
-        (Select6_3, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect22 },
-        (Select6_3, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect25 },
-        (Select6_4, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect19 },
-        (Select6_4, Select3_1) =>
-            Port::LogicCellOutput { x, y, n: LogicCell3, output: Local },
-        (Select6_4, Select3_2) =>
-            Port::LogicCellOutput { x, y, n: LogicCell8, output: Local },
-        (Select6_5, Select3_0) =>
-            Port::LogicCellOutput { x, y, n: LogicCell4, output: Local },
-        (Select6_5, Select3_1) =>
-            Port::LogicCellOutput { x, y, n: LogicCell5, output: Local },
-        (Select6_5, Select3_2) =>
-            Port::LogicCellOutput { x, y, n: LogicCell6, output: Local },
-    }
-}
-
-fn logic_input_b(
-    x: X,
-    y: Y,
-    select6: Select6,
-    select3: Select3,
-) -> Port {
-    use LogicCellNumber::*;
-    use LogicCellOutput::*;
-    use LogicInterconnectIndex::*;
-    use Select3::*;
-    use Select6::*;
-
-    match (select6, select3) {
-        (Select6_0, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect2 },
-        (Select6_0, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect7 },
-        (Select6_0, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect17 },
-        (Select6_1, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect4 },
-        (Select6_1, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect5 },
-        (Select6_1, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect10 },
-        (Select6_2, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect12 },
-        (Select6_2, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect13 },
-        (Select6_2, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect16 },
-        (Select6_3, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect20 },
-        (Select6_3, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect23 },
-        (Select6_3, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect24 },
-        (Select6_4, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect21 },
-        (Select6_4, Select3_1) =>
-            Port::LogicCellOutput { x, y, n: LogicCell0, output: Local },
-        (Select6_4, Select3_2) =>
-            Port::LogicCellOutput { x, y, n: LogicCell7, output: Local },
-        (Select6_5, Select3_0) =>
-            Port::LogicCellOutput { x, y, n: LogicCell1, output: Local },
-        (Select6_5, Select3_1) =>
-            Port::LogicCellOutput { x, y, n: LogicCell2, output: Local },
-        (Select6_5, Select3_2) =>
-            Port::LogicCellOutput { x, y, n: LogicCell9, output: Local },
-    }
-}
-
-fn logic_input_c(
-    x: X,
-    y: Y,
-    select6: Select6,
-    select3: Select3,
-) -> Port {
-    use LogicCellNumber::*;
-    use LogicCellOutput::*;
-    use LogicInterconnectIndex::*;
-    use Select3::*;
-    use Select6::*;
-
-    match (select6, select3) {
-        (Select6_0, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect0 },
-        (Select6_0, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect3 },
-        (Select6_0, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect8 },
-        (Select6_1, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect2 },
-        (Select6_1, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect7 },
-        (Select6_1, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect17 },
-        (Select6_2, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect9 },
-        (Select6_2, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect11 },
-        (Select6_2, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect14 },
-        (Select6_3, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect18 },
-        (Select6_3, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect22 },
-        (Select6_3, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect25 },
-        (Select6_4, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect21 },
-        (Select6_4, Select3_1) =>
-            Port::LogicCellOutput { x, y, n: LogicCell0, output: Local },
-        (Select6_4, Select3_2) =>
-            Port::LogicCellOutput { x, y, n: LogicCell7, output: Local },
-        (Select6_5, Select3_0) =>
-            Port::LogicCellOutput { x, y, n: LogicCell4, output: Local },
-        (Select6_5, Select3_1) =>
-            Port::LogicCellOutput { x, y, n: LogicCell5, output: Local },
-        (Select6_5, Select3_2) =>
-            Port::LogicCellOutput { x, y, n: LogicCell6, output: Local },
-    }
-}
-
-fn logic_input_d(
-    x: X,
-    y: Y,
-    select6: Select6,
-    select3: Select3,
-) -> Port {
-    use LogicCellNumber::*;
-    use LogicCellOutput::*;
-    use LogicInterconnectIndex::*;
-    use Select3::*;
-    use Select6::*;
-
-    match (select6, select3) {
-        (Select6_0, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect1 },
-        (Select6_0, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect6 },
-        (Select6_0, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect15 },
-        (Select6_1, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect4 },
-        (Select6_1, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect5 },
-        (Select6_1, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect10 },
-        (Select6_2, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect12 },
-        (Select6_2, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect13 },
-        (Select6_2, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect16 },
-        (Select6_3, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect20 },
-        (Select6_3, Select3_1) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect23 },
-        (Select6_3, Select3_2) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect24 },
-        (Select6_4, Select3_0) =>
-            Port::LogicInterconnect { x, y, i: LogicInterconnect19 },
-        (Select6_4, Select3_1) =>
-            Port::LogicCellOutput { x, y, n: LogicCell3, output: Local },
-        (Select6_4, Select3_2) =>
-            Port::LogicCellOutput { x, y, n: LogicCell8, output: Local },
-        (Select6_5, Select3_0) =>
-            Port::LogicCellOutput { x, y, n: LogicCell1, output: Local },
-        (Select6_5, Select3_1) =>
-            Port::LogicCellOutput { x, y, n: LogicCell2, output: Local },
-        (Select6_5, Select3_2) =>
-            Port::LogicCellOutput { x, y, n: LogicCell9, output: Local },
     }
 }
 

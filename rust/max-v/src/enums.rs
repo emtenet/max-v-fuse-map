@@ -50,6 +50,15 @@ enumerated! {
 }
 
 enumerated! {
+    enum IOCellInput {
+        Enable,
+        Output,
+    }
+    struct IOCellInputOutOfRange ;
+    struct IOCellInputs : Iterator ;
+}
+
+enumerated! {
     enum IOColumnCellNumber {
         IOColumnCell0,
         IOColumnCell1,

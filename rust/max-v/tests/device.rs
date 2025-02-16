@@ -1,11 +1,13 @@
 use max_v::*;
 use Control::*;
+use IOColumnCellNumber::*;
+use IORowCellNumber::*;
 use LogicCellNumber::*;
 use LogicInterconnectIndex::*;
 
 #[test]
 fn max_v_40z_e64() {
-    let device = DeviceSources::read("../device/max_v_40z_e64.toml").unwrap();
+    let device = DeviceSources::read("../device/max_v_40z_e64.sources").unwrap();
 
     // logic-cell (a)
     let interconnect = device.logic_cell(
@@ -87,25 +89,50 @@ fn max_v_40z_e64() {
         },
         sources.last().unwrap().1,
     );
+
+    assert_eq!(
+        Some(PinSource::Row {
+            x: X(1), y: Y(3), n: IORowCell3,
+        }),
+        device.pin("7"),
+    );
+    assert_eq!(
+        "7",
+        device.io_row_cell(X(1), Y(3), IORowCell3).unwrap()
+            .pin_name().as_str(),
+    );
 }
 
 #[test]
 fn max_v_160z_t100() {
-    let _ = DeviceSources::read("../device/max_v_160z_t100.toml").unwrap();
+    let device = DeviceSources::read("../device/max_v_160z_t100.sources")
+        .unwrap();
+
+    assert_eq!(
+        Some(PinSource::Column {
+            x: X(2), y: Y(0), n: IOColumnCell2,
+        }),
+        device.pin("27"),
+    );
+    assert_eq!(
+        "27",
+        device.io_column_cell(X(2), Y(0), IOColumnCell2).unwrap()
+            .pin_name().as_str(),
+    );
 }
 
 #[test]
 fn max_v_240z_t144() {
-    let _ = DeviceSources::read("../device/max_v_240z_t144.toml").unwrap();
+    let _ = DeviceSources::read("../device/max_v_240z_t144.sources").unwrap();
 }
 
 #[test]
 fn max_v_570z_t100() {
-    let _ = DeviceSources::read("../device/max_v_570z_t100.toml").unwrap();
+    let _ = DeviceSources::read("../device/max_v_570z_t100.sources").unwrap();
 }
 
 #[test]
 fn max_v_1270z_t144() {
-    let _ = DeviceSources::read("../device/max_v_1270z_t144.toml").unwrap();
+    let _ = DeviceSources::read("../device/max_v_1270z_t144.sources").unwrap();
 }
 
