@@ -1,13 +1,77 @@
 use max_v::*;
 use Control::*;
+use C4InterconnectIndex::*;
 use IOColumnCellNumber::*;
 use IORowCellNumber::*;
 use LogicCellNumber::*;
 use LogicInterconnectIndex::*;
 
+macro_rules! assert_c4_interconnect {
+    {$device:ident ( $x:literal, $y:literal, $n:ident) => $port:expr} => {{
+        let interconnect = $device.c4_interconnect(
+            X($x), Y($y), $n,
+        ).unwrap();
+        let mut sources = interconnect.sources();
+        assert_eq!($port, sources.next().unwrap().1);
+    }};
+}
+
+macro_rules! io_column {
+    ($x:literal, $y:literal, $n:ident) => {
+        Port::IOColumnCellOutput { x: X($x), y: Y($y), n: $n }
+    };
+}
+
+macro_rules! io_row {
+    ($x:literal, $y:literal, $n:ident) => {
+        Port::IORowCellOutput { x: X($x), y: Y($y), n: $n }
+    };
+}
+
+macro_rules! logic_cell {
+    ($x:literal, $y:literal, $n:ident, $output:ident) => {
+        Port::LogicCellOutput {
+            x: X($x), y: Y($y), n: $n, output: LogicCellOutput::$output
+        }
+    };
+}
+
 #[test]
 fn max_v_40z_e64() {
-    let device = DeviceSources::read("../device/max_v_40z_e64.sources").unwrap();
+    let device = DeviceSources::read("../device/max_v_40z_e64.sources")
+        .unwrap();
+
+    assert_c4_interconnect! { // top left
+        device(1, 5, C4Interconnect11) => io_column!(2, 5, IOColumnCell2)
+    }
+
+    assert_c4_interconnect! { // top
+        device(3, 5, C4Interconnect2) => io_column!(3, 5, IOColumnCell3)
+    }
+
+    assert_c4_interconnect! { // top right
+        device(7, 5, C4Interconnect1) => io_column!(7, 5, IOColumnCell3)
+    }
+
+    assert_c4_interconnect! { // left
+        device(1, 4, C4Interconnect7) => io_row!(1, 4, IORowCell0)
+    }
+
+    assert_c4_interconnect! { // logic
+        device(5, 2, C4Interconnect1) => logic_cell!(6, 2, LogicCell1, Left)
+    }
+
+    assert_c4_interconnect! { // bottom left
+        device(1, 0, C4Interconnect11) => io_column!(2, 0, IOColumnCell3)
+    }
+
+    assert_c4_interconnect! { // bottom
+        device(4, 0, C4Interconnect9) => io_column!(4, 0, IOColumnCell2)
+    }
+
+    assert_c4_interconnect! { // bottom right
+        device(7, 0, C4Interconnect7) => io_column!(7, 0, IOColumnCell1)
+    }
 
     // logic-cell (a)
     let interconnect = device.logic_cell(
@@ -128,7 +192,32 @@ fn max_v_240z_t144() {
 
 #[test]
 fn max_v_570z_t100() {
-    let _ = DeviceSources::read("../device/max_v_570z_t100.sources").unwrap();
+    let device = DeviceSources::read("../device/max_v_570z_t100.sources")
+        .unwrap();
+
+    assert_c4_interconnect! { // bottom left
+        device(0, 3, C4Interconnect3) => io_column!(1, 3, IOColumnCell3)
+    }
+
+    assert_c4_interconnect! { // grow 3
+        device(9, 3, C4Interconnect11) => logic_cell!(10, 3, LogicCell6, Left)
+    }
+
+    assert_c4_interconnect! { // grow 2
+        device(9, 2, C4Interconnect6) => logic_cell!(10, 2, LogicCell8, Left)
+    }
+
+    assert_c4_interconnect! { // grow 1
+        device(9, 1, C4Interconnect0) => logic_cell!(10, 1, LogicCell0, Left)
+    }
+
+    assert_c4_interconnect! { // grow corner
+        device(9, 0, C4Interconnect12) => io_column!(10, 0, IOColumnCell2)
+    }
+
+    assert_c4_interconnect! { // bottom right
+        device(12, 0, C4Interconnect7) => io_column!(12, 0, IOColumnCell1)
+    }
 }
 
 #[test]

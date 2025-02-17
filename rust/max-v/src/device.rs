@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     Control,
+    C4InterconnectIndex,
     Device,
     IOColumnCellNumber,
     IOColumnInterconnectIndex,
@@ -31,6 +32,45 @@ impl DeviceSources {
     fn block(&self, x: X, y: Y) -> Option<&Block> {
         self.blocks.get(x.0 as usize)
             .and_then(|col| col.get(y.0 as usize))
+    }
+
+    pub fn c4_interconnect(&self, x: X, y: Y, i: C4InterconnectIndex)
+        -> Option<InterconnectSources>
+    {
+        match self.block(x, y) {
+            Some(Block::Column(block)) => {
+                let interconnect = &block.c4_interconnects.0[i.index()];
+                interconnect.sources()
+            }
+
+            Some(Block::Corner(block)) => {
+                let interconnect = &block.c4_interconnects.0[i.index()];
+                interconnect.sources()
+            }
+
+            Some(Block::Grow(block)) => {
+                let interconnect = &block.c4_interconnects[i.index()];
+                Some(interconnect.sources())
+            }
+
+            Some(Block::Left(block)) => {
+                let interconnect = &block.c4_interconnects[i.index()];
+                Some(interconnect.sources())
+            }
+
+            Some(Block::Logic(block)) => {
+                let interconnect = &block.c4_interconnects[i.index()];
+                Some(interconnect.sources())
+            }
+
+            Some(Block::UFM(block)) => {
+                let interconnect = &block.c4_interconnects[i.index()];
+                Some(interconnect.sources())
+            }
+
+            _ =>
+                None,
+        }
     }
 
     pub fn io_column_cell(
@@ -255,22 +295,13 @@ pub enum PinSource {
 enum Block {
     #[default]
     Blank,
-    //Corner {
-    //    c4_interconnects: [Interconnect_; 14],
-    //},
     Column(Box<ColumnBlock>),
+    Corner(Box<CornerBlock>),
+    Grow(Box<GrowBlock>),
     Left(Box<LeftBlock>),
     Right(Box<RightBlock>),
     Logic(Box<LogicBlock>),
-    //UFM {
-    //    c4_interconnects: [Interconnect_; 14],
-    //    r4_interconnects: [Interconnect_; 16],
-    //    ufm_interconnects: [Interconnect_; 10],
-    //},
-    //Grow {
-    //    c4_interconnects: [Interconnect_; 14],
-    //    r4_interconnects: [Interconnect_; 16],
-    //},
+    UFM(Box<UFMBlock>),
 }
 
 //  Interconnect
@@ -331,19 +362,74 @@ struct Source {
     fuse: [usize; 3],
 }
 
+//  Block
+// =======
+
+#[derive(Default)]
+struct CornerBlock {
+    c4_interconnects: C4ColumnInterconnects,
+}
+
+#[derive(Default)]
+struct GrowBlock {
+    c4_interconnects: [Interconnect<13>; 14],
+    //r4_interconnects: [Interconnect_; 16],
+}
+
+#[derive(Default)]
+struct UFMBlock {
+    c4_interconnects: [Interconnect<13>; 14],
+    //r4_interconnects: [Interconnect_; 16],
+    //ufm_interconnects: [Interconnect_; 10],
+}
+
+#[derive(Default)]
+struct C4ColumnInterconnects([C4ColumnInterconnect; 14]);
+
+#[derive(Default)]
+enum C4ColumnInterconnect {
+    #[default]
+    None,
+    One(Interconnect<1>),
+    Two(Interconnect<2>),
+}
+
+impl C4ColumnInterconnect {
+    fn is_some(&self) -> bool {
+        if let C4ColumnInterconnect::None = self {
+            false
+        } else {
+            true
+        }
+    }
+
+    fn sources(&self) -> Option<InterconnectSources> {
+        match self {
+            C4ColumnInterconnect::None =>
+                None,
+
+            C4ColumnInterconnect::One(interconnect) =>
+                Some(interconnect.sources()),
+
+            C4ColumnInterconnect::Two(interconnect) =>
+                Some(interconnect.sources()),
+        }
+    }
+}
+
 //  IO
 // ====
 
 #[derive(Default)]
 struct ColumnBlock {
-    //c4_interconnects: [Interconnect_; 14],
+    c4_interconnects: C4ColumnInterconnects,
     io_cells: [Option<IOColumnCell>; 4],
     io_interconnects: [Interconnect<12>; 10],
 }
 
 #[derive(Default)]
 struct LeftBlock {
-    //c4_interconnects: [Interconnect_; 14],
+    c4_interconnects: [Interconnect<13>; 14],
     io_cells: [Option<IORowCell>; 7],
     io_interconnects: IORowInterconnects,
     //r4_interconnects: [Interconnect_; 16],
@@ -451,11 +537,11 @@ impl IORowInterconnects {
 
 #[derive(Default)]
 struct LogicBlock {
-    //c4_interconnect: [Interconnect<13>; 14],
+    c4_interconnects: [Interconnect<13>; 14],
     logic_cells: [LogicCell; 10],
     logic_controls: [Interconnect<18>; 6],
     logic_interconnects: LogicInterconnects,
-    //r4_interconnect: [Interconnect<13>; 16],
+    //r4_interconnects: [Interconnect<13>; 16],
 }
 
 #[derive(Default)]

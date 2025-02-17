@@ -7,6 +7,7 @@
 -record(db, {
     density :: atom(),
     device :: atom(),
+    c4s :: c4_interconnect_mux_database:blocks(),
     iobs :: iob_interconnect_mux_database:blocks(),
     labs :: lab_interconnect_mux_database:blocks(),
     metric :: #metric{}
@@ -18,16 +19,16 @@
 -define(UFM_INTERCONNECTS, 16#EF).
 
 % block types
--define(CORNDER_BLOCK, 16#F0).
+-define(CORNER_BLOCK, 16#F0).
 -define(COLUMN_BLOCK, 16#F1).
--define(GROWL_BLOCK, 16#F2).
+-define(GROW_BLOCK, 16#F2).
 -define(LEFT_BLOCK, 16#F3).
 -define(LOGIC_BLOCK, 16#F4).
 -define(RIGHT_BLOCK, 16#F5).
 -define(UFM_BLOCK, 16#F6).
 
 % sub-block types
--define(C4_INTERCONNECTS, 16#F9)).
+-define(C4_INTERCONNECTS, 16#F9).
 -define(IO_CELLS, 16#FA).
 -define(IO_INTERCONNECTS, 16#FB).
 -define(LOGIC_CELLS, 16#FC).
@@ -81,11 +82,13 @@ device(Device) ->
 db(Device) ->
     Density = device:density(Device),
     Metric = density:metric(Density),
+    {ok, C4s} = c4_interconnect_mux_database:open(Density),
     {ok, LABs} = lab_interconnect_mux_database:open(Density),
     {ok, IOBs} = iob_interconnect_mux_database:open(Density),
     #db{
         density = Density,
         device = Device,
+        c4s = C4s,
         iobs = IOBs,
         labs = LABs,
         metric = Metric
@@ -117,18 +120,24 @@ block(X, Y, Db) ->
     case density:block_type(X, Y, Metric) of
         column ->
             [<<?COLUMN_BLOCK, X, Y>>,
+             c4_io_interconnects(X, Y, Db),
              io_column_cells(X, Y, Db),
              io_column_interconnects(X, Y, Db)
             ];
-        global -> <<>>;
+        global ->
+            [<<?UFM_BLOCK, X, Y>>,
+             c4_interconnects(X, Y, Db)
+            ];
         logic ->
             [<<?LOGIC_BLOCK, X, Y>>,
+             c4_interconnects(X, Y, Db),
              logic_cells(X, Y, Db),
              logic_controls(X, Y, Db),
              logic_interconnects(X, Y, Db)
             ];
         row when X < 2 ->
             [<<?LEFT_BLOCK, X, Y>>,
+             c4_interconnects(X, Y, Db),
              io_row_cells(X, Y, Db),
              io_row_interconnects(X, Y, Db)
             ];
@@ -137,8 +146,141 @@ block(X, Y, Db) ->
              io_row_cells(X, Y, Db),
              io_row_interconnects(X, Y, Db)
             ];
-        ufm -> <<>>;
+        ufm ->
+            [<<?UFM_BLOCK, X, Y>>,
+             c4_interconnects(X, Y, Db)
+            ];
+        false when X =:= Metric#metric.left_io andalso
+                   Y =:= Metric#metric.top_io ->
+            [<<?CORNER_BLOCK, X, Y>>,
+             c4_io_interconnects(X, Y, [], [9, 10, 11, 12, 13], Db)
+            ];
+        false when X =:= Metric#metric.left_io andalso
+                   Y =:= Metric#metric.indent_bottom_io ->
+            [<<?CORNER_BLOCK, X, Y>>,
+             c4_io_interconnects(X, Y, [], [3, 10, 11, 12, 13], Db)
+            ];
+        false when X =:= Metric#metric.indent_left_io andalso
+                   Y =:= Metric#metric.bottom_lab ->
+            [<<?GROW_BLOCK, X, Y>>,
+             c4_interconnects(X, Y, Db)
+            ];
+        false when X =:= Metric#metric.indent_left_io andalso
+                   Y =:= Metric#metric.bottom_io ->
+            [<<?CORNER_BLOCK, X, Y>>,
+             c4_io_interconnects(X, Y, [], [3, 10, 11, 12, 13], Db)
+            ];
         false -> <<>>
+    end.
+
+%%====================================================================
+%% c4 interconnects
+%%====================================================================
+
+c4_interconnects(X, Y, Db) ->
+    Interconnects = [
+        c4_interconnect(X, Y, I, Db)
+        ||
+        I <- lists:seq(0, 13)
+    ],
+    [<<?C4_INTERCONNECTS, 14>> | Interconnects].
+
+%%--------------------------------------------------------------------
+
+c4_interconnect(X, Y, I, Db) ->
+    Source = c4_interconnect_source(X, Y, I, direct_link, Db),
+    Sources = [
+        c4_interconnect_source(X, Y, I, Mux4, Mux3, Db)
+        ||
+        Mux4 <- [mux0, mux1, mux2, mux3],
+        Mux3 <- [mux0, mux1, mux2]
+    ],
+    [<<13>>, Source, Sources].
+
+%%--------------------------------------------------------------------
+
+c4_io_interconnects(X, Y, Db = #db{metric = #metric{right_lab = Right}})
+        when Y > 3 andalso X =:= Right ->
+    c4_io_interconnects(X, Y, [9, 10, 11, 12, 13], [0, 1, 2, 7, 8], Db);
+c4_io_interconnects(X, Y, Db) when Y > 3 ->
+    c4_io_interconnects(X, Y, [], [0, 1, 2, 7, 8, 9, 10, 11, 12, 13], Db);
+c4_io_interconnects(X, Y, Db = #db{metric = #metric{right_lab = Right}})
+        when X =:= Right ->
+    c4_io_interconnects(X, Y, [3, 10, 11, 12, 13], [0, 1, 7, 8, 9], Db);
+c4_io_interconnects(X, Y, Db) ->
+    c4_io_interconnects(X, Y, [], [0, 1, 3, 7, 8, 9, 10, 11, 12, 13], Db).
+
+%%--------------------------------------------------------------------
+
+c4_io_interconnects(X, Y, I1s, I2s, Db) ->
+    Count = length(I1s) + length(I2s),
+    Interconnect1s = [
+        c4_io_1_interconnect(X, Y, I, Db)
+        ||
+        I <- I1s
+    ],
+    Interconnect2s = [
+        c4_io_2_interconnect(X, Y, I, Db)
+        ||
+        I <- I2s
+    ],
+    [<<?C4_INTERCONNECTS, Count>>, Interconnect1s, Interconnect2s].
+
+%%--------------------------------------------------------------------
+
+c4_io_1_interconnect(X, Y, I, Db) ->
+    [<<I, 1>>,
+     c4_interconnect_source(X, Y, I, io_data_in1, Db)
+    ].
+
+%%--------------------------------------------------------------------
+
+c4_io_2_interconnect(X, Y, I, Db) ->
+    [<<I, 2>>,
+     c4_interconnect_source(X, Y, I, io_data_in1, Db),
+     c4_interconnect_source(X, Y, I, io_data_in0, Db)
+    ].
+
+%%--------------------------------------------------------------------
+
+c4_interconnect_source(X, Y, I, DirectLink, Db) ->
+    Port = c4_interconnect_port(X, Y, I, DirectLink, Db),
+    {ok, Fuse} = fuse_map:from_name(
+        {{c4, X, Y}, {mux, I}, DirectLink},
+        Db#db.density
+    ),
+    port_fuse(Port, Fuse, 0, 0).
+
+%%--------------------------------------------------------------------
+
+c4_interconnect_source(X, Y, I, Mux4, Mux3, Db) ->
+    Port = c4_interconnect_port(X, Y, I, {Mux4, Mux3}, Db),
+    {ok, Fuse0} = fuse_map:from_name(
+        {{c4, X, Y}, {mux, I}, from4, Mux4},
+        Db#db.density
+    ),
+    {ok, Fuse1} = fuse_map:from_name(
+        {{c4, X, Y}, {mux, I}, from3, Mux3},
+        Db#db.density
+    ),
+    port_fuse(Port, Fuse0, Fuse1, 0).
+
+%%--------------------------------------------------------------------
+
+c4_interconnect_port(X, Y, I, Mux, Db) ->
+    #{{c4, X, Y} := Block} = Db#db.c4s,
+    case Block of
+        #{I := Interconnect} ->
+            case Interconnect of
+                #{Mux := From} ->
+                    source_port(From, Db);
+
+                _ ->
+                    source_port(unknown, Db)
+            end;
+
+        _ ->
+            source_port(unknown, Db)
     end.
 
 %%====================================================================

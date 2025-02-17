@@ -33,8 +33,12 @@ use crate::{
 };
 use super::{
     Block,
+    C4ColumnInterconnect,
+    C4ColumnInterconnects,
     ColumnBlock,
+    CornerBlock,
     DeviceSources,
+    GrowBlock,
     Interconnect,
     InterconnectMut,
     IOColumnCell,
@@ -44,6 +48,7 @@ use super::{
     PinSource,
     RightBlock,
     Source,
+    UFMBlock,
 };
 
 //% device interconnects
@@ -52,16 +57,16 @@ use super::{
 //-define(UFM_INTERCONNECTS, 16#EF).
 
 // block types
-//const CORNDER_BLOCK: u8 = 0xF0;
+const CORNER_BLOCK: u8 = 0xF0;
 const COLUMN_BLOCK: u8 = 0xF1;
-//const GROWL_BLOCK: u8 = 0xF2;
+const GROW_BLOCK: u8 = 0xF2;
 const LEFT_BLOCK: u8 = 0xF3;
 const LOGIC_BLOCK: u8 = 0xF4;
 const RIGHT_BLOCK: u8 = 0xF5;
-//const UFM_BLOCK: u8 = 0xF6;
+const UFM_BLOCK: u8 = 0xF6;
 
 // sub-block types
-//const C4_INTERCONNECTS: u8 = 0xF9;
+const C4_INTERCONNECTS: u8 = 0xF9;
 const IO_CELLS: u8 = 0xFA;
 const IO_INTERCONNECTS: u8 = 0xFB;
 const LOGIC_CELLS: u8 = 0xFC;
@@ -255,6 +260,20 @@ impl DeviceSources {
                 );
             }
 
+            Some(DensityBlockType::Corner) => {
+                *block = Block::Corner(
+                    CornerBlock::read(density, x, y, t, bytes)
+                        .with_context(|| format!("in Corner Block: {x},{y}"))?
+                );
+            }
+
+            Some(DensityBlockType::Grow) => {
+                *block = Block::Grow(
+                    GrowBlock::read(density, x, y, t, bytes)
+                        .with_context(|| format!("in Grow Block: {x},{y}"))?
+                );
+            }
+
             Some(DensityBlockType::Left) => {
                 *block = Block::Left(
                     LeftBlock::read(density, &mut self.pins, x, y, t, bytes)
@@ -276,8 +295,12 @@ impl DeviceSources {
                 );
             }
 
-            Some(t) =>
-                todo!("{x:?},{y:?} is {t:?}"),
+            Some(DensityBlockType::UFM) => {
+                *block = Block::UFM(
+                    UFMBlock::read(density, x, y, t, bytes)
+                        .with_context(|| format!("in UFM Block: {x},{y}"))?
+                );
+            }
 
             None =>
                 bail!("Invalid Block coordinate {x},{y}"),
@@ -300,6 +323,8 @@ impl ColumnBlock {
         }
 
         let mut block = Self::default();
+
+        block.c4_interconnects.read(density, x, y, bytes)?;
 
         bytes.expect(IO_CELLS, "IO Cells header")?;
         let count = bytes.byte("IO Cell count")?;
@@ -343,6 +368,55 @@ impl ColumnBlock {
     }
 }
 
+impl CornerBlock {
+    fn read<'b>(
+        density: &Density,
+        x: X, y: Y,
+        t: u8,
+        bytes: &mut Bytes<'b>,
+    ) -> Result<Box<Self>> {
+        if t != CORNER_BLOCK {
+            bail!("Invalid Block type 0x{t:x}")
+        }
+
+        let mut block = Self::default();
+
+        block.c4_interconnects.read(density, x, y, bytes)?;
+
+        Ok(Box::new(block))
+    }
+}
+
+impl GrowBlock {
+    fn read<'b>(
+        density: &Density,
+        x: X, y: Y,
+        t: u8,
+        bytes: &mut Bytes<'b>,
+    ) -> Result<Box<Self>> {
+        if t != GROW_BLOCK {
+            bail!("Invalid Block type 0x{t:x}")
+        }
+
+        let mut block = Self::default();
+
+        bytes.expect(C4_INTERCONNECTS, "C4 Interconnects header")?;
+        bytes.expect(
+            C4InterconnectIndex::count() as u8,
+            "C4 Interconnects count",
+        )?;
+        for i in C4InterconnectIndex::iter() {
+            let interconnect = &mut block.c4_interconnects[i.index()];
+            interconnect.port = Port::C4Interconnect {
+                x, y, i,
+            };
+            interconnect.read(density, bytes)?;
+        }
+
+        Ok(Box::new(block))
+    }
+}
+
 impl LeftBlock {
     fn read<'b>(
         density: &Density,
@@ -356,6 +430,19 @@ impl LeftBlock {
         }
 
         let mut block = Self::default();
+
+        bytes.expect(C4_INTERCONNECTS, "C4 Interconnects header")?;
+        bytes.expect(
+            C4InterconnectIndex::count() as u8,
+            "C4 Interconnects count",
+        )?;
+        for i in C4InterconnectIndex::iter() {
+            let interconnect = &mut block.c4_interconnects[i.index()];
+            interconnect.port = Port::C4Interconnect {
+                x, y, i,
+            };
+            interconnect.read(density, bytes)?;
+        }
 
         bytes.expect(IO_CELLS, "IO Cells header")?;
         let count = bytes.byte("IO Cell count")?;
@@ -418,6 +505,19 @@ impl LogicBlock {
         }
 
         let mut block = Self::default();
+
+        bytes.expect(C4_INTERCONNECTS, "C4 Interconnects header")?;
+        bytes.expect(
+            C4InterconnectIndex::count() as u8,
+            "C4 Interconnects count",
+        )?;
+        for i in C4InterconnectIndex::iter() {
+            let interconnect = &mut block.c4_interconnects[i.index()];
+            interconnect.port = Port::C4Interconnect {
+                x, y, i,
+            };
+            interconnect.read(density, bytes)?;
+        }
 
         bytes.expect(LOGIC_CELLS, "Logic Cells header")?;
         bytes.expect(LogicCellNumber::count() as u8, "Logic Cell count")?;
@@ -556,6 +656,93 @@ impl RightBlock {
                 .with_context(|| format!("in IO Cell {}", n.index()))?,
         );
         Ok(())
+    }
+}
+
+impl UFMBlock {
+    fn read<'b>(
+        density: &Density,
+        x: X, y: Y,
+        t: u8,
+        bytes: &mut Bytes<'b>,
+    ) -> Result<Box<Self>> {
+        if t != UFM_BLOCK {
+            bail!("Invalid Block type 0x{t:x}")
+        }
+
+        let mut block = Self::default();
+
+        bytes.expect(C4_INTERCONNECTS, "C4 Interconnects header")?;
+        bytes.expect(
+            C4InterconnectIndex::count() as u8,
+            "C4 Interconnects count",
+        )?;
+        for i in C4InterconnectIndex::iter() {
+            let interconnect = &mut block.c4_interconnects[i.index()];
+            interconnect.port = Port::C4Interconnect {
+                x, y, i,
+            };
+            interconnect.read(density, bytes)?;
+        }
+
+        Ok(Box::new(block))
+    }
+}
+
+impl C4ColumnInterconnects {
+    fn read<'b>(
+        &mut self,
+        density: &Density,
+        x: X, y: Y,
+        bytes: &mut Bytes<'b>,
+    ) -> Result<()> {
+        bytes.expect(C4_INTERCONNECTS, "C4 Interconnects header")?;
+        let count = bytes.byte("C4 Interconnects count")?;
+        for _ in 0..count {
+            let n: C4InterconnectIndex = bytes.n("C4 Interconnect index")?;
+            let interconnect = &mut self.0[n.index()];
+            if interconnect.is_some() {
+                bail!("C4 Interconnect already defined: {}", n.index())
+            }
+            *interconnect = C4ColumnInterconnect::read(density, x, y, n, bytes)
+                .with_context(|| format!("in C4 Interconnect {}", n.index()))?;
+        }
+        Ok(())
+    }
+}
+
+impl C4ColumnInterconnect {
+    fn read<'b>(
+        density: &Density,
+        x: X, y: Y, i: C4InterconnectIndex,
+        bytes: &mut Bytes<'b>,
+    ) -> Result<Self> {
+        match bytes.byte("C4 Sources count")? {
+            1 => {
+                let mut interconnect = Interconnect::<1>{
+                    port: Port::C4Interconnect { x, y, i },
+                    sources: Default::default(),
+                };
+                interconnect.sources[0].read(density, bytes)
+                    .context("in Source 0")?;
+                Ok(C4ColumnInterconnect::One(interconnect))
+            }
+
+            2 => {
+                let mut interconnect = Interconnect::<2>{
+                    port: Port::C4Interconnect { x, y, i },
+                    sources: Default::default(),
+                };
+                interconnect.sources[0].read(density, bytes)
+                    .context("in Source 0")?;
+                interconnect.sources[1].read(density, bytes)
+                    .context("in Source 1")?;
+                Ok(C4ColumnInterconnect::Two(interconnect))
+            }
+
+            count =>
+                bail!("Invalid C4 Sources count {count}"),
+        }
     }
 }
 
