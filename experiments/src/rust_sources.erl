@@ -64,9 +64,12 @@
 run() ->
     device(max_v_40z_e64),
     device(max_v_160z_t100),
+    device(max_v_240z_m100),
     device(max_v_240z_t144),
+    device(max_v_570z_f256),
     device(max_v_570z_t100),
     device(max_v_1270z_t144),
+    device(max_v_2210z_f324),
     ok.
 
 %%--------------------------------------------------------------------
