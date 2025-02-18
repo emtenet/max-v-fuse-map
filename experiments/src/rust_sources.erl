@@ -10,6 +10,7 @@
     c4s :: c4_interconnect_mux_database:blocks(),
     iobs :: iob_interconnect_mux_database:blocks(),
     labs :: lab_interconnect_mux_database:blocks(),
+    r4s :: r4_interconnect_mux_database:blocks(),
     metric :: #metric{}
 }).
 
@@ -54,8 +55,9 @@
 -define(UFM_AR_OUT, 16#DE).
 -define(UFM_BUSY, 16#DF).
 -define(UFM_DR_OUT, 16#E0).
--define(UFM_OSC, 16#E1).
--define(UNKNOWN, 16#E2).
+-define(UFM_ISP_BUSY, 16#E1).
+-define(UFM_OSC, 16#E2).
+-define(UNKNOWN, 16#E3).
 
 %%====================================================================
 %% run
@@ -88,12 +90,14 @@ db(Device) ->
     {ok, C4s} = c4_interconnect_mux_database:open(Density),
     {ok, LABs} = lab_interconnect_mux_database:open(Density),
     {ok, IOBs} = iob_interconnect_mux_database:open(Density),
+    {ok, R4s} = r4_interconnect_mux_database:open(Density),
     #db{
         density = Density,
         device = Device,
         c4s = C4s,
         iobs = IOBs,
         labs = LABs,
+        r4s = R4s,
         metric = Metric
     }.
 
@@ -129,29 +133,34 @@ block(X, Y, Db) ->
             ];
         global ->
             [<<?UFM_BLOCK, X, Y>>,
-             c4_interconnects(X, Y, Db)
+             c4_interconnects(X, Y, Db),
+             r4_grow_interconnects(X, Y, Db)
             ];
         logic ->
             [<<?LOGIC_BLOCK, X, Y>>,
              c4_interconnects(X, Y, Db),
              logic_cells(X, Y, Db),
              logic_controls(X, Y, Db),
-             logic_interconnects(X, Y, Db)
+             logic_interconnects(X, Y, Db),
+             r4_interconnects(X, Y, Db)
             ];
         row when X < 2 ->
             [<<?LEFT_BLOCK, X, Y>>,
              c4_interconnects(X, Y, Db),
              io_row_cells(X, Y, Db),
-             io_row_interconnects(X, Y, Db)
+             io_row_interconnects(X, Y, Db),
+             r4_left_interconnects(X, Y, Db)
             ];
         row ->
             [<<?RIGHT_BLOCK, X, Y>>,
              io_row_cells(X, Y, Db),
-             io_row_interconnects(X, Y, Db)
+             io_row_interconnects(X, Y, Db),
+             r4_right_interconnects(X, Y, Db)
             ];
         ufm ->
             [<<?UFM_BLOCK, X, Y>>,
-             c4_interconnects(X, Y, Db)
+             c4_interconnects(X, Y, Db),
+             r4_grow_interconnects(X, Y, Db)
             ];
         false when X =:= Metric#metric.left_io andalso
                    Y =:= Metric#metric.top_io ->
@@ -166,7 +175,8 @@ block(X, Y, Db) ->
         false when X =:= Metric#metric.indent_left_io andalso
                    Y =:= Metric#metric.bottom_lab ->
             [<<?GROW_BLOCK, X, Y>>,
-             c4_interconnects(X, Y, Db)
+             c4_interconnects(X, Y, Db),
+             r4_grow_interconnects(X, Y, Db)
             ];
         false when X =:= Metric#metric.indent_left_io andalso
                    Y =:= Metric#metric.bottom_io ->
@@ -694,6 +704,110 @@ logic_interconnect_port(X, Y, I, Mux, Db) ->
     end.
 
 %%====================================================================
+%% r4 interconnects
+%%====================================================================
+
+r4_interconnects(X, Y, Db) ->
+    Interconnects = [
+        r4_interconnect(X, Y, I, Db)
+        ||
+        I <- lists:seq(0, 15)
+    ],
+    [<<?R4_INTERCONNECTS, 16>> | Interconnects].
+
+%%--------------------------------------------------------------------
+
+r4_left_interconnects(X, Y, Db) ->
+    Interconnects = [
+        r4_io_interconnect(X, Y, I, Db)
+        ||
+        I <- lists:seq(0, 7)
+    ],
+    [<<?R4_INTERCONNECTS, 8>> | Interconnects].
+
+%%--------------------------------------------------------------------
+
+r4_right_interconnects(X, Y, Db) ->
+    Interconnects = [
+        r4_interconnect(X, Y, I, Db)
+        ||
+        I <- lists:seq(0, 7)
+    ],
+    [<<?R4_INTERCONNECTS, 8>> | Interconnects].
+
+%%--------------------------------------------------------------------
+
+r4_grow_interconnects(X, Y, Db) ->
+    Interconnects = [
+        r4_interconnect(X, Y, I, Db)
+        ||
+        I <- lists:seq(8, 15)
+    ],
+    [<<?R4_INTERCONNECTS, 8>> | Interconnects].
+
+%%--------------------------------------------------------------------
+
+r4_interconnect(X, Y, I, Db) ->
+    Source = r4_interconnect_source(X, Y, I, direct_link, Db),
+    Sources = [
+        r4_interconnect_source(X, Y, I, Mux4, Mux3, Db)
+        ||
+        Mux4 <- [mux0, mux1, mux2, mux3],
+        Mux3 <- [mux0, mux1, mux2]
+    ],
+    [<<I, 13>>, Source, Sources].
+
+%%--------------------------------------------------------------------
+
+r4_io_interconnect(X, Y, I, Db) ->
+    [<<I, 2>>,
+     r4_interconnect_source(X, Y, I, io_data_in1, Db),
+     r4_interconnect_source(X, Y, I, io_data_in0, Db)
+    ].
+
+%%--------------------------------------------------------------------
+
+r4_interconnect_source(X, Y, I, DirectLink, Db) ->
+    Port = r4_interconnect_port(X, Y, I, DirectLink, Db),
+    {ok, Fuse} = fuse_map:from_name(
+        {{r4, X, Y}, {mux, I}, DirectLink},
+        Db#db.density
+    ),
+    port_fuse(Port, Fuse, 0, 0).
+
+%%--------------------------------------------------------------------
+
+r4_interconnect_source(X, Y, I, Mux4, Mux3, Db) ->
+    Port = r4_interconnect_port(X, Y, I, {Mux4, Mux3}, Db),
+    {ok, Fuse0} = fuse_map:from_name(
+        {{r4, X, Y}, {mux, I}, from4, Mux4},
+        Db#db.density
+    ),
+    {ok, Fuse1} = fuse_map:from_name(
+        {{r4, X, Y}, {mux, I}, from3, Mux3},
+        Db#db.density
+    ),
+    port_fuse(Port, Fuse0, Fuse1, 0).
+
+%%--------------------------------------------------------------------
+
+r4_interconnect_port(X, Y, I, Mux, Db) ->
+    #{{r4, X, Y} := Block} = Db#db.r4s,
+    case Block of
+        #{I := Interconnect} ->
+            case Interconnect of
+                #{Mux := From} ->
+                    source_port(From, Db);
+
+                _ ->
+                    source_port(unknown, Db)
+            end;
+
+        _ ->
+            source_port(unknown, Db)
+    end.
+
+%%====================================================================
 %% sources
 %%====================================================================
 
@@ -728,6 +842,8 @@ source_port({ufm, _X, _Y, busy}, _) ->
     <<?UFM_BUSY>>;
 source_port({ufm, _X, _Y, dr_out}, _) ->
     <<?UFM_DR_OUT>>;
+source_port({ufm, _X, _Y, isp_busy}, _) ->
+    <<?UFM_ISP_BUSY>>;
 source_port({ufm, _X, _Y, osc}, _) ->
     <<?UFM_OSC>>;
 source_port(unknown, _) ->

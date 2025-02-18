@@ -13,6 +13,7 @@ use crate::{
     LogicInterconnectIndex,
     PinName,
     Port,
+    R4InterconnectIndex,
     X,
     Y,
 };
@@ -192,6 +193,30 @@ impl DeviceSources {
 
     pub fn pin(&self, name: &str) -> Option<PinSource> {
         self.pins.get(name).cloned()
+    }
+
+    pub fn r4_interconnect(&self, x: X, y: Y, i: R4InterconnectIndex)
+        -> Option<InterconnectSources>
+    {
+        match self.block(x, y) {
+            Some(Block::Grow(block)) =>
+                block.r4_interconnect(i).map(Interconnect::sources),
+
+            Some(Block::Left(block)) =>
+                block.r4_interconnect(i).map(Interconnect::sources),
+
+            Some(Block::Logic(block)) =>
+                block.r4_interconnect(i).map(Interconnect::sources),
+
+            Some(Block::Right(block)) =>
+                block.r4_interconnect(i).map(Interconnect::sources),
+
+            Some(Block::UFM(block)) =>
+                block.r4_interconnect(i).map(Interconnect::sources),
+
+            _ =>
+                None,
+        }
     }
 }
 
@@ -373,14 +398,42 @@ struct CornerBlock {
 #[derive(Default)]
 struct GrowBlock {
     c4_interconnects: [Interconnect<13>; 14],
-    //r4_interconnects: [Interconnect_; 16],
+    r4_interconnects: [Interconnect<13>; 8],
+}
+
+impl GrowBlock {
+    fn r4_interconnect(&self, i: R4InterconnectIndex)
+        -> Option<&Interconnect<13>>
+    {
+        let i = i.index();
+
+        if i >= 8 {
+            Some(&self.r4_interconnects[i - 8])
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Default)]
 struct UFMBlock {
     c4_interconnects: [Interconnect<13>; 14],
-    //r4_interconnects: [Interconnect_; 16],
+    r4_interconnects: [Interconnect<13>; 8],
     //ufm_interconnects: [Interconnect_; 10],
+}
+
+impl UFMBlock {
+    fn r4_interconnect(&self, i: R4InterconnectIndex)
+        -> Option<&Interconnect<13>>
+    {
+        let i = i.index();
+
+        if i >= 8 {
+            Some(&self.r4_interconnects[i - 8])
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Default)]
@@ -432,14 +485,30 @@ struct LeftBlock {
     c4_interconnects: [Interconnect<13>; 14],
     io_cells: [Option<IORowCell>; 7],
     io_interconnects: IORowInterconnects,
-    //r4_interconnects: [Interconnect_; 16],
+    r4_interconnects: [Interconnect<2>; 8],
+}
+
+impl LeftBlock {
+    fn r4_interconnect(&self, i: R4InterconnectIndex)
+        -> Option<&Interconnect<2>>
+    {
+        self.r4_interconnects.get(i.index())
+    }
 }
 
 #[derive(Default)]
 struct RightBlock {
     io_cells: [Option<IORowCell>; 7],
     io_interconnects: IORowInterconnects,
-    //r4_interconnects: [Interconnect_; 16],
+    r4_interconnects: [Interconnect<13>; 8],
+}
+
+impl RightBlock {
+    fn r4_interconnect(&self, i: R4InterconnectIndex)
+        -> Option<&Interconnect<13>>
+    {
+        self.r4_interconnects.get(i.index())
+    }
 }
 
 #[derive(Default)]
@@ -541,7 +610,15 @@ struct LogicBlock {
     logic_cells: [LogicCell; 10],
     logic_controls: [Interconnect<18>; 6],
     logic_interconnects: LogicInterconnects,
-    //r4_interconnects: [Interconnect<13>; 16],
+    r4_interconnects: [Interconnect<13>; 16],
+}
+
+impl LogicBlock {
+    fn r4_interconnect(&self, i: R4InterconnectIndex)
+        -> Option<&Interconnect<13>>
+    {
+        self.r4_interconnects.get(i.index())
+    }
 }
 
 #[derive(Default)]

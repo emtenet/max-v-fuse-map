@@ -2,9 +2,12 @@ use max_v::*;
 use Control::*;
 use C4InterconnectIndex::*;
 use IOColumnCellNumber::*;
+use IOColumnInterconnectIndex::*;
 use IORowCellNumber::*;
+use IORowInterconnectIndex::*;
 use LogicCellNumber::*;
 use LogicInterconnectIndex::*;
+use R4InterconnectIndex::*;
 
 #[macro_use]
 mod macros;
@@ -47,6 +50,28 @@ fn max_v_40z_e64() {
         c4_interconnect(7, 0, C4Interconnect7).first() =>
             io_column!(7, 0, IOColumnCell1);
 
+        io_row_pin(1, 3, IORowCell3) => "7";
+
+        // io interconnect (bottom)
+        io_column_interconnect(2, 0, IOColumnInterconnect4).first() =>
+            c4_interconnect!(2, 1, C4Interconnect12);
+
+        // io interconnect (bottom)
+        io_column_interconnect(2, 0, IOColumnInterconnect4).source(7) =>
+            global!(Global0);
+
+        // io interconnect (top)
+        io_column_interconnect(4, 5, IOColumnInterconnect2).first() =>
+            c4_interconnect!(4, 1, C4Interconnect3);
+
+        // io interconnect (left)
+        io_row_interconnect(1, 2, IORowInterconnect14).first() =>
+            logic_cell!(2, 2, LogicCell8, Left);
+
+        // io interconnect (right)
+        io_row_interconnect(8, 2, IORowInterconnect17).first() =>
+            logic_cell!(7, 2, LogicCell9, Right);
+
         // logic-cell (a)
         logic_cell(6, 4, LogicCell1, A).source(0) =>
             logic_interconnect!(6, 4, LogicInterconnect0);
@@ -71,7 +96,17 @@ fn max_v_40z_e64() {
         logic_interconnect(7, 4, LogicInterconnect25).last() =>
             global!(Global3);
 
-        io_row_pin(1, 3, IORowCell3) => "7";
+        // r4 (left)
+        r4_interconnect(1, 2, R4Interconnect5).first() =>
+            jtag!(TMS);
+
+        // r4 (logic)
+        r4_interconnect(3, 3, R4Interconnect15).source(8) =>
+            logic_cell!(3, 3, LogicCell8, Right);
+
+        // r4 (right)
+        r4_interconnect(8, 4, R4Interconnect0).source(6) =>
+            c4_interconnect!(7, 0, C4Interconnect7);
     }
 
 }
@@ -105,6 +140,18 @@ fn max_v_570z_f256() {
         io_column_pin(7, 8, IOColumnCell3) => "C7";
 
         io_row_pin(13, 1, IORowCell0) => "M15";
+
+        // r4 (grow)
+        r4_interconnect(9, 1, R4Interconnect8).source(4) =>
+            r4_interconnect!(10, 1, R4Interconnect8);
+
+        // r4 (ufm)
+        r4_interconnect(9, 2, R4Interconnect15).first() =>
+            logic_cell!(10, 2, LogicCell9, Left);
+
+        // r4 (ufm)
+        r4_interconnect(9, 3, R4Interconnect9).source(3) =>
+            ufm!(Busy);
     }
 }
 

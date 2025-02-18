@@ -327,6 +327,7 @@ enumerated_str! {
         ArOut ="ar-out",
         Busy = "busy",
         DrOut = "dr-out",
+        IspBusy = "isp-busy",
         Osc = "osc",
     }
     struct UFMOutputOutOfRange ;

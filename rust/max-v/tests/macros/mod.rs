@@ -1,13 +1,13 @@
 
 macro_rules! interconnect_port {
     ($interconnect:ident . source $ff:tt) => {
-        $interconnect.source $ff .unwrap()
+        $interconnect.source $ff .expect("source")
     };
     ($interconnect:ident.first()) => {
-        $interconnect.sources().next().unwrap().1
+        $interconnect.sources().next().expect("first").1
     };
     ($interconnect:ident.last()) => {
-        $interconnect.sources().last().unwrap().1
+        $interconnect.sources().last().expect("last").1
     };
 }
 
@@ -22,7 +22,7 @@ macro_rules! assert_device {
         {
             let interconnect = $device.c4_interconnect(
                 X($x), Y($y), $i,
-            ).unwrap();
+            ).expect("c4_interconnect");
             assert_eq!(
                 Port::C4Interconnect { x: X($x), y: Y($y), i: $i },
                 interconnect.port(),
@@ -39,7 +39,8 @@ macro_rules! assert_device {
         {
             assert_eq!(
                 $pin,
-                $device.io_column_cell(X($x), Y($y), $n).unwrap()
+                $device.io_column_cell(X($x), Y($y), $n)
+                    .expect("io_column_cell")
                     .pin_name().as_str(),
             );
             assert_eq!(
@@ -58,7 +59,8 @@ macro_rules! assert_device {
         {
             assert_eq!(
                 $pin,
-                $device.io_row_cell(X($x), Y($y), $n).unwrap()
+                $device.io_row_cell(X($x), Y($y), $n)
+                    .expect("io_row_cell")
                     .pin_name().as_str(),
             );
             assert_eq!(
@@ -67,6 +69,44 @@ macro_rules! assert_device {
                 }),
                 $device.pin($pin),
             );
+        }
+        assert_device!($device $($tail)*);
+    };
+    ($device:ident
+        io_column_interconnect($x:literal, $y:literal, $i:ident)
+            . $f:ident $ff:tt
+            => $port:expr;
+        $($tail:tt)*
+    ) => {
+        {
+            let interconnect = $device.io_column_interconnect(
+                X($x), Y($y), $i,
+            ).expect("io_column_interconnect");
+            assert_eq!(
+                Port::IOColumnInterconnect { x: X($x), y: Y($y), i: $i },
+                interconnect.port(),
+            );
+            let port = interconnect_port!(interconnect . $f $ff );
+            assert_eq!($port, port);
+        }
+        assert_device!($device $($tail)*);
+    };
+    ($device:ident
+        io_row_interconnect($x:literal, $y:literal, $i:ident)
+            . $f:ident $ff:tt
+            => $port:expr;
+        $($tail:tt)*
+    ) => {
+        {
+            let interconnect = $device.io_row_interconnect(
+                X($x), Y($y), $i,
+            ).expect("io_row_interconnect");
+            assert_eq!(
+                Port::IORowInterconnect { x: X($x), y: Y($y), i: $i },
+                interconnect.port(),
+            );
+            let port = interconnect_port!(interconnect . $f $ff );
+            assert_eq!($port, port);
         }
         assert_device!($device $($tail)*);
     };
@@ -80,7 +120,7 @@ macro_rules! assert_device {
             let interconnect = $device.logic_cell(
                 X($x), Y($y), $n,
                 LogicCellInput::$input,
-            ).unwrap();
+            ).expect("logic_cell");
             assert_eq!(
                 Port::LogicCellInput {
                     x: X($x), y: Y($y), n: $n, input: LogicCellInput::$input,
@@ -101,7 +141,7 @@ macro_rules! assert_device {
         {
             let interconnect = $device.logic_control(
                 X($x), Y($y), $control,
-            ).unwrap();
+            ).expect("logic_control");
             assert_eq!(
                 Port::LogicControl {
                     x: X($x), y: Y($y), control: $control,
@@ -122,7 +162,7 @@ macro_rules! assert_device {
         {
             let interconnect = $device.logic_interconnect(
                 X($x), Y($y), $i,
-            ).unwrap();
+            ).expect("logic_interconnect");
             assert_eq!(
                 Port::LogicInterconnect { x: X($x), y: Y($y), i: $i },
                 interconnect.port(),
@@ -131,6 +171,33 @@ macro_rules! assert_device {
             assert_eq!($port, port);
         }
         assert_device!($device $($tail)*);
+    };
+    ($device:ident
+        r4_interconnect($x:literal, $y:literal, $i:ident)
+            . $f:ident $ff:tt
+            => $port:expr;
+        $($tail:tt)*
+    ) => {
+        {
+            let interconnect = $device.r4_interconnect(
+                X($x), Y($y), $i,
+            ).expect("r4_interconnect");
+            assert_eq!(
+                Port::R4Interconnect { x: X($x), y: Y($y), i: $i },
+                interconnect.port(),
+            );
+            let port = interconnect_port!(interconnect . $f $ff );
+            assert_eq!($port, port);
+        }
+        assert_device!($device $($tail)*);
+    };
+}
+
+macro_rules! c4_interconnect {
+    ($x:literal, $y:literal, $i:ident) => {
+        Port::C4Interconnect {
+            x: X($x), y: Y($y), i: $i,
+        }
     };
 }
 
@@ -152,6 +219,12 @@ macro_rules! io_row {
     };
 }
 
+macro_rules! jtag {
+    ($jtag:ident) => {
+        Port::JTAGOutput { output: JTAGOutput::$jtag }
+    };
+}
+
 macro_rules! logic_cell {
     ($x:literal, $y:literal, $n:ident, $output:ident) => {
         Port::LogicCellOutput {
@@ -165,6 +238,20 @@ macro_rules! logic_interconnect {
         Port::LogicInterconnect {
             x: X($x), y: Y($y), i: $i,
         }
+    };
+}
+
+macro_rules! r4_interconnect {
+    ($x:literal, $y:literal, $i:ident) => {
+        Port::R4Interconnect {
+            x: X($x), y: Y($y), i: $i,
+        }
+    };
+}
+
+macro_rules! ufm {
+    ($ufm:ident) => {
+        Port::UFMOutput { output: UFMOutput::$ufm }
     };
 }
 

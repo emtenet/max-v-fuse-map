@@ -72,7 +72,7 @@ const IO_INTERCONNECTS: u8 = 0xFB;
 const LOGIC_CELLS: u8 = 0xFC;
 const LOGIC_CONTROLS: u8 = 0xFD;
 const LOGIC_INTERCONNECTS: u8 = 0xFE;
-//const R4_INTERCONNECTS: u8 = 0xFF;
+const R4_INTERCONNECTS: u8 = 0xFF;
 
 // ports
 const C4_INTERCONNECT: u8 = 0xD0;
@@ -92,8 +92,9 @@ const R4_INTERCONNECT: u8 = 0xDD;
 const UFM_AR_OUT: u8 = 0xDE;
 const UFM_BUSY: u8 = 0xDF;
 const UFM_DR_OUT: u8 = 0xE0;
-const UFM_OSC: u8 = 0xE1;
-const UNKNOWN: u8 = 0xE2;
+const UFM_ISP_BUSY: u8 = 0xE1;
+const UFM_OSC: u8 = 0xE2;
+const UNKNOWN: u8 = 0xE3;
 
 impl DeviceSources {
     pub fn read(path: impl AsRef<Path>) -> Result<Self> {
@@ -413,6 +414,8 @@ impl GrowBlock {
             interconnect.read(density, bytes)?;
         }
 
+        r4_interconnects(&mut block.r4_interconnects, density, x, y, bytes)?;
+
         Ok(Box::new(block))
     }
 }
@@ -472,6 +475,8 @@ impl LeftBlock {
                 }
             }
         }
+
+        r4_interconnects(&mut block.r4_interconnects, density, x, y, bytes)?;
 
         Ok(Box::new(block))
     }
@@ -589,6 +594,8 @@ impl LogicBlock {
             }
         }
 
+        r4_interconnects(&mut block.r4_interconnects, density, x, y, bytes)?;
+
         Ok(Box::new(block))
     }
 }
@@ -635,6 +642,8 @@ impl RightBlock {
                 }
             }
         }
+
+        r4_interconnects(&mut block.r4_interconnects, density, x, y, bytes)?;
 
         Ok(Box::new(block))
     }
@@ -684,6 +693,8 @@ impl UFMBlock {
             };
             interconnect.read(density, bytes)?;
         }
+
+        r4_interconnects(&mut block.r4_interconnects, density, x, y, bytes)?;
 
         Ok(Box::new(block))
     }
@@ -812,11 +823,30 @@ impl IORowCell {
     }
 }
 
+fn r4_interconnects<'b, const I: usize, const N: usize>(
+    interconnects: &mut [Interconnect<N>; I],
+    density: &Density,
+    x: X,
+    y: Y,
+    bytes: &mut Bytes<'b>,
+) -> Result<()> {
+    bytes.expect(R4_INTERCONNECTS, "R4 Interconnects header")?;
+    bytes.expect(I as u8, "R4 Interconnects count")?;
+    for index in 0..I {
+        let i: R4InterconnectIndex = bytes.n("R4 Interconnect index")?;
+        let interconnect = &mut interconnects[index];
+        interconnect.port = Port::R4Interconnect { x, y, i };
+        interconnect.read(density, bytes)
+            .with_context(|| format!("in R4 Interconnect {}", i.index()))?;
+    }
+    Ok(())
+}
+
 impl<const N: usize> Interconnect<N> {
     fn read<'b>(&mut self, density: &Density, bytes: &mut Bytes<'b>)
         -> Result<()>
-    where
-        Self: Default,
+    //where
+    //    Self: Default,
     {
         bytes.expect(N as u8, "Sources count")?;
         for i in 0..N {
@@ -1001,6 +1031,8 @@ impl Port {
                 Ok(Port::UFMOutput { output: UFMOutput::Busy }),
             UFM_DR_OUT =>
                 Ok(Port::UFMOutput { output: UFMOutput::DrOut }),
+            UFM_ISP_BUSY =>
+                Ok(Port::UFMOutput { output: UFMOutput::IspBusy }),
             UFM_OSC =>
                 Ok(Port::UFMOutput { output: UFMOutput::Osc }),
             UNKNOWN =>
