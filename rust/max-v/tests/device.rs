@@ -1,6 +1,7 @@
 use max_v::*;
 use Control::*;
 use C4InterconnectIndex::*;
+use Global::*;
 use IOColumnCellNumber::*;
 use IOColumnInterconnectIndex::*;
 use IORowCellNumber::*;
@@ -8,6 +9,7 @@ use IORowInterconnectIndex::*;
 use LogicCellNumber::*;
 use LogicInterconnectIndex::*;
 use R4InterconnectIndex::*;
+use UFMInterconnectIndex::*;
 
 #[macro_use]
 mod macros;
@@ -50,6 +52,14 @@ fn max_v_40z_e64() {
         c4_interconnect(7, 0, C4Interconnect7).first() =>
             io_column!(7, 0, IOColumnCell1);
 
+        global_interconnect(Global0).first() =>
+            io_row_interconnect!(1, 3, IORowInterconnect0);
+
+        global_pin(Global0) => Some(1, 3, IORowCell3);
+        global_pin(Global1) => Some(1, 2, IORowCell0);
+        global_pin(Global2) => Some(8, 2, IORowCell0);
+        global_pin(Global3) => Some(8, 3, IORowCell4);
+
         io_row_pin(1, 3, IORowCell3) => "7";
 
         // io interconnect (bottom)
@@ -71,6 +81,9 @@ fn max_v_40z_e64() {
         // io interconnect (right)
         io_row_interconnect(8, 2, IORowInterconnect17).first() =>
             logic_cell!(7, 2, LogicCell9, Right);
+
+        jtag_interconnect(TDO).source(6) =>
+            io_row_interconnect!(1, 4, IORowInterconnect6);
 
         // logic-cell (a)
         logic_cell(6, 4, LogicCell1, A).source(0) =>
@@ -107,8 +120,26 @@ fn max_v_40z_e64() {
         // r4 (right)
         r4_interconnect(8, 4, R4Interconnect0).source(6) =>
             c4_interconnect!(7, 0, C4Interconnect7);
-    }
 
+        ufm_interconnect(DrClk).last() =>
+            io_row_interconnect!(1, 1, IORowInterconnect17);
+
+        ufm_interconnect(Erase).source(7) =>
+            io_row_interconnect!(1, 2, IORowInterconnect7);
+    }
+}
+
+#[test]
+fn max_v_40z_m64() {
+    let device = DeviceSources::read("../device/max_v_40z_m64.sources")
+        .unwrap();
+
+    assert_device! { device
+        global_pin(Global0) => None;
+        global_pin(Global1) => Some(1, 2, IORowCell0);
+        global_pin(Global2) => Some(8, 2, IORowCell0);
+        global_pin(Global3) => None;
+    }
 }
 
 #[test]
@@ -117,6 +148,11 @@ fn max_v_160z_t100() {
         .unwrap();
 
     assert_device! { device
+        global_pin(Global0) => Some(1, 3, IORowCell3);
+        global_pin(Global1) => Some(1, 2, IORowCell0);
+        global_pin(Global2) => Some(8, 2, IORowCell0);
+        global_pin(Global3) => Some(8, 3, IORowCell4);
+
         io_column_pin(2, 0, IOColumnCell2) => "27";
     }
 }
@@ -137,9 +173,20 @@ fn max_v_570z_f256() {
         .unwrap();
 
     assert_device! { device
+        global_interconnect(Global1).source(3) =>
+            ufm_interconnect!(9, 3, UFMInterconnect3);
+
+        global_pin(Global0) => Some(0, 5, IORowCell0);
+        global_pin(Global1) => Some(0, 5, IORowCell1);
+        global_pin(Global2) => Some(13, 4, IORowCell4);
+        global_pin(Global3) => Some(13, 4, IORowCell3);
+
         io_column_pin(7, 8, IOColumnCell3) => "C7";
 
         io_row_pin(13, 1, IORowCell0) => "M15";
+
+        jtag_interconnect(TDO).source(1) =>
+            ufm_interconnect!(9, 2, UFMInterconnect1);
 
         // r4 (grow)
         r4_interconnect(9, 1, R4Interconnect8).source(4) =>
@@ -152,6 +199,12 @@ fn max_v_570z_f256() {
         // r4 (ufm)
         r4_interconnect(9, 3, R4Interconnect9).source(3) =>
             ufm!(Busy);
+
+        ufm_interconnect(ArIn).last() =>
+            ufm_interconnect!(9, 3, UFMInterconnect9);
+
+        ufm_interconnect(Program).source(2) =>
+            ufm_interconnect!(9, 2, UFMInterconnect2);
     }
 }
 

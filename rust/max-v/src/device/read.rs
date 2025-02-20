@@ -19,6 +19,7 @@ use crate::{
     IOColumnInterconnectIndex,
     IORowCellNumber,
     IORowInterconnectIndex,
+    JTAGInput,
     JTAGOutput,
     LogicCellInput,
     LogicCellNumber,
@@ -27,6 +28,8 @@ use crate::{
     PinName,
     Port,
     R4InterconnectIndex,
+    UFMInterconnectIndex,
+    UFMInput,
     UFMOutput,
     X,
     Y,
@@ -37,24 +40,29 @@ use super::{
     C4ColumnInterconnects,
     ColumnBlock,
     CornerBlock,
+    DeviceInterconnect,
     DeviceSources,
+    GlobalInterconnects,
+    GlobalInterconnect,
     GrowBlock,
     Interconnect,
     InterconnectMut,
     IOColumnCell,
     IORowCell,
+    JTAGInterconnects,
     LeftBlock,
     LogicBlock,
     PinSource,
     RightBlock,
     Source,
     UFMBlock,
+    UFMInterconnects,
 };
 
-//% device interconnects
-//-define(GLOBAL_INTERCONNECTS, 16#ED).
-//-define(JTAG_INTERCONNECTS, 16#EE).
-//-define(UFM_INTERCONNECTS, 16#EF).
+// device interconnects
+const GLOBAL_INTERCONNECTS: u8 = 0xED;
+const JTAG_INTERCONNECTS: u8 = 0xEE;
+const UFM_INTERCONNECTS: u8 = 0xEF;
 
 // block types
 const CORNER_BLOCK: u8 = 0xF0;
@@ -92,9 +100,10 @@ const R4_INTERCONNECT: u8 = 0xDD;
 const UFM_AR_OUT: u8 = 0xDE;
 const UFM_BUSY: u8 = 0xDF;
 const UFM_DR_OUT: u8 = 0xE0;
-const UFM_ISP_BUSY: u8 = 0xE1;
-const UFM_OSC: u8 = 0xE2;
-const UNKNOWN: u8 = 0xE3;
+const UFM_INTERCONNECT: u8 = 0xE1;
+const UFM_ISP_BUSY: u8 = 0xE2;
+const UFM_OSC: u8 = 0xE3;
+const UNKNOWN: u8 = 0xE4;
 
 impl DeviceSources {
     pub fn read(path: impl AsRef<Path>) -> Result<Self> {
@@ -117,12 +126,19 @@ impl DeviceSources {
         let mut bytes = Bytes { bytes };
 
         let device = bytes.device_type()?;
+        let density = device.density().layout();
         let mut device = DeviceSources {
             device,
             blocks: Default::default(),
+            globals: GlobalInterconnects::new(density),
+            jtag: JTAGInterconnects::new(density),
             pins: Default::default(),
+            ufm: UFMInterconnects::new(density),
         };
-        let density = device.device.density().layout();
+
+        device.globals.read(density, &mut bytes)?;
+        device.jtag.read(density, &mut bytes)?;
+        device.ufm.read(density, &mut bytes)?;
 
         while !bytes.is_empty() {
             device.read_block(density, &mut bytes)?;
@@ -340,10 +356,11 @@ impl ColumnBlock {
         )?;
         for i in IOColumnInterconnectIndex::iter() {
             let interconnect = &mut block.io_interconnects[i.index()];
-            interconnect.port = Port::IOColumnInterconnect {
-                x, y, i,
-            };
-            interconnect.read(density, bytes)?;
+            interconnect.read(
+                density,
+                Port::IOColumnInterconnect { x, y, i, },
+                bytes,
+            )?;
         }
 
         Ok(Box::new(block))
@@ -408,10 +425,11 @@ impl GrowBlock {
         )?;
         for i in C4InterconnectIndex::iter() {
             let interconnect = &mut block.c4_interconnects[i.index()];
-            interconnect.port = Port::C4Interconnect {
-                x, y, i,
-            };
-            interconnect.read(density, bytes)?;
+            interconnect.read(
+                density,
+                Port::C4Interconnect { x, y, i },
+                bytes,
+            )?;
         }
 
         r4_interconnects(&mut block.r4_interconnects, density, x, y, bytes)?;
@@ -441,10 +459,11 @@ impl LeftBlock {
         )?;
         for i in C4InterconnectIndex::iter() {
             let interconnect = &mut block.c4_interconnects[i.index()];
-            interconnect.port = Port::C4Interconnect {
-                x, y, i,
-            };
-            interconnect.read(density, bytes)?;
+            interconnect.read(
+                density,
+                Port::C4Interconnect { x, y, i },
+                bytes,
+            )?;
         }
 
         bytes.expect(IO_CELLS, "IO Cells header")?;
@@ -461,17 +480,19 @@ impl LeftBlock {
         for i in IORowInterconnectIndex::iter() {
             match block.io_interconnects.get_mut(i) {
                 InterconnectMut::Normal(interconnect) => {
-                    interconnect.port = Port::IORowInterconnect {
-                        x, y, i,
-                    };
-                    interconnect.read(density, bytes)?;
+                    interconnect.read(
+                        density,
+                        Port::IORowInterconnect { x, y, i },
+                        bytes,
+                    )?;
                 }
 
                 InterconnectMut::Global(interconnect) => {
-                    interconnect.port = Port::IORowInterconnect {
-                        x, y, i,
-                    };
-                    interconnect.read(density, bytes)?;
+                    interconnect.read(
+                        density,
+                        Port::IORowInterconnect { x, y, i },
+                        bytes,
+                    )?;
                 }
             }
         }
@@ -518,44 +539,52 @@ impl LogicBlock {
         )?;
         for i in C4InterconnectIndex::iter() {
             let interconnect = &mut block.c4_interconnects[i.index()];
-            interconnect.port = Port::C4Interconnect {
-                x, y, i,
-            };
-            interconnect.read(density, bytes)?;
+            interconnect.read(
+                density,
+                Port::C4Interconnect { x, y, i },
+                bytes,
+            )?;
         }
 
         bytes.expect(LOGIC_CELLS, "Logic Cells header")?;
         bytes.expect(LogicCellNumber::count() as u8, "Logic Cell count")?;
         for n in LogicCellNumber::iter() {
             let cell = &mut block.logic_cells[n.index()];
-            cell.input_a.port = Port::LogicCellInput {
-                x, y, n, input: LogicCellInput::A,
-            };
-            cell.input_a.read(density, bytes)
-                .with_context(||
-                    format!("in Logic Cell {} Input A", n.index())
-                )?;
-            cell.input_b.port = Port::LogicCellInput {
-                x, y, n, input: LogicCellInput::B,
-            };
-            cell.input_b.read(density, bytes)
-                .with_context(||
-                    format!("in Logic Cell {} Input B", n.index())
-                )?;
-            cell.input_c.port = Port::LogicCellInput {
-                x, y, n, input: LogicCellInput::C,
-            };
-            cell.input_c.read(density, bytes)
-                .with_context(||
-                    format!("in Logic Cell {} Input C", n.index())
-                )?;
-            cell.input_d.port = Port::LogicCellInput {
-                x, y, n, input: LogicCellInput::D,
-            };
-            cell.input_d.read(density, bytes)
-                .with_context(||
-                    format!("in Logic Cell {} Input D", n.index())
-                )?;
+            cell.input_a.read(density,
+                Port::LogicCellInput {
+                    x, y, n, input: LogicCellInput::A,
+                },
+                bytes,
+            ).with_context(||
+                format!("in Logic Cell {} Input A", n.index())
+            )?;
+            cell.input_b.read(
+                density,
+                Port::LogicCellInput {
+                    x, y, n, input: LogicCellInput::B,
+                },
+                bytes,
+            ).with_context(||
+                format!("in Logic Cell {} Input B", n.index())
+            )?;
+            cell.input_c.read(
+                density,
+                Port::LogicCellInput {
+                    x, y, n, input: LogicCellInput::C,
+                },
+                bytes,
+            ).with_context(||
+                format!("in Logic Cell {} Input C", n.index())
+            )?;
+            cell.input_d.read(
+                density,
+                Port::LogicCellInput {
+                    x, y, n, input: LogicCellInput::D,
+                },
+                bytes,
+            ).with_context(||
+                format!("in Logic Cell {} Input D", n.index())
+            )?;
         }
 
         bytes.expect(LOGIC_CONTROLS, "Logic Controls header")?;
@@ -565,10 +594,11 @@ impl LogicBlock {
         )?;
         for control in Control::iter() {
             let interconnect = &mut block.logic_controls[control.index()];
-            interconnect.port = Port::LogicControl {
-                x, y, control,
-            };
-            interconnect.read(density, bytes)?;
+            interconnect.read(
+                density,
+                Port::LogicControl { x, y, control },
+                bytes,
+            )?;
         }
 
         bytes.expect(LOGIC_INTERCONNECTS, "Logic Interconnects header")?;
@@ -579,17 +609,19 @@ impl LogicBlock {
         for i in LogicInterconnectIndex::iter() {
             match block.logic_interconnects.get_mut(i) {
                 InterconnectMut::Normal(interconnect) => {
-                    interconnect.port = Port::LogicInterconnect {
-                        x, y, i,
-                    };
-                    interconnect.read(density, bytes)?;
+                    interconnect.read(
+                        density,
+                        Port::LogicInterconnect { x, y, i },
+                        bytes,
+                    )?;
                 }
 
                 InterconnectMut::Global(interconnect) => {
-                    interconnect.port = Port::LogicInterconnect {
-                        x, y, i,
-                    };
-                    interconnect.read(density, bytes)?;
+                    interconnect.read(
+                        density,
+                        Port::LogicInterconnect { x, y, i },
+                        bytes,
+                    )?;
                 }
             }
         }
@@ -628,17 +660,19 @@ impl RightBlock {
         for i in IORowInterconnectIndex::iter() {
             match block.io_interconnects.get_mut(i) {
                 InterconnectMut::Normal(interconnect) => {
-                    interconnect.port = Port::IORowInterconnect {
-                        x, y, i,
-                    };
-                    interconnect.read(density, bytes)?;
+                    interconnect.read(
+                        density,
+                        Port::IORowInterconnect { x, y, i },
+                        bytes,
+                    )?;
                 }
 
                 InterconnectMut::Global(interconnect) => {
-                    interconnect.port = Port::IORowInterconnect {
-                        x, y, i,
-                    };
-                    interconnect.read(density, bytes)?;
+                    interconnect.read(
+                        density,
+                        Port::IORowInterconnect { x, y, i },
+                        bytes,
+                    )?;
                 }
             }
         }
@@ -688,10 +722,11 @@ impl UFMBlock {
         )?;
         for i in C4InterconnectIndex::iter() {
             let interconnect = &mut block.c4_interconnects[i.index()];
-            interconnect.port = Port::C4Interconnect {
-                x, y, i,
-            };
-            interconnect.read(density, bytes)?;
+            interconnect.read(
+                density,
+                Port::C4Interconnect { x, y, i },
+                bytes,
+            )?;
         }
 
         r4_interconnects(&mut block.r4_interconnects, density, x, y, bytes)?;
@@ -757,6 +792,66 @@ impl C4ColumnInterconnect {
     }
 }
 
+impl DeviceInterconnect {
+    fn read<'b>(
+        &mut self,
+        density: &Density,
+        port: Port,
+        bytes: &mut Bytes<'b>,
+    ) -> Result<()> {
+        match self {
+            DeviceInterconnect::Small(interconnect) =>
+                interconnect.read(density, port, bytes),
+
+            DeviceInterconnect::Large(interconnect) =>
+                interconnect.read(density, port, bytes),
+        }
+    }
+}
+
+impl GlobalInterconnects {
+    fn read<'b>(
+        &mut self,
+        density: &Density,
+        bytes: &mut Bytes<'b>,
+    ) -> Result<()> {
+        bytes.expect(GLOBAL_INTERCONNECTS, "Global Interconnects header")?;
+        self.0.read(density, Global::Global0, bytes)?;
+        self.1.read(density, Global::Global1, bytes)?;
+        self.2.read(density, Global::Global2, bytes)?;
+        self.3.read(density, Global::Global3, bytes)?;
+        Ok(())
+    }
+}
+
+impl GlobalInterconnect {
+    fn read<'b>(
+        &mut self,
+        density: &Density,
+        global: Global,
+        bytes: &mut Bytes<'b>,
+    ) -> Result<()> {
+        match bytes.byte("Global Pin option")? {
+            0 => {
+            }
+
+            1 => {
+                let x = bytes.x(density)?;
+                let y = bytes.y(density)?;
+                let n: IORowCellNumber = bytes.n("Global IO number")?;
+                self.pin = Some(PinSource::Row {
+                    x, y, n,
+                });
+            }
+
+            option =>
+                bail!("Invalid Global Pin option {option}"),
+        }
+
+        self.interconnect.read(density, Port::GlobalInput { global }, bytes)
+    }
+}
+
 impl IOColumnCell {
     fn read<'b>(
         density: &Density,
@@ -765,26 +860,26 @@ impl IOColumnCell {
         bytes: &mut Bytes<'b>,
     ) -> Result<Self> {
         let mut cell = IOColumnCell {
-            enable: Interconnect {
-                port: Port::IOColumnCellInput {
-                    x, y, n,
-                    input: IOCellInput::Enable,
-                },
-                sources: Default::default(),
-            },
+            enable: Default::default(),
             pin_name: bytes.pin_name()?,
-            output: Interconnect {
-                port: Port::IOColumnCellInput {
-                    x, y, n,
-                    input: IOCellInput::Output,
-                },
-                sources: Default::default(),
-            },
+            output: Default::default(),
         };
-        cell.output.read(density, bytes)
-            .context("in Output")?;
-        cell.enable.read(density, bytes)
-            .context("in Enable")?;
+        cell.output.read(
+            density,
+            Port::IOColumnCellInput {
+                x, y, n,
+                input: IOCellInput::Output,
+            },
+            bytes,
+        ).context("in Output")?;
+        cell.enable.read(
+            density,
+            Port::IOColumnCellInput {
+                x, y, n,
+                input: IOCellInput::Enable,
+            },
+            bytes,
+        ).context("in Enable")?;
         pins.insert(cell.pin_name, PinSource::Column { x, y, n });
         Ok(cell)
     }
@@ -798,28 +893,42 @@ impl IORowCell {
         bytes: &mut Bytes<'b>,
     ) -> Result<Self> {
         let mut cell = IORowCell {
-            enable: Interconnect {
-                port: Port::IORowCellInput {
-                    x, y, n,
-                    input: IOCellInput::Enable,
-                },
-                sources: Default::default(),
-            },
+            enable: Default::default(),
             pin_name: bytes.pin_name()?,
-            output: Interconnect {
-                port: Port::IORowCellInput {
-                    x, y, n,
-                    input: IOCellInput::Output,
-                },
-                sources: Default::default(),
-            },
+            output: Default::default(),
         };
-        cell.output.read(density, bytes)
-            .context("in Output")?;
-        cell.enable.read(density, bytes)
-            .context("in Enable")?;
+        cell.output.read(
+            density,
+            Port::IORowCellInput {
+                x, y, n,
+                input: IOCellInput::Output,
+            },
+            bytes,
+        ).context("in Output")?;
+        cell.enable.read(
+            density,
+            Port::IORowCellInput {
+                x, y, n,
+                input: IOCellInput::Enable,
+            },
+            bytes,
+        ).context("in Enable")?;
         pins.insert(cell.pin_name, PinSource::Row { x, y, n });
         Ok(cell)
+    }
+}
+
+impl JTAGInterconnects {
+    fn read<'b>(
+        &mut self,
+        density: &Density,
+        bytes: &mut Bytes<'b>,
+    ) -> Result<()> {
+        use JTAGInput::*;
+
+        bytes.expect(JTAG_INTERCONNECTS, "JTAG Interconnects header")?;
+        self.tdo.read(density, Port::JTAGInput { input: TDO }, bytes)?;
+        Ok(())
     }
 }
 
@@ -835,24 +944,50 @@ fn r4_interconnects<'b, const I: usize, const N: usize>(
     for index in 0..I {
         let i: R4InterconnectIndex = bytes.n("R4 Interconnect index")?;
         let interconnect = &mut interconnects[index];
-        interconnect.port = Port::R4Interconnect { x, y, i };
-        interconnect.read(density, bytes)
-            .with_context(|| format!("in R4 Interconnect {}", i.index()))?;
+        interconnect.read(
+            density,
+            Port::R4Interconnect { x, y, i },
+            bytes,
+        ).with_context(|| format!("in R4 Interconnect {}", i.index()))?;
     }
     Ok(())
 }
 
+impl UFMInterconnects {
+    fn read<'b>(
+        &mut self,
+        density: &Density,
+        bytes: &mut Bytes<'b>,
+    ) -> Result<()> {
+        use UFMInput::*;
+
+        bytes.expect(UFM_INTERCONNECTS, "UFM Interconnects header")?;
+        self.ar_clk.read(density, Port::UFMInput { input: ArClk }, bytes)?;
+        self.ar_in.read(density, Port::UFMInput { input: ArIn }, bytes)?;
+        self.ar_shift.read(density, Port::UFMInput { input: ArShift }, bytes)?;
+        self.dr_clk.read(density, Port::UFMInput { input: DrClk }, bytes)?;
+        self.dr_in.read(density, Port::UFMInput { input: DrIn }, bytes)?;
+        self.dr_shift.read(density, Port::UFMInput { input: DrShift }, bytes)?;
+        self.erase.read(density, Port::UFMInput { input: Erase }, bytes)?;
+        self.osc_ena.read(density, Port::UFMInput { input: OscEna }, bytes)?;
+        self.program.read(density, Port::UFMInput { input: Program }, bytes)?;
+        Ok(())
+    }
+}
+
 impl<const N: usize> Interconnect<N> {
-    fn read<'b>(&mut self, density: &Density, bytes: &mut Bytes<'b>)
-        -> Result<()>
-    //where
-    //    Self: Default,
-    {
+    fn read<'b>(
+        &mut self,
+        density: &Density,
+        port: Port,
+        bytes: &mut Bytes<'b>,
+    ) -> Result<()> {
         bytes.expect(N as u8, "Sources count")?;
         for i in 0..N {
             self.sources[i].read(density, bytes)
                 .with_context(|| format!("in Source {i}"))?;
         }
+        self.port = port;
         Ok(())
     }
 }
@@ -1031,6 +1166,18 @@ impl Port {
                 Ok(Port::UFMOutput { output: UFMOutput::Busy }),
             UFM_DR_OUT =>
                 Ok(Port::UFMOutput { output: UFMOutput::DrOut }),
+            UFM_INTERCONNECT => {
+                let x = bytes.x(density)?;
+                let y = bytes.y(density)?;
+                let i: UFMInterconnectIndex = bytes.n("UFM Interconnect #")?;
+                if density.ufm_block(x, y) {
+                    Ok(Port::UFMInterconnect {
+                        x, y, i,
+                    })
+                } else {
+                    bail!("UFM Interconnect invalid coordinate {x},{y}")
+                }
+            }
             UFM_ISP_BUSY =>
                 Ok(Port::UFMOutput { output: UFMOutput::IspBusy }),
             UFM_OSC =>

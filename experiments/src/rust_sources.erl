@@ -55,9 +55,10 @@
 -define(UFM_AR_OUT, 16#DE).
 -define(UFM_BUSY, 16#DF).
 -define(UFM_DR_OUT, 16#E0).
--define(UFM_ISP_BUSY, 16#E1).
--define(UFM_OSC, 16#E2).
--define(UNKNOWN, 16#E3).
+-define(UFM_INTERCONNECT, 16#E1).
+-define(UFM_ISP_BUSY, 16#E2).
+-define(UFM_OSC, 16#E3).
+-define(UNKNOWN, 16#E4).
 
 %%====================================================================
 %% run
@@ -65,6 +66,7 @@
 
 run() ->
     device(max_v_40z_e64),
+    device(max_v_40z_m64),
     device(max_v_160z_t100),
     device(max_v_240z_m100),
     device(max_v_240z_t144),
@@ -77,6 +79,7 @@ run() ->
 %%--------------------------------------------------------------------
 
 device(Device) ->
+    io:format(" ==> ~p~n", [Device]),
     Db = db(Device),
     Source = source(Db),
     Path = io_lib:format("../rust/device/~s.sources", [Device]),
@@ -112,6 +115,9 @@ source(Db) ->
     <<Name:NameSize/binary, "C5">> = Name0,
     [
         <<"MAXV", NameSize, Name/binary>>,
+        global_interconnects(Db),
+        jtag_interconnects(Db),
+        ufm_interconnects(Db),
         [
             block(X, Y, Db)
             ||
@@ -262,7 +268,7 @@ c4_interconnect_source(X, Y, I, DirectLink, Db) ->
         {{c4, X, Y}, {mux, I}, DirectLink},
         Db#db.density
     ),
-    port_fuse(Port, Fuse, 0, 0).
+    port_fuse(Port, Fuse).
 
 %%--------------------------------------------------------------------
 
@@ -276,7 +282,7 @@ c4_interconnect_source(X, Y, I, Mux4, Mux3, Db) ->
         {{c4, X, Y}, {mux, I}, from3, Mux3},
         Db#db.density
     ),
-    port_fuse(Port, Fuse0, Fuse1, 0).
+    port_fuse(Port, Fuse0, Fuse1).
 
 %%--------------------------------------------------------------------
 
@@ -295,6 +301,41 @@ c4_interconnect_port(X, Y, I, Mux, Db) ->
         _ ->
             source_port(unknown, Db)
     end.
+
+%%====================================================================
+%% global interconnects
+%%====================================================================
+
+global_interconnects(Db = #db{device = Device}) ->
+    [A, B, C, D] = device:gclk_pins(Device),
+    IOCs = device:iocs(Device),
+    [<<?GLOBAL_INTERCONNECTS>>,
+     global_pin(A, IOCs),
+     ufm_interconnect(global, 0, {3, 3}, Db),
+     global_pin(B, IOCs),
+     ufm_interconnect(global, 1, {3, 3}, Db),
+     global_pin(C, IOCs),
+     ufm_interconnect(global, 2, {3, 3}, Db),
+     global_pin(D, IOCs),
+     ufm_interconnect(global, 3, {3, 3}, Db)
+    ].
+
+%%--------------------------------------------------------------------
+
+global_pin(undefined, _) ->
+    <<0>>;
+global_pin(PinName, IOCs) ->
+    {{ioc, X, Y, N}, _} = lists:keyfind(PinName, 2, IOCs),
+    <<1, X, Y, N>>.
+
+%%====================================================================
+%% jtag interconnects
+%%====================================================================
+
+jtag_interconnects(Db) ->
+    [<<?JTAG_INTERCONNECTS>>,
+     ufm_interconnect(jtag, tdo, {4, 2}, Db)
+    ].
 
 %%====================================================================
 %% io cells
@@ -360,7 +401,7 @@ io_column_cell_source(X, Y, N, I, From4, From3, Db) ->
         {{ioc, X, Y, N}, From3, Mux3},
         Db#db.density
     ),
-    port_fuse(Port, Fuse0, Fuse1, 0).
+    port_fuse(Port, Fuse0, Fuse1).
 
 %%--------------------------------------------------------------------
 
@@ -401,7 +442,7 @@ io_row_cell_source(X, Y, N, fast_out, Db) ->
         {{ioc, X, Y, N}, fast_out},
         Db#db.density
     ),
-    port_fuse(Port, Fuse0, 0, 0).
+    port_fuse(Port, Fuse0).
 
 %%--------------------------------------------------------------------
 
@@ -416,7 +457,7 @@ io_row_cell_source(X, Y, N, From6, Mux6, From3, Mux3, Db) ->
         {{ioc, X, Y, N}, From3, Mux3},
         Db#db.density
     ),
-    port_fuse(Port, Fuse0, Fuse1, 0).
+    port_fuse(Port, Fuse0, Fuse1).
 
 %%====================================================================
 %% io interconnects
@@ -481,7 +522,7 @@ io_interconnect_source(X, Y, I, DirectLink, Db) ->
         {{iob, X, Y}, {interconnect, I}, direct_link},
         Db#db.density
     ),
-    port_fuse(Port, Fuse, 0, 0).
+    port_fuse(Port, Fuse).
 
 %%--------------------------------------------------------------------
 
@@ -495,7 +536,7 @@ io_interconnect_source(X, Y, I, Mux4, Mux3, Db) ->
         {{iob, X, Y}, {interconnect, I}, from3, Mux3},
         Db#db.density
     ),
-    port_fuse(Port, Fuse0, Fuse1, 0).
+    port_fuse(Port, Fuse0, Fuse1).
 
 %%--------------------------------------------------------------------
 
@@ -574,7 +615,7 @@ logic_cell_input(X, Y, N, Input, From6, Mux6, From3, Mux3, Db) ->
         {{lc, X, Y, N}, From3, Mux3},
         Db#db.density
     ),
-    port_fuse(Port, Fuse0, Fuse1, 0).
+    port_fuse(Port, Fuse0, Fuse1).
 
 %%====================================================================
 %% logic controls
@@ -625,7 +666,7 @@ logic_control_input(X, Y, N, Input, Mux6, Mux3, Db) ->
         {{lab, X, Y}, {control, N}, from3, Mux3},
         Db#db.density
     ),
-    port_fuse(Port, Fuse0, Fuse1, 0).
+    port_fuse(Port, Fuse0, Fuse1).
 
 %%====================================================================
 %% logic interconnects
@@ -669,7 +710,7 @@ logic_interconnect_source(X, Y, I, DirectLink, Db) ->
         {{lab, X, Y}, {interconnect, I}, direct_link},
         Db#db.density
     ),
-    port_fuse(Port, Fuse, 0, 0).
+    port_fuse(Port, Fuse).
 
 %%--------------------------------------------------------------------
 
@@ -683,7 +724,7 @@ logic_interconnect_source(X, Y, I, Mux4, Mux3, Db) ->
         {{lab, X, Y}, {interconnect, I}, from3, Mux3},
         Db#db.density
     ),
-    port_fuse(Port, Fuse0, Fuse1, 0).
+    port_fuse(Port, Fuse0, Fuse1).
 
 %%--------------------------------------------------------------------
 
@@ -773,7 +814,7 @@ r4_interconnect_source(X, Y, I, DirectLink, Db) ->
         {{r4, X, Y}, {mux, I}, DirectLink},
         Db#db.density
     ),
-    port_fuse(Port, Fuse, 0, 0).
+    port_fuse(Port, Fuse).
 
 %%--------------------------------------------------------------------
 
@@ -787,7 +828,7 @@ r4_interconnect_source(X, Y, I, Mux4, Mux3, Db) ->
         {{r4, X, Y}, {mux, I}, from3, Mux3},
         Db#db.density
     ),
-    port_fuse(Port, Fuse0, Fuse1, 0).
+    port_fuse(Port, Fuse0, Fuse1).
 
 %%--------------------------------------------------------------------
 
@@ -806,6 +847,89 @@ r4_interconnect_port(X, Y, I, Mux, Db) ->
         _ ->
             source_port(unknown, Db)
     end.
+
+%%====================================================================
+%% ufm interconnects
+%%====================================================================
+
+ufm_interconnects(Db) ->
+    [<<?UFM_INTERCONNECTS>>,
+     ufm_interconnect(ufm, ar_clk, {1, 2}, Db),
+     ufm_interconnect(ufm, ar_in, {1, 3}, Db),
+     ufm_interconnect(ufm, ar_shift, {1, 2}, Db),
+     ufm_interconnect(ufm, dr_clk, {1, 3}, Db),
+     ufm_interconnect(ufm, dr_in, {1, 3}, Db),
+     ufm_interconnect(ufm, dr_shift, {1, 3}, Db),
+     ufm_interconnect(ufm, erase, {2, 2}, Db),
+     ufm_interconnect(ufm, osc_ena, {2, 2}, Db),
+     ufm_interconnect(ufm, program, {2, 2}, Db)
+    ].
+
+%%====================================================================
+%% global / jtag / ufm
+%%====================================================================
+
+ufm_interconnect(Block, N, {S, L}, Db = #db{metric = Metric}) ->
+    case Metric#metric.indent_bottom_io of
+        0 ->
+            ufm_small(Block, Metric#metric.indent_left_io, S, N, Db);
+
+        3 ->
+            ufm_large(Block, Metric#metric.indent_left_io, L, N, Db)
+    end.
+
+%%--------------------------------------------------------------------
+
+ufm_small(Block, X, Y, N, Db) ->
+    Sources = [
+        ufm_small_source(Block, X, Y, N, Mux6, Mux3, Db)
+        ||
+        Mux6 <- [mux0, mux1, mux2, mux3, mux5, mux5],
+        Mux3 <- [mux0, mux1, mux2]
+    ],
+    [<<18>>, Sources].
+
+%%--------------------------------------------------------------------
+
+ufm_small_source(Block, X, Y, N, Mux6, Mux3, Db) ->
+    {interconnect, I} = global_mux_map:to_small_interconnect(Mux6, Mux3),
+    Port = <<?IO_ROW_INTERCONNECT, X, Y, I>>,
+    {ok, Fuse0} = fuse_map:from_name(
+        {{Block, X, Y}, N, from6, Mux6},
+        Db#db.density
+    ),
+    {ok, Fuse1} = fuse_map:from_name(
+        {{Block, X, Y}, N, from3, Mux3},
+        Db#db.density
+    ),
+    port_fuse(Port, Fuse0, Fuse1).
+
+%%--------------------------------------------------------------------
+
+ufm_large(Block, X, Y, N, Db) ->
+    Sources = [
+        ufm_large_source(Block, X, Y, N, I, Db)
+        ||
+        I <- lists:seq(0, 9)
+    ],
+    [<<10>>, Sources].
+
+%%--------------------------------------------------------------------
+
+ufm_large_source(Block, X, Y, N, I, Db) ->
+    Port = <<?UFM_INTERCONNECT, X, Y, I>>,
+    {ok, Mux4, Mux3} = global_mux_map:from_large_interconnect(
+        {interconnect, I}
+    ),
+    {ok, Fuse0} = fuse_map:from_name(
+        {{Block, X, Y}, N, from4, Mux4},
+        Db#db.density
+    ),
+    {ok, Fuse1} = fuse_map:from_name(
+        {{Block, X, Y}, N, from3, Mux3},
+        Db#db.density
+    ),
+    port_fuse(Port, Fuse0, Fuse1).
 
 %%====================================================================
 %% sources
@@ -855,17 +979,23 @@ source_port(Error, _) ->
 %% sources
 %%====================================================================
 
-port_fuse(Port, Fuse0, 0, 0) ->
+port_fuse(Port, Fuse0) ->
     <<Port/binary,
       1,
       Fuse0:24/big-integer
-    >>;
-port_fuse(Port, Fuse0, Fuse1, 0) ->
+    >>.
+
+%%--------------------------------------------------------------------
+
+port_fuse(Port, Fuse0, Fuse1) ->
     <<Port/binary,
       2,
       Fuse0:24/big-integer,
       Fuse1:24/big-integer
-    >>;
+    >>.
+
+%%--------------------------------------------------------------------
+
 port_fuse(Port, Fuse0, Fuse1, Fuse2) ->
     <<Port/binary,
       3,

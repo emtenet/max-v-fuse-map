@@ -4,16 +4,20 @@ use crate::{
     Control,
     C4InterconnectIndex,
     Device,
+    DensityLayout,
+    Global,
     IOColumnCellNumber,
     IOColumnInterconnectIndex,
     IORowCellNumber,
     IORowInterconnectIndex,
+    JTAGInput,
     LogicCellInput,
     LogicCellNumber,
     LogicInterconnectIndex,
     PinName,
     Port,
     R4InterconnectIndex,
+    UFMInput,
     X,
     Y,
 };
@@ -23,10 +27,10 @@ mod read;
 pub struct DeviceSources {
     pub device: Device,
     blocks: [[Block; 15]; 22],
-    //global: [Interconnect<18>; 4],
-    //jtag: JTAG,
+    globals: GlobalInterconnects,
+    jtag: JTAGInterconnects,
     pins: HashMap<PinName, PinSource>,
-    //ufm: UFM,
+    ufm: UFMInterconnects,
 }
 
 impl DeviceSources {
@@ -71,6 +75,26 @@ impl DeviceSources {
 
             _ =>
                 None,
+        }
+    }
+
+    pub fn global_interconnect(&self, global: Global)
+        -> InterconnectSources
+    {
+        match global {
+            Global::Global0 => self.globals.0.interconnect.sources(),
+            Global::Global1 => self.globals.1.interconnect.sources(),
+            Global::Global2 => self.globals.2.interconnect.sources(),
+            Global::Global3 => self.globals.3.interconnect.sources(),
+        }
+    }
+
+    pub fn global_pin(&self, global: Global) -> Option<PinSource> {
+        match global {
+            Global::Global0 => self.globals.0.pin,
+            Global::Global1 => self.globals.1.pin,
+            Global::Global2 => self.globals.2.pin,
+            Global::Global3 => self.globals.3.pin,
         }
     }
 
@@ -147,6 +171,15 @@ impl DeviceSources {
         }
     }
 
+    pub fn jtag_interconnect(&self, jtag: JTAGInput)
+        -> InterconnectSources
+    {
+        match jtag {
+            JTAGInput::TDO =>
+                self.jtag.tdo.sources(),
+        }
+    }
+
     pub fn logic_cell(
         &self, x: X, y: Y,
         n: LogicCellNumber,
@@ -216,6 +249,22 @@ impl DeviceSources {
 
             _ =>
                 None,
+        }
+    }
+
+    pub fn ufm_interconnect(&self, ufm: UFMInput)
+        -> InterconnectSources
+    {
+        match ufm {
+            UFMInput::ArClk => self.ufm.ar_clk.sources(),
+            UFMInput::ArIn => self.ufm.ar_in.sources(),
+            UFMInput::ArShift => self.ufm.ar_shift.sources(),
+            UFMInput::DrClk => self.ufm.dr_clk.sources(),
+            UFMInput::DrIn => self.ufm.dr_in.sources(),
+            UFMInput::DrShift => self.ufm.dr_shift.sources(),
+            UFMInput::Erase => self.ufm.erase.sources(),
+            UFMInput::OscEna => self.ufm.osc_ena.sources(),
+            UFMInput::Program => self.ufm.program.sources(),
         }
     }
 }
@@ -729,21 +778,100 @@ impl LogicInterconnects {
     }
 }
 
-//#[derive(Default)]
-//struct JTAG {
-//    tdo: Interconnect<18>,
-//}
+struct GlobalInterconnects(
+    GlobalInterconnect,
+    GlobalInterconnect,
+    GlobalInterconnect,
+    GlobalInterconnect,
+);
 
-//#[derive(Default)]
-//struct UFM {
-//    ar_clk: Interconnect<18>,
-//    ar_in: Interconnect<18>,
-//    ar_shift: Interconnect<18>,
-//    dr_clk: Interconnect<18>,
-//    dr_in: Interconnect<18>,
-//    dr_shift: Interconnect<18>,
-//    erase: Interconnect<18>,
-//    osc_ena: Interconnect<18>,
-//    program: Interconnect<18>,
-//}
+impl GlobalInterconnects {
+    fn new(density: &DensityLayout) -> Self {
+        GlobalInterconnects(
+            GlobalInterconnect::new(density),
+            GlobalInterconnect::new(density),
+            GlobalInterconnect::new(density),
+            GlobalInterconnect::new(density),
+        )
+    }
+}
+
+struct GlobalInterconnect {
+    pin: Option<PinSource>,
+    interconnect: DeviceInterconnect,
+}
+
+impl GlobalInterconnect {
+    fn new(density: &DensityLayout) -> Self {
+        GlobalInterconnect {
+            pin: None,
+            interconnect: DeviceInterconnect::new(density),
+        }
+    }
+}
+
+struct JTAGInterconnects {
+    tdo: DeviceInterconnect,
+}
+
+impl JTAGInterconnects {
+    fn new(density: &DensityLayout) -> Self {
+        JTAGInterconnects {
+            tdo: DeviceInterconnect::new(density),
+        }
+    }
+}
+
+struct UFMInterconnects {
+    ar_clk: DeviceInterconnect,
+    ar_in: DeviceInterconnect,
+    ar_shift: DeviceInterconnect,
+    dr_clk: DeviceInterconnect,
+    dr_in: DeviceInterconnect,
+    dr_shift: DeviceInterconnect,
+    erase: DeviceInterconnect,
+    osc_ena: DeviceInterconnect,
+    program: DeviceInterconnect,
+}
+
+impl UFMInterconnects {
+    fn new(density: &DensityLayout) -> Self {
+        UFMInterconnects {
+            ar_clk: DeviceInterconnect::new(density),
+            ar_in: DeviceInterconnect::new(density),
+            ar_shift: DeviceInterconnect::new(density),
+            dr_clk: DeviceInterconnect::new(density),
+            dr_in: DeviceInterconnect::new(density),
+            dr_shift: DeviceInterconnect::new(density),
+            erase: DeviceInterconnect::new(density),
+            osc_ena: DeviceInterconnect::new(density),
+            program: DeviceInterconnect::new(density),
+        }
+    }
+}
+
+enum DeviceInterconnect {
+    Small(Interconnect<18>),
+    Large(Interconnect<10>),
+}
+
+impl DeviceInterconnect {
+    fn new(density: &DensityLayout) -> Self {
+        if density.has_grow {
+            DeviceInterconnect::Large(Default::default())
+        } else {
+            DeviceInterconnect::Small(Default::default())
+        }
+    }
+
+    fn sources(&self) -> InterconnectSources {
+        match self {
+            DeviceInterconnect::Small(interconnect) =>
+                interconnect.sources(),
+
+            DeviceInterconnect::Large(interconnect) =>
+                interconnect.sources(),
+        }
+    }
+}
 

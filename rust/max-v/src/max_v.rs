@@ -327,6 +327,9 @@ pub enum Port {
     Global {
         global: Global,
     },
+    GlobalInput {
+        global: Global,
+    },
     IOColumnCellInput {
         x: X,
         y: Y,
@@ -359,6 +362,9 @@ pub enum Port {
         y: Y,
         i: IORowInterconnectIndex,
     },
+    JTAGInput {
+        input: JTAGInput,
+    },
     JTAGOutput {
         output: JTAGOutput,
     },
@@ -388,6 +394,14 @@ pub enum Port {
         x: X,
         y: Y,
         i: R4InterconnectIndex,
+    },
+    UFMInput {
+        input: UFMInput,
+    },
+    UFMInterconnect {
+        x: X,
+        y: Y,
+        i: UFMInterconnectIndex,
     },
     UFMOutput {
         output: UFMOutput,
