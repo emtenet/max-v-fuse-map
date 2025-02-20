@@ -127,7 +127,7 @@
 %% from_large_interconnect
 %%====================================================================
 
--spec from_large_interconnect(large_interconnect()) -> {ok, mux6(), mux3()}.
+-spec from_large_interconnect(large_interconnect()) -> {ok, mux4(), mux3()}.
 
 -define(INTERCONNECT(Mux4, Mux3, N),
     from_large_interconnect({interconnect, N}) ->
