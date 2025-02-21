@@ -163,8 +163,50 @@ fn max_v_240z_m100() {
 }
 
 #[test]
+fn max_v_240z_t100() {
+    let _ = DeviceSources::read("../device/max_v_240z_t100.sources").unwrap();
+}
+
+#[test]
 fn max_v_240z_t144() {
     let _ = DeviceSources::read("../device/max_v_240z_t144.sources").unwrap();
+}
+
+#[test]
+fn max_v_570z_t100() {
+    let device = DeviceSources::read("../device/max_v_570z_t100.sources")
+        .unwrap();
+
+    assert_device! { device
+        // bottom left
+        c4_interconnect(0, 3, C4Interconnect3).source(0) =>
+            io_column!(1, 3, IOColumnCell3);
+
+        // grow 3
+        c4_interconnect(9, 3, C4Interconnect11).source(0) =>
+            logic_cell!(10, 3, LogicCell6, Left);
+
+        // grow 2
+        c4_interconnect(9, 2, C4Interconnect6).source(0) =>
+            logic_cell!(10, 2, LogicCell8, Left);
+
+        // grow 1
+        c4_interconnect(9, 1, C4Interconnect0).source(0) =>
+            logic_cell!(10, 1, LogicCell0, Left);
+
+        // grow corner
+        c4_interconnect(9, 0, C4Interconnect12).source(0) =>
+            io_column!(10, 0, IOColumnCell2);
+
+        // bottom right
+        c4_interconnect(12, 0, C4Interconnect7).source(0) =>
+            io_column!(12, 0, IOColumnCell1);
+    }
+}
+
+#[test]
+fn max_v_570z_t144() {
+    let _ = DeviceSources::read("../device/max_v_570z_t144.sources").unwrap();
 }
 
 #[test]
@@ -209,40 +251,13 @@ fn max_v_570z_f256() {
 }
 
 #[test]
-fn max_v_570z_t100() {
-    let device = DeviceSources::read("../device/max_v_570z_t100.sources")
-        .unwrap();
-
-    assert_device! { device
-        // bottom left
-        c4_interconnect(0, 3, C4Interconnect3).source(0) =>
-            io_column!(1, 3, IOColumnCell3);
-
-        // grow 3
-        c4_interconnect(9, 3, C4Interconnect11).source(0) =>
-            logic_cell!(10, 3, LogicCell6, Left);
-
-        // grow 2
-        c4_interconnect(9, 2, C4Interconnect6).source(0) =>
-            logic_cell!(10, 2, LogicCell8, Left);
-
-        // grow 1
-        c4_interconnect(9, 1, C4Interconnect0).source(0) =>
-            logic_cell!(10, 1, LogicCell0, Left);
-
-        // grow corner
-        c4_interconnect(9, 0, C4Interconnect12).source(0) =>
-            io_column!(10, 0, IOColumnCell2);
-
-        // bottom right
-        c4_interconnect(12, 0, C4Interconnect7).source(0) =>
-            io_column!(12, 0, IOColumnCell1);
-    }
+fn max_v_1270z_t144() {
+    let _ = DeviceSources::read("../device/max_v_1270z_t144.sources").unwrap();
 }
 
 #[test]
-fn max_v_1270z_t144() {
-    let _ = DeviceSources::read("../device/max_v_1270z_t144.sources").unwrap();
+fn max_v_1270z_f324() {
+    let _ = DeviceSources::read("../device/max_v_1270z_f324.sources") .unwrap();
 }
 
 #[test]
