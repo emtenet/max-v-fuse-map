@@ -217,7 +217,7 @@ impl std::str::FromStr for PortKind {
             "global" => Ok(Self::Global),
             "io" => Ok(Self::IOCellOutput),
             "jtag" => Ok(Self::JTAGOutput),
-            "lc" => Ok(Self::LogicCellOutput),
+            "logic" => Ok(Self::LogicCellOutput),
             "r4" => Ok(Self::R4Interconnect),
             "ufm" => Ok(Self::UFMOutput),
             _ =>

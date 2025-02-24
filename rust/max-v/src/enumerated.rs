@@ -20,13 +20,27 @@ macro_rules! enumerated {
         #[derive(Debug)]
         pub struct $out_of_range;
 
-        impl std::fmt::Display for $out_of_range {
-            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-                f.write_str(concat!(stringify!($enum), "out of range"))
+        impl $enum {
+            pub fn count() -> usize {
+                enumerated!(@count
+                    $( $item, )* ;
+                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                    10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                    20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                    30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+                )
             }
-        }
 
-        impl std::error::Error for $out_of_range {
+            pub fn index(self) -> usize {
+                enumerated!(@index
+                    $enum self
+                    $( $item, )* ;
+                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                    10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                    20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                    30, 31, 32, 33, 34, 35, 36, 37, 38, 39, ;
+                )
+            }
         }
 
         impl std::convert::TryFrom<usize> for $enum {
@@ -56,32 +70,28 @@ macro_rules! enumerated {
             }
         }
 
+        impl std::fmt::Display for $enum {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                let s = self.index().to_string();
+
+                f.pad_integral(true, "", &s)
+            }
+        }
+
+        impl std::fmt::Display for $out_of_range {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                f.write_str(concat!(stringify!($enum), "out of range"))
+            }
+        }
+
+        impl std::error::Error for $out_of_range {
+        }
+
         pub struct $iterator(Option<$enum>);
 
         impl $enum {
             pub fn iter() -> $iterator {
                 $iterator(Some(enumerated!(@iterate $enum $($item,)* )))
-            }
-
-            pub fn count() -> usize {
-                enumerated!(@count
-                    $( $item, )* ;
-                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                    10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-                    20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-                    30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-                )
-            }
-
-            pub fn index(self) -> usize {
-                enumerated!(@index
-                    $enum self
-                    $( $item, )* ;
-                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                    10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-                    20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-                    30, 31, 32, 33, 34, 35, 36, 37, 38, 39, ;
-                )
             }
         }
 
