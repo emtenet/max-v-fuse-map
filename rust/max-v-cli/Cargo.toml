@@ -1,0 +1,13 @@
+[package]
+name = "max-v-cli"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "max-v"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+max-v.workspace = true
+

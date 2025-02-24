@@ -25,7 +25,7 @@ use crate::{
 mod read;
 
 pub struct DeviceSources {
-    pub device: Device,
+    device: Device,
     blocks: [[Block; 15]; 22],
     globals: GlobalInterconnects,
     jtag: JTAGInterconnects,
@@ -34,6 +34,14 @@ pub struct DeviceSources {
 }
 
 impl DeviceSources {
+    pub fn device(&self) -> Device {
+        self.device
+    }
+
+    pub fn density_layout(&self) -> &'static DensityLayout {
+        self.device.density().layout()
+    }
+
     fn block(&self, x: X, y: Y) -> Option<&Block> {
         self.blocks.get(x.0 as usize)
             .and_then(|col| col.get(y.0 as usize))
@@ -321,6 +329,10 @@ impl<'d> InterconnectSources<'d> {
     pub fn source(&self, index: usize) -> Option<Port> {
         self.sources.get(index)
             .map(|source| source.port)
+    }
+
+    pub fn source_count(&self) -> usize {
+        self.sources.len()
     }
 
     pub fn sources(&self) -> InterconnectSourcesIter<'d> {

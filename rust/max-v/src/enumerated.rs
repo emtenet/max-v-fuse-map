@@ -20,6 +20,15 @@ macro_rules! enumerated {
         #[derive(Debug)]
         pub struct $out_of_range;
 
+        impl std::fmt::Display for $out_of_range {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                f.write_str(concat!(stringify!($enum), "out of range"))
+            }
+        }
+
+        impl std::error::Error for $out_of_range {
+        }
+
         impl std::convert::TryFrom<usize> for $enum {
             type Error = $out_of_range;
 
@@ -35,60 +44,15 @@ macro_rules! enumerated {
             }
         }
 
-        impl<'de> serde::de::Deserialize<'de> for $enum {
-            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-            where
-                D: serde::de::Deserializer<'de>,
-            {
-                struct Index;
+        impl std::str::FromStr for $enum {
+            type Err = $out_of_range;
 
-                impl<'de> serde::de::Visitor<'de> for Index {
-                    type Value = $enum;
-
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter)
-                        -> std::fmt::Result
-                    {
-                        formatter.write_str(stringify!($enum))
-                    }
-
-                    fn visit_i64<E>(self, value: i64)
-                        -> Result<Self::Value, E>
-                    where
-                        E: serde::de::Error,
-                    {
-                        use serde::de::Unexpected;
-
-                        if let Ok(value) = usize::try_from(value) {
-                            if let Ok(value) = $enum::try_from(value) {
-                                return Ok(value);
-                            }
-                        }
-                        Err(E::invalid_value(
-                            Unexpected::Signed(value),
-                            &stringify!($enum),
-                        ))
-                    }
-
-                    fn visit_u64<E>(self, value: u64)
-                        -> Result<Self::Value, E>
-                    where
-                        E: serde::de::Error,
-                    {
-                        use serde::de::Unexpected;
-
-                        if let Ok(value) = usize::try_from(value) {
-                            if let Ok(value) = $enum::try_from(value) {
-                                return Ok(value);
-                            }
-                        }
-                        Err(E::invalid_value(
-                            Unexpected::Unsigned(value),
-                            &stringify!($enum),
-                        ))
-                    }
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                if let Ok(i) = usize::from_str(s) {
+                    $enum::try_from(i)
+                } else {
+                    Err($out_of_range)
                 }
-
-                deserializer.deserialize_u8(Index)
             }
         }
 
@@ -250,59 +214,11 @@ macro_rules! enumerated_str {
         #[derive(Debug)]
         pub struct $out_of_range;
 
-        impl std::str::FromStr for $enum {
-            type Err = $out_of_range;
-
-            fn from_str(s: &str) -> Result<Self, Self::Err> {
-                enumerated_str!(@from_str
-                    $enum s $out_of_range
-                    $( $item = $str, )*
-                )
-            }
-        }
-
-        impl<'de> serde::de::Deserialize<'de> for $enum {
-            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-            where
-                D: serde::de::Deserializer<'de>,
-            {
-                use std::str::FromStr;
-
-                struct Visitor;
-
-                impl<'de> serde::de::Visitor<'de> for Visitor {
-                    type Value = $enum;
-
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter)
-                        -> std::fmt::Result
-                    {
-                        formatter.write_str("a device")
-                    }
-
-                    fn visit_str<E>(self, value: &str)
-                        -> Result<Self::Value, E>
-                    where
-                        E: serde::de::Error,
-                    {
-                        $enum::from_str(value)
-                            .map_err(|_|
-                                E::invalid_value(
-                                    serde::de::Unexpected::Str(value),
-                                    &stringify!($enum),
-                                )
-                            )
-                    }
-                }
-
-                deserializer.deserialize_str(Visitor)
-            }
-        }
-
-        pub struct $iterator(Option<$enum>);
-
         impl $enum {
-            pub fn iter() -> $iterator {
-                $iterator(Some(enumerated_str!(@iterate $enum $($item,)* )))
+            pub fn as_str(&self) -> &'static str {
+                match self {
+                    $( Self::$item => $str, )+
+                }
             }
 
             pub fn index(self) -> usize {
@@ -314,6 +230,31 @@ macro_rules! enumerated_str {
                     20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
                     30, 31, 32, 33, 34, 35, 36, 37, 38, 39, ;
                 )
+            }
+        }
+
+        impl std::str::FromStr for $enum {
+            type Err = $out_of_range;
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                enumerated_str!(@from_str
+                    $enum s $out_of_range
+                    $( $item = $str, )*
+                )
+            }
+        }
+
+        impl std::fmt::Display for $enum {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                f.write_str(self.as_str())
+            }
+        }
+
+        pub struct $iterator(Option<$enum>);
+
+        impl $enum {
+            pub fn iter() -> $iterator {
+                $iterator(Some(enumerated_str!(@iterate $enum $($item,)* )))
             }
         }
 
@@ -389,175 +330,6 @@ macro_rules! enumerated_str {
             $enum $self
             $n, $( $item, )* ;
             $( $prev, $next, )* $p, $n,
-        )
-    };
-}
-
-#[macro_export]
-macro_rules! field {
-    (enum $enum:ident { $( $item:ident = $str:literal, )+ }) => {
-        #[derive(Debug)]
-        enum $enum {
-            $( $item, )*
-        }
-
-        impl<'de> serde::de::Deserialize<'de> for $enum {
-            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-            where
-                D: serde::de::Deserializer<'de>,
-            {
-                struct Fields;
-                static FIELDS: &'static [&'static str] = &[
-                    $( $str, )+
-                ];
-
-                impl<'de> serde::de::Visitor<'de> for Fields {
-                    type Value = $enum;
-
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter)
-                        -> std::fmt::Result
-                    {
-                        formatter.write_str("fields")
-                    }
-
-                    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-                    where
-                        E: de::Error,
-                    {
-                        field!(@match $enum value {
-                            $( $item = $str, )*
-                        } FIELDS)
-                    }
-                }
-
-                deserializer.deserialize_str(Fields)
-            }
-        }
-    };
-    (@match $enum:ident $value:ident {
-            $( $item:ident = $str:literal, )+
-        } $FIELDS:ident
-    ) => {
-        match $value {
-            $( $str => Ok($enum::$item), )*
-            _ => Err(de::Error::unknown_field($value, $FIELDS)),
-        }
-    }
-}
-
-#[macro_export]
-macro_rules! indexed_str {
-    (
-        enum $enum:ident {
-            $( $item:ident = $str:literal, )+
-        }
-        struct $out_of_range:ident ;
-    ) => {
-        #[derive(Copy, Clone)]
-        #[derive(Debug)]
-        #[derive(Eq, PartialEq)]
-        #[derive(Hash)]
-        #[derive(Ord, PartialOrd)]
-        pub enum $enum {
-            $( $item, )+
-        }
-
-        #[derive(Debug)]
-        pub struct $out_of_range;
-
-        impl std::str::FromStr for $enum {
-            type Err = $out_of_range;
-
-            fn from_str(s: &str) -> Result<Self, Self::Err> {
-                indexed_str!(@from_str
-                    $enum s $out_of_range
-                    $( $item = $str, )*
-                )
-            }
-        }
-
-        impl<'de> serde::de::Deserialize<'de> for $enum {
-            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-            where
-                D: serde::de::Deserializer<'de>,
-            {
-                use std::str::FromStr;
-
-                struct Visitor;
-
-                impl<'de> serde::de::Visitor<'de> for Visitor {
-                    type Value = $enum;
-
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter)
-                        -> std::fmt::Result
-                    {
-                        formatter.write_str("a device")
-                    }
-
-                    fn visit_str<E>(self, value: &str)
-                        -> Result<Self::Value, E>
-                    where
-                        E: serde::de::Error,
-                    {
-                        $enum::from_str(value)
-                            .map_err(|_|
-                                E::invalid_value(
-                                    serde::de::Unexpected::Str(value),
-                                    &stringify!($enum),
-                                )
-                            )
-                    }
-                }
-
-                deserializer.deserialize_str(Visitor)
-            }
-        }
-
-        impl $enum {
-            pub fn index(self) -> usize {
-                indexed_str!(@index
-                    $enum self
-                    $( $item, )* ;
-                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                    10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-                    20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-                    30, 31, 32, 33, 34, 35, 36, 37, 38, 39, ;
-                )
-            }
-        }
-    };
-    // from_str
-    (@from_str
-        $enum:ident $s:ident $error:ident
-        $( $item:ident = $str:literal, )+
-    ) => {
-        match $s {
-            $( $str => { Ok($enum::$item) } )*
-            _ => { Err($error) }
-        }
-    };
-    // index
-    (@index
-        $enum:ident $self:ident
-        ;
-        $( $numbers:literal, )* ;
-        $( $index:literal, $item:ident, )*
-    ) => {
-        match $self {
-            $( $enum::$item => $index, )*
-        }
-    };
-    (@index
-        $enum:ident $self:ident
-        $name:ident, $( $names:ident, )* ;
-        $number:literal, $( $numbers:literal, )* ;
-        $( $index:literal, $item:ident, )*
-    ) => {
-        indexed_str!(@index
-            $enum $self
-            $( $names, )* ;
-            $( $numbers, )* ;
-            $( $index, $item, )* $number, $name,
         )
     };
 }

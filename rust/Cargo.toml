@@ -2,5 +2,9 @@
 resolver = "2"
 members = [
     "max-v",
+    "max-v-cli",
 ]
 
+[workspace.dependencies]
+anyhow = "1.0"
+max-v = { path = "max-v" }

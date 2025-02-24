@@ -6,11 +6,13 @@ mod device;
 mod enumerated;
 mod enums;
 mod fuse;
+mod port;
 
 pub use density::*;
 pub use device::*;
 pub use enums::*;
 pub use fuse::*;
+pub use port::*;
 
 enumerated_str! {
     enum Density {
@@ -104,7 +106,7 @@ pub struct X(pub u8);
 
 impl std::fmt::Display for X {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+        self.0.fmt(f)
     }
 }
 
@@ -117,6 +119,12 @@ impl From<u8> for X {
 impl From<X> for usize {
     fn from(x: X) -> usize {
         usize::from(x.0)
+    }
+}
+
+impl From<X> for isize {
+    fn from(x: X) -> isize {
+        isize::from(x.0)
     }
 }
 
@@ -168,6 +176,25 @@ impl PartialOrd<u8> for X {
     }
 }
 
+pub struct XIter {
+    pub (crate) next: X,
+    pub (crate) last: X,
+}
+
+impl Iterator for XIter {
+    type Item = X;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.next > self.last {
+            None
+        } else {
+            let next = self.next + 1;
+
+            Some(std::mem::replace(&mut self.next, next))
+        }
+    }
+}
+
 #[derive(Copy, Clone)]
 #[derive(Debug)]
 #[derive(Eq, PartialEq)]
@@ -178,7 +205,7 @@ pub struct Y(pub u8);
 
 impl std::fmt::Display for Y {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+        self.0.fmt(f)
     }
 }
 
@@ -191,6 +218,12 @@ impl From<u8> for Y {
 impl From<Y> for usize {
     fn from(y: Y) -> usize {
         usize::from(y.0)
+    }
+}
+
+impl From<Y> for isize {
+    fn from(y: Y) -> isize {
+        isize::from(y.0)
     }
 }
 
@@ -239,6 +272,25 @@ impl PartialEq<u8> for Y {
 impl PartialOrd<u8> for Y {
     fn partial_cmp(&self, with: &u8) -> Option<std::cmp::Ordering> {
         self.0.partial_cmp(with)
+    }
+}
+
+pub struct YIter {
+    pub (crate) next: Option<Y>,
+}
+
+impl Iterator for YIter {
+    type Item = Y;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(next) = self.next.take() {
+            if next > 0 {
+                self.next = Some(next - 1);
+            }
+            Some(next)
+        } else {
+            None
+        }
     }
 }
 
@@ -312,101 +364,5 @@ impl std::hash::Hash for PinName {
     {
         self.as_str().hash(state)
     }
-}
-
-#[derive(Copy, Clone)]
-#[derive(Default)]
-#[derive(Debug)]
-#[derive(Eq, PartialEq)]
-pub enum Port {
-    C4Interconnect {
-        x: X,
-        y: Y,
-        i: C4InterconnectIndex,
-    },
-    Global {
-        global: Global,
-    },
-    GlobalInput {
-        global: Global,
-    },
-    IOColumnCellInput {
-        x: X,
-        y: Y,
-        n: IOColumnCellNumber,
-        input: IOCellInput,
-    },
-    IOColumnCellOutput {
-        x: X,
-        y: Y,
-        n: IOColumnCellNumber,
-    },
-    IOColumnInterconnect {
-        x: X,
-        y: Y,
-        i: IOColumnInterconnectIndex,
-    },
-    IORowCellInput {
-        x: X,
-        y: Y,
-        n: IORowCellNumber,
-        input: IOCellInput,
-    },
-    IORowCellOutput {
-        x: X,
-        y: Y,
-        n: IORowCellNumber,
-    },
-    IORowInterconnect {
-        x: X,
-        y: Y,
-        i: IORowInterconnectIndex,
-    },
-    JTAGInput {
-        input: JTAGInput,
-    },
-    JTAGOutput {
-        output: JTAGOutput,
-    },
-    LogicCellInput {
-        x: X,
-        y: Y,
-        n: LogicCellNumber,
-        input: LogicCellInput,
-    },
-    LogicCellOutput {
-        x: X,
-        y: Y,
-        n: LogicCellNumber,
-        output: LogicCellOutput,
-    },
-    LogicControl {
-        x: X,
-        y: Y,
-        control: Control,
-    },
-    LogicInterconnect {
-        x: X,
-        y: Y,
-        i: LogicInterconnectIndex,
-    },
-    R4Interconnect {
-        x: X,
-        y: Y,
-        i: R4InterconnectIndex,
-    },
-    UFMInput {
-        input: UFMInput,
-    },
-    UFMInterconnect {
-        x: X,
-        y: Y,
-        i: UFMInterconnectIndex,
-    },
-    UFMOutput {
-        output: UFMOutput,
-    },
-    #[default]
-    Unknown,
 }
 

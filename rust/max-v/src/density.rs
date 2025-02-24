@@ -2,7 +2,9 @@ use crate::{
     IOColumnCellNumber,
     IORowCellNumber,
     X,
+    XIter,
     Y,
+    YIter,
 };
 
 pub struct DensityLayout {
@@ -425,6 +427,19 @@ pub const MAX_V_2210Z: DensityLayout = DensityLayout {
 impl DensityLayout {
     pub fn large(&self) -> bool {
         self.has_grow
+    }
+
+    pub fn x_iter(&self) -> XIter {
+        XIter {
+            next: self.left,
+            last: self.right,
+        }
+    }
+
+    pub fn y_iter(&self) -> YIter {
+        YIter {
+            next: Some(self.top),
+        }
     }
 
     pub fn block_type(&self, x: X, y: Y) -> Option<DensityBlockType> {
