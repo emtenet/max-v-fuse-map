@@ -52,7 +52,7 @@ fn max_v_40z_e64() {
         c4_interconnect(7, 0, C4Interconnect7).first() =>
             io_column!(7, 0, IOColumnCell1);
 
-        global_interconnect(Global0).first() =>
+        global_input(Global0).first() =>
             io_row_interconnect!(1, 3, IORowInterconnect0);
 
         global_pin(Global0) => Some(1, 3, IORowCell3);
@@ -82,7 +82,7 @@ fn max_v_40z_e64() {
         io_row_interconnect(8, 2, IORowInterconnect17).first() =>
             logic_cell!(7, 2, LogicCell9, Right);
 
-        jtag_interconnect(TDO).source(6) =>
+        jtag_input(TDO).source(6) =>
             io_row_interconnect!(1, 4, IORowInterconnect6);
 
         // logic-cell (a)
@@ -121,10 +121,10 @@ fn max_v_40z_e64() {
         r4_interconnect(8, 4, R4Interconnect0).source(6) =>
             c4_interconnect!(7, 0, C4Interconnect7);
 
-        ufm_interconnect(DrClk).last() =>
+        ufm_input(DrClk).last() =>
             io_row_interconnect!(1, 1, IORowInterconnect17);
 
-        ufm_interconnect(Erase).source(7) =>
+        ufm_input(Erase).source(7) =>
             io_row_interconnect!(1, 2, IORowInterconnect7);
     }
 }
@@ -215,7 +215,7 @@ fn max_v_570z_f256() {
         .unwrap();
 
     assert_device! { device
-        global_interconnect(Global1).source(3) =>
+        global_input(Global1).source(3) =>
             ufm_interconnect!(9, 3, UFMInterconnect3);
 
         global_pin(Global0) => Some(0, 5, IORowCell0);
@@ -227,7 +227,7 @@ fn max_v_570z_f256() {
 
         io_row_pin(13, 1, IORowCell0) => "M15";
 
-        jtag_interconnect(TDO).source(1) =>
+        jtag_input(TDO).source(1) =>
             ufm_interconnect!(9, 2, UFMInterconnect1);
 
         // r4 (grow)
@@ -242,10 +242,10 @@ fn max_v_570z_f256() {
         r4_interconnect(9, 3, R4Interconnect9).source(3) =>
             ufm!(Busy);
 
-        ufm_interconnect(ArIn).last() =>
+        ufm_input(ArIn).last() =>
             ufm_interconnect!(9, 3, UFMInterconnect9);
 
-        ufm_interconnect(Program).source(2) =>
+        ufm_input(Program).source(2) =>
             ufm_interconnect!(9, 2, UFMInterconnect2);
     }
 }

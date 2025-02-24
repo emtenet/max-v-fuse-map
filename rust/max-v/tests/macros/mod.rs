@@ -33,13 +33,13 @@ macro_rules! assert_device {
         assert_device!($device $($tail)*);
     };
     ($device:ident
-        global_interconnect($global:ident)
+        global_input($global:ident)
             . $f:ident $ff:tt
             => $port:expr;
         $($tail:tt)*
     ) => {
         {
-            let interconnect = $device.global_interconnect($global);
+            let interconnect = $device.global_input($global);
             assert_eq!(
                 Port::GlobalInput { global: $global },
                 interconnect.port(),
@@ -145,13 +145,13 @@ macro_rules! assert_device {
         assert_device!($device $($tail)*);
     };
     ($device:ident
-        jtag_interconnect($input:ident)
+        jtag_input($input:ident)
             . $f:ident $ff:tt
             => $port:expr;
         $($tail:tt)*
     ) => {
         {
-            let interconnect = $device.jtag_interconnect(JTAGInput::$input);
+            let interconnect = $device.jtag_input(JTAGInput::$input);
             assert_eq!(
                 Port::JTAGInput { input: JTAGInput::$input },
                 interconnect.port(),
@@ -243,15 +243,34 @@ macro_rules! assert_device {
         assert_device!($device $($tail)*);
     };
     ($device:ident
-        ufm_interconnect($input:ident)
+        ufm_input($input:ident)
             . $f:ident $ff:tt
             => $port:expr;
         $($tail:tt)*
     ) => {
         {
-            let interconnect = $device.ufm_interconnect(UFMInput::$input);
+            let interconnect = $device.ufm_input(UFMInput::$input);
             assert_eq!(
                 Port::UFMInput { input: UFMInput::$input },
+                interconnect.port(),
+            );
+            let port = interconnect_port!(interconnect . $f $ff );
+            assert_eq!($port, port);
+        }
+        assert_device!($device $($tail)*);
+    };
+    ($device:ident
+        ufm_interconnect($x:literal, $y:literal, $i:ident)
+            . $f:ident $ff:tt
+            => $port:expr;
+        $($tail:tt)*
+    ) => {
+        {
+            let interconnect = $device.ufm_interconnect(
+                X($x), Y($y), $i,
+            ).expect("ufm_interconnect");
+            assert_eq!(
+                Port::UFMInterconnect { x: X($x), y: Y($y), i: $i },
                 interconnect.port(),
             );
             let port = interconnect_port!(interconnect . $f $ff );

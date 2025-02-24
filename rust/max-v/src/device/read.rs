@@ -60,9 +60,9 @@ use super::{
 };
 
 // device interconnects
-const GLOBAL_INTERCONNECTS: u8 = 0xED;
-const JTAG_INTERCONNECTS: u8 = 0xEE;
-const UFM_INTERCONNECTS: u8 = 0xEF;
+const GLOBAL_INPUTS: u8 = 0xED;
+const JTAG_INPUTS: u8 = 0xEE;
+const UFM_INPUTS: u8 = 0xEF;
 
 // block types
 const CORNER_BLOCK: u8 = 0xF0;
@@ -74,13 +74,14 @@ const RIGHT_BLOCK: u8 = 0xF5;
 const UFM_BLOCK: u8 = 0xF6;
 
 // sub-block types
-const C4_INTERCONNECTS: u8 = 0xF9;
-const IO_CELLS: u8 = 0xFA;
-const IO_INTERCONNECTS: u8 = 0xFB;
-const LOGIC_CELLS: u8 = 0xFC;
-const LOGIC_CONTROLS: u8 = 0xFD;
-const LOGIC_INTERCONNECTS: u8 = 0xFE;
-const R4_INTERCONNECTS: u8 = 0xFF;
+const C4_INTERCONNECTS: u8 = 0xF8;
+const IO_CELLS: u8 = 0xF9;
+const IO_INTERCONNECTS: u8 = 0xFA;
+const LOGIC_CELLS: u8 = 0xFB;
+const LOGIC_CONTROLS: u8 = 0xFC;
+const LOGIC_INTERCONNECTS: u8 = 0xFD;
+const R4_INTERCONNECTS: u8 = 0xFE;
+const UFM_INTERCONNECTS: u8 = 0xFF;
 
 // ports
 const C4_INTERCONNECT: u8 = 0xD0;
@@ -731,6 +732,20 @@ impl UFMBlock {
 
         r4_interconnects(&mut block.r4_interconnects, density, x, y, bytes)?;
 
+        bytes.expect(UFM_INTERCONNECTS, "UFM Interconnects header")?;
+        bytes.expect(
+            UFMInterconnectIndex::count() as u8,
+            "UFM Interconnects count",
+        )?;
+        for i in UFMInterconnectIndex::iter() {
+            let interconnect = &mut block.ufm_interconnects[i.index()];
+            interconnect.read(
+                density,
+                Port::UFMInterconnect { x, y, i },
+                bytes,
+            )?;
+        }
+
         Ok(Box::new(block))
     }
 }
@@ -815,7 +830,7 @@ impl GlobalInterconnects {
         density: &Density,
         bytes: &mut Bytes<'b>,
     ) -> Result<()> {
-        bytes.expect(GLOBAL_INTERCONNECTS, "Global Interconnects header")?;
+        bytes.expect(GLOBAL_INPUTS, "Global Inputs header")?;
         self.0.read(density, Global::Global0, bytes)?;
         self.1.read(density, Global::Global1, bytes)?;
         self.2.read(density, Global::Global2, bytes)?;
@@ -926,7 +941,7 @@ impl JTAGInterconnects {
     ) -> Result<()> {
         use JTAGInput::*;
 
-        bytes.expect(JTAG_INTERCONNECTS, "JTAG Interconnects header")?;
+        bytes.expect(JTAG_INPUTS, "JTAG Inputs header")?;
         self.tdo.read(density, Port::JTAGInput { input: TDO }, bytes)?;
         Ok(())
     }
@@ -961,7 +976,7 @@ impl UFMInterconnects {
     ) -> Result<()> {
         use UFMInput::*;
 
-        bytes.expect(UFM_INTERCONNECTS, "UFM Interconnects header")?;
+        bytes.expect(UFM_INPUTS, "UFM Inputs header")?;
         self.ar_clk.read(density, Port::UFMInput { input: ArClk }, bytes)?;
         self.ar_in.read(density, Port::UFMInput { input: ArIn }, bytes)?;
         self.ar_shift.read(density, Port::UFMInput { input: ArShift }, bytes)?;

@@ -18,6 +18,7 @@ use crate::{
     Port,
     R4InterconnectIndex,
     UFMInput,
+    UFMInterconnectIndex,
     X,
     Y,
 };
@@ -86,7 +87,7 @@ impl DeviceSources {
         }
     }
 
-    pub fn global_interconnect(&self, global: Global)
+    pub fn global_input(&self, global: Global)
         -> InterconnectSources
     {
         match global {
@@ -179,7 +180,7 @@ impl DeviceSources {
         }
     }
 
-    pub fn jtag_interconnect(&self, jtag: JTAGInput)
+    pub fn jtag_input(&self, jtag: JTAGInput)
         -> InterconnectSources
     {
         match jtag {
@@ -260,7 +261,7 @@ impl DeviceSources {
         }
     }
 
-    pub fn ufm_interconnect(&self, ufm: UFMInput)
+    pub fn ufm_input(&self, ufm: UFMInput)
         -> InterconnectSources
     {
         match ufm {
@@ -273,6 +274,16 @@ impl DeviceSources {
             UFMInput::Erase => self.ufm.erase.sources(),
             UFMInput::OscEna => self.ufm.osc_ena.sources(),
             UFMInput::Program => self.ufm.program.sources(),
+        }
+    }
+
+    pub fn ufm_interconnect(&self, x: X, y: Y, i: UFMInterconnectIndex)
+        -> Option<InterconnectSources>
+    {
+        if let Some(Block::UFM(block)) = self.block(x, y) {
+            Some(block.ufm_interconnect(i).sources())
+        } else {
+            None
         }
     }
 }
@@ -480,7 +491,7 @@ impl GrowBlock {
 struct UFMBlock {
     c4_interconnects: [Interconnect<13>; 14],
     r4_interconnects: [Interconnect<13>; 8],
-    //ufm_interconnects: [Interconnect_; 10],
+    ufm_interconnects: [Interconnect<13>; 10],
 }
 
 impl UFMBlock {
@@ -494,6 +505,10 @@ impl UFMBlock {
         } else {
             None
         }
+    }
+
+    fn ufm_interconnect(&self, i: UFMInterconnectIndex) -> &Interconnect<13> {
+        &self.ufm_interconnects[i.index()]
     }
 }
 

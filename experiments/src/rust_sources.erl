@@ -11,13 +11,14 @@
     iobs :: iob_interconnect_mux_database:blocks(),
     labs :: lab_interconnect_mux_database:blocks(),
     r4s :: r4_interconnect_mux_database:blocks(),
+    ufms :: ufm_interconnect_mux_database:blocks(),
     metric :: #metric{}
 }).
 
 % device interconnects
--define(GLOBAL_INTERCONNECTS, 16#ED).
--define(JTAG_INTERCONNECTS, 16#EE).
--define(UFM_INTERCONNECTS, 16#EF).
+-define(GLOBAL_INPUTS, 16#ED).
+-define(JTAG_INPUTS, 16#EE).
+-define(UFM_INPUTS, 16#EF).
 
 % block types
 -define(CORNER_BLOCK, 16#F0).
@@ -29,13 +30,14 @@
 -define(UFM_BLOCK, 16#F6).
 
 % sub-block types
--define(C4_INTERCONNECTS, 16#F9).
--define(IO_CELLS, 16#FA).
--define(IO_INTERCONNECTS, 16#FB).
--define(LOGIC_CELLS, 16#FC).
--define(LOGIC_CONTROLS, 16#FD).
--define(LOGIC_INTERCONNECTS, 16#FE).
--define(R4_INTERCONNECTS, 16#FF).
+-define(C4_INTERCONNECTS, 16#F8).
+-define(IO_CELLS, 16#F9).
+-define(IO_INTERCONNECTS, 16#FA).
+-define(LOGIC_CELLS, 16#FB).
+-define(LOGIC_CONTROLS, 16#FC).
+-define(LOGIC_INTERCONNECTS, 16#FD).
+-define(R4_INTERCONNECTS, 16#FE).
+-define(UFM_INTERCONNECTS, 16#FF).
 
 % ports
 -define(C4_INTERCONNECT, 16#D0).
@@ -97,6 +99,7 @@ db(Device) ->
     {ok, LABs} = lab_interconnect_mux_database:open(Density),
     {ok, IOBs} = iob_interconnect_mux_database:open(Density),
     {ok, R4s} = r4_interconnect_mux_database:open(Density),
+    {ok, UFMs} = ufm_interconnect_mux_database:open(Density),
     #db{
         density = Density,
         device = Device,
@@ -104,6 +107,7 @@ db(Device) ->
         iobs = IOBs,
         labs = LABs,
         r4s = R4s,
+        ufms = UFMs,
         metric = Metric
     }.
 
@@ -118,9 +122,9 @@ source(Db) ->
     <<Name:NameSize/binary, "C5">> = Name0,
     [
         <<"MAXV", NameSize, Name/binary>>,
-        global_interconnects(Db),
-        jtag_interconnects(Db),
-        ufm_interconnects(Db),
+        global_inputs(Db),
+        jtag_inputs(Db),
+        ufm_inputs(Db),
         [
             block(X, Y, Db)
             ||
@@ -143,7 +147,8 @@ block(X, Y, Db) ->
         global ->
             [<<?UFM_BLOCK, X, Y>>,
              c4_interconnects(X, Y, Db),
-             r4_grow_interconnects(X, Y, Db)
+             r4_grow_interconnects(X, Y, Db),
+             ufm_interconnects(X, Y, Db)
             ];
         logic ->
             [<<?LOGIC_BLOCK, X, Y>>,
@@ -169,7 +174,8 @@ block(X, Y, Db) ->
         ufm ->
             [<<?UFM_BLOCK, X, Y>>,
              c4_interconnects(X, Y, Db),
-             r4_grow_interconnects(X, Y, Db)
+             r4_grow_interconnects(X, Y, Db),
+             ufm_interconnects(X, Y, Db)
             ];
         false when X =:= Metric#metric.left_io andalso
                    Y =:= Metric#metric.top_io ->
@@ -306,21 +312,21 @@ c4_interconnect_port(X, Y, I, Mux, Db) ->
     end.
 
 %%====================================================================
-%% global interconnects
+%% global inputs
 %%====================================================================
 
-global_interconnects(Db = #db{device = Device}) ->
+global_inputs(Db = #db{device = Device}) ->
     [A, B, C, D] = device:gclk_pins(Device),
     IOCs = device:iocs(Device),
-    [<<?GLOBAL_INTERCONNECTS>>,
+    [<<?GLOBAL_INPUTS>>,
      global_pin(A, IOCs),
-     ufm_interconnect(global, 0, {3, 3}, Db),
+     ufm_input(global, 0, {3, 3}, Db),
      global_pin(B, IOCs),
-     ufm_interconnect(global, 1, {3, 3}, Db),
+     ufm_input(global, 1, {3, 3}, Db),
      global_pin(C, IOCs),
-     ufm_interconnect(global, 2, {3, 3}, Db),
+     ufm_input(global, 2, {3, 3}, Db),
      global_pin(D, IOCs),
-     ufm_interconnect(global, 3, {3, 3}, Db)
+     ufm_input(global, 3, {3, 3}, Db)
     ].
 
 %%--------------------------------------------------------------------
@@ -332,12 +338,12 @@ global_pin(PinName, IOCs) ->
     <<1, X, Y, N>>.
 
 %%====================================================================
-%% jtag interconnects
+%% jtag inputs
 %%====================================================================
 
-jtag_interconnects(Db) ->
-    [<<?JTAG_INTERCONNECTS>>,
-     ufm_interconnect(jtag, tdo, {4, 2}, Db)
+jtag_inputs(Db) ->
+    [<<?JTAG_INPUTS>>,
+     ufm_input(jtag, tdo, {4, 2}, Db)
     ].
 
 %%====================================================================
@@ -852,27 +858,27 @@ r4_interconnect_port(X, Y, I, Mux, Db) ->
     end.
 
 %%====================================================================
-%% ufm interconnects
+%% ufm inputs
 %%====================================================================
 
-ufm_interconnects(Db) ->
-    [<<?UFM_INTERCONNECTS>>,
-     ufm_interconnect(ufm, ar_clk, {1, 2}, Db),
-     ufm_interconnect(ufm, ar_in, {1, 3}, Db),
-     ufm_interconnect(ufm, ar_shift, {1, 2}, Db),
-     ufm_interconnect(ufm, dr_clk, {1, 3}, Db),
-     ufm_interconnect(ufm, dr_in, {1, 3}, Db),
-     ufm_interconnect(ufm, dr_shift, {1, 3}, Db),
-     ufm_interconnect(ufm, erase, {2, 2}, Db),
-     ufm_interconnect(ufm, osc_ena, {2, 2}, Db),
-     ufm_interconnect(ufm, program, {2, 2}, Db)
+ufm_inputs(Db) ->
+    [<<?UFM_INPUTS>>,
+     ufm_input(ufm, ar_clk, {1, 2}, Db),
+     ufm_input(ufm, ar_in, {1, 3}, Db),
+     ufm_input(ufm, ar_shift, {1, 2}, Db),
+     ufm_input(ufm, dr_clk, {1, 3}, Db),
+     ufm_input(ufm, dr_in, {1, 3}, Db),
+     ufm_input(ufm, dr_shift, {1, 3}, Db),
+     ufm_input(ufm, erase, {2, 2}, Db),
+     ufm_input(ufm, osc_ena, {2, 2}, Db),
+     ufm_input(ufm, program, {2, 2}, Db)
     ].
 
 %%====================================================================
 %% global / jtag / ufm
 %%====================================================================
 
-ufm_interconnect(Block, N, {S, L}, Db = #db{metric = Metric}) ->
+ufm_input(Block, N, {S, L}, Db = #db{metric = Metric}) ->
     case Metric#metric.indent_bottom_io of
         0 ->
             ufm_small(Block, Metric#metric.indent_left_io, S, N, Db);
@@ -933,6 +939,72 @@ ufm_large_source(Block, X, Y, N, I, Db) ->
         Db#db.density
     ),
     port_fuse(Port, Fuse0, Fuse1).
+
+%%====================================================================
+%% ufm interconnects
+%%====================================================================
+
+ufm_interconnects(X, Y, Db) ->
+    Interconnects = [
+        ufm_interconnect(X, Y, I, Db)
+        ||
+        I <- lists:seq(0, 9)
+    ],
+    [<<?UFM_INTERCONNECTS, 10>> | Interconnects].
+
+%%--------------------------------------------------------------------
+
+ufm_interconnect(X, Y, I, Db) ->
+    Source = ufm_interconnect_source(X, Y, I, direct_link, Db),
+    Sources = [
+        ufm_interconnect_source(X, Y, I, Mux4, Mux3, Db)
+        ||
+        Mux4 <- [mux0, mux1, mux2, mux3],
+        Mux3 <- [mux0, mux1, mux2]
+    ],
+    [<<13>>, Source, Sources].
+
+%%--------------------------------------------------------------------
+
+ufm_interconnect_source(X, Y, I, DirectLink, Db) ->
+    Port = ufm_interconnect_port(X, Y, I, DirectLink, Db),
+    {ok, Fuse} = fuse_map:from_name(
+        {{ufm, X, Y}, {interconnect, I}, direct_link},
+        Db#db.density
+    ),
+    port_fuse(Port, Fuse).
+
+%%--------------------------------------------------------------------
+
+ufm_interconnect_source(X, Y, I, Mux4, Mux3, Db) ->
+    Port = ufm_interconnect_port(X, Y, I, {Mux4, Mux3}, Db),
+    {ok, Fuse0} = fuse_map:from_name(
+        {{ufm, X, Y}, {interconnect, I}, from4, Mux4},
+        Db#db.density
+    ),
+    {ok, Fuse1} = fuse_map:from_name(
+        {{ufm, X, Y}, {interconnect, I}, from3, Mux3},
+        Db#db.density
+    ),
+    port_fuse(Port, Fuse0, Fuse1).
+
+%%--------------------------------------------------------------------
+
+ufm_interconnect_port(X, Y, I, Mux, Db) ->
+    #{{ufm, X, Y} := UFM} = Db#db.ufms,
+    case UFM of
+        #{I := Interconnect} ->
+            case Interconnect of
+                #{Mux := From} ->
+                    source_port(From, Db);
+
+                _ ->
+                    source_port(unknown, Db)
+            end;
+
+        _ ->
+            source_port(unknown, Db)
+    end.
 
 %%====================================================================
 %% sources
