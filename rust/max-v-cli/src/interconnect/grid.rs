@@ -1,12 +1,15 @@
 use crate::*;
 use max_v::*;
 
-pub fn run(
+pub fn run<I>(
     devices: &[DeviceSources],
     axis: PortAxis,
-    interconnect: IORowInterconnectIndex,
+    interconnect: I,
     source: usize,
-) {
+)
+where
+    I: BlockInterconnectIndex,
+{
     match axis {
         PortAxis::Kind =>
             print(devices, interconnect, source, &print_kind),
@@ -22,51 +25,64 @@ pub fn run(
     }
 }
 
-pub fn run_rel_x(
+pub fn run_rel_x<I>(
     devices: &[DeviceSources],
-    interconnect: IORowInterconnectIndex,
+    interconnect: I,
     source: usize,
-) {
+)
+where
+    I: BlockInterconnectIndex,
+{
     print(devices, interconnect, source, &print_rel_x);
 }
 
-pub fn run_rel_y(
+pub fn run_rel_y<I>(
     devices: &[DeviceSources],
-    interconnect: IORowInterconnectIndex,
+    interconnect: I,
     source: usize,
-) {
+)
+where
+    I: BlockInterconnectIndex,
+{
     print(devices, interconnect, source, &print_rel_y);
 }
 
-pub fn run_count(
+pub fn run_count<I>(
     devices: &[DeviceSources],
-    interconnect: IORowInterconnectIndex,
-) {
+    interconnect: I,
+)
+where
+    I: BlockInterconnectIndex,
+{
     block_grid::print(devices, |device, x, y|
         print_count(device, x, y, interconnect)
     );
 }
 
-fn print_count(
+fn print_count<I>(
     device: &DeviceSources,
     x: X,
     y: Y,
-    interconnect: IORowInterconnectIndex,
-) -> Print {
-    if let Some(interconnect) =  device.io_row_interconnect(x, y, interconnect) {
+    interconnect: I,
+) -> Print
+where
+    I: BlockInterconnectIndex,
+{
+    if let Some(interconnect) = interconnect.interconnect_at(device, x, y) {
         Print::Unsigned(interconnect.source_count())
     } else {
         Print::Blank
     }
 }
 
-fn print<W>(
+fn print<I, W>(
     devices: &[DeviceSources],
-    interconnect: IORowInterconnectIndex,
+    interconnect: I,
     source: usize,
     with: &W,
 )
 where
+    I: BlockInterconnectIndex,
     W: Fn(X, Y, Port) -> Print,
 {
     block_grid::print(devices, |device, x, y|
@@ -74,18 +90,19 @@ where
     );
 }
 
-fn print_block<W>(
+fn print_block<I, W>(
     device: &DeviceSources,
     x: X,
     y: Y,
-    interconnect: IORowInterconnectIndex,
+    interconnect: I,
     source: usize,
     with: &W,
 ) -> Print
 where
+    I: BlockInterconnectIndex,
     W: Fn(X, Y, Port) -> Print,
 {
-    if let Some(interconnect) =  device.io_row_interconnect(x, y, interconnect) {
+    if let Some(interconnect) = interconnect.interconnect_at(device, x, y) {
         if let Some(source) = interconnect.source(source) {
             with(x, y, source)
         } else {
@@ -143,4 +160,5 @@ fn print_i(_x: X, _y: Y, source: Port) -> Print {
         Print::Dot
     }
 }
+
 
