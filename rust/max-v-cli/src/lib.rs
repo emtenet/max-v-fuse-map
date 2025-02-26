@@ -134,3 +134,36 @@ impl BlockInterconnectIndex for UFMInterconnectIndex {
     }
 }
 
+pub enum One<T> {
+    Unknown,
+    Yes(T),
+    No,
+}
+
+impl<T> One<T> {
+    pub fn as_option(self) -> Option<T> {
+        match self {
+            One::Yes(t) => Some(t),
+            _ => None,
+        }
+    }
+
+    pub fn add(&mut self, t: T)
+    where
+        T: PartialEq,
+    {
+        match self {
+            One::Unknown => {
+                *self = One::Yes(t);
+            }
+
+            One::Yes(was) if *was == t => {
+            }
+
+            _ => {
+                *self = One::No;
+            }
+        }
+    }
+}
+

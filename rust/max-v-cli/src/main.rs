@@ -75,13 +75,20 @@ where
         ["has-source", k] =>
             has_source::run::<I>(devices, k.parse()?),
 
+        ["one-source"] =>
+            one_source_kind::run::<I>(devices),
+
+        ["main-source"] =>
+            main_source_kind::run::<I>(devices),
+
         _ => {
             println!("Error:");
             println!("  max-v {name} {args:?}");
             println!("Usage:");
             println!("  max-v {name} grid <interconnect> <select> <axis>");
             println!("  max-v {name} has-source <kind>");
-            println!("  max-v {name} one-source <axis>");
+            println!("  max-v {name} one-source");
+            println!("  max-v {name} main-source");
         }
     }
 

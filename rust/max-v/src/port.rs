@@ -189,6 +189,7 @@ impl Port {
 
 #[derive(Copy, Clone)]
 #[derive(Eq, PartialEq)]
+#[derive(Hash)]
 pub enum PortKind {
     C4Interconnect,
     Global,
